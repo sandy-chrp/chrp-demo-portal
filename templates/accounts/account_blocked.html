@@ -1,0 +1,408 @@
+<!-- templates/accounts/account_blocked.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Blocked - Demo Portal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #1e3c72;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #06b6d4;
+            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        
+        .blocked-container {
+            max-width: 600px;
+            width: 100%;
+            margin: 20px;
+        }
+        
+        .blocked-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+            border: 2px solid #fecaca;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .blocked-header {
+            background: var(--gradient-danger);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .blocked-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
+            border-radius: 0 0 0 100px;
+        }
+        
+        .blocked-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            animation: shake 1s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .blocked-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .blocked-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .blocked-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .blocked-body {
+            padding: 2rem;
+        }
+        
+        .reason-box {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .reason-box h6 {
+            color: var(--danger-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .reason-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .reason-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #fecaca;
+            display: flex;
+            align-items: center;
+            color: #7f1d1d;
+        }
+        
+        .reason-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .reason-list i {
+            color: var(--danger-color);
+            margin-right: 0.75rem;
+            width: 16px;
+        }
+        
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #e0f2fe;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-box h6 {
+            color: var(--info-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .info-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0f2fe;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .info-list i {
+            color: var(--info-color);
+            margin-right: 0.75rem;
+            width: 16px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn-custom {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary-custom {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(30, 60, 114, 0.3);
+            color: white;
+        }
+        
+        .btn-outline-custom {
+            background: transparent;
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
+        }
+        
+        .btn-outline-custom:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .contact-info {
+            background: #fafafa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        .contact-info h6 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .contact-detail {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            color: #6b7280;
+        }
+        
+        .contact-detail i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .warning-note {
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .warning-note .warning-text {
+            color: #92400e;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .blocked-container {
+                margin: 10px;
+            }
+            
+            .blocked-header,
+            .blocked-body {
+                padding: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-custom {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="blocked-container">
+        <div class="blocked-card">
+            <!-- Header -->
+            <div class="blocked-header">
+                <div class="blocked-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <h1 class="blocked-title">Account Blocked</h1>
+                <p class="blocked-subtitle">Your access to the demo portal has been suspended</p>
+            </div>
+            
+            <!-- Body -->
+            <div class="blocked-body">
+                <!-- Reason Box -->
+                <div class="reason-box">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Possible Reasons for Account Suspension</h6>
+                    <ul class="reason-list">
+                        <li>
+                            <i class="fas fa-shield-alt"></i>
+                            Multiple security violations detected
+                        </li>
+                        <li>
+                            <i class="fas fa-user-times"></i>
+                            Violation of terms of service
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            Invalid or suspicious business credentials
+                        </li>
+                        <li>
+                            <i class="fas fa-exclamation-circle"></i>
+                            Inappropriate use of platform features
+                        </li>
+                        <li>
+                            <i class="fas fa-ban"></i>
+                            Administrative decision based on policy violations
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Warning Note -->
+                <div class="warning-note">
+                    <p class="warning-text">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> This suspension may be temporary or permanent depending on the violation severity. 
+                        Please contact our support team for clarification and next steps.
+                    </p>
+                </div>
+                
+                <!-- Information Box -->
+                <div class="info-box">
+                    <h6><i class="fas fa-life-ring me-2"></i>How to resolve this issue?</h6>
+                    <ul class="info-list">
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            Contact our support team immediately with your account details
+                        </li>
+                        <li>
+                            <i class="fas fa-file-alt"></i>
+                            Provide any additional business verification documents if requested
+                        </li>
+                        <li>
+                            <i class="fas fa-clock"></i>
+                            Wait for our team to review your case (typically 2-3 business days)
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            Follow any instructions provided by our support team
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="mailto:support@chrp-india.com?subject=Account%20Blocked%20-%20Support%20Request" class="btn-custom btn-outline-custom">
+                        <i class="fas fa-envelope me-2"></i>Contact Support
+                    </a>
+                    <a href="{% url 'core:home' %}" class="btn-custom btn-primary-custom">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="contact-info">
+                    <h6>Support Contact Information</h6>
+                    <div class="contact-detail">
+                        <i class="fas fa-envelope"></i>
+                        <span>support@chrp-india.com</span>
+                    </div>
+                    <div class="contact-detail">
+                        <i class="fas fa-phone"></i>
+                        <span>+91-1234567890</span>
+                    </div>
+                    <div class="contact-detail">
+                        <i class="fas fa-clock"></i>
+                        <span>Support Hours: 9:00 AM - 6:00 PM (Mon-Fri)</span>
+                    </div>
+                    <div class="contact-detail">
+                        <i class="fas fa-headset"></i>
+                        <span>Average Response Time: 2-4 hours</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

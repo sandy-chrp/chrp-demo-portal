@@ -1,0 +1,640 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign Up - Demo Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .signup-container {
+        min-height: calc(100vh - 160px);
+        padding: 2rem 0;
+        background: #f8f9fa;
+    }
+    
+    .signup-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        background: white;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #1e3c72;
+        box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.15);
+    }
+    
+    /* CRITICAL: Hide error messages by default */
+    .invalid-feedback, .valid-feedback {
+        display: none;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Only show when field has is-invalid class */
+    .form-control.is-invalid ~ .invalid-feedback,
+    .form-select.is-invalid ~ .invalid-feedback {
+        display: block;
+        color: #dc3545;
+    }
+    
+    /* Only show when field has is-valid class */
+    .form-control.is-valid ~ .valid-feedback,
+    .form-select.is-valid ~ .valid-feedback {
+        display: block;
+        color: #28a745;
+    }
+    
+    .form-control.is-invalid, .form-select.is-invalid {
+        border-color: #dc3545;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .form-control.is-valid, .form-select.is-valid {
+        border-color: #28a745;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border: none;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
+    }
+    
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .password-strength {
+        height: 4px;
+        border-radius: 2px;
+        background: #e0e0e0;
+        margin-top: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .password-strength-bar {
+        height: 100%;
+        width: 0%;
+        transition: all 0.3s;
+    }
+    
+    .strength-weak { width: 33%; background: #dc3545; }
+    .strength-medium { width: 66%; background: #ffc107; }
+    .strength-strong { width: 100%; background: #28a745; }
+    
+    #strengthText {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container signup-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card signup-card">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">Create Account</h2>
+                        <p class="text-muted">Join Demo Portal for exclusive business solutions</p>
+                    </div>
+
+                    <form method="post" id="signupForm" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                <strong>Please correct the following errors:</strong>
+                                <ul class="mb-0 mt-2">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+
+                        <!-- Name Fields -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="first_name" id="firstName" 
+                                       required value="{{ form.first_name.value|default:'' }}">
+                                <div class="invalid-feedback">Please enter your first name</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="last_name" id="lastName" 
+                                       required value="{{ form.last_name.value|default:'' }}">
+                                <div class="invalid-feedback">Please enter your last name</div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="form-label">Business Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" name="email" id="emailField" 
+                                   required placeholder="your@company.com" 
+                                   value="{{ form.email.value|default:'' }}">
+                            <div class="invalid-feedback" id="emailError">Please enter a valid business email</div>
+                            <small class="form-text text-muted">Use your business email address</small>
+                        </div>
+
+                        <!-- Mobile -->
+                        <div class="mb-3">
+                            <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <select class="form-select" name="country_code" style="max-width: 150px;">
+                                    {% for code, label in form.fields.country_code.choices %}
+                                        <option value="{{ code }}" {% if code == '+91' %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <input type="tel" class="form-control" name="mobile" id="mobileField" 
+                                       required pattern="[0-9]{10}" placeholder="10-digit number" 
+                                       maxlength="10" value="{{ form.mobile.value|default:'' }}">
+                            </div>
+                            <div class="invalid-feedback">Please enter a valid 10-digit mobile number</div>
+                        </div>
+
+                        <!-- Job & Organization -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Job Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="job_title" id="jobTitle" 
+                                       required value="{{ form.job_title.value|default:'' }}">
+                                <div class="invalid-feedback">Please enter your job title</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Organization <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="organization" id="organization" 
+                                       required value="{{ form.organization.value|default:'' }}">
+                                <div class="invalid-feedback">Please enter your organization name</div>
+                            </div>
+                        </div>
+
+                        <!-- Business Category -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Business Category <span class="text-danger">*</span></label>
+                                <select class="form-select" name="business_category" id="categorySelect" required>
+                                    <option value="">Select category...</option>
+                                    {% for category in form.fields.business_category.queryset %}
+                                        <option value="{{ category.id }}">
+                                            {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">Please select a business category</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Subcategory</label>
+                                <select class="form-select" name="business_subcategory" id="subcategorySelect" disabled>
+                                    <option value="">Select category first...</option>
+                                </select>
+                                <div id="subcategoryLoader" class="text-muted small mt-1" style="display:none;">
+                                    <span class="loading-spinner"></span> Loading...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" name="password1" id="password1" 
+                                       required minlength="8">
+                                <div class="password-strength">
+                                    <div class="password-strength-bar" id="strengthBar"></div>
+                                </div>
+                                <small class="text-muted" id="strengthText">Min 8 characters</small>
+                                <div class="invalid-feedback">Password must be at least 8 characters</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" name="password2" id="password2" required>
+                                <div class="invalid-feedback" id="password2Error">Passwords must match</div>
+                                <div class="valid-feedback">Passwords match</div>
+                            </div>
+                        </div>
+
+                        <!-- Referral -->
+                        <div class="mb-3">
+                            <label class="form-label">How did you find us?</label>
+                            <select class="form-select" name="referral_source">
+                                <option value="">Select source...</option>
+                                {% for value, label in form.fields.referral_source.choices %}
+                                    {% if value %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" required id="terms">
+                                <label class="form-check-label" for="terms">
+                                    I agree to the <a href="#" target="_blank">Terms of Service</a> and 
+                                    <a href="#" target="_blank">Privacy Policy</a>
+                                </label>
+                                <div class="invalid-feedback">You must agree to the terms</div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn btn-primary w-100 py-2" id="submitBtn">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </form>
+
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="text-muted mb-0">
+                            Already have an account? 
+                            <a href="{% url 'accounts:signin' %}" class="text-decoration-none fw-bold">Sign In</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('signupForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const categorySelect = document.getElementById('categorySelect');
+    const subcategorySelect = document.getElementById('subcategorySelect');
+    const password1 = document.getElementById('password1');
+    const password2 = document.getElementById('password2');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    const emailField = document.getElementById('emailField');
+    const mobileField = document.getElementById('mobileField');
+    const termsCheckbox = document.getElementById('terms');
+    
+    const blockedDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'ymail.com', 'aol.com', 'icloud.com', 'live.com'];
+    
+    // Prevent form default submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleFormSubmit();
+        return false;
+    });
+    
+    // Text inputs validation
+    const textInputs = form.querySelectorAll('input[type="text"]');
+    textInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required')) {
+                if (!this.value.trim()) {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                } else {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid') && this.value.trim()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
+    
+    // Email validation
+    function validateEmail() {
+        const email = emailField.value.trim();
+        const emailError = document.getElementById('emailError');
+        
+        if (!email) {
+            emailField.classList.add('is-invalid');
+            emailField.classList.remove('is-valid');
+            emailError.textContent = 'Email is required';
+            return false;
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            emailField.classList.add('is-invalid');
+            emailField.classList.remove('is-valid');
+            emailError.textContent = 'Please enter a valid email address';
+            return false;
+        }
+        
+        const domain = email.split('@')[1]?.toLowerCase();
+        if (blockedDomains.includes(domain)) {
+            emailField.classList.add('is-invalid');
+            emailField.classList.remove('is-valid');
+            emailError.textContent = `Business email required. Personal domains (${domain}) not allowed`;
+            return false;
+        }
+        
+        emailField.classList.remove('is-invalid');
+        emailField.classList.add('is-valid');
+        return true;
+    }
+    
+    emailField.addEventListener('blur', validateEmail);
+    emailField.addEventListener('input', function() {
+        if (this.classList.contains('is-invalid')) {
+            validateEmail();
+        }
+    });
+    
+    // Mobile validation
+    mobileField.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    });
+    
+    mobileField.addEventListener('blur', function() {
+        if (this.value.length === 10) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else if (this.value.length > 0) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        }
+    });
+    
+    // Password strength
+    password1.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        
+        strengthBar.className = 'password-strength-bar';
+        
+        if (password.length >= 8) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        
+        if (password.length === 0) {
+            strengthText.textContent = 'Min 8 characters';
+            strengthText.className = 'text-muted';
+        } else if (strength <= 1) {
+            strengthBar.classList.add('strength-weak');
+            strengthText.textContent = 'Weak password';
+            strengthText.className = 'text-warning';
+        } else if (strength === 2) {
+            strengthBar.classList.add('strength-medium');
+            strengthText.textContent = 'Medium password';
+            strengthText.className = 'text-warning';
+        } else {
+            strengthBar.classList.add('strength-strong');
+            strengthText.textContent = 'Strong password';
+            strengthText.className = 'text-success';
+        }
+        
+        if (password2.value) {
+            validatePasswordMatch();
+        }
+    });
+    
+    password1.addEventListener('blur', function() {
+        if (this.value.length > 0 && this.value.length < 8) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (this.value.length >= 8) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        }
+    });
+    
+    // Password match validation
+    function validatePasswordMatch() {
+        const pass1 = password1.value;
+        const pass2 = password2.value;
+        const errorDiv = document.getElementById('password2Error');
+        
+        if (!pass2) {
+            password2.classList.remove('is-invalid', 'is-valid');
+            return false;
+        }
+        
+        if (pass1.length < 8) {
+            password2.classList.add('is-invalid');
+            password2.classList.remove('is-valid');
+            errorDiv.textContent = 'Password must be at least 8 characters';
+            return false;
+        }
+        
+        if (pass2 !== pass1) {
+            password2.classList.add('is-invalid');
+            password2.classList.remove('is-valid');
+            errorDiv.textContent = 'Passwords do not match';
+            return false;
+        }
+        
+        password2.classList.remove('is-invalid');
+        password2.classList.add('is-valid');
+        return true;
+    }
+    
+    password2.addEventListener('input', validatePasswordMatch);
+    password2.addEventListener('blur', validatePasswordMatch);
+    
+    // Category validation
+    categorySelect.addEventListener('change', function() {
+        const categoryId = this.value;
+        
+        if (!categoryId) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+            subcategorySelect.innerHTML = '<option value="">Select category first...</option>';
+            subcategorySelect.disabled = true;
+            return;
+        }
+        
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+        
+        subcategorySelect.disabled = true;
+        const loader = document.getElementById('subcategoryLoader');
+        if (loader) loader.style.display = 'block';
+        
+        fetch(`/auth/ajax/get-subcategories/?category_id=${categoryId}`)
+            .then(res => res.json())
+            .then(data => {
+                subcategorySelect.innerHTML = '<option value="">Select subcategory (optional)...</option>';
+                
+                if (data.success && data.subcategories && data.subcategories.length > 0) {
+                    data.subcategories.forEach(sub => {
+                        subcategorySelect.innerHTML += `<option value="${sub.id}">${sub.name}</option>`;
+                    });
+                }
+                
+                subcategorySelect.disabled = false;
+                if (loader) loader.style.display = 'none';
+            })
+            .catch(() => {
+                subcategorySelect.innerHTML = '<option value="">Error loading</option>';
+                if (loader) loader.style.display = 'none';
+            });
+    });
+    
+    // Terms validation
+    termsCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            this.classList.remove('is-invalid');
+            const errorMsg = this.closest('.form-check').querySelector('.invalid-feedback');
+            if (errorMsg) errorMsg.style.display = 'none';
+        }
+    });
+    
+    // Main form submission handler
+    function handleFormSubmit() {
+        let isValid = true;
+        let errors = [];
+        
+        // Validate first name
+        const firstName = form.querySelector('[name="first_name"]');
+        if (!firstName.value.trim()) {
+            firstName.classList.add('is-invalid');
+            errors.push('First name is required');
+            isValid = false;
+        }
+        
+        // Validate last name
+        const lastName = form.querySelector('[name="last_name"]');
+        if (!lastName.value.trim()) {
+            lastName.classList.add('is-invalid');
+            errors.push('Last name is required');
+            isValid = false;
+        }
+        
+        // Validate email
+        if (!validateEmail()) {
+            errors.push('Valid business email is required');
+            isValid = false;
+        }
+        
+        // Validate mobile
+        if (mobileField.value.length !== 10) {
+            mobileField.classList.add('is-invalid');
+            errors.push('Valid 10-digit mobile number is required');
+            isValid = false;
+        }
+        
+        // Validate job title
+        const jobTitle = form.querySelector('[name="job_title"]');
+        if (!jobTitle.value.trim()) {
+            jobTitle.classList.add('is-invalid');
+            errors.push('Job title is required');
+            isValid = false;
+        }
+        
+        // Validate organization
+        const organization = form.querySelector('[name="organization"]');
+        if (!organization.value.trim()) {
+            organization.classList.add('is-invalid');
+            errors.push('Organization is required');
+            isValid = false;
+        }
+        
+        // Validate category
+        if (!categorySelect.value) {
+            categorySelect.classList.add('is-invalid');
+            errors.push('Business category is required');
+            isValid = false;
+        }
+        
+        // Validate password
+        if (password1.value.length < 8) {
+            password1.classList.add('is-invalid');
+            errors.push('Password must be at least 8 characters');
+            isValid = false;
+        }
+        
+        // Validate password match
+        if (!validatePasswordMatch()) {
+            errors.push('Passwords must match');
+            isValid = false;
+        }
+        
+        // Validate terms - CRITICAL
+        if (!termsCheckbox.checked) {
+            termsCheckbox.classList.add('is-invalid');
+            const errorMsg = termsCheckbox.closest('.form-check').querySelector('.invalid-feedback');
+            if (errorMsg) errorMsg.style.display = 'block';
+            errors.push('You must agree to terms and conditions');
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            // Show alert with all errors
+            alert('Please fix the following errors:\n\n• ' + errors.join('\n• '));
+            
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+            
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+            return;
+        }
+        
+        // All valid - submit
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="loading-spinner me-2"></span>Sending verification code...';
+        form.submit();
+    }
+});
+</script>
+{% endblock %}

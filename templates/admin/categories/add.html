@@ -1,0 +1,594 @@
+<!-- templates/admin/categories/add.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Add New Category{% endblock %}
+{% block page_title %}Add New Category{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_categories' %}">Demo Categories</a>
+            </li>
+            <li class="breadcrumb-item active">Add New Category</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <a href="{% url 'core:admin_categories' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Categories
+    </a>
+    <button type="submit" form="categoryForm" class="btn btn-primary">
+        <i class="fas fa-save me-1"></i>Save Category
+    </button>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .form-section {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .section-title i {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-sm);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .form-label.required::after {
+        content: '*';
+        color: var(--danger-color);
+        margin-left: var(--spacing-xs);
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.1);
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-top: var(--spacing-xs);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-check {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-top: 0;
+    }
+
+    .form-check-label {
+        font-weight: 500;
+        margin-left: var(--spacing-sm);
+    }
+
+    .help-text {
+        background: var(--info-color);
+        color: white;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .help-text i {
+        margin-right: var(--spacing-sm);
+    }
+
+    .icon-preview {
+        width: 60px;
+        height: 60px;
+        background: var(--gray-100);
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--gray-500);
+        transition: all 0.3s ease;
+    }
+
+    .icon-preview.has-icon {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .icon-selector {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
+        max-height: 200px;
+        overflow-y: auto;
+        padding: var(--spacing-md);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        background: var(--gray-50);
+    }
+
+    .icon-option {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.25rem;
+        color: var(--gray-600);
+    }
+
+    .icon-option:hover {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.1);
+        color: var(--primary-color);
+    }
+
+    .icon-option.selected {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .form-actions {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+        position: sticky;
+        bottom: var(--spacing-lg);
+        z-index: 100;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    @media (max-width: 768px) {
+        .form-section {
+            padding: var(--spacing-lg);
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-group {
+            justify-content: center;
+        }
+
+        .icon-selector {
+            grid-template-columns: repeat(6, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<form method="post" id="categoryForm" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <!-- Basic Information -->
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-info-circle"></i>Basic Information
+        </h3>
+
+        <div class="help-text">
+            <i class="fas fa-lightbulb"></i>
+            Categories help organize your demo videos and make them easier for customers to find and browse.
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="form-group">
+                    <label for="name" class="form-label required">
+                        <i class="fas fa-tag"></i>Category Name
+                    </label>
+                    <input type="text" name="name" id="name" class="form-control" 
+                           placeholder="e.g., Product Features, Training Videos, Tutorials" required>
+                    <div class="form-text">
+                        Choose a clear, descriptive name that customers will easily understand.
+                    </div>
+                    <div class="invalid-feedback">
+                        Please provide a category name.
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">
+                        <i class="fas fa-align-left"></i>Description
+                    </label>
+                    <textarea name="description" id="description" class="form-control" rows="4" 
+                              placeholder="Brief description of what types of demos belong in this category..."></textarea>
+                    <div class="form-text">
+                        Optional description to help explain what this category contains.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-icons"></i>Category Icon
+                    </label>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="icon-preview" id="iconPreview">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="chooseIconBtn">
+                                Choose Icon
+                            </button>
+                            <div class="form-text mt-1">
+                                Optional visual icon for the category
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="icon" id="iconInput" value="">
+                    
+                    <!-- Icon Selector (Hidden by default) -->
+                    <div class="icon-selector" id="iconSelector" style="display: none;">
+                        <div class="icon-option" data-icon="" title="No Icon">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="icon-option" data-icon="📁" title="Folder">📁</div>
+                        <div class="icon-option" data-icon="🎥" title="Video">🎥</div>
+                        <div class="icon-option" data-icon="📊" title="Analytics">📊</div>
+                        <div class="icon-option" data-icon="🛠️" title="Tools">🛠️</div>
+                        <div class="icon-option" data-icon="📱" title="Mobile">📱</div>
+                        <div class="icon-option" data-icon="💻" title="Desktop">💻</div>
+                        <div class="icon-option" data-icon="🌐" title="Web">🌐</div>
+                        <div class="icon-option" data-icon="🔧" title="Configuration">🔧</div>
+                        <div class="icon-option" data-icon="📈" title="Growth">📈</div>
+                        <div class="icon-option" data-icon="🎯" title="Target">🎯</div>
+                        <div class="icon-option" data-icon="💡" title="Ideas">💡</div>
+                        <div class="icon-option" data-icon="🚀" title="Launch">🚀</div>
+                        <div class="icon-option" data-icon="⭐" title="Featured">⭐</div>
+                        <div class="icon-option" data-icon="🔥" title="Popular">🔥</div>
+                        <div class="icon-option" data-icon="📚" title="Learning">📚</div>
+                        <div class="icon-option" data-icon="🎓" title="Education">🎓</div>
+                        <div class="icon-option" data-icon="💼" title="Business">💼</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sort_order" class="form-label">
+                        <i class="fas fa-sort-numeric-down"></i>Sort Order
+                    </label>
+                    <input type="number" name="sort_order" id="sort_order" class="form-control" 
+                           value="0" min="0" max="999">
+                    <div class="form-text">
+                        Lower numbers appear first. Leave as 0 for automatic ordering.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings & Visibility -->
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-cogs"></i>Settings & Visibility
+        </h3>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label class="form-label">Visibility Options</label>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked>
+                        <label class="form-check-label" for="is_active">
+                            <i class="fas fa-eye me-1"></i>Active (visible to customers)
+                        </label>
+                        <div class="form-text">
+                            Uncheck to create this category as inactive initially.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label class="form-label">Preview</label>
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <span id="previewIcon" class="me-2">📁</span>
+                                <strong id="previewName">Category Name</strong>
+                            </div>
+                            <small class="text-muted" id="previewDescription">Category description will appear here</small>
+                            <div class="mt-2">
+                                <span class="badge bg-success" id="previewStatus">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+        <div>
+            <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                After creating this category, you can assign demo videos to it.
+            </small>
+        </div>
+        
+        <div class="btn-group">
+            <a href="{% url 'core:admin_categories' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>Cancel
+            </a>
+            <button type="button" class="btn btn-outline-primary" onclick="previewCategory()">
+                <i class="fas fa-eye me-1"></i>Preview
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i>Create Category
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    setupFormValidation();
+    
+    // Icon selector functionality
+    setupIconSelector();
+    
+    // Live preview
+    setupLivePreview();
+});
+
+function setupFormValidation() {
+    const form = document.getElementById('categoryForm');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (form.checkValidity()) {
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating...';
+            submitBtn.disabled = true;
+            
+            // Submit the form
+            form.submit();
+        } else {
+            // Show validation errors
+            form.classList.add('was-validated');
+            
+            // Scroll to first error
+            const firstError = form.querySelector('.is-invalid, :invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+}
+
+function setupIconSelector() {
+    const iconOptions = document.querySelectorAll('.icon-option');
+    const iconPreview = document.getElementById('iconPreview');
+    const iconInput = document.getElementById('iconInput');
+    const chooseIconBtn = document.getElementById('chooseIconBtn');
+    const iconSelector = document.getElementById('iconSelector');
+    
+    // Show/hide icon selector
+    chooseIconBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (iconSelector.style.display === 'none' || iconSelector.style.display === '') {
+            iconSelector.style.display = 'grid';
+        } else {
+            iconSelector.style.display = 'none';
+        }
+    });
+    
+    // Icon option selection
+    iconOptions.forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Remove selected class from all options
+            iconOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selected class to clicked option
+            this.classList.add('selected');
+            
+            // Update preview and input
+            const iconValue = this.dataset.icon;
+            iconInput.value = iconValue;
+            
+            if (iconValue) {
+                iconPreview.innerHTML = iconValue;
+                iconPreview.classList.add('has-icon');
+            } else {
+                iconPreview.innerHTML = '<i class="fas fa-folder"></i>';
+                iconPreview.classList.remove('has-icon');
+            }
+            
+            // Update live preview
+            updatePreview();
+            
+            // Hide selector after selection
+            iconSelector.style.display = 'none';
+        });
+    });
+    
+    // Hide selector when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!iconSelector.contains(e.target) && 
+            !chooseIconBtn.contains(e.target) && 
+            !iconPreview.contains(e.target)) {
+            iconSelector.style.display = 'none';
+        }
+    });
+}
+
+function showIconSelector() {
+    const selector = document.getElementById('iconSelector');
+    selector.style.display = selector.style.display === 'none' ? 'grid' : 'none';
+}
+
+function setupLivePreview() {
+    const nameInput = document.getElementById('name');
+    const descriptionInput = document.getElementById('description');
+    const isActiveInput = document.getElementById('is_active');
+    
+    nameInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+    isActiveInput.addEventListener('change', updatePreview);
+}
+
+function updatePreview() {
+    const name = document.getElementById('name').value || 'Category Name';
+    const description = document.getElementById('description').value || 'Category description will appear here';
+    const isActive = document.getElementById('is_active').checked;
+    const icon = document.getElementById('iconInput').value || '📁';
+    
+    document.getElementById('previewName').textContent = name;
+    document.getElementById('previewDescription').textContent = description;
+    document.getElementById('previewIcon').textContent = icon;
+    
+    const statusBadge = document.getElementById('previewStatus');
+    if (isActive) {
+        statusBadge.className = 'badge bg-success';
+        statusBadge.textContent = 'Active';
+    } else {
+        statusBadge.className = 'badge bg-secondary';
+        statusBadge.textContent = 'Inactive';
+    }
+}
+
+function previewCategory() {
+    const name = document.getElementById('name').value || 'Untitled Category';
+    const description = document.getElementById('description').value || 'No description provided';
+    const icon = document.getElementById('iconInput').value || '📁';
+    const isActive = document.getElementById('is_active').checked;
+    
+    const previewHtml = `
+        <div class="modal fade" id="previewModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Category Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center">
+                            <div class="d-flex align-items-center justify-content-center mb-3">
+                                <span class="me-3" style="font-size: 2rem;">${icon}</span>
+                                <div>
+                                    <h4 class="mb-1">${name}</h4>
+                                    <p class="text-muted mb-2">${description}</p>
+                                    <span class="badge ${isActive ? 'bg-success' : 'bg-secondary'}">
+                                        ${isActive ? 'Active' : 'Inactive'}
+                                    </span>
+                                </div>
+                            </div>
+                            <small class="text-muted">This is how the category will appear to customers.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" form="categoryForm" class="btn btn-primary">Create Category</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', previewHtml);
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+    
+    // Clean up when modal is hidden
+    document.getElementById('previewModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+// Hide icon selector when clicking outside
+document.addEventListener('click', function(e) {
+    const iconSelector = document.getElementById('iconSelector');
+    const iconPreview = document.getElementById('iconPreview');
+    
+    if (!iconSelector.contains(e.target) && !iconPreview.contains(e.target)) {
+        iconSelector.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

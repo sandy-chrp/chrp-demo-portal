@@ -1,0 +1,417 @@
+<!-- templates/accounts/pending_approval.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Pending Approval - Demo Portal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #1e3c72;
+            --secondary-color: #2a5298;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --info-color: #06b6d4;
+            --gradient-primary: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        
+        .pending-container {
+            max-width: 600px;
+            width: 100%;
+            margin: 20px;
+        }
+        
+        .pending-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pending-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pending-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
+            border-radius: 0 0 0 100px;
+        }
+        
+        .pending-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pending-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .pending-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .pending-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .pending-body {
+            padding: 2rem;
+        }
+        
+        .status-steps {
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .step.completed {
+            background: #ecfdf5;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .step.current {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1rem;
+        }
+        
+        .step.completed .step-icon {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .step.current .step-icon {
+            background: var(--warning-color);
+            color: white;
+        }
+        
+        .step.pending .step-icon {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+        
+        .step-content h6 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .step-content small {
+            color: #6b7280;
+        }
+        
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #e0f2fe;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-box h6 {
+            color: var(--info-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .info-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0f2fe;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .info-list i {
+            color: var(--info-color);
+            margin-right: 0.75rem;
+            width: 16px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn-custom {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary-custom {
+            background: var(--gradient-primary);
+            color: white;
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(30, 60, 114, 0.3);
+            color: white;
+        }
+        
+        .btn-outline-custom {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-outline-custom:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .contact-info {
+            background: #fafafa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        .contact-info h6 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .contact-detail {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            color: #6b7280;
+        }
+        
+        .contact-detail i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .pending-container {
+                margin: 10px;
+            }
+            
+            .pending-header,
+            .pending-body {
+                padding: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-custom {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pending-container">
+        <div class="pending-card">
+            <!-- Header -->
+            <div class="pending-header">
+                <div class="pending-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h1 class="pending-title">Account Pending Approval</h1>
+                <p class="pending-subtitle">Your registration is being reviewed by our team</p>
+            </div>
+            
+            <!-- Body -->
+            <div class="pending-body">
+                <!-- Status Steps -->
+                <div class="status-steps">
+                    <div class="step completed">
+                        <div class="step-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-content">
+                            <h6>Account Created</h6>
+                            <small>Your account has been successfully created</small>
+                        </div>
+                    </div>
+                    
+                    <div class="step completed">
+                        <div class="step-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-content">
+                            <h6>Email Verification</h6>
+                            <small>Please check your email to verify your account</small>
+                        </div>
+                    </div>
+                    
+                    <div class="step current">
+                        <div class="step-icon">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div class="step-content">
+                            <h6>Admin Review</h6>
+                            <small>Our team is reviewing your business credentials</small>
+                        </div>
+                    </div>
+                    
+                    <div class="step pending">
+                        <div class="step-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="step-content">
+                            <h6>Account Approved</h6>
+                            <small>You'll receive access to the demo portal</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Information Box -->
+                <div class="info-box">
+                    <h6><i class="fas fa-info-circle me-2"></i>What happens next?</h6>
+                    <ul class="info-list">
+                        <li>
+                            <i class="fas fa-search"></i>
+                            Our team reviews your business email and organization details
+                        </li>
+                        <li>
+                            <i class="fas fa-shield-alt"></i>
+                            We verify that you represent a legitimate business organization
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            You'll receive an email notification once approved (typically within 24 hours)
+                        </li>
+                        <li>
+                            <i class="fas fa-key"></i>
+                            After approval, you can access our full demo library and request live sessions
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="{% url 'accounts:resend_verification' %}" class="btn-custom btn-outline-custom">
+                        <i class="fas fa-envelope me-2"></i>Resend Verification Email
+                    </a>
+                    <a href="{% url 'core:home' %}" class="btn-custom btn-primary-custom">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="contact-info">
+                    <h6>Need Help?</h6>
+                    <div class="contact-detail">
+                        <i class="fas fa-envelope"></i>
+                        <span>support@chrp-india.com</span>
+                    </div>
+                    <div class="contact-detail">
+                        <i class="fas fa-phone"></i>
+                        <span>+91-1234567890</span>
+                    </div>
+                    <div class="contact-detail">
+                        <i class="fas fa-clock"></i>
+                        <span>Business Hours: 9:00 AM - 6:00 PM (Mon-Fri)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

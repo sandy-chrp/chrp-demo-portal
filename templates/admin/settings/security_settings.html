@@ -1,0 +1,97 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Security Settings{% endblock %}
+{% block page_title %}Security Configuration{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Security Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Password Requirements -->
+                        <h6 class="mb-3">Password Requirements</h6>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Minimum Password Length</label>
+                                <input type="number" name="password_min_length" class="form-control" 
+                                       value="{{ security_settings.password_min_length }}" min="6" max="20">
+                            </div>
+                            <div class="col-md-6">
+                                <div class="pt-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="password_require_uppercase" 
+                                               {% if security_settings.password_require_uppercase %}checked{% endif %}>
+                                        <label class="form-check-label">Require uppercase letters</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="password_require_numbers" 
+                                               {% if security_settings.password_require_numbers %}checked{% endif %}>
+                                        <label class="form-check-label">Require numbers</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="password_require_special" 
+                                               {% if security_settings.password_require_special %}checked{% endif %}>
+                                        <label class="form-check-label">Require special characters</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Session Settings -->
+                        <h6 class="mb-3">Session Settings</h6>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Session Timeout (minutes)</label>
+                                <input type="number" name="session_timeout" class="form-control" 
+                                       value="{{ security_settings.session_timeout }}" min="5">
+                                <small class="text-muted">Time before inactive sessions expire</small>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Login Attempts -->
+                        <h6 class="mb-3">Login Security</h6>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Max Login Attempts</label>
+                                <input type="number" name="max_login_attempts" class="form-control" 
+                                       value="{{ security_settings.max_login_attempts }}" min="3" max="10">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Account Lockout Duration (minutes)</label>
+                                <input type="number" name="lockout_duration" class="form-control" 
+                                       value="{{ security_settings.lockout_duration }}" min="5">
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Changes to security settings will affect all users immediately
+                        </div>
+                        
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save me-2"></i>Update Security Settings
+                        </button>
+                        <a href="{% url 'core:admin_settings' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

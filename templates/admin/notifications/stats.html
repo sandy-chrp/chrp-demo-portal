@@ -1,0 +1,197 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block admin_title %}Notification Statistics{% endblock %}
+{% block page_title %}Notification Statistics{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .stat-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .progress-stat {
+        height: 30px;
+        background: var(--gray-200);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Notification Analytics</h2>
+            <p class="text-muted mb-0">Track notification performance and engagement</p>
+        </div>
+        <div>
+            <form method="get" class="d-flex gap-2">
+                <input type="date" name="from" class="form-control" value="{{ date_from }}">
+                <input type="date" name="to" class="form-control" value="{{ date_to }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-2"></i>Filter
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3 class="fw-bold text-primary">{{ stats.total }}</h3>
+                <p class="text-muted mb-0">Total Notifications</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: var(--success-color);">
+                <h3 class="fw-bold text-success">{{ stats.read_rate|floatformat:1 }}%</h3>
+                <p class="text-muted mb-0">Read Rate</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: var(--info-color);">
+                <h3 class="fw-bold text-info">{{ stats.email_success_rate|floatformat:1 }}%</h3>
+                <p class="text-muted mb-0">Email Success Rate</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="border-left-color: var(--warning-color);">
+                <h3 class="fw-bold text-warning">{{ stats.by_day|length }}</h3>
+                <p class="text-muted mb-0">Active Days</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row">
+        <!-- Notifications by Type -->
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5 class="mb-4">Notifications by Type</h5>
+                <canvas id="typeChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Daily Trend -->
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5 class="mb-4">Daily Trend</h5>
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Users -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Top Recipients</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Notifications</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in stats.top_users %}
+                        <tr>
+                            <td>{{ user.user__first_name }} {{ user.user__last_name }}</td>
+                            <td>{{ user.user__email }}</td>
+                            <td>{{ user.count }}</td>
+                            <td>
+                                <div class="progress-stat">
+                                    <div class="progress-bar" style="width: {% widthratio user.count stats.total 100 %}%">
+                                        {% widthratio user.count stats.total 100 %}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block admin_extra_js %}
+<script>
+// Type Distribution Chart
+const typeCtx = document.getElementById('typeChart').getContext('2d');
+new Chart(typeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for item in stats.by_type %}'{{ item.notification_type }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for item in stats.by_type %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            backgroundColor: [
+                '#1e3c72', '#2a5298', '#3b82f6', '#10b981', 
+                '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6'
+            ]
+        }]
+    }
+});
+
+// Trend Chart
+const trendCtx = document.getElementById('trendChart').getContext('2d');
+new Chart(trendCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in stats.by_day %}'{{ item.day }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Notifications',
+            data: [{% for item in stats.by_day %}{{ item.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            borderColor: '#3b82f6',
+            tension: 0.4,
+            fill: true,
+            backgroundColor: 'rgba(59, 130, 246, 0.1)'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+

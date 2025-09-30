@@ -1,0 +1,545 @@
+<!-- templates/admin/enquiries/list.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Enquiries Management{% endblock %}
+{% block page_title %}Business Enquiries{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Business Enquiries</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <!-- Quick Stats -->
+    <div class="d-none d-md-flex align-items-center gap-3 me-3">
+        <div class="text-center">
+            <div class="fw-bold text-primary">{{ total_enquiries|default:"0" }}</div>
+            <small class="text-muted">Total</small>
+        </div>
+        <div class="text-center">
+            <div class="fw-bold text-danger">{{ open_enquiries|default:"0" }}</div>
+            <small class="text-muted">Open</small>
+        </div>
+        <div class="text-center">
+            <div class="fw-bold text-warning">{{ pending_enquiries|default:"0" }}</div>
+            <small class="text-muted">Pending</small>
+        </div>
+    </div>
+    
+    <!-- Export Button -->
+    <button class="btn btn-outline-secondary" onclick="exportEnquiries()">
+        <i class="fas fa-download me-1"></i>Export
+    </button>
+    
+    <!-- Settings -->
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-cog me-1"></i>Settings
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" onclick="markAllRead()">
+                <i class="fas fa-check-double me-2"></i>Mark All as Read
+            </a></li>
+            <li><a class="dropdown-item" href="#" onclick="archiveResolved()">
+                <i class="fas fa-archive me-2"></i>Archive Resolved
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" onclick="configureNotifications()">
+                <i class="fas fa-bell me-2"></i>Configure Notifications
+            </a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .enquiry-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+        overflow: hidden;
+    }
+
+    .enquiry-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .enquiry-card.status-open {
+        border-left-color: var(--danger-color);
+    }
+
+    .enquiry-card.status-in-progress {
+        border-left-color: var(--warning-color);
+    }
+
+    .enquiry-card.status-answered {
+        border-left-color: var(--success-color);
+    }
+
+    .enquiry-card.status-closed {
+        border-left-color: var(--gray-400);
+    }
+
+    .enquiry-header {
+        padding: 1rem 1.5rem;
+        background: var(--gray-50);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .enquiry-id {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 0.9rem;
+    }
+
+    .enquiry-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-open {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+    }
+
+    .status-in-progress {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+    }
+
+    .status-answered {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+
+    .status-closed {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--gray-600);
+    }
+
+    .enquiry-body {
+        padding: 1.5rem;
+    }
+
+    .enquiry-customer {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .customer-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), #4a90e2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .customer-info {
+        flex: 1;
+    }
+
+    .customer-name {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .customer-details {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .enquiry-subject {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .enquiry-message {
+        color: var(--gray-700);
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .enquiry-meta {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        padding-top: 1rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .enquiry-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .filter-section {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        text-align: center;
+        border-top: 3px solid;
+    }
+
+    .stat-card.primary { border-top-color: var(--primary-color); }
+    .stat-card.danger { border-top-color: var(--danger-color); }
+    .stat-card.warning { border-top-color: var(--warning-color); }
+    .stat-card.success { border-top-color: var(--success-color); }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--gray-500);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray-400);
+        margin-bottom: 1rem;
+    }
+
+    .priority-badge {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: var(--radius-xs);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 0.5rem;
+    }
+
+    .priority-urgent {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+    }
+
+    .priority-high {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+    }
+
+    .priority-medium {
+        background: rgba(23, 162, 184, 0.1);
+        color: var(--info-color);
+    }
+
+    .priority-low {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--gray-600);
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Statistics -->
+<div class="stats-row">
+    <div class="stat-card primary">
+        <div class="stat-number text-primary">{{ total_enquiries|default:"0" }}</div>
+        <div class="stat-label">Total Enquiries</div>
+    </div>
+    <div class="stat-card danger">
+        <div class="stat-number text-danger">{{ open_enquiries|default:"0" }}</div>
+        <div class="stat-label">Open</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-number text-warning">{{ in_progress_enquiries|default:"0" }}</div>
+        <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-number text-success">{{ answered_enquiries|default:"0" }}</div>
+        <div class="stat-label">Answered</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-section">
+    <form method="get" class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Search</label>
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" 
+                       value="{{ search|default:'' }}">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="open" {% if status_filter == 'open' %}selected{% endif %}>Open</option>
+                <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                <option value="answered" {% if status_filter == 'answered' %}selected{% endif %}>Answered</option>
+                <option value="closed" {% if status_filter == 'closed' %}selected{% endif %}>Closed</option>
+            </select>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">Priority</label>
+            <select name="priority" class="form-select" onchange="this.form.submit()">
+                <option value="">All Priorities</option>
+                <option value="urgent" {% if priority_filter == 'urgent' %}selected{% endif %}>Urgent</option>
+                <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+                <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+                <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+            </select>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">Sort By</label>
+            <select name="sort" class="form-select" onchange="this.form.submit()">
+                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest First</option>
+                <option value="-priority" {% if sort_by == '-priority' %}selected{% endif %}>Priority High-Low</option>
+                <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Priority Low-High</option>
+            </select>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-grid">
+                <a href="{% url 'core:admin_enquiries' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Clear
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Enquiries List -->
+{% if enquiries %}
+    {% for enquiry in enquiries %}
+    <div class="enquiry-card status-{{ enquiry.status|default:'open' }}">
+        <div class="enquiry-header">
+            <div>
+                <span class="enquiry-id">{{ enquiry.enquiry_id|default:"#ENQ-000000" }}</span>
+                <span class="priority-badge priority-{{ enquiry.priority|default:'medium' }}">
+                    {{ enquiry.get_priority_display|default:"Medium" }}
+                </span>
+            </div>
+            <span class="enquiry-status status-{{ enquiry.status|default:'open' }}">
+                {{ enquiry.get_status_display|default:"Open" }}
+            </span>
+        </div>
+        
+        <div class="enquiry-body">
+            <div class="enquiry-customer">
+                <div class="customer-avatar">
+                    {{ enquiry.first_name|first|upper|default:"U" }}{{ enquiry.last_name|first|upper|default:"" }}
+                </div>
+                <div class="customer-info">
+                    <div class="customer-name">
+                        {{ enquiry.full_name|default:"Unknown Customer" }}
+                    </div>
+                    <div class="customer-details">
+                        <span><i class="fas fa-envelope me-1"></i>{{ enquiry.business_email|default:"" }}</span>
+                        <span><i class="fas fa-building me-1"></i>{{ enquiry.organization|default:"" }}</span>
+                        <span><i class="fas fa-phone me-1"></i>{{ enquiry.full_mobile|default:"" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="enquiry-subject">
+                {{ enquiry.subject|default:"No Subject" }}
+            </div>
+            
+            <div class="enquiry-message">
+                {{ enquiry.message|truncatechars:200|default:"" }}
+            </div>
+            
+            <div class="enquiry-meta">
+                <div class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    {{ enquiry.created_at|date:"M d, Y g:i A"|default:"" }}
+                </div>
+                {% if enquiry.category %}
+                <div class="meta-item">
+                    <i class="fas fa-folder"></i>
+                    {{ enquiry.category.name }}
+                </div>
+                {% endif %}
+                {% if enquiry.assigned_to %}
+                <div class="meta-item">
+                    <i class="fas fa-user-tie"></i>
+                    {{ enquiry.assigned_to.get_full_name }}
+                </div>
+                {% endif %}
+                <div class="ms-auto">
+                    <div class="enquiry-actions">
+                        <a href="{% url 'core:admin_enquiry_detail' enquiry.id %}" 
+                           class="btn btn-sm btn-outline-primary" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'core:admin_respond_enquiry' enquiry.id %}" 
+                           class="btn btn-sm btn-outline-success" title="Respond">
+                            <i class="fas fa-reply"></i>
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger" 
+                                onclick="deleteEnquiry({{ enquiry.id }}, '{{ enquiry.enquiry_id|escapejs }}')"
+                                title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Enquiry pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+{% else %}
+    <!-- Empty State -->
+    <div class="admin-card">
+        <div class="admin-card-body">
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No Enquiries Found</h3>
+                {% if search or status_filter or priority_filter %}
+                    <p>No enquiries match your current filters. Try adjusting your search criteria.</p>
+                    <a href="{% url 'core:admin_enquiries' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-times me-1"></i>Clear Filters
+                    </a>
+                {% else %}
+                    <p>No business enquiries have been received yet.</p>
+                    <p class="text-muted mt-2">
+                        <small>When customers submit enquiries, they will appear here for management and response.</small>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+function deleteEnquiry(enquiryId, enquiryCode) {
+    if (confirm(`Are you sure you want to delete enquiry ${enquiryCode}?`)) {
+        console.log('Deleting enquiry:', enquiryId);
+        // Implement delete functionality
+        alert('Delete functionality will be implemented with backend integration.');
+    }
+}
+
+function exportEnquiries() {
+    console.log('Exporting enquiries...');
+    alert('Export functionality will be implemented with backend integration.');
+}
+
+function markAllRead() {
+    if (confirm('Mark all enquiries as read?')) {
+        console.log('Marking all as read...');
+        alert('This functionality will be implemented with backend integration.');
+    }
+}
+
+function archiveResolved() {
+    if (confirm('Archive all resolved enquiries?')) {
+        console.log('Archiving resolved...');
+        alert('Archive functionality will be implemented with backend integration.');
+    }
+}
+
+function configureNotifications() {
+    console.log('Opening notification settings...');
+    alert('Notification settings will be implemented with backend integration.');
+}
+</script>
+{% endblock %}

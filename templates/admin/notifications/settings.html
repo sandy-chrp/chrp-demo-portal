@@ -1,0 +1,137 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block admin_title %}Notification Settings{% endblock %}
+{% block page_title %}Notification Settings{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .settings-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .settings-header {
+        border-bottom: 2px solid var(--gray-200);
+        padding-bottom: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .setting-item {
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        transition: background 0.3s ease;
+    }
+    
+    .setting-item:hover {
+        background: var(--gray-100);
+    }
+    
+    .help-text {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Email Settings -->
+                <div class="settings-card">
+                    <div class="settings-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-envelope text-primary me-2"></i>
+                            Email Settings
+                        </h4>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" 
+                                   name="email_enabled" id="emailEnabled"
+                                   {% if settings.email_enabled %}checked{% endif %}>
+                            <label class="form-check-label" for="emailEnabled">
+                                <strong>Enable Email Notifications</strong>
+                            </label>
+                        </div>
+                        <p class="help-text mb-0">
+                            Send email notifications to users when enabled in templates
+                        </p>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="form-label">Batch Size for Email Sending</label>
+                        <input type="number" name="batch_size" class="form-control" 
+                               value="{{ settings.batch_size }}" min="1" max="500">
+                        <p class="help-text">
+                            Number of emails to send in each batch (recommended: 100)
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- In-App Settings -->
+                <div class="settings-card">
+                    <div class="settings-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-bell text-primary me-2"></i>
+                            In-App Settings
+                        </h4>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" 
+                                   name="in_app_enabled" id="inAppEnabled"
+                                   {% if settings.in_app_enabled %}checked{% endif %}>
+                            <label class="form-check-label" for="inAppEnabled">
+                                <strong>Enable In-App Notifications</strong>
+                            </label>
+                        </div>
+                        <p class="help-text mb-0">
+                            Show notifications in the customer portal
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Cleanup Settings -->
+                <div class="settings-card">
+                    <div class="settings-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-broom text-primary me-2"></i>
+                            Cleanup Settings
+                        </h4>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="form-label">Auto-Delete Old Notifications After (Days)</label>
+                        <input type="number" name="auto_delete_days" class="form-control" 
+                               value="{{ settings.auto_delete_days }}" min="30" max="365">
+                        <p class="help-text">
+                            Automatically delete read notifications older than specified days
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Settings
+                    </button>
+                    <a href="{% url 'core:admin_notifications' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

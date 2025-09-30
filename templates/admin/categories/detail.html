@@ -1,0 +1,636 @@
+<!-- templates/admin/categories/detail.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}{{ category.name }} - Category Details{% endblock %}
+{% block page_title %}Category Details: {{ category.name }}{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_categories' %}">Demo Categories</a>
+            </li>
+            <li class="breadcrumb-item active">{{ category.name }}</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <!-- Category Status Badge -->
+    <span class="badge bg-{% if category.is_active %}success{% else %}secondary{% endif %} fs-6">
+        <i class="fas fa-{% if category.is_active %}check-circle{% else %}pause-circle{% endif %} me-1"></i>
+        {% if category.is_active %}Active{% else %}Inactive{% endif %}
+    </span>
+    
+    <!-- Quick Actions -->
+    <div class="btn-group">
+        <a href="{% url 'core:admin_edit_category' category.id %}" class="btn btn-primary">
+            <i class="fas fa-edit me-1"></i>Edit Category
+        </a>
+        
+        <button class="btn btn-outline-{% if category.is_active %}warning{% else %}success{% endif %}" 
+                onclick="toggleCategoryStatus({{ category.id }}, {{ category.is_active|yesno:'false,true' }}, '{{ category.name|escapejs }}')">
+            <i class="fas fa-{% if category.is_active %}pause{% else %}play{% endif %} me-1"></i>
+            {% if category.is_active %}Deactivate{% else %}Activate{% endif %}
+        </button>
+        
+        {% if demo_count == 0 %}
+            <button class="btn btn-outline-danger" 
+                    onclick="deleteCategory({{ category.id }}, '{{ category.name|escapejs }}')">
+                <i class="fas fa-trash me-1"></i>Delete
+            </button>
+        {% endif %}
+    </div>
+    
+    <!-- More Actions Dropdown -->
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <a class="dropdown-item" href="{% url 'core:admin_duplicate_category' category.id %}" 
+                   onclick="return confirm('Create a duplicate of this category?')">
+                    <i class="fas fa-copy me-2"></i>Duplicate Category
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="{% url 'core:admin_demos' %}?category={{ category.slug }}">
+                    <i class="fas fa-video me-2"></i>View All Demos
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item" href="{% url 'core:admin_categories' %}">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Categories
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .category-hero {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-xl);
+        margin-bottom: var(--spacing-xl);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .category-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .category-icon-large {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .stat-card {
+        background: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .stat-card.primary { border-left-color: var(--primary-color); }
+    .stat-card.success { border-left-color: var(--success-color); }
+    .stat-card.warning { border-left-color: var(--warning-color); }
+    .stat-card.info { border-left-color: var(--info-color); }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+        color: var(--dark-color);
+    }
+
+    .stat-label {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .info-card-header {
+        padding: var(--spacing-lg);
+        border-bottom: 1px solid var(--gray-200);
+        background: var(--gray-50);
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+
+    .info-card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .info-card-title i {
+        margin-right: var(--spacing-md);
+        color: var(--primary-color);
+    }
+
+    .info-card-body {
+        padding: var(--spacing-lg);
+    }
+
+    .demo-item {
+        display: flex;
+        align-items: center;
+        padding: var(--spacing-md);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+        transition: all 0.3s ease;
+    }
+
+    .demo-item:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .demo-thumbnail {
+        width: 60px;
+        height: 45px;
+        border-radius: var(--radius-sm);
+        background: var(--gray-200);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: var(--spacing-md);
+        color: var(--gray-500);
+    }
+
+    .demo-info {
+        flex: 1;
+    }
+
+    .demo-title {
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+        color: var(--dark-color);
+    }
+
+    .demo-meta {
+        font-size: 0.8rem;
+        color: var(--gray-600);
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    .demo-actions {
+        display: flex;
+        gap: var(--spacing-xs);
+    }
+
+    .property-row {
+        display: flex;
+        padding: var(--spacing-md) 0;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .property-row:last-child {
+        border-bottom: none;
+    }
+
+    .property-label {
+        font-weight: 600;
+        color: var(--gray-700);
+        min-width: 150px;
+    }
+
+    .property-value {
+        flex: 1;
+        color: var(--gray-600);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-3xl);
+        color: var(--gray-600);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--gray-400);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .category-hero {
+            padding: var(--spacing-lg);
+        }
+        
+        .demo-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .demo-thumbnail {
+            margin-bottom: var(--spacing-sm);
+            margin-right: 0;
+        }
+        
+        .demo-actions {
+            margin-top: var(--spacing-sm);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Category Hero Section -->
+<div class="category-hero">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            {% if category.icon %}
+                <div class="category-icon-large">
+                    {{ category.icon|safe }}
+                </div>
+            {% else %}
+                <div class="category-icon-large">
+                    <i class="fas fa-folder"></i>
+                </div>
+            {% endif %}
+            
+            <h1 class="display-6 fw-bold mb-3">{{ category.name }}</h1>
+            
+            {% if category.description %}
+                <p class="lead mb-0">{{ category.description }}</p>
+            {% else %}
+                <p class="lead mb-0 opacity-75">No description provided for this category.</p>
+            {% endif %}
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="d-flex flex-column gap-2">
+                <div class="badge bg-light text-dark fs-6 p-2">
+                    Sort Order: <strong>{{ category.sort_order }}</strong>
+                </div>
+                <div class="badge bg-light text-dark fs-6 p-2">
+                    Slug: <strong>{{ category.slug }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Grid -->
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-number text-primary">{{ demo_count }}</div>
+        <div class="stat-label">Total Demos</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-number text-success">{{ active_demos }}</div>
+        <div class="stat-label">Active Demos</div>
+    </div>
+    <div class="stat-card info">
+        <div class="stat-number text-info">{{ total_views }}</div>
+        <div class="stat-label">Total Views</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-number text-warning">{{ category.created_at|timesince }}</div>
+        <div class="stat-label">Age</div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Category Information -->
+    <div class="col-lg-6">
+        <div class="info-card">
+            <div class="info-card-header">
+                <h3 class="info-card-title">
+                    <i class="fas fa-info-circle"></i>Category Information
+                </h3>
+            </div>
+            <div class="info-card-body">
+                <div class="property-row">
+                    <div class="property-label">Name:</div>
+                    <div class="property-value">{{ category.name }}</div>
+                </div>
+                
+                <div class="property-row">
+                    <div class="property-label">Slug:</div>
+                    <div class="property-value">
+                        <code>{{ category.slug }}</code>
+                    </div>
+                </div>
+                
+                <div class="property-row">
+                    <div class="property-label">Description:</div>
+                    <div class="property-value">
+                        {% if category.description %}
+                            {{ category.description }}
+                        {% else %}
+                            <em class="text-muted">No description</em>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="property-row">
+                    <div class="property-label">Icon:</div>
+                    <div class="property-value">
+                        {% if category.icon %}
+                            <span class="me-2">{{ category.icon|safe }}</span>
+                            <code>{{ category.icon }}</code>
+                        {% else %}
+                            <em class="text-muted">No icon set</em>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="property-row">
+                    <div class="property-label">Sort Order:</div>
+                    <div class="property-value">{{ category.sort_order }}</div>
+                </div>
+                
+                <div class="property-row">
+                    <div class="property-label">Status:</div>
+                    <div class="property-value">
+                        <span class="badge bg-{% if category.is_active %}success{% else %}secondary{% endif %}">
+                            <i class="fas fa-{% if category.is_active %}check{% else %}times{% endif %} me-1"></i>
+                            {% if category.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="property-row">
+                    <div class="property-label">Created:</div>
+                    <div class="property-value">
+                        {{ category.created_at|date:"F j, Y g:i A" }}
+                        <small class="text-muted">({{ category.created_at|timesince }} ago)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Demos -->
+    <div class="col-lg-6">
+        <div class="info-card">
+            <div class="info-card-header">
+                <h3 class="info-card-title">
+                    <i class="fas fa-video"></i>Recent Demos
+                    <span class="badge bg-primary ms-2">{{ demo_count }}</span>
+                </h3>
+            </div>
+            <div class="info-card-body">
+                {% if recent_demos %}
+                    {% for demo in recent_demos %}
+                        <div class="demo-item">
+                            <div class="demo-thumbnail">
+                                {% if demo.thumbnail %}
+                                    <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" 
+                                         style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
+                                {% else %}
+                                    <i class="fas fa-video"></i>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="demo-info">
+                                <div class="demo-title">{{ demo.title }}</div>
+                                <div class="demo-meta">
+                                    <span><i class="fas fa-eye me-1"></i>{{ demo.views_count }} views</span>
+                                    <span><i class="fas fa-heart me-1"></i>{{ demo.likes_count }} likes</span>
+                                    {% if demo.duration %}
+                                        <span><i class="fas fa-clock me-1"></i>{{ demo.formatted_duration }}</span>
+                                    {% endif %}
+                                    <span class="badge bg-{% if demo.is_active %}success{% else %}secondary{% endif %}">
+                                        {% if demo.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="demo-actions">
+                                <a href="{% url 'core:admin_demo_detail' demo.id %}" 
+                                   class="btn btn-sm btn-outline-primary" title="View Demo">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'core:admin_demo_detail' demo.id %}" 
+                                   class="btn btn-sm btn-outline-secondary" title="View Demo Details">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    {% if demo_count > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'core:admin_demos' %}?category={{ category.slug }}" 
+                               class="btn btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>View All {{ demo_count }} Demos
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-video"></i>
+                        <h5>No Demos Yet</h5>
+                        <p class="text-muted">This category doesn't contain any demos yet.</p>
+                        <a href="{% url 'core:admin_add_demo' %}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add First Demo
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Card -->
+<div class="info-card">
+    <div class="info-card-header">
+        <h3 class="info-card-title">
+            <i class="fas fa-bolt"></i>Quick Actions
+        </h3>
+    </div>
+    <div class="info-card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <a href="{% url 'core:admin_edit_category' category.id %}" 
+                   class="btn btn-outline-primary w-100">
+                    <i class="fas fa-edit mb-2 d-block"></i>
+                    Edit Category
+                </a>
+            </div>
+            
+            <div class="col-md-3">
+                <a href="{% url 'core:admin_add_demo' %}" 
+                   class="btn btn-outline-success w-100">
+                    <i class="fas fa-plus mb-2 d-block"></i>
+                    Add Demo
+                </a>
+            </div>
+            
+            <div class="col-md-3">
+                <a href="{% url 'core:admin_demos' %}?category={{ category.slug }}" 
+                   class="btn btn-outline-info w-100">
+                    <i class="fas fa-video mb-2 d-block"></i>
+                    View All Demos
+                </a>
+            </div>
+            
+            <div class="col-md-3">
+                <button class="btn btn-outline-warning w-100" 
+                        onclick="toggleCategoryStatus({{ category.id }}, {{ category.is_active|yesno:'false,true' }}, '{{ category.name|escapejs }}')">
+                    <i class="fas fa-{% if category.is_active %}pause{% else %}play{% endif %} mb-2 d-block"></i>
+                    {% if category.is_active %}Deactivate{% else %}Activate{% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+    // CSRF Token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Toggle category status
+    function toggleCategoryStatus(categoryId, activate, categoryName) {
+        const action = activate ? 'activate' : 'deactivate';
+        
+        if (confirm(`Are you sure you want to ${action} "${categoryName}"?`)) {
+            fetch(`/admin/categories/${categoryId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ activate: activate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification('Error updating category status', 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error updating category status', 'error');
+            });
+        }
+    }
+
+    // Delete category
+    function deleteCategory(categoryId, categoryName) {
+        const confirmMessage = `Are you sure you want to delete "${categoryName}"?\n\nThis action cannot be undone.`;
+        
+        if (confirm(confirmMessage)) {
+            fetch(`/admin/categories/${categoryId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/admin/categories/';
+                    }, 1000);
+                } else {
+                    showNotification(data.message || 'Error deleting category', 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error deleting category', 'error');
+            });
+        }
+    }
+
+    // Notification function
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 350px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        `;
+        
+        const iconClass = type === 'success' ? 'check-circle' : 
+                         type === 'error' ? 'exclamation-circle' : 'info-circle';
+        
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${iconClass} me-2"></i>
+                <span>${message}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+</script>
+{% endblock %}

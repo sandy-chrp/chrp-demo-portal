@@ -1,0 +1,83 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Backup Settings{% endblock %}
+{% block page_title %}Backup & Restore{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Create Backup -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-database me-2"></i>Create Backup
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="backup">
+                        
+                        <p>Create a complete backup of your database and media files.</p>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-download me-2"></i>Create New Backup
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Backup History -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Backup History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if backups %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Size</th>
+                                    <th>Type</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for backup in backups %}
+                                <tr>
+                                    <td>{{ backup.created_at|date:"M d, Y g:i A" }}</td>
+                                    <td>{{ backup.size }}</td>
+                                    <td>{{ backup.type }}</td>
+                                    <td>
+                                        <form method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="restore">
+                                            <input type="hidden" name="backup_id" value="{{ backup.id }}">
+                                            <button type="submit" class="btn btn-sm btn-success"
+                                                    onclick="return confirm('Restore this backup? Current data will be replaced.')">
+                                                <i class="fas fa-undo"></i> Restore
+                                            </button>
+                                        </form>
+                                        <button class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No backups available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

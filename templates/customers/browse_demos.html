@@ -1,0 +1,902 @@
+<!-- templates/customers/browse_demos.html - Browse Demos with Security -->
+{% extends 'customers/base.html' %}
+
+{% block customer_title %}Browse Demos - Customer Portal{% endblock %}
+{% block page_title %}Browse Demos{% endblock %}
+
+{% block customer_extra_css %}
+<style>
+    /* Security Protection Styles */
+    body {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Disable right-click and drag for all content */
+    * {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    img, video {
+        -webkit-user-drag: none;
+        -khtml-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+        user-drag: none;
+        pointer-events: none;
+    }
+
+    /* Filters Section */
+    .filters-section {
+        background: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-xl);
+        border: 1px solid var(--gray-200);
+    }
+
+    .filter-group {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .filter-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-sm);
+        display: block;
+    }
+
+    .filter-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+
+    .filter-pill {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-lg);
+        background: white;
+        color: var(--gray-700);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .filter-pill:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+    }
+
+    .filter-pill.active {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .sort-dropdown {
+        min-width: 150px;
+    }
+
+    /* Search Section */
+    .search-section {
+        position: relative;
+        max-width: 400px;
+    }
+
+    .search-input {
+        padding-left: 45px;
+        border-radius: var(--radius-lg);
+        border: 2px solid var(--gray-300);
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-500);
+    }
+
+    /* Demo Grid */
+    .demos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: var(--spacing-xl);
+        margin-top: var(--spacing-xl);
+    }
+
+    .demo-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        border: 1px solid var(--gray-200);
+        position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .demo-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .demo-thumbnail-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        background: var(--gray-100);
+    }
+
+    .demo-thumbnail {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.3s ease;
+        -webkit-user-drag: none;
+        -khtml-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+        user-drag: none;
+        pointer-events: none;
+    }
+
+    .demo-card:hover .demo-thumbnail {
+        transform: scale(1.05);
+    }
+
+    .demo-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(30, 60, 114, 0.8), rgba(42, 82, 152, 0.6));
+        opacity: 0;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .demo-card:hover .demo-overlay {
+        opacity: 1;
+    }
+
+    .play-button {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        transform: scale(0.8);
+        transition: all 0.3s ease;
+    }
+
+    .demo-card:hover .play-button {
+        transform: scale(1);
+    }
+
+    .demo-badge {
+        position: absolute;
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+        background: var(--primary-color);
+        color: white;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-md);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .demo-card-content {
+        padding: var(--spacing-lg);
+    }
+
+    .demo-category {
+        color: var(--primary-color);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .demo-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-sm);
+        line-height: 1.3;
+        -webkit-line-clamp: 2;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .demo-description {
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-lg);
+        line-height: 1.5;
+        -webkit-line-clamp: 3;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .demo-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        font-size: 0.875rem;
+        color: var(--gray-500);
+    }
+
+    .demo-stats {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    .demo-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    .btn-watch {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+
+    .btn-watch:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-request {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-request:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* Status Indicators */
+    .status-watched {
+        background: var(--success-color);
+    }
+
+    .status-liked {
+        background: var(--danger-color);
+    }
+
+    .status-new {
+        background: var(--info-color);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-xl) var(--spacing-lg);
+        color: var(--gray-500);
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: var(--spacing-lg);
+        opacity: 0.5;
+    }
+
+    /* Pagination */
+    .pagination-wrapper {
+        margin-top: var(--spacing-xl);
+        display: flex;
+        justify-content: center;
+    }
+
+    .pagination .page-link {
+        border: 2px solid var(--gray-300);
+        color: var(--gray-700);
+        padding: var(--spacing-sm) var(--spacing-md);
+        margin: 0 var(--spacing-xs);
+        border-radius: var(--radius-md);
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .demos-grid {
+            grid-template-columns: 1fr;
+            gap: var(--spacing-lg);
+        }
+        
+        .filter-pills {
+            justify-content: center;
+        }
+        
+        .filters-section .row {
+            text-align: center;
+        }
+        
+        .search-section {
+            max-width: 100%;
+            margin-bottom: var(--spacing-md);
+        }
+    }
+
+    /* Protection Overlay */
+    .content-protection::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        z-index: 999;
+        pointer-events: none;
+    }
+
+    /* Watermark */
+    .demo-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        color: rgba(255, 255, 255, 0.1);
+        font-size: 1.5rem;
+        font-weight: bold;
+        pointer-events: none;
+        z-index: 1;
+        user-select: none;
+    }
+</style>
+{% endblock %}
+
+{% block customer_content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">Browse Demo Library</h1>
+        <p class="text-muted mb-0">Explore our comprehensive collection of business solutions</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'customers:request_demo' %}" class="btn btn-primary">
+            <i class="fas fa-calendar-plus me-2"></i>Request Live Demo
+        </a>
+    </div>
+</div>
+
+<!-- Filters Section -->
+<div class="filters-section content-protection">
+    <form method="GET" id="filterForm">
+        <div class="row g-4 align-items-end">
+            <!-- Search -->
+            <div class="col-lg-4">
+                <label class="filter-label">Search Demos</label>
+                <div class="search-section">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           name="search" 
+                           value="{{ search_query }}" 
+                           placeholder="Search by title or description..." 
+                           class="form-control search-input">
+                </div>
+            </div>
+            
+            <!-- Sort -->
+            <div class="col-lg-3">
+                <label class="filter-label">Sort By</label>
+                <select name="sort" class="form-select sort-dropdown">
+                    <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                    <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
+                    <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Popular</option>
+                    <option value="liked" {% if sort_by == 'liked' %}selected{% endif %}>Most Liked</option>
+                    <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title A-Z</option>
+                </select>
+            </div>
+            
+            <!-- Actions -->
+            <div class="col-lg-5">
+                <div class="d-flex gap-2 justify-content-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter me-2"></i>Apply Filters
+                    </button>
+                    <a href="{% url 'customers:browse_demos' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Clear
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Category Filter -->
+        {% if categories %}
+        <div class="filter-group mt-4">
+            <label class="filter-label">Categories</label>
+            <div class="filter-pills">
+                <a href="?search={{ search_query }}&sort={{ sort_by }}" 
+                   class="filter-pill {% if not current_category %}active{% endif %}">
+                    All Categories
+                </a>
+                {% for category in categories %}
+                    <a href="?category={{ category.id }}&search={{ search_query }}&sort={{ sort_by }}" 
+                       class="filter-pill {% if current_category == category.id %}active{% endif %}">
+                        {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Results Info -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        {% if page_obj %}
+            <p class="mb-0 text-muted">
+                Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} demos
+                {% if search_query %}
+                    for "<strong>{{ search_query }}</strong>"
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
+    <div class="d-flex align-items-center gap-2 text-muted">
+        <i class="fas fa-shield-alt"></i>
+        <small>Content Protected</small>
+    </div>
+</div>
+
+<!-- Demos Grid -->
+{% if page_obj.object_list %}
+    <div class="demos-grid">
+        {% for demo in page_obj.object_list %}
+            <div class="demo-card content-protection">
+                <!-- Watermark -->
+                <div class="demo-watermark">{{ user.email }}</div>
+                
+                <!-- Thumbnail -->
+                <div class="demo-thumbnail-container">
+                    {% if demo.thumbnail %}
+                        <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-thumbnail">
+                    {% else %}
+                        <div class="demo-thumbnail" style="background: var(--gray-200); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-video text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Play Overlay -->
+                    <div class="demo-overlay">
+                        <div class="play-button">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Badges -->
+                    {% if demo.id in user_views %}
+                        <div class="demo-badge status-watched">
+                            <i class="fas fa-eye me-1"></i>Watched
+                        </div>
+                    {% elif demo.is_featured %}
+                        <div class="demo-badge status-new">
+                            <i class="fas fa-star me-1"></i>Featured
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Content -->
+                <div class="demo-card-content">
+                    <div class="demo-category">{{ demo.category.name }}</div>
+                    <h3 class="demo-title">{{ demo.title }}</h3>
+                    <p class="demo-description">{{ demo.description|truncatewords:20 }}</p>
+                    
+                    <!-- Meta Info -->
+                    <div class="demo-meta">
+                        <div class="demo-stats">
+                            <span><i class="fas fa-eye me-1"></i>{{ demo.views_count }}</span>
+                            <span><i class="fas fa-heart me-1"></i>{{ demo.likes_count }}</span>
+                            {% if demo.duration %}
+                                <span><i class="fas fa-clock me-1"></i>{{ demo.formatted_duration }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="demo-date">
+                            {{ demo.created_at|date:"M d" }}
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="demo-actions">
+                        <a href="{% url 'customers:demo_detail' demo.slug %}" class="btn btn-watch">
+                            <i class="fas fa-play me-2"></i>Watch Demo
+                        </a>
+                        <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
+                           class="btn btn-request" title="Request Live Demo">
+                            <i class="fas fa-calendar"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <div class="pagination-wrapper">
+            <nav aria-label="Demo pagination">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+    
+{% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <h3>No Demos Found</h3>
+        {% if search_query or current_category %}
+            <p>No demos match your current filters. Try adjusting your search criteria.</p>
+            <a href="{% url 'customers:browse_demos' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-times me-2"></i>Clear Filters
+            </a>
+        {% else %}
+            <p>No demo videos are currently available. Please check back later.</p>
+            <a href="{% url 'customers:contact_sales' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-envelope me-2"></i>Contact Sales Team
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block customer_extra_js %}
+<script>
+// Enhanced Security Protection for Demo Browsing
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Complete security protection (same as dashboard)
+    
+    // Disable right-click context menu
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Disable keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S, Ctrl+A, Ctrl+P, Ctrl+C, Print Screen
+        if (e.keyCode === 123 || 
+            (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
+            (e.ctrlKey && e.shiftKey && e.keyCode === 74) ||
+            (e.ctrlKey && e.keyCode === 85) ||
+            (e.ctrlKey && e.keyCode === 83) ||
+            (e.ctrlKey && e.keyCode === 65) ||
+            (e.ctrlKey && e.keyCode === 80) ||
+            (e.ctrlKey && e.keyCode === 67) ||
+            e.keyCode === 44) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // Disable drag and drop
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Disable image saving
+    document.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Disable selection for protected content
+    document.addEventListener('selectstart', function(e) {
+        if (e.target.closest('.content-protection, .demo-card, .demo-thumbnail')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // Auto-submit filters on change
+    const filterForm = document.getElementById('filterForm');
+    const sortSelect = filterForm.querySelector('select[name="sort"]');
+    const searchInput = filterForm.querySelector('input[name="search"]');
+    
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            filterForm.submit();
+        });
+    }
+    
+    // Debounced search
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterForm.submit();
+            }, 1000);
+        });
+    }
+    
+    // Enhanced protection for demo thumbnails
+    const demoThumbnails = document.querySelectorAll('.demo-thumbnail');
+    demoThumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        thumbnail.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Disable pointer events completely
+        thumbnail.style.pointerEvents = 'none';
+    });
+    
+    // Animate demo cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Observe demo cards
+    const demoCards = document.querySelectorAll('.demo-card');
+    demoCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'all 0.6s ease';
+        card.style.transitionDelay = `${index * 100}ms`;
+        observer.observe(card);
+    });
+    
+    // Prevent screenshot apps detection
+    let devtools = {open: false};
+    const threshold = 160;
+    setInterval(function() {
+        if (window.outerHeight - window.innerHeight > threshold || 
+            window.outerWidth - window.innerWidth > threshold) {
+            if (!devtools.open) {
+                devtools.open = true;
+                alert('Developer tools detected. For security reasons, please close them.');
+            }
+        } else {
+            devtools.open = false;
+        }
+    }, 1000);
+    
+    // Disable clipboard operations
+    document.addEventListener('copy', function(e) {
+        e.preventDefault();
+        e.clipboardData.setData('text/plain', 'Copying is not allowed');
+        return false;
+    });
+    
+    // Screen recording detection
+    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        navigator.mediaDevices.getDisplayMedia = function() {
+            alert('Screen recording is not allowed for security reasons.');
+            return Promise.reject(new Error('Screen recording blocked'));
+        };
+    }
+    
+    // Blur content when window loses focus
+    window.addEventListener('blur', function() {
+        document.body.style.filter = 'blur(5px)';
+        document.body.style.pointerEvents = 'none';
+    });
+    
+    window.addEventListener('focus', function() {
+        document.body.style.filter = 'none';
+        document.body.style.pointerEvents = 'auto';
+    });
+    
+    // Add watermarks to demo cards
+    function addDemoWatermarks() {
+        const demoCards = document.querySelectorAll('.demo-card');
+        demoCards.forEach(card => {
+            const watermark = document.createElement('div');
+            watermark.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                color: rgba(0, 0, 0, 0.05);
+                font-size: 1rem;
+                font-weight: bold;
+                pointer-events: none;
+                z-index: 2;
+                user-select: none;
+                white-space: nowrap;
+            `;
+            watermark.textContent = '{{ user.email }} - CONFIDENTIAL';
+            card.appendChild(watermark);
+        });
+    }
+    
+    addDemoWatermarks();
+    
+    // Override common screenshot methods
+    if (typeof html2canvas !== 'undefined') {
+        html2canvas = function() {
+            alert('Screenshot functionality is disabled.');
+            return Promise.reject(new Error('Screenshots not allowed'));
+        };
+    }
+    
+    // Disable screenshot libraries
+    window.html2canvas = undefined;
+    window.domtoimage = undefined;
+    window.rasterizeHTML = undefined;
+    
+    // Console protection
+    Object.defineProperty(window, 'console', {
+        value: console,
+        writable: false,
+        configurable: false
+    });
+    
+    // Clear console periodically
+    setInterval(function() {
+        if (typeof console !== 'undefined' && console.clear) {
+            console.clear();
+        }
+    }, 2000);
+    
+    // Print protection
+    window.addEventListener('beforeprint', function(e) {
+        e.preventDefault();
+        alert('Printing is not allowed for security reasons.');
+        return false;
+    });
+    
+    // Additional protection: Hide content when print is detected
+    const printMediaQuery = window.matchMedia('print');
+    printMediaQuery.addEventListener('change', function(e) {
+        if (e.matches) {
+            document.body.style.display = 'none';
+        } else {
+            document.body.style.display = 'block';
+        }
+    });
+});
+
+// Disable common methods used for content extraction
+window.addEventListener('load', function() {
+    // Disable common DOM manipulation methods
+    const originalQuerySelector = document.querySelector;
+    const originalQuerySelectorAll = document.querySelectorAll;
+    const originalGetElementById = document.getElementById;
+    
+    // Override with security checks
+    document.querySelector = function(selector) {
+        if (selector.includes('demo-thumbnail') || selector.includes('content-protection')) {
+            console.warn('Access to protected content is restricted');
+            return null;
+        }
+        return originalQuerySelector.call(this, selector);
+    };
+    
+    // Block access to sensitive elements
+    const protectedClasses = ['demo-thumbnail', 'content-protection', 'demo-card'];
+    protectedClasses.forEach(className => {
+        const elements = document.getElementsByClassName(className);
+        for (let element of elements) {
+            Object.defineProperty(element, 'innerHTML', {
+                get: function() { return ''; },
+                set: function() { return false; },
+                configurable: false
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

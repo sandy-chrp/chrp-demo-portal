@@ -1,0 +1,623 @@
+<!-- templates/customers/request_demo.html -->
+{% extends 'customers/base.html' %}
+
+{% block customer_title %}Request Demo - Customer Portal{% endblock %}
+{% block page_title %}Request Live Demo{% endblock %}
+
+{% block customer_extra_css %}
+<style>
+    /* Security Protection Styles */
+    body {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Form Styles */
+    .demo-request-form {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+        border: 1px solid var(--gray-200);
+    }
+
+    .form-section {
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-lg);
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title i {
+        margin-right: var(--spacing-md);
+        color: var(--primary-color);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-sm);
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: var(--spacing-md);
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-lg);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        outline: none;
+    }
+
+    .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+
+    /* Demo Cards */
+    .demo-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-lg);
+    }
+
+    .demo-option {
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-lg);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .demo-option:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .demo-option.selected {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+    }
+
+    .demo-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .demo-info {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .demo-thumbnail {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .demo-details h4 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-sm);
+        color: var(--dark-color);
+    }
+
+    .demo-meta {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .demo-description {
+        font-size: 0.95rem;
+        color: var(--gray-600);
+        line-height: 1.4;
+    }
+
+    /* Time Slot Selection */
+    .time-slots {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+    }
+
+    .time-slot {
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .time-slot:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+
+    .time-slot.selected {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+    }
+
+    .time-slot input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .slot-time {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .slot-type {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Date Input */
+    .date-input {
+        position: relative;
+    }
+
+    .date-input input[type="date"] {
+        width: 100%;
+        padding: var(--spacing-md);
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-lg);
+        font-size: 1rem;
+    }
+
+    /* Notes Section */
+    .notes-section textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Submit Button */
+    .submit-section {
+        background: var(--gray-50);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-xl);
+        text-align: center;
+    }
+
+    .btn-submit {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        font-size: 1.125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 200px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(30, 60, 114, 0.3);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Info Boxes */
+    .info-box {
+        background: #f0f9ff;
+        border: 1px solid #e0f2fe;
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .info-box h6 {
+        color: var(--info-color);
+        font-weight: 600;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-list li {
+        padding: var(--spacing-xs) 0;
+        color: var(--gray-700);
+        display: flex;
+        align-items: center;
+    }
+
+    .info-list i {
+        color: var(--info-color);
+        margin-right: var(--spacing-sm);
+        width: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .demo-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .time-slots {
+            grid-template-columns: 1fr;
+        }
+        
+        .demo-request-form {
+            padding: var(--spacing-lg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block customer_content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">Request Live Demo</h1>
+        <p class="text-muted mb-0">Schedule a personalized demo session with our experts</p>
+    </div>
+    <div>
+        <a href="{% url 'customers:demo_requests' %}" class="btn btn-outline-primary">
+            <i class="fas fa-list me-2"></i>My Requests
+        </a>
+    </div>
+</div>
+
+<!-- Demo Request Form -->
+<form method="POST" id="demoRequestForm" class="demo-request-form">
+    {% csrf_token %}
+    
+    <!-- Demo Selection Section -->
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-video"></i>
+            Select Demo Topic
+        </h3>
+        
+        <div class="info-box">
+            <h6><i class="fas fa-info-circle me-2"></i>Choose Your Demo</h6>
+            <ul class="info-list">
+                <li><i class="fas fa-check"></i>Select the demo that best matches your business needs</li>
+                <li><i class="fas fa-check"></i>Our experts will customize the session for your requirements</li>
+                <li><i class="fas fa-check"></i>You can request multiple demos for different topics</li>
+            </ul>
+        </div>
+        
+        {% if available_demos %}
+            <div class="demo-grid">
+                {% for demo in available_demos %}
+                    <label class="demo-option" for="demo_{{ demo.id }}">
+                        <input type="radio" name="demo_id" value="{{ demo.id }}" id="demo_{{ demo.id }}" required>
+                        <div class="demo-info">
+                            {% if demo.thumbnail %}
+                                <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-thumbnail">
+                            {% else %}
+                                <div class="demo-thumbnail" style="background: var(--gray-200); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-video text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="demo-details">
+                                <h4>{{ demo.title }}</h4>
+                                <div class="demo-meta">
+                                    <span class="badge bg-primary">{{ demo.category.name }}</span>
+                                    <span class="ms-2 text-muted">
+                                        <i class="fas fa-eye me-1"></i>{{ demo.views_count }} views
+                                    </span>
+                                </div>
+                                <p class="demo-description">{{ demo.description|truncatewords:15 }}</p>
+                            </div>
+                        </div>
+                    </label>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                No demos are currently available. Please contact support for assistance.
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Date & Time Selection -->
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-calendar-alt"></i>
+            Select Date & Time
+        </h3>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Preferred Date</label>
+                    <div class="date-input">
+                        <input type="date" 
+                               name="requested_date" 
+                               class="form-control" 
+                               min="{{ today|date:'Y-m-d' }}"
+                               required>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Demos are available Monday through Saturday (No Sundays)
+                    </small>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Preferred Time Slot</label>
+                    {% if time_slots %}
+                        <div class="time-slots">
+                            {% for slot in time_slots %}
+                                <label class="time-slot" for="slot_{{ slot.id }}">
+                                    <input type="radio" name="time_slot_id" value="{{ slot.id }}" id="slot_{{ slot.id }}" required>
+                                    <div class="slot-time">{{ slot.start_time|time:"g:i A" }} - {{ slot.end_time|time:"g:i A" }}</div>
+                                    <div class="slot-type">{{ slot.get_slot_type_display }}</div>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-clock me-2"></i>
+                            No time slots are currently available. Please contact support.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Information -->
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-sticky-note"></i>
+            Additional Information
+        </h3>
+        
+        <div class="form-group notes-section">
+            <label class="form-label">Notes / Specific Requirements (Optional)</label>
+            <textarea name="notes" 
+                      class="form-control" 
+                      placeholder="Please share any specific topics you'd like to focus on, questions you have, or special requirements for the demo session..."></textarea>
+            <small class="text-muted">
+                <i class="fas fa-lightbulb me-1"></i>
+                Help us prepare by sharing your specific interests, business challenges, or questions
+            </small>
+        </div>
+        
+        <div class="info-box">
+            <h6><i class="fas fa-calendar-check me-2"></i>What to Expect</h6>
+            <ul class="info-list">
+                <li><i class="fas fa-clock"></i>Demo sessions typically last 30-45 minutes</li>
+                <li><i class="fas fa-user-tie"></i>You'll be assigned a dedicated product expert</li>
+                <li><i class="fas fa-laptop"></i>Sessions are conducted via video conference</li>
+                <li><i class="fas fa-file-alt"></i>You'll receive session materials and follow-up resources</li>
+                <li><i class="fas fa-phone"></i>We'll contact you 1 hour before the scheduled time</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Submit Section -->
+    <div class="submit-section">
+        <button type="submit" class="btn-submit" id="submitBtn">
+            <i class="fas fa-calendar-plus me-2"></i>
+            Request Demo Session
+        </button>
+        <div class="mt-3">
+            <small class="text-muted">
+                <i class="fas fa-shield-alt me-1"></i>
+                Your request will be reviewed and confirmed within 2-4 hours during business hours
+            </small>
+        </div>
+    </div>
+</form>
+
+<!-- Contact Information -->
+<div class="customer-card mt-4">
+    <div class="customer-card-header">
+        <h3 class="customer-card-title">
+            <i class="fas fa-headset"></i>
+            Need Help?
+        </h3>
+    </div>
+    <div class="customer-card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Contact Support</h6>
+                <p class="mb-2">
+                    <i class="fas fa-envelope text-primary me-2"></i>
+                    <a href="mailto:support@chrp-india.com">support@chrp-india.com</a>
+                </p>
+                <p class="mb-0">
+                    <i class="fas fa-phone text-primary me-2"></i>
+                    <a href="tel:+91-1234567890">+91-1234567890</a>
+                </p>
+            </div>
+            <div class="col-md-6">
+                <h6>Business Hours</h6>
+                <p class="mb-2">
+                    <i class="fas fa-clock text-primary me-2"></i>
+                    Monday - Friday: 9:00 AM - 6:00 PM
+                </p>
+                <p class="mb-0">
+                    <i class="fas fa-calendar text-primary me-2"></i>
+                    Saturday: 10:00 AM - 4:00 PM
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customer_extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Security protection
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 123 || 
+            (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
+            (e.ctrlKey && e.keyCode === 85) ||
+            (e.ctrlKey && e.keyCode === 83)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // Demo selection functionality
+    const demoOptions = document.querySelectorAll('.demo-option');
+    demoOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            demoOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+    
+    // Time slot selection functionality
+    const timeSlots = document.querySelectorAll('.time-slot');
+    timeSlots.forEach(slot => {
+        slot.addEventListener('click', function() {
+            timeSlots.forEach(s => s.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('input[type="radio"]').checked = true;
+        });
+    });
+    
+    // Form submission
+    const form = document.getElementById('demoRequestForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function(e) {
+        // Validate that demo and time slot are selected
+        const selectedDemo = document.querySelector('input[name="demo_id"]:checked');
+        const selectedTimeSlot = document.querySelector('input[name="time_slot_id"]:checked');
+        const selectedDate = document.querySelector('input[name="requested_date"]').value;
+        
+        if (!selectedDemo) {
+            e.preventDefault();
+            alert('Please select a demo topic.');
+            return;
+        }
+        
+        if (!selectedDate) {
+            e.preventDefault();
+            alert('Please select a preferred date.');
+            return;
+        }
+        
+        if (!selectedTimeSlot) {
+            e.preventDefault();
+            alert('Please select a time slot.');
+            return;
+        }
+        
+        // Check if selected date is not Sunday
+        const date = new Date(selectedDate);
+        if (date.getDay() === 0) {
+            e.preventDefault();
+            alert('Demo sessions are not available on Sundays. Please select a different date.');
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting Request...';
+    });
+    
+    // Date validation
+    const dateInput = document.querySelector('input[name="requested_date"]');
+    if (dateInput) {
+        dateInput.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const today = new Date();
+            
+            if (selectedDate < today) {
+                alert('Please select a future date.');
+                this.value = '';
+                return;
+            }
+            
+            if (selectedDate.getDay() === 0) {
+                alert('Demo sessions are not available on Sundays. Please select a different date.');
+                this.value = '';
+                return;
+            }
+        });
+    }
+    
+    // Add animations
+    const sections = document.querySelectorAll('.form-section');
+    sections.forEach((section, index) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(30px)';
+        section.style.transition = 'all 0.6s ease';
+        
+        setTimeout(() => {
+            section.style.opacity = '1';
+            section.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+});
+</script>
+{% endblock %}

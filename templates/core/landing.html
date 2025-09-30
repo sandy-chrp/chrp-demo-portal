@@ -1,0 +1,597 @@
+<!-- templates/core/landing.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Demo Portal - Professional Business Solutions | CHRP India{% endblock %}
+{% block meta_description %}Experience cutting-edge business solutions through interactive demos. Request live sessions, explore product showcases, and connect with our expert team at CHRP India.{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 4rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        opacity: 0.95;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .hero-buttons .btn {
+        margin: 0.5rem;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: var(--radius-lg);
+    }
+
+    /* Auth Card */
+    .auth-card {
+        background: white;
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-xl);
+        padding: 2rem;
+        margin-top: -100px;
+        position: relative;
+        z-index: 3;
+    }
+
+    .auth-tabs {
+        display: flex;
+        background: var(--gray-100);
+        border-radius: var(--radius-lg);
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .auth-tab {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        color: var(--gray-600);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .auth-tab.active {
+        background: white;
+        color: var(--primary-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .auth-form {
+        display: none;
+    }
+
+    .auth-form.active {
+        display: block;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .phone-input {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.75rem;
+    }
+
+    .country-select {
+        min-width: 120px;
+    }
+
+    /* Features Section */
+    .features-section {
+        padding: 5rem 0;
+        background: white;
+    }
+
+    .feature-card {
+        text-align: center;
+        padding: 2rem;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--gradient-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: white;
+        font-size: 2rem;
+    }
+
+    .feature-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+    }
+
+    .feature-description {
+        color: var(--gray-600);
+        line-height: 1.6;
+    }
+
+    /* Stats Section */
+    .stats-section {
+        background: var(--gray-100);
+        padding: 4rem 0;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: block;
+    }
+
+    .stat-label {
+        color: var(--gray-600);
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+    }
+
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .cta-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .auth-card {
+            margin-top: -50px;
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .phone-input {
+            grid-template-columns: 1fr;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+        }
+
+        .cta-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="hero-title">Experience Our Solutions with Live Demos</h1>
+                    <p class="hero-subtitle">
+                        Access exclusive product demonstrations, request personalized sessions, and connect with our expert sales team. 
+                        Built for businesses seeking professional solutions.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#auth-section" class="btn btn-light btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Get Started Free
+                        </a>
+                        <a href="{% url 'core:contact_sales' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-phone me-2"></i>Contact Sales
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-play-circle" style="font-size: 15rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Auth Section -->
+<section id="auth-section" class="pb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="auth-card">
+                    <!-- Auth Tabs -->
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="signin">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                        <button class="auth-tab" data-tab="signup">
+                            <i class="fas fa-user-plus me-2"></i>Sign Up
+                        </button>
+                    </div>
+
+                    <!-- Sign In Form -->
+                    <form class="auth-form active" id="signinForm" method="post" action="{% url 'accounts:signin' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="form-label">Business Email</label>
+                            <input type="email" class="form-control" name="email" required placeholder="your@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" required placeholder="Enter your password">
+                        </div>
+                        <div class="form-group d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember_me" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">Remember me</label>
+                            </div>
+                            <a href="{% url 'accounts:forgot_password' %}" class="text-decoration-none">Forgot Password?</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In to Dashboard
+                        </button>
+                        
+                        <div class="text-center">
+                            <span class="text-muted">Need Help?</span>
+                        </div>
+                        <a href="{% url 'core:contact_sales' %}" class="btn btn-outline-primary w-100 mt-2">
+                            <i class="fas fa-phone me-2"></i>Contact Sales Team
+                        </a>
+                    </form>
+
+                    <!-- Sign Up Form -->
+                    <form class="auth-form" id="signupForm" method="post" action="{% url 'accounts:signup' %}">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="first_name" required placeholder="John">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" required placeholder="Doe">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Business Email (No Gmail/Yahoo)</label>
+                            <input type="email" class="form-control" name="email" required placeholder="john@company.com" id="signupEmail">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Mobile Number</label>
+                            <div class="phone-input">
+                                <select class="form-select country-select" name="country_code">
+                                    <option value="+91">🇮🇳 +91</option>
+                                    <option value="+1">🇺🇸 +1</option>
+                                    <option value="+44">🇬🇧 +44</option>
+                                    <option value="+86">🇨🇳 +86</option>
+                                    <option value="+49">🇩🇪 +49</option>
+                                </select>
+                                <input type="tel" class="form-control" name="mobile" required placeholder="1234567890" pattern="[0-9]{10}">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" name="password1" required placeholder="Strong password" id="password1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" name="password2" required placeholder="Confirm password" id="password2">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">How did you find us?</label>
+                            <select class="form-select" name="referral_source">
+                                <option value="">Select source...</option>
+                                <option value="referral">Referral from colleague</option>
+                                <option value="facebook">Facebook</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="google">Google Search</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="terms_accepted" id="termsAccepted" required>
+                                <label class="form-check-label" for="termsAccepted">
+                                    I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                        
+                        <div class="text-center">
+                            <span class="text-muted">Need Faster Access?</span>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary w-100 mt-2" onclick="speedUpSignup()">
+                            <i class="fas fa-rocket me-2"></i>Contact Sales to Speed Up Signup
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold text-primary mb-3">Why Choose Our Demo Portal?</h2>
+                <p class="lead text-muted">Experience comprehensive business solutions through interactive demonstrations and expert guidance.</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h4 class="feature-title">Interactive Demos</h4>
+                    <p class="feature-description">Watch detailed product demonstrations and request personalized live sessions with our experts.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h4 class="feature-title">Easy Scheduling</h4>
+                    <p class="feature-description">Book demo sessions at your convenience with our flexible scheduling system.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h4 class="feature-title">Expert Support</h4>
+                    <p class="feature-description">Connect with sales experts and get personalized assistance for your business needs.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h4 class="feature-title">Multi-Device Access</h4>
+                    <p class="feature-description">Access from web, mobile apps, and offline mode support for seamless experience.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <span class="stat-number">500+</span>
+                    <div class="stat-label">Happy Customers</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <span class="stat-number">50+</span>
+                    <div class="stat-label">Demo Solutions</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <span class="stat-number">24/7</span>
+                    <div class="stat-label">Support Available</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <span class="stat-number">99%</span>
+                    <div class="stat-label">Client Satisfaction</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="cta-title">Ready to Transform Your Business?</h2>
+                <p class="cta-subtitle">Join hundreds of companies already using our solutions. Get started with a personalized demo today.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="#auth-section" class="btn btn-light btn-lg">
+                        <i class="fas fa-play me-2"></i>Watch Demos Now
+                    </a>
+                    <a href="{% url 'core:contact_sales' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-calendar me-2"></i>Schedule Consultation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Tab Switching
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.auth-tab');
+        const forms = document.querySelectorAll('.auth-form');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show corresponding form
+                forms.forEach(f => f.classList.remove('active'));
+                document.querySelector(`#${tabName}Form`).classList.add('active');
+            });
+        });
+        
+        // Real-time email validation
+        const signupEmail = document.getElementById('signupEmail');
+        if (signupEmail) {
+            signupEmail.addEventListener('input', function() {
+                const email = this.value;
+                const blockedDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
+                const domain = email.split('@')[1];
+                
+                if (domain && blockedDomains.includes(domain.toLowerCase())) {
+                    this.setCustomValidity('Please use a business email address');
+                    this.classList.add('is-invalid');
+                } else {
+                    this.setCustomValidity('');
+                    this.classList.remove('is-invalid');
+                }
+            });
+        }
+        
+        // Password confirmation validation
+        const password1 = document.getElementById('password1');
+        const password2 = document.getElementById('password2');
+        
+        if (password2) {
+            password2.addEventListener('input', function() {
+                if (password1.value !== password2.value) {
+                    this.setCustomValidity('Passwords do not match');
+                    this.classList.add('is-invalid');
+                } else {
+                    this.setCustomValidity('');
+                    this.classList.remove('is-invalid');
+                }
+            });
+        }
+    });
+    
+    function speedUpSignup() {
+        alert('Speed Up Signup Form will open with:\n• Contact details\n• Business information\n• Reason for urgency\n• Direct admin contact option\n\nAdmin will be notified to manually add customer.');
+    }
+    
+    // Smooth scroll to auth section
+    document.querySelectorAll('a[href="#auth-section"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('auth-section').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        });
+    });
+</script>
+{% endblock %}

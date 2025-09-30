@@ -1,0 +1,143 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Business Categories{% endblock %}
+{% block page_title %}Business Categories{% endblock %}
+
+{% block admin_content %}
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-icon">
+            <i class="fas fa-folder"></i>
+        </div>
+        <div class="stat-number">{{ total_categories }}</div>
+        <div class="stat-label">Total Categories</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-number">{{ active_categories }}</div>
+        <div class="stat-label">Active Categories</div>
+    </div>
+    <div class="stat-card info">
+        <div class="stat-icon">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="stat-number">{{ total_subcategories }}</div>
+        <div class="stat-label">Total Subcategories</div>
+    </div>
+</div>
+
+<!-- Main Card -->
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h2 class="admin-card-title">
+            <i class="fas fa-folder"></i>
+            Business Categories Management
+        </h2>
+        <a href="{% url 'core:admin_business_category_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add New Category
+        </a>
+    </div>
+    <div class="admin-card-body">
+        <!-- Search Bar -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control" placeholder="Search categories..." value="{{ search_query }}">
+                    <button type="submit" class="btn btn-outline-primary ms-2">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    {% if search_query %}
+                        <a href="{% url 'core:admin_business_categories' %}" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="{% url 'core:admin_business_subcategories' %}" class="btn btn-outline-info">
+                    <i class="fas fa-layer-group me-2"></i>Manage Subcategories
+                </a>
+            </div>
+        </div>
+
+        <!-- Categories Table -->
+        {% if categories %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="50">#</th>
+                            <th>Category Name</th>
+                            <th width="100" class="text-center">Icon</th>
+                            <th width="120" class="text-center">Subcategories</th>
+                            <th width="120" class="text-center">Customers</th>
+                            <th width="100" class="text-center">Status</th>
+                            <th width="200" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                            <tr>
+                                <td>{{ category.sort_order }}</td>
+                                <td>
+                                    <strong>{{ category.name }}</strong>
+                                    {% if category.description %}
+                                        <br><small class="text-muted">{{ category.description|truncatewords:15 }}</small>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span style="font-size: 1.5rem;">{{ category.icon|default:"📁" }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info">{{ category.subcategory_count }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary">{{ category.customer_count }}</span>
+                                </td>
+                                <td class="text-center">
+                                    {% if category.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'core:admin_business_category_edit' category.id %}" 
+                                           class="btn btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{% url 'core:admin_business_category_toggle_status' category.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-warning" 
+                                                    title="{% if category.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                                <i class="fas fa-{% if category.is_active %}eye-slash{% else %}eye{% endif %}"></i>
+                                            </button>
+                                        </form>
+                                        <a href="{% url 'core:admin_business_category_delete' category.id %}" 
+                                           class="btn btn-outline-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i>
+                {% if search_query %}
+                    No categories found matching "{{ search_query }}".
+                {% else %}
+                    No business categories found. Create your first category to get started.
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

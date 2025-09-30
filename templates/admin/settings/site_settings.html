@@ -1,0 +1,126 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Site Settings{% endblock %}
+{% block page_title %}Site Configuration{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-globe me-2"></i>Basic Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Site Name</label>
+                            <input type="text" name="site_name" class="form-control" 
+                                   value="{{ site_settings.site_name }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Site Description</label>
+                            <textarea name="site_description" class="form-control" rows="3">{{ site_settings.site_description }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Site Logo</label>
+                                <input type="file" name="site_logo" class="form-control" accept="image/*">
+                                {% if site_settings.site_logo %}
+                                <small class="text-muted">Current: {{ site_settings.site_logo.name }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Favicon</label>
+                                <input type="file" name="favicon" class="form-control" accept="image/*">
+                                {% if site_settings.favicon %}
+                                <small class="text-muted">Current: {{ site_settings.favicon.name }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-phone me-2"></i>Contact Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Contact Email</label>
+                                <input type="email" name="contact_email" class="form-control" 
+                                       value="{{ site_settings.contact_email }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Contact Phone</label>
+                                <input type="text" name="contact_phone" class="form-control" 
+                                       value="{{ site_settings.contact_phone }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea name="address" class="form-control" rows="2">{{ site_settings.address }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Social Media -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-share-alt me-2"></i>Social Media
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fab fa-facebook me-1"></i>Facebook URL
+                            </label>
+                            <input type="url" name="facebook_url" class="form-control" 
+                                   value="{{ site_settings.facebook_url }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fab fa-linkedin me-1"></i>LinkedIn URL
+                            </label>
+                            <input type="url" name="linkedin_url" class="form-control" 
+                                   value="{{ site_settings.linkedin_url }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fab fa-youtube me-1"></i>YouTube URL
+                            </label>
+                            <input type="url" name="youtube_url" class="form-control" 
+                                   value="{{ site_settings.youtube_url }}">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Settings
+                    </button>
+                    <a href="{% url 'core:admin_settings' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

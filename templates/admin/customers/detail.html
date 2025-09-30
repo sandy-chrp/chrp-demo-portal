@@ -1,0 +1,872 @@
+<!-- templates/admin/customers/detail.html -->
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block admin_title %}Customer Details{% endblock %}
+{% block page_title %}{{ customer.full_name }} - Customer Details{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_users' %}">
+                    <i class="fas fa-users me-1"></i>Customers
+                </a>
+            </li>
+            <li class="breadcrumb-item active">{{ customer.first_name }}</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .customer-header {
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-2xl);
+        margin-bottom: var(--spacing-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .customer-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .customer-avatar {
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: var(--spacing-lg);
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        position: relative;
+        z-index: 1;
+    }
+
+    .customer-info {
+        margin-left: var(--spacing-lg); /* Added left margin for spacing */
+    }
+
+    .customer-info h1 {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .customer-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-lg);
+        opacity: 0.95;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .status-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: var(--radius-md);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .status-approved {
+        background: rgba(16, 185, 129, 0.2);
+        color: white;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-pending {
+        background: rgba(245, 158, 11, 0.2);
+        color: white;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-blocked {
+        background: rgba(239, 68, 68, 0.2);
+        color: white;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .info-section {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+    }
+
+    .section-title {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--gray-100);
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title i {
+        background: var(--gradient-primary);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: var(--spacing-md);
+        font-size: 0.9rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .info-label {
+        color: var(--gray-600);
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .info-value {
+        color: var(--dark-color);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .stat-card {
+        background: var(--gray-50);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        line-height: 1;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-label {
+        color: var(--gray-600);
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .stat-sublabel {
+        color: var(--gray-500);
+        font-size: 0.75rem;
+        margin-top: var(--spacing-xs);
+    }
+
+    .engagement-score {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .score-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: conic-gradient(var(--primary-color) 0%, var(--primary-color) var(--score-percentage), var(--gray-200) var(--score-percentage), var(--gray-200) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .score-circle::after {
+        content: '';
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 50%;
+        position: absolute;
+    }
+
+    .score-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        z-index: 1;
+    }
+
+    .action-buttons {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        position: sticky;
+        bottom: var(--spacing-lg);
+        z-index: 10;
+    }
+
+    .btn-group-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-action {
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: var(--radius-md);
+        border: 2px solid;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        cursor: pointer; /* Added cursor pointer */
+        position: relative; /* Added for better text visibility */
+    }
+
+    .btn-primary-action {
+        background: var(--gradient-primary);
+        border-color: var(--primary-color);
+        color: white !important; /* Added !important for better visibility */
+    }
+
+    .btn-primary-action:hover {
+        background: var(--gradient-secondary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: #274c8e  !important; /* Ensured text remains visible on hover */
+        text-decoration: none; /* Removed text decoration on hover */
+    }
+
+    .btn-success-action {
+        background: var(--gradient-success);
+        border-color: var(--success-color);
+        color: white !important;
+    }
+
+    .btn-success-action:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white !important;
+        text-decoration: none;
+    }
+
+    .btn-warning-action {
+        background: var(--warning-color);
+        border-color: var(--warning-color);
+        color: white !important;
+    }
+
+    .btn-warning-action:hover {
+        background: #d97706;
+        border-color: #d97706;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: white !important;
+        text-decoration: none;
+    }
+
+    .btn-outline-action {
+        background: transparent;
+        border-color: var(--gray-400);
+        color: var(--gray-700) !important;
+    }
+
+    .btn-outline-action:hover {
+        background: var(--gray-100);
+        border-color: var(--gray-500);
+        color: var(--gray-800) !important;
+        text-decoration: none;
+    }
+
+    /* Fix for button text visibility - additional override */
+    .btn-action:hover,
+    .btn-action:focus,
+    .btn-action:active {
+        text-decoration: none !important;
+    }
+
+    .btn-action span {
+        color: inherit;
+        pointer-events: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-2xl);
+        color: var(--gray-600);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--gray-400);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    @media (max-width: 768px) {
+        .customer-header {
+            padding: var(--spacing-xl);
+        }
+
+        .customer-info {
+            margin-left: var(--spacing-md); /* Reduced left margin for mobile */
+        }
+        
+        .customer-meta {
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .btn-group-actions {
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+        
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Customer Header -->
+<div class="customer-header">
+    <div class="d-flex align-items-start justify-content-between">
+        <div class="customer-info">
+            <div class="customer-avatar">
+                {{ customer.first_name|first }}{{ customer.last_name|first }}
+            </div>
+            <h1>{{ customer.full_name }}</h1>
+            <p class="mb-0 opacity-75">{{ customer.email }}</p>
+            
+            <div class="customer-meta">
+                <div class="meta-item">
+                    {% if customer.is_approved %}
+                        {% if customer.is_active %}
+                            <span class="status-badge status-approved">
+                                <i class="fas fa-check-circle"></i>Active Customer
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-blocked">
+                                <i class="fas fa-ban"></i>Blocked Account
+                            </span>
+                        {% endif %}
+                    {% else %}
+                        <span class="status-badge status-pending">
+                            <i class="fas fa-clock"></i>Pending Approval
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <div class="meta-item">
+                    {% if customer.is_email_verified %}
+                        <i class="fas fa-envelope-check"></i>
+                        <span>Email Verified</span>
+                    {% else %}
+                        <i class="fas fa-envelope"></i>
+                        <span>Email Not Verified</span>
+                    {% endif %}
+                </div>
+                
+                <div class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Member since {{ customer.created_at|date:"M Y" }}</span>
+                </div>
+                
+                {% if customer.last_login %}
+                <div class="meta-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Last login {{ customer.last_login|timesince }} ago</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Statistics -->
+<div class="info-section">
+    <div class="section-title">
+        <i class="fas fa-chart-bar"></i>
+        Customer Statistics
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ customer_stats.demo_views }}</div>
+            <div class="stat-label">Demo Views</div>
+            <div class="stat-sublabel">Total videos watched</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ customer_stats.demo_requests }}</div>
+            <div class="stat-label">Demo Requests</div>
+            <div class="stat-sublabel">Live sessions requested</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ customer_stats.enquiries }}</div>
+            <div class="stat-label">Enquiries</div>
+            <div class="stat-sublabel">Business questions asked</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ customer_stats.notifications }}</div>
+            <div class="stat-label">Notifications</div>
+            <div class="stat-sublabel">Messages received</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="engagement-score">
+                <div class="score-circle" style="--score-percentage: {{ customer_stats.engagement_score }}%;">
+                    <div class="score-value">{{ customer_stats.engagement_score }}%</div>
+                </div>
+                <div>
+                    <div class="stat-label">Engagement Score</div>
+                    <div class="stat-sublabel">Platform activity level</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Personal Information -->
+<div class="info-section">
+    <div class="section-title">
+        <i class="fas fa-user"></i>
+        Personal Information
+    </div>
+    
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Full Name</div>
+            <div class="info-value">{{ customer.full_name }}</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Email Address</div>
+            <div class="info-value">{{ customer.email }}</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Mobile Number</div>
+            <div class="info-value">{{ customer.full_mobile|default:"Not provided" }}</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Country</div>
+            <div class="info-value">{{ customer.get_country_code_display }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Business Information -->
+<div class="info-section">
+    <div class="section-title">
+        <i class="fas fa-building"></i>
+        Business Information
+    </div>
+    
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Job Title</div>
+            <div class="info-value">{{ customer.job_title|default:"Not specified" }}</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Organization</div>
+            <div class="info-value">{{ customer.organization|default:"Not specified" }}</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">How They Found Us</div>
+            <div class="info-value">{{ customer.get_referral_source_display|default:"Not specified" }}</div>
+        </div>
+        
+        {% if customer.referral_message %}
+        <div class="info-item">
+            <div class="info-label">Referral Message</div>
+            <div class="info-value">{{ customer.referral_message }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Account Information -->
+<div class="info-section">
+    <div class="section-title">
+        <i class="fas fa-cog"></i>
+        Account Information
+    </div>
+    
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Account Status</div>
+            <div class="info-value">
+                {% if customer.is_approved %}
+                    {% if customer.is_active %}
+                        <span class="text-success">
+                            <i class="fas fa-check-circle me-1"></i>Active & Approved
+                        </span>
+                    {% else %}
+                        <span class="text-danger">
+                            <i class="fas fa-ban me-1"></i>Blocked
+                        </span>
+                    {% endif %}
+                {% else %}
+                    <span class="text-warning">
+                        <i class="fas fa-clock me-1"></i>Pending Approval
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Email Verification</div>
+            <div class="info-value">
+                {% if customer.is_email_verified %}
+                    <span class="text-success">
+                        <i class="fas fa-envelope-check me-1"></i>Verified
+                    </span>
+                {% else %}
+                    <span class="text-warning">
+                        <i class="fas fa-envelope me-1"></i>Not Verified
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Registration Date</div>
+            <div class="info-value">{{ customer.created_at|date:"F d, Y \a\t g:i A" }}</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Last Updated</div>
+            <div class="info-value">{{ customer.updated_at|date:"F d, Y \a\t g:i A" }}</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Last Login</div>
+            <div class="info-value">
+                {% if customer.last_login %}
+                    {{ customer.last_login|date:"F d, Y \a\t g:i A" }}
+                    <small class="text-muted d-block">{{ customer.last_login|timesince }} ago</small>
+                {% else %}
+                    <span class="text-muted">Never logged in</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if customer.last_login_ip %}
+        <div class="info-item">
+            <div class="info-label">Last Login IP</div>
+            <div class="info-value">{{ customer.last_login_ip }}</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent Activity -->
+{% if customer_stats.last_activity.0 %}
+<div class="info-section">
+    <div class="section-title">
+        <i class="fas fa-history"></i>
+        Recent Activity
+    </div>
+    
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Last Activity</div>
+            <div class="info-value">
+                {{ customer_stats.last_activity.1 }}
+                <small class="text-muted d-block">{{ customer_stats.last_activity.0|timesince }} ago</small>
+            </div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Activity Level</div>
+            <div class="info-value">
+                {% if customer_stats.engagement_score >= 70 %}
+                    <span class="text-success">
+                        <i class="fas fa-battery-full me-1"></i>Very Active
+                    </span>
+                {% elif customer_stats.engagement_score >= 40 %}
+                    <span class="text-warning">
+                        <i class="fas fa-battery-half me-1"></i>Moderately Active
+                    </span>
+                {% elif customer_stats.engagement_score >= 20 %}
+                    <span class="text-info">
+                        <i class="fas fa-battery-quarter me-1"></i>Somewhat Active
+                    </span>
+                {% else %}
+                    <span class="text-muted">
+                        <i class="fas fa-battery-empty me-1"></i>Low Activity
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="info-section">
+    <div class="section-title">
+        <i class="fas fa-history"></i>
+        Recent Activity
+    </div>
+    
+    <div class="empty-state">
+        <i class="fas fa-chart-line"></i>
+        <h5>No Recent Activity</h5>
+        <p>This customer hasn't performed any activities yet.</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="action-buttons">
+    <div class="btn-group-actions">
+        <div class="d-flex gap-3 flex-wrap">
+            <a href="{% url 'core:admin_edit_customer' customer.id %}" class="btn-action btn-primary-action">
+                <i class="fas fa-edit"></i>
+                <span>Edit Customer</span>
+            </a>
+            
+            {% if not customer.is_approved %}
+                <form method="post" action="{% url 'core:admin_approve_customer' customer.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action btn-success-action" onclick="return confirm('Approve {{ customer.full_name }}?')">
+                        <i class="fas fa-check"></i>
+                        <span>Approve Customer</span>
+                    </button>
+                </form>
+            {% endif %}
+            
+            {% if customer.is_active %}
+                <form method="post" action="{% url 'core:admin_block_customer' customer.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-action btn-warning-action" onclick="return confirm('Block {{ customer.full_name }}?')">
+                        <i class="fas fa-ban"></i>
+                        <span>Block Customer</span>
+                    </button>
+                </form>
+            {% else %}
+                <button type="button" class="btn-action btn-success-action" onclick="unblockCustomer()">
+                    <i class="fas fa-unlock"></i>
+                    <span>Unblock Customer</span>
+                </button>
+            {% endif %}
+            
+            <a href="mailto:{{ customer.email }}" class="btn-action btn-outline-action">
+                <i class="fas fa-envelope"></i>
+                <span>Send Email</span>
+            </a>
+        </div>
+        
+        <div class="d-flex gap-3">
+            <a href="{% url 'core:admin_users' %}" class="btn-action btn-outline-action">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Customers</span>
+            </a>
+            
+            <button type="button" class="btn-action btn-outline-action" onclick="exportCustomerData()" style="border-color: var(--success-color); color: var(--success-color);">
+                <i class="fas fa-download"></i>
+                <span>Export Data</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+    // CSRF Token
+    const csrfToken = '{{ csrf_token }}';
+
+    function unblockCustomer() {
+        const customerName = '{{ customer.full_name|escapejs }}';
+        
+        if (confirm(`Unblock ${customerName}? They will regain access to the portal.`)) {
+            fetch(`/admin/customers/{{ customer.id }}/unblock/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    throw new Error(data.message || 'Error unblocking customer');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error unblocking customer. Please try again.', 'error');
+            });
+        }
+    }
+
+    function exportCustomerData() {
+        showNotification('Preparing customer data export...', 'info');
+        
+        // Create export data
+        const customerData = {
+            personal_info: {
+                name: '{{ customer.full_name|escapejs }}',
+                email: '{{ customer.email|escapejs }}',
+                mobile: '{{ customer.full_mobile|escapejs }}',
+                job_title: '{{ customer.job_title|escapejs }}',
+                organization: '{{ customer.organization|escapejs }}'
+            },
+            account_info: {
+                status: '{% if customer.is_approved %}{% if customer.is_active %}Active{% else %}Blocked{% endif %}{% else %}Pending{% endif %}',
+                email_verified: {{ customer.is_email_verified|yesno:"true,false" }},
+                registration_date: '{{ customer.created_at|date:"Y-m-d H:i:s" }}',
+                last_login: '{% if customer.last_login %}{{ customer.last_login|date:"Y-m-d H:i:s" }}{% else %}Never{% endif %}'
+            },
+            statistics: {
+                demo_views: {{ customer_stats.demo_views }},
+                demo_requests: {{ customer_stats.demo_requests }},
+                enquiries: {{ customer_stats.enquiries }},
+                engagement_score: {{ customer_stats.engagement_score }}
+            }
+        };
+
+        // Convert to JSON and download
+        const dataStr = JSON.stringify(customerData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `customer_${customerData.personal_info.name.replace(/\s+/g, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showNotification('Customer data exported successfully!', 'success');
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 350px;
+            max-width: 500px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        `;
+        
+        const iconClass = type === 'success' ? 'check-circle' : 
+                         type === 'warning' ? 'exclamation-triangle' : 
+                         type === 'error' ? 'exclamation-circle' : 'info-circle';
+        
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${iconClass} me-2"></i>
+                <span>${message}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Auto-refresh statistics every 30 seconds
+    setInterval(function() {
+        // Optional: Add auto-refresh for real-time stats
+        // This could fetch updated stats via AJAX if needed
+    }, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+Dear {{ user.first_name }} {{ user.last_name }},
+
+Great news! Your account has been approved.
+
+You can now sign in to the Demo Portal and access all features.
+
+Sign in here: {{ site_url }}/auth/signin/
+
+Your Account Details:
+- Email: {{ user.email }}
+- Organization: {{ user.organization }}
+- Job Title: {{ user.job_title }}
+
+If you have any questions, contact our support team.
+
+Best regards,
+Demo Portal Team
+CHRP India

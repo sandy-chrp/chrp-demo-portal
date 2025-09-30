@@ -1,0 +1,962 @@
+<!-- templates/admin/demo_requests/detail.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Demo Request Details{% endblock %}
+{% block page_title %}Demo Request Details{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_demo_requests' %}">Demo Requests</a>
+            </li>
+            <li class="breadcrumb-item active">Request #{{ demo_request.id }}</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <a href="{% url 'core:admin_demo_requests' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to List
+    </a>
+    
+    {% if demo_request.status == 'pending' %}
+        <button type="button" class="btn btn-success" onclick="confirmRequest()">
+            <i class="fas fa-check me-1"></i>Confirm
+        </button>
+        <button type="button" class="btn btn-warning" onclick="rescheduleRequest()">
+            <i class="fas fa-calendar-alt me-1"></i>Reschedule
+        </button>
+        <button type="button" class="btn btn-danger" onclick="cancelRequest()">
+            <i class="fas fa-times me-1"></i>Cancel
+        </button>
+    {% elif demo_request.status == 'confirmed' %}
+        <button type="button" class="btn btn-info" onclick="rescheduleRequest()">
+            <i class="fas fa-calendar-alt me-1"></i>Reschedule
+        </button>
+        <button type="button" class="btn btn-success" onclick="completeRequest()">
+            <i class="fas fa-check-circle me-1"></i>Mark Complete
+        </button>
+        <button type="button" class="btn btn-danger" onclick="cancelRequest()">
+            <i class="fas fa-times me-1"></i>Cancel
+        </button>
+    {% endif %}
+    
+    <a href="{% url 'core:admin_edit_demo_request' demo_request.id %}" class="btn btn-primary">
+        <i class="fas fa-edit me-1"></i>Edit
+    </a>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .detail-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .detail-header {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e3c72;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .status-confirmed {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .status-rescheduled {
+        background: #e2e3e5;
+        color: #383d41;
+        border: 1px solid #d6d8db;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #1e3c72;
+    }
+
+    .info-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: #212529;
+        font-weight: 500;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0.5rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #1e3c72;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -1.75rem;
+        top: 1.5rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #1e3c72;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #1e3c72;
+    }
+
+    .conflict-warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .user-requests {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .request-item {
+        padding: 0.75rem;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .request-item:hover {
+        background: #f8f9fa;
+        transform: translateX(5px);
+    }
+
+    @media (max-width: 768px) {
+        .detail-card {
+            padding: 1.5rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+
+<!-- Status Overview -->
+<div class="detail-card">
+    <div class="detail-header">
+        <i class="fas fa-info-circle"></i>Request Overview
+        <div class="ms-auto">
+            <span class="status-badge status-{{ demo_request.status }}">
+                {{ demo_request.get_status_display }}
+            </span>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Request ID</div>
+            <div class="info-value">#{{ demo_request.id }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Customer</div>
+            <div class="info-value">{{ demo_request.user.full_name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Demo</div>
+            <div class="info-value">{{ demo_request.demo.title }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Created</div>
+            <div class="info-value">{{ demo_request.created_at|date:"M d, Y g:i A" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Information -->
+<div class="detail-card">
+    <div class="detail-header">
+        <i class="fas fa-user"></i>Customer Information
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Name</div>
+            <div class="info-value">{{ demo_request.user.full_name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value">
+                <a href="mailto:{{ demo_request.user.email }}" class="text-decoration-none">
+                    {{ demo_request.user.email }}
+                </a>
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Mobile</div>
+            <div class="info-value">
+                <a href="tel:{{ demo_request.user.full_mobile }}" class="text-decoration-none">
+                    {{ demo_request.user.full_mobile }}
+                </a>
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Organization</div>
+            <div class="info-value">{{ demo_request.user.organization|default:"Not specified" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Job Title</div>
+            <div class="info-value">{{ demo_request.user.job_title|default:"Not specified" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Location</div>
+            <div class="info-value">
+                {% if demo_request.city %}
+                    {{ demo_request.city }}{% if demo_request.country_region %}, {{ demo_request.get_country_region_display }}{% endif %}
+                {% else %}
+                    Not specified
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Demo Information -->
+<div class="detail-card">
+    <div class="detail-header">
+        <i class="fas fa-video"></i>Demo Information
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Demo Title</div>
+                    <div class="info-value">{{ demo_request.demo.title }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Category</div>
+                    <div class="info-value">{{ demo_request.demo.category.name }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Duration</div>
+                    <div class="info-value">{{ demo_request.demo.formatted_duration|default:"Not specified" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Views</div>
+                    <div class="info-value">{{ demo_request.demo.views_count }}</div>
+                </div>
+            </div>
+            
+            {% if demo_request.demo.description %}
+                <div class="mt-3">
+                    <div class="info-label">Description</div>
+                    <div class="info-value">{{ demo_request.demo.description }}</div>
+                </div>
+            {% endif %}
+        </div>
+        
+        {% if demo_request.demo.thumbnail %}
+            <div class="col-md-4">
+                <img src="{{ demo_request.demo.thumbnail.url }}" 
+                     alt="{{ demo_request.demo.title }}" 
+                     class="img-fluid rounded">
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Schedule Information -->
+<div class="detail-card">
+    <div class="detail-header">
+        <i class="fas fa-calendar-alt"></i>Schedule Information
+    </div>
+
+    <!-- Conflicts Warning -->
+    {% if conflicts %}
+        <div class="conflict-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Scheduling Conflict:</strong> Another demo is already scheduled at the same time.
+            <ul class="mb-0 mt-2">
+                {% for conflict in conflicts %}
+                    <li>{{ conflict.user.full_name }} - {{ conflict.demo.title }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Requested Date</div>
+            <div class="info-value">{{ demo_request.requested_date|date:"l, M d, Y" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Requested Time</div>
+            <div class="info-value">{{ demo_request.requested_time_slot }}</div>
+        </div>
+        {% if demo_request.confirmed_date %}
+            <div class="info-item">
+                <div class="info-label">Confirmed Date</div>
+                <div class="info-value">{{ demo_request.confirmed_date|date:"l, M d, Y" }}</div>
+            </div>
+        {% endif %}
+        {% if demo_request.confirmed_time_slot %}
+            <div class="info-item">
+                <div class="info-label">Confirmed Time</div>
+                <div class="info-value">{{ demo_request.confirmed_time_slot }}</div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Notes & Comments -->
+<div class="detail-card">
+    <div class="detail-header">
+        <i class="fas fa-sticky-note"></i>Notes & Comments
+    </div>
+
+    <div class="row">
+        {% if demo_request.notes %}
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Customer Notes</div>
+                    <div class="info-value">{{ demo_request.notes }}</div>
+                </div>
+            </div>
+        {% endif %}
+        
+        {% if demo_request.admin_notes %}
+            <div class="col-md-6">
+                <div class="info-item">
+                    <div class="info-label">Admin Notes</div>
+                    <div class="info-value">{{ demo_request.admin_notes|linebreaks }}</div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if not demo_request.notes and not demo_request.admin_notes %}
+        <p class="text-muted mb-0">No notes or comments available.</p>
+    {% endif %}
+</div>
+
+<!-- Request History -->
+<div class="detail-card">
+    <div class="detail-header">
+        <i class="fas fa-history"></i>Request Timeline
+    </div>
+
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1 text-primary">Request Created</h6>
+                    <p class="mb-1">Demo request submitted by {{ demo_request.user.full_name }}</p>
+                    <small class="text-muted">{{ demo_request.created_at|date:"M d, Y g:i A" }}</small>
+                </div>
+                <span class="badge bg-primary">Created</span>
+            </div>
+        </div>
+
+        {% if demo_request.status == 'confirmed' %}
+            <div class="timeline-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1 text-success">Request Confirmed</h6>
+                        <p class="mb-1">Demo confirmed for {{ demo_request.effective_date|date:"M d, Y" }} at {{ demo_request.effective_time_slot }}</p>
+                        {% if demo_request.handled_by %}
+                            <small class="text-muted">Confirmed by {{ demo_request.handled_by.username }}</small>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-success">Confirmed</span>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if demo_request.status == 'completed' %}
+            <div class="timeline-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1 text-info">Demo Completed</h6>
+                        <p class="mb-1">Demo session completed successfully</p>
+                        {% if demo_request.handled_by %}
+                            <small class="text-muted">Marked complete by {{ demo_request.handled_by.username }}</small>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-info">Completed</span>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if demo_request.status == 'cancelled' %}
+            <div class="timeline-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1 text-danger">Request Cancelled</h6>
+                        <p class="mb-1">Demo request was cancelled</p>
+                        {% if demo_request.handled_by %}
+                            <small class="text-muted">Cancelled by {{ demo_request.handled_by.username }}</small>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-danger">Cancelled</span>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Customer's Other Requests -->
+{% if user_other_requests %}
+    <div class="detail-card">
+        <div class="detail-header">
+            <i class="fas fa-list"></i>Customer's Other Requests
+        </div>
+
+        <div class="user-requests">
+            {% for request in user_other_requests %}
+                <div class="request-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ request.demo.title }}</strong>
+                            <br>
+                            <small class="text-muted">
+                                {{ request.requested_date|date:"M d, Y" }} at {{ request.requested_time_slot }}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <span class="status-badge status-{{ request.status }}">
+                                {{ request.get_status_display }}
+                            </span>
+                            <br>
+                            <small class="text-muted">{{ request.created_at|date:"M d" }}</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Action Modals -->
+<div class="modal fade" id="actionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actionModalTitle">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="actionModalBody">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmActionBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+let currentAction = null;
+let availableTimeSlots = [
+    { id: 1, text: "9:30 AM - 10:30 AM", type: "morning" },
+    { id: 2, text: "10:30 AM - 11:30 AM", type: "morning" },
+    { id: 3, text: "11:30 AM - 12:30 PM", type: "morning" },
+    { id: 4, text: "12:30 PM - 1:30 PM", type: "morning" },
+    { id: 5, text: "2:00 PM - 3:00 PM", type: "afternoon" },
+    { id: 6, text: "3:00 PM - 4:00 PM", type: "afternoon" },
+    { id: 7, text: "4:00 PM - 5:00 PM", type: "afternoon" },
+    { id: 8, text: "5:00 PM - 6:00 PM", type: "afternoon" },
+    { id: 9, text: "6:00 PM - 7:00 PM", type: "afternoon" }
+];
+
+function confirmRequest() {
+    currentAction = 'confirm';
+    showActionModal('Confirm Demo Request', `
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            This will confirm the demo for <strong>{{ demo_request.requested_date|date:"M d, Y" }}</strong> at <strong>{{ demo_request.requested_time_slot }}</strong>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Or select different date & time:</label>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-control" id="confirmedDate" 
+                           value="{{ demo_request.requested_date|date:"Y-m-d" }}"
+                           min="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Time Slot</label>
+                    <select class="form-select" id="confirmedTimeSlot">
+                        <option value="">Select time slot...</option>
+                        <optgroup label="Morning Slots">
+                            ${availableTimeSlots.filter(slot => slot.type === 'morning').map(slot => 
+                                `<option value="${slot.id}">${slot.text}</option>`
+                            ).join('')}
+                        </optgroup>
+                        <optgroup label="Afternoon/Evening Slots">
+                            ${availableTimeSlots.filter(slot => slot.type === 'afternoon').map(slot => 
+                                `<option value="${slot.id}">${slot.text}</option>`
+                            ).join('')}
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Confirmation Notes (Optional)</label>
+            <textarea class="form-control" id="actionNotes" rows="3" 
+                      placeholder="Add any confirmation notes for the customer..."></textarea>
+        </div>
+    `);
+    
+    // Set default time slot if current request slot exists
+    setTimeout(() => {
+        const timeSlotSelect = document.getElementById('confirmedTimeSlot');
+        if (timeSlotSelect) {
+            // Try to match current request time slot
+            const currentSlotText = "{{ demo_request.requested_time_slot }}";
+            const matchingSlot = availableTimeSlots.find(slot => slot.text === currentSlotText);
+            if (matchingSlot) {
+                timeSlotSelect.value = matchingSlot.id;
+            }
+        }
+    }, 100);
+}
+
+function rescheduleRequest() {
+    currentAction = 'reschedule';
+    showActionModal('Reschedule Demo Request', `
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Current booking: <strong>{{ demo_request.effective_date|date:"M d, Y" }}</strong> at <strong>{{ demo_request.effective_time_slot }}</strong>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label required">New Date</label>
+                <input type="date" class="form-control" id="newDate" 
+                       min="${new Date().toISOString().split('T')[0]}" 
+                       onchange="validateRescheduleDate(this.value)" required>
+                <div class="invalid-feedback" id="dateError"></div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label required">New Time Slot</label>
+                <select class="form-select" id="newTimeSlot" required>
+                    <option value="">Select new time slot...</option>
+                    <optgroup label="Morning Slots (9 AM - 1 PM)">
+                        ${availableTimeSlots.filter(slot => slot.type === 'morning').map(slot => 
+                            `<option value="${slot.id}">${slot.text}</option>`
+                        ).join('')}
+                    </optgroup>
+                    <optgroup label="Afternoon/Evening Slots (2 PM - 7 PM)">
+                        ${availableTimeSlots.filter(slot => slot.type === 'afternoon').map(slot => 
+                            `<option value="${slot.id}">${slot.text}</option>`
+                        ).join('')}
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label required">Reason for Rescheduling</label>
+            <textarea class="form-control" id="actionNotes" rows="3" 
+                      placeholder="Please explain why the demo is being rescheduled. This will be sent to the customer." 
+                      required></textarea>
+            <div class="form-text">This reason will be included in the email notification to the customer.</div>
+        </div>
+        
+        <div class="mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="sendNotification" checked>
+                <label class="form-check-label" for="sendNotification">
+                    Send email notification to customer
+                </label>
+            </div>
+        </div>
+    `);
+}
+
+function cancelRequest() {
+    currentAction = 'cancel';
+    showActionModal('Cancel Demo Request', `
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Warning:</strong> This action cannot be undone. The customer will be notified via email.
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Cancellation Reason</label>
+            <select class="form-select" id="cancelReason" onchange="updateCancelNotes()">
+                <option value="">Select a reason...</option>
+                <option value="technical_issues">Technical Issues</option>
+                <option value="scheduling_conflict">Scheduling Conflict</option>
+                <option value="resource_unavailable">Resource Unavailable</option>
+                <option value="customer_request">Customer Requested Cancellation</option>
+                <option value="other">Other (Please specify)</option>
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label required">Detailed Explanation</label>
+            <textarea class="form-control" id="actionNotes" rows="4" 
+                      placeholder="Please provide a detailed explanation. This will be sent to the customer." 
+                      required></textarea>
+            <div class="form-text">Be professional and helpful. Consider offering alternative solutions if appropriate.</div>
+        </div>
+        
+        <div class="mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="offerReschedule" checked>
+                <label class="form-check-label" for="offerReschedule">
+                    Offer to reschedule instead of cancel
+                </label>
+            </div>
+        </div>
+    `);
+}
+
+function completeRequest() {
+    currentAction = 'complete';
+    showActionModal('Mark Demo as Complete', `
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            Mark this demo as successfully completed?
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Demo Quality Rating</label>
+            <div class="rating-stars mb-2">
+                <i class="fas fa-star rating-star" data-rating="1"></i>
+                <i class="fas fa-star rating-star" data-rating="2"></i>
+                <i class="fas fa-star rating-star" data-rating="3"></i>
+                <i class="fas fa-star rating-star" data-rating="4"></i>
+                <i class="fas fa-star rating-star" data-rating="5"></i>
+            </div>
+            <input type="hidden" id="demoRating" value="5">
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Completion Summary</label>
+            <textarea class="form-control" id="actionNotes" rows="4" 
+                      placeholder="Summarize what was covered in the demo, customer feedback, follow-up actions, etc."></textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Follow-up Actions</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="sendFollowUp" checked>
+                <label class="form-check-label" for="sendFollowUp">
+                    Send follow-up email with resources
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="scheduleFollowUpCall">
+                <label class="form-check-label" for="scheduleFollowUpCall">
+                    Schedule follow-up call
+                </label>
+            </div>
+        </div>
+    `);
+    
+    // Add rating star functionality
+    setTimeout(() => {
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = this.dataset.rating;
+                document.getElementById('demoRating').value = rating;
+                
+                // Update star display
+                document.querySelectorAll('.rating-star').forEach((s, index) => {
+                    if (index < rating) {
+                        s.style.color = '#ffc107';
+                    } else {
+                        s.style.color = '#dee2e6';
+                    }
+                });
+            });
+        });
+        
+        // Set default 5-star rating
+        document.querySelectorAll('.rating-star').forEach(s => s.style.color = '#ffc107');
+    }, 100);
+}
+
+function validateRescheduleDate(dateValue) {
+    const selectedDate = new Date(dateValue);
+    const today = new Date();
+    const dateError = document.getElementById('dateError');
+    const dateInput = document.getElementById('newDate');
+    
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+        dateError.textContent = 'Cannot select past dates';
+        dateInput.classList.add('is-invalid');
+        return false;
+    }
+    
+    if (selectedDate.getDay() === 0) { // Sunday
+        dateError.textContent = 'Sundays are not available for demos';
+        dateInput.classList.add('is-invalid');
+        return false;
+    }
+    
+    dateInput.classList.remove('is-invalid');
+    dateError.textContent = '';
+    return true;
+}
+
+function updateCancelNotes() {
+    const reason = document.getElementById('cancelReason').value;
+    const notesField = document.getElementById('actionNotes');
+    
+    const templates = {
+        'technical_issues': 'Due to unforeseen technical issues with our demo system, we need to cancel your scheduled demo session. We apologize for the inconvenience and would like to reschedule at your earliest convenience.',
+        'scheduling_conflict': 'Unfortunately, we have a scheduling conflict that requires us to cancel your demo session. We sincerely apologize and would be happy to find an alternative time that works for you.',
+        'resource_unavailable': 'The required resources for your demo are temporarily unavailable. We apologize for the short notice and would like to reschedule when everything is ready.',
+        'customer_request': 'As requested, we are cancelling your scheduled demo session. Please let us know if you would like to reschedule for a future date.'
+    };
+    
+    if (reason && templates[reason]) {
+        notesField.value = templates[reason];
+    }
+}
+
+function showActionModal(title, body) {
+    document.getElementById('actionModalTitle').textContent = title;
+    document.getElementById('actionModalBody').innerHTML = body;
+    
+    const modal = new bootstrap.Modal(document.getElementById('actionModal'));
+    modal.show();
+}
+
+// Handle action confirmation with full validation
+document.getElementById('confirmActionBtn').addEventListener('click', function() {
+    const notes = document.getElementById('actionNotes')?.value || '';
+    let isValid = true;
+    let data = {
+        action: currentAction,
+        admin_notes: notes
+    };
+    
+    // Validate based on action type
+    if (currentAction === 'confirm') {
+        const confirmedDate = document.getElementById('confirmedDate').value;
+        const confirmedTimeSlot = document.getElementById('confirmedTimeSlot').value;
+        
+        if (confirmedDate && confirmedTimeSlot) {
+            data.confirmed_date = confirmedDate;
+            data.confirmed_time_slot_id = confirmedTimeSlot;
+        }
+        
+    } else if (currentAction === 'reschedule') {
+        const newDate = document.getElementById('newDate').value;
+        const newTimeSlot = document.getElementById('newTimeSlot').value;
+        const sendNotification = document.getElementById('sendNotification').checked;
+        
+        if (!newDate || !newTimeSlot) {
+            alert('Please select both new date and time slot');
+            return;
+        }
+        
+        if (!validateRescheduleDate(newDate)) {
+            return;
+        }
+        
+        if (!notes.trim()) {
+            alert('Please provide a reason for rescheduling');
+            return;
+        }
+        
+        data.new_date = newDate;
+        data.new_time_slot_id = newTimeSlot;
+        data.send_notification = sendNotification;
+        
+    } else if (currentAction === 'cancel') {
+        const cancelReason = document.getElementById('cancelReason').value;
+        const offerReschedule = document.getElementById('offerReschedule').checked;
+        
+        if (!notes.trim()) {
+            alert('Please provide a cancellation reason');
+            return;
+        }
+        
+        data.cancel_reason = cancelReason;
+        data.offer_reschedule = offerReschedule;
+        
+    } else if (currentAction === 'complete') {
+        const rating = document.getElementById('demoRating').value;
+        const sendFollowUp = document.getElementById('sendFollowUp').checked;
+        const scheduleFollowUpCall = document.getElementById('scheduleFollowUpCall').checked;
+        
+        data.demo_rating = rating;
+        data.send_followup = sendFollowUp;
+        data.schedule_followup_call = scheduleFollowUpCall;
+    }
+    
+    // Show loading state
+    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+    this.disabled = true;
+    
+    // Submit action
+    fetch(`{% url 'core:admin_confirm_demo_request' demo_request.id %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                ${result.message || 'Action completed successfully'}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.detail-card').prepend(alertDiv);
+            
+            // Reload page after 2 seconds
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+            
+        } else {
+            alert('Error: ' + result.error);
+            // Reset button
+            this.innerHTML = 'Confirm';
+            this.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while processing the request');
+        // Reset button
+        this.innerHTML = 'Confirm';
+        this.disabled = false;
+    });
+    
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+});
+
+// Add CSRF token to page if not exists
+if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = '{{ csrf_token }}';
+    document.body.appendChild(csrfInput);
+}
+
+// Add custom styles for rating stars
+const style = document.createElement('style');
+style.textContent = `
+    .rating-stars {
+        font-size: 1.5rem;
+    }
+    .rating-star {
+        cursor: pointer;
+        margin-right: 0.25rem;
+        transition: color 0.3s ease;
+    }
+    .rating-star:hover {
+        color: #ffc107;
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

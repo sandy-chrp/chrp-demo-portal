@@ -1,0 +1,93 @@
+<!-- templates/admin/business_categories/edit.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Edit Business Category{% endblock %}
+{% block page_title %}Edit Business Category{% endblock %}
+
+{% block admin_content %}
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h2 class="admin-card-title">
+            <i class="fas fa-edit"></i>
+            Edit Category: {{ category.name }}
+        </h2>
+        <a href="{% url 'core:admin_business_categories' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+    <div class="admin-card-body">
+        <!-- Category Stats -->
+        <div class="alert alert-info mb-4">
+            <div class="row text-center">
+                <div class="col-md-6">
+                    <i class="fas fa-layer-group me-2"></i>
+                    <strong>{{ subcategory_count }}</strong> Subcategories
+                </div>
+                <div class="col-md-6">
+                    <i class="fas fa-users me-2"></i>
+                    <strong>{{ customer_count }}</strong> Customers
+                </div>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Category Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required 
+                               value="{{ category.name }}">
+                        <div class="form-text">Enter a unique category name</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4">{{ category.description }}</textarea>
+                        <div class="form-text">Brief description of this category</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="icon" class="form-label">Icon (Emoji)</label>
+                        <input type="text" class="form-control form-control-lg text-center" 
+                               id="icon" name="icon" value="{{ category.icon }}" style="font-size: 2rem;">
+                        <div class="form-text">Enter an emoji icon</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="sort_order" class="form-label">Sort Order</label>
+                        <input type="number" class="form-control" id="sort_order" name="sort_order" 
+                               value="{{ category.sort_order }}" min="0">
+                        <div class="form-text">Display order (lower first)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_active" 
+                                   name="is_active" {% if category.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">
+                                Active Status
+                            </label>
+                        </div>
+                        <div class="form-text">Enable/disable this category</div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'core:admin_business_categories' %}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Update Category
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+
+<!-- templates/admin/notifications/create_announcement.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Create Announcement{% endblock %}
+{% block page_title %}Create System Announcement{% endblock %}
+
+{% block admin_extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bullhorn me-2"></i>Create New Announcement
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Title <span class="text-danger">*</span></label>
+                                <input type="text" name="title" class="form-control" required maxlength="200"
+                                       placeholder="Enter announcement title">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Type <span class="text-danger">*</span></label>
+                                <select name="announcement_type" class="form-select" required>
+                                    {% for value, label in announcement_types %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Message <span class="text-danger">*</span></label>
+                            <textarea name="message" class="form-control" rows="5" required
+                                      placeholder="Enter announcement message"></textarea>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Start Date <span class="text-danger">*</span></label>
+                                <input type="datetime-local" name="start_date" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">End Date <span class="text-danger">*</span></label>
+                                <input type="datetime-local" name="end_date" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Display Options</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
+                                <label class="form-check-label" for="isActive">
+                                    Active (Enable announcement)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="show_on_login" id="showOnLogin">
+                                <label class="form-check-label" for="showOnLogin">
+                                    Show on user login
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="show_on_dashboard" id="showOnDashboard" checked>
+                                <label class="form-check-label" for="showOnDashboard">
+                                    Show on dashboard
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="notify_users" id="notifyUsers">
+                                <label class="form-check-label" for="notifyUsers">
+                                    Send notification to all users
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Create Announcement
+                            </button>
+                            <a href="{% url 'core:admin_system_announcements' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+flatpickr("input[type=datetime-local]", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+});
+</script>
+{% endblock %}

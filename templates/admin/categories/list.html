@@ -1,0 +1,750 @@
+<!-- templates/admin/categories/list.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Category Management{% endblock %}
+{% block page_title %}Demo Categories Management{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Demo Categories</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <!-- Quick Stats -->
+    <div class="d-none d-md-flex align-items-center gap-3 me-3">
+        <div class="text-center">
+            <div class="fw-bold text-primary">{{ categories.paginator.count }}</div>
+            <small class="text-muted">Total Categories</small>
+        </div>
+        <div class="text-center">
+            <div class="fw-bold text-success">{{ active_categories }}</div>
+            <small class="text-muted">Active</small>
+        </div>
+    </div>
+    
+    <!-- Add Category Button -->
+    <a href="{% url 'core:admin_add_category' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Add New Category
+    </a>
+    
+    <!-- Bulk Actions -->
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-cog me-1"></i>Actions
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" onclick="bulkActivate()">
+                <i class="fas fa-play me-2"></i>Activate Selected
+            </a></li>
+            <li><a class="dropdown-item" href="#" onclick="bulkDeactivate()">
+                <i class="fas fa-pause me-2"></i>Deactivate Selected
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="bulkDelete()">
+                <i class="fas fa-trash me-2"></i>Delete Selected
+            </a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .category-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        background: var(--gray-100);
+        color: var(--gray-600);
+    }
+
+    .category-icon.has-icon {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-inactive {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--gray-600);
+        border: 1px solid rgba(107, 114, 128, 0.2);
+    }
+
+    .filter-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .stat-card {
+        background: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border-left: 4px solid;
+        text-align: center;
+    }
+
+    .stat-card.primary { border-left-color: var(--primary-color); }
+    .stat-card.success { border-left-color: var(--success-color); }
+    .stat-card.info { border-left-color: var(--info-color); }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-label {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+
+    .table-actions {
+        display: flex;
+        gap: var(--spacing-xs);
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-3xl);
+        color: var(--gray-600);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray-400);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .sortable-table {
+        cursor: move;
+    }
+
+    .sortable-table tbody tr:hover {
+        background-color: var(--gray-50);
+    }
+
+    .drag-handle {
+        cursor: grab;
+        color: var(--gray-400);
+    }
+
+    .drag-handle:hover {
+        color: var(--primary-color);
+    }
+
+    .modal-content {
+        border-radius: var(--radius-lg);
+        border: none;
+    }
+
+    .modal-header {
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .modal-body {
+        padding: var(--spacing-xl);
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--gray-200);
+        padding: var(--spacing-lg);
+    }
+
+    .description-preview {
+        max-height: 100px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .description-preview.expanded {
+        max-height: none;
+    }
+
+    .description-toggle {
+        color: var(--primary-color);
+        cursor: pointer;
+        font-size: 0.8rem;
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .table-actions {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .table-actions .btn {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Quick Stats -->
+<div class="stats-row">
+    <div class="stat-card primary">
+        <div class="stat-number text-primary">{{ categories.paginator.count }}</div>
+        <div class="stat-label">Total Categories</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-number text-success">{{ active_categories }}</div>
+        <div class="stat-label">Active Categories</div>
+    </div>
+    <div class="stat-card info">
+        <div class="stat-number text-info">{{ total_demos_in_categories }}</div>
+        <div class="stat-label">Total Demos</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-card">
+    <form method="get" class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Search Categories</label>
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" 
+                       placeholder="Search by name or description..." 
+                       value="{{ search|default:'' }}">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        
+        <div class="col-md-3">
+            <label class="form-label">Sort By</label>
+            <select name="sort" class="form-select" onchange="this.form.submit()">
+                <option value="sort_order" {% if sort_by == 'sort_order' %}selected{% endif %}>Sort Order</option>
+                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name A-Z</option>
+                <option value="-name" {% if sort_by == '-name' %}selected{% endif %}>Name Z-A</option>
+                <option value="-demo_count" {% if sort_by == '-demo_count' %}selected{% endif %}>Most Demos</option>
+            </select>
+        </div>
+        
+        <div class="col-md-3">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-grid">
+                <a href="{% url 'core:admin_categories' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Clear Filters
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Category List -->
+{% if categories %}
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h3 class="admin-card-title">
+                <i class="fas fa-folder"></i>Demo Categories
+            </h3>
+            <div class="d-flex align-items-center gap-2">
+                <small class="text-muted">{{ categories.start_index }}-{{ categories.end_index }} of {{ categories.paginator.count }} categories</small>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                    <label class="form-check-label" for="selectAll">Select All</label>
+                </div>
+            </div>
+        </div>
+        <div class="admin-card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 sortable-table" id="categoriesTable">
+                    <thead>
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" class="form-check-input" id="masterCheckbox" onchange="toggleSelectAll(this)">
+                            </th>
+                            <th width="50">Order</th>
+                            <th width="80">Icon</th>
+                            <th>Name & Description</th>
+                            <th width="100">Demos</th>
+                            <th width="100">Status</th>
+                            <th width="120">Created</th>
+                            <th width="200">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                            <tr data-category-id="{{ category.id }}">
+                                <td>
+                                    <input type="checkbox" class="form-check-input category-checkbox" value="{{ category.id }}">
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-grip-vertical drag-handle me-2"></i>
+                                        <span class="fw-bold">{{ category.sort_order }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="category-icon {% if category.icon %}has-icon{% endif %}">
+                                        {% if category.icon %}
+                                            {{ category.icon|safe }}
+                                        {% else %}
+                                            <i class="fas fa-folder"></i>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <div class="fw-semibold">{{ category.name }}</div>
+                                        {% if category.description %}
+                                            <div class="description-preview" id="desc-{{ category.id }}">
+                                                <small class="text-muted">{{ category.description|truncatechars:100 }}</small>
+                                                {% if category.description|length > 100 %}
+                                                    <a href="#" class="description-toggle" onclick="toggleDescription({{ category.id }})">
+                                                        <span id="toggle-text-{{ category.id }}">Show more</span>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <small class="text-muted">No description</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-semibold">{{ category.demo_count }}</span>
+                                    {% if category.demo_count > 0 %}
+                                        <a href="{% url 'core:admin_demos' %}?category={{ category.slug }}" 
+                                           class="btn btn-sm btn-outline-primary ms-1" title="View Demos">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if category.is_active %}
+                                        <span class="status-badge status-active">Active</span>
+                                    {% else %}
+                                        <span class="status-badge status-inactive">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ category.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <!-- View Details Button -->
+                                        <a href="{% url 'core:admin_category_detail' category.id %}" 
+                                           class="btn btn-sm btn-outline-info" 
+                                           title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        <!-- Edit Button -->
+                                        <a href="{% url 'core:admin_edit_category' category.id %}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Edit Category">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                        <!-- View Demos Button (if has demos) -->
+                                        {% if category.demo_count > 0 %}
+                                            <a href="{% url 'core:admin_demos' %}?category={{ category.slug }}" 
+                                               class="btn btn-sm btn-outline-secondary" 
+                                               title="View {{ category.demo_count }} Demo(s)">
+                                                <i class="fas fa-video"></i>
+                                                <span class="d-none d-md-inline ms-1">{{ category.demo_count }}</span>
+                                            </a>
+                                        {% endif %}
+                                        
+                                        <!-- Toggle Status Button -->
+                                        <button class="btn btn-sm btn-outline-{% if category.is_active %}warning{% else %}success{% endif %}" 
+                                                onclick="toggleCategoryStatus({{ category.id }}, {{ category.is_active|yesno:'false,true' }}, '{{ category.name|escapejs }}')"
+                                                title="{% if category.is_active %}Deactivate Category{% else %}Activate Category{% endif %}">
+                                            <i class="fas fa-{% if category.is_active %}pause{% else %}play{% endif %}"></i>
+                                        </button>
+                                        
+                                        <!-- Delete Button -->
+                                        {% if category.demo_count == 0 %}
+                                            <button class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteCategory({{ category.id }}, '{{ category.name|escapejs }}')"
+                                                    title="Delete Category">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-outline-secondary" 
+                                                    title="Cannot delete - contains {{ category.demo_count }} demo(s)" 
+                                                    disabled>
+                                                <i class="fas fa-lock"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if categories.has_other_pages %}
+        <nav aria-label="Category pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if categories.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ categories.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">{{ categories.number }} of {{ categories.paginator.num_pages }}</span>
+                </li>
+
+                {% if categories.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ categories.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ categories.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <!-- Empty State -->
+    <div class="admin-card">
+        <div class="admin-card-body">
+            <div class="empty-state">
+                <i class="fas fa-folder"></i>
+                <h3>No Categories Found</h3>
+                {% if search or status_filter %}
+                    <p>No categories match your current filters.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'core:admin_categories' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Clear Filters
+                        </a>
+                        <a href="{% url 'core:admin_add_category' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add Category
+                        </a>
+                    </div>
+                {% else %}
+                    <p>Get started by creating your first demo category to organize your content.</p>
+                    <a href="{% url 'core:admin_add_category' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create First Category
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+    // CSRF Token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Toggle category status
+    function toggleCategoryStatus(categoryId, activate, categoryName) {
+        const action = activate ? 'activate' : 'deactivate';
+        
+        if (confirm(`Are you sure you want to ${action} "${categoryName}"?`)) {
+            // Show loading state on the button
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            
+            fetch(`/admin/categories/${categoryId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ activate: activate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification('Error updating category status', 'error');
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                showNotification('Error updating category status', 'error');
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            });
+        }
+    }
+
+    // Delete category
+    function deleteCategory(categoryId, categoryName) {
+        const confirmMessage = `Are you sure you want to delete "${categoryName}"?\n\nThis action cannot be undone.`;
+        
+        if (confirm(confirmMessage)) {
+            // Show loading state on the button
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            
+            fetch(`/admin/categories/${categoryId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    // Remove the row from table with animation
+                    const row = button.closest('tr');
+                    row.style.transition = 'opacity 0.3s ease';
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        row.remove();
+                        updateTableStats();
+                    }, 300);
+                } else {
+                    showNotification(data.message || 'Error deleting category', 'error');
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                showNotification('Error deleting category', 'error');
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            });
+        }
+    }
+
+    // Select all functionality
+    function toggleSelectAll(checkbox) {
+        const checkboxes = document.querySelectorAll('.category-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = checkbox.checked;
+        });
+        updateBulkActionVisibility();
+    }
+
+    // Update bulk action button visibility
+    function updateBulkActionVisibility() {
+        const selectedCategories = getSelectedCategories();
+        const bulkActions = document.querySelector('.dropdown');
+        
+        if (selectedCategories.length > 0) {
+            bulkActions.style.opacity = '1';
+        } else {
+            bulkActions.style.opacity = '0.6';
+        }
+    }
+
+    // Bulk actions
+    function getSelectedCategories() {
+        const selected = [];
+        document.querySelectorAll('.category-checkbox:checked').forEach(cb => {
+            selected.push(cb.value);
+        });
+        return selected;
+    }
+
+    function bulkActivate() {
+        const selected = getSelectedCategories();
+        if (selected.length === 0) {
+            showNotification('Please select categories to activate.', 'warning');
+            return;
+        }
+        
+        if (confirm(`Activate ${selected.length} selected categories?`)) {
+            bulkUpdateStatus(selected, 'activate');
+        }
+    }
+
+    function bulkDeactivate() {
+        const selected = getSelectedCategories();
+        if (selected.length === 0) {
+            showNotification('Please select categories to deactivate.', 'warning');
+            return;
+        }
+        
+        if (confirm(`Deactivate ${selected.length} selected categories?`)) {
+            bulkUpdateStatus(selected, 'deactivate');
+        }
+    }
+
+    function bulkDelete() {
+        const selected = getSelectedCategories();
+        if (selected.length === 0) {
+            showNotification('Please select categories to delete.', 'warning');
+            return;
+        }
+        
+        if (confirm(`Are you sure you want to delete ${selected.length} selected categories?\n\nThis action cannot be undone and will only delete categories that don't contain demos.`)) {
+            bulkUpdateStatus(selected, 'delete');
+        }
+    }
+
+    function bulkUpdateStatus(categoryIds, action) {
+        showNotification(`Processing ${action} for ${categoryIds.length} categories...`, 'info');
+        
+        fetch('/admin/categories/bulk-actions/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                category_ids: categoryIds,
+                action: action
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showNotification(data.message || 'Error performing bulk action', 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('Error performing bulk action', 'error');
+        });
+    }
+
+    // Description toggle
+    function toggleDescription(categoryId) {
+        const desc = document.getElementById(`desc-${categoryId}`);
+        const toggle = document.getElementById(`toggle-text-${categoryId}`);
+        
+        if (desc.classList.contains('expanded')) {
+            desc.classList.remove('expanded');
+            toggle.textContent = 'Show more';
+        } else {
+            desc.classList.add('expanded');
+            toggle.textContent = 'Show less';
+        }
+    }
+
+    // Update table stats after deletion
+    function updateTableStats() {
+        // Update the stats if categories are deleted
+        const remainingRows = document.querySelectorAll('#categoriesTable tbody tr').length;
+        if (remainingRows === 0) {
+            location.reload(); // Reload to show empty state
+        }
+    }
+
+    // Notification function
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 350px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        `;
+        
+        const iconClass = type === 'success' ? 'check-circle' : 
+                         type === 'error' ? 'exclamation-circle' : 
+                         type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+        
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${iconClass} me-2"></i>
+                <span>${message}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup checkbox change listeners for bulk actions
+        document.querySelectorAll('.category-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', updateBulkActionVisibility);
+        });
+        
+        // Initial bulk action state
+        updateBulkActionVisibility();
+    });
+</script>
+{% endblock %}

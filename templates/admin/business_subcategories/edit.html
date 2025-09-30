@@ -1,0 +1,86 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Edit Business Subcategory{% endblock %}
+{% block page_title %}Edit Business Subcategory{% endblock %}
+
+{% block admin_content %}
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h2 class="admin-card-title">
+            <i class="fas fa-edit"></i>
+            Edit Subcategory: {{ subcategory.name }}
+        </h2>
+        <a href="{% url 'core:admin_business_subcategories' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+    <div class="admin-card-body">
+        <!-- Subcategory Stats -->
+        <div class="alert alert-info mb-4">
+            <div class="text-center">
+                <strong>{{ customer_count }}</strong> Customers using this subcategory
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Parent Category <span class="text-danger">*</span></label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="">Select parent category...</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if cat.id == subcategory.category.id %}selected{% endif %}>
+                                    {% if cat.icon %}{{ cat.icon }} {% endif %}{{ cat.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Subcategory Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required 
+                               value="{{ subcategory.name }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4">{{ subcategory.description }}</textarea>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="sort_order" class="form-label">Sort Order</label>
+                        <input type="number" class="form-control" id="sort_order" name="sort_order" 
+                               value="{{ subcategory.sort_order }}" min="0">
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_active" 
+                                   name="is_active" {% if subcategory.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">
+                                Active Status
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'core:admin_business_subcategories' %}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Update Subcategory
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

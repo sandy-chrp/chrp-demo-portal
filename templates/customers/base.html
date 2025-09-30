@@ -1,0 +1,1068 @@
+<!-- templates/customers/base.html - Complete Customer Base Template -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block customer_title %}Customer Portal{% endblock %} - Demo Portal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for customer analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* CSS Variables for CHRP India Branding */
+        :root {
+            --primary-color: #1e3c72;
+            --secondary-color: #2a5298;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            
+            /* Customer Portal Specific */
+            --customer-sidebar-width: 280px;
+            --customer-sidebar-collapsed: 70px;
+            --customer-header-height: 70px;
+        }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--gray-100);
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        /* Customer Layout */
+        .customer-wrapper {
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Customer Sidebar */
+        .customer-sidebar {
+            width: var(--customer-sidebar-width);
+            background: var(--gradient-primary);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .customer-sidebar.collapsed {
+            width: var(--customer-sidebar-collapsed);
+        }
+
+        .customer-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .customer-sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .customer-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        .sidebar-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .sidebar-brand i {
+            margin-right: var(--spacing-md);
+            font-size: 1.5rem;
+            min-width: 24px;
+        }
+
+        .sidebar-brand .brand-text {
+            transition: opacity 0.3s ease;
+        }
+
+        .customer-sidebar.collapsed .brand-text {
+            opacity: 0;
+            width: 0;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Customer Navigation Styles */
+        .sidebar-nav {
+            padding: var(--spacing-md) 0;
+        }
+
+        .nav-section {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: var(--spacing-lg);
+            transition: all 0.3s ease;
+        }
+
+        .nav-section:first-child {
+            margin-top: 0;
+        }
+
+        .customer-sidebar.collapsed .nav-section {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .nav-item {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: var(--spacing-md) var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: white;
+        }
+
+        .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            border-left-color: white;
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            margin-right: var(--spacing-md);
+            width: 20px;
+            text-align: center;
+            min-width: 20px;
+        }
+
+        .nav-link .nav-text {
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .customer-sidebar.collapsed .nav-text {
+            opacity: 0;
+            width: 0;
+        }
+
+        .nav-link .badge {
+            margin-left: auto;
+            transition: all 0.3s ease;
+        }
+
+        .customer-sidebar.collapsed .badge {
+            opacity: 0;
+            width: 0;
+        }
+
+        /* Tooltip for collapsed sidebar */
+        .customer-sidebar.collapsed .nav-link {
+            position: relative;
+        }
+
+        .customer-sidebar.collapsed .nav-link::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--dark-color);
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-left: var(--spacing-md);
+            z-index: 1001;
+        }
+
+        .customer-sidebar.collapsed .nav-link:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Main Content Area */
+        .customer-main {
+            margin-left: var(--customer-sidebar-width);
+            width: calc(100% - var(--customer-sidebar-width));
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .customer-sidebar.collapsed ~ .customer-main {
+            margin-left: var(--customer-sidebar-collapsed);
+            width: calc(100% - var(--customer-sidebar-collapsed));
+        }
+
+        /* Customer Header */
+        .customer-header {
+            background: white;
+            box-shadow: var(--shadow-sm);
+            padding: 0 var(--spacing-xl);
+            height: var(--customer-header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .customer-header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+        }
+
+        .customer-header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
+        .customer-header-right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        /* Welcome User Section */
+        .welcome-user {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        .welcome-user .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Content Area */
+        .customer-content {
+            flex: 1;
+            padding: var(--spacing-xl);
+            background: var(--gray-100);
+        }
+
+        /* Customer Components */
+        .customer-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+
+        .customer-card-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--gray-50);
+        }
+
+        .customer-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .customer-card-title i {
+            margin-right: var(--spacing-md);
+            color: var(--primary-color);
+        }
+
+        .customer-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        /* Quick Stats Cards for Customer */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card.primary { border-left-color: var(--primary-color); }
+        .stat-card.success { border-left-color: var(--success-color); }
+        .stat-card.warning { border-left-color: var(--warning-color); }
+        .stat-card.info { border-left-color: var(--info-color); }
+        .stat-card.danger { border-left-color: var(--danger-color); }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent);
+            border-radius: 0 0 0 100px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            color: var(--dark-color);
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: var(--spacing-lg);
+            right: var(--spacing-lg);
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        /* Demo Cards */
+        .demo-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-200);
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .demo-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .demo-card-body {
+            padding: var(--spacing-lg);
+        }
+
+        .demo-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--dark-color);
+        }
+
+        .demo-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .demo-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        /* Notifications */
+        .notification-item {
+            background: white;
+            border-left: 4px solid var(--info-color);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .notification-item.unread {
+            background: #f0f9ff;
+            border-left-color: var(--primary-color);
+        }
+
+        .notification-item.success {
+            border-left-color: var(--success-color);
+        }
+
+        .notification-item.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        /* Mobile Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .customer-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .customer-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .customer-main {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .customer-sidebar.collapsed ~ .customer-main {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .mobile-toggle {
+                display: flex !important;
+            }
+
+            .sidebar-toggle {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .customer-header {
+                padding: 0 var(--spacing-md);
+            }
+
+            .customer-content {
+                padding: var(--spacing-md);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+
+            .customer-header-title {
+                font-size: 1.25rem;
+            }
+
+            .welcome-user {
+                display: none;
+            }
+        }
+
+        /* Mobile Toggle Button */
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--gray-600);
+            cursor: pointer;
+            padding: var(--spacing-sm);
+        }
+
+        /* Utility Classes */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Chatbot Button */
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+        }
+    </style>
+    {% block customer_extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="customer-wrapper">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Customer Sidebar -->
+        <div class="customer-sidebar" id="customerSidebar">
+            <div class="sidebar-header">
+                <a href="{% url 'customers:dashboard' %}" class="sidebar-brand">
+                    <i class="fas fa-play-circle"></i>
+                    <span class="brand-text">Demo Portal</span>
+                </a>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">Main</div>
+                <div class="nav-item">
+                    <a href="{% url 'customers:dashboard' %}" 
+                       class="nav-link {% if 'dashboard' in request.resolver_match.url_name %}active{% endif %}"
+                       data-tooltip="Dashboard Overview">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">Demo Library</div>
+                <div class="nav-item">
+                    <a href="{% url 'customers:browse_demos' %}" 
+                       class="nav-link {% if 'browse_demos' in request.resolver_match.url_name %}active{% endif %}"
+                       data-tooltip="Browse Demo Videos">
+                        <i class="fas fa-video"></i>
+                        <span class="nav-text">Browse Demos</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'customers:demo_requests' %}" 
+                       class="nav-link {% if 'demo_requests' in request.resolver_match.url_name %}active{% endif %}"
+                       data-tooltip="My Demo Requests">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="nav-text">Demo Requests</span>
+                        {% if pending_demo_requests %}
+                            <span class="badge bg-warning">{{ pending_demo_requests }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'customers:request_demo' %}" 
+                       class="nav-link {% if 'request_demo' in request.resolver_match.url_name %}active{% endif %}"
+                       data-tooltip="Request Live Demo">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span class="nav-text">Request Demo</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">Business Support</div>
+                <div class="nav-item">
+                    <a href="{% url 'customers:enquiries' %}" 
+                       class="nav-link {% if 'enquiries' in request.resolver_match.url_name %}active{% endif %}"
+                       data-tooltip="My Business Enquiries">
+                        <i class="fas fa-envelope"></i>
+                        <span class="nav-text">Enquiries</span>
+                        {% if open_enquiries %}
+                            <span class="badge bg-info">{{ open_enquiries }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'customers:send_enquiry' %}" 
+                       class="nav-link {% if 'send_enquiry' in request.resolver_match.url_name %}active{% endif %}"
+                       data-tooltip="Send Business Enquiry">
+                        <i class="fas fa-paper-plane"></i>
+                        <span class="nav-text">Send Enquiry</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'customers:contact_sales' %}" 
+                       class="nav-link {% if 'contact_sales' in request.resolver_match.url_name %}active{% endif %}"
+                       data-tooltip="Contact Sales Team">
+                        <i class="fas fa-handshake"></i>
+                        <span class="nav-text">Contact Sales</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">Account</div>
+                <div class="nav-item">
+                    <a href="{% url 'accounts:profile' %}" 
+                       class="nav-link {% if 'profile' in request.resolver_match.url_name %}active{% endif %}"
+                       data-tooltip="My Profile">
+                        <i class="fas fa-user"></i>
+                        <span class="nav-text">Profile</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'customers:notifications' %}" 
+                       class="nav-link {% if 'notifications' in request.resolver_match.url_name %}active{% endif %}"
+                       data-tooltip="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="nav-text">Notifications</span>
+                        {% if unread_notifications %}
+                            <span class="badge bg-danger">{{ unread_notifications }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{% url 'accounts:signout' %}" class="nav-link" data-tooltip="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="nav-text">Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="customer-main">
+            <!-- Customer Header -->
+            <div class="customer-header">
+                <div class="customer-header-left">
+                    <button class="mobile-toggle" id="mobileToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="customer-header-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                <div class="customer-header-right">
+                    {% block header_actions %}
+                        <!-- Welcome User -->
+                        <div class="welcome-user">
+                            <div class="user-avatar">
+                                {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+                            </div>
+                            <span>Welcome, {{ user.first_name }}!</span>
+                        </div>
+
+                        <!-- Notifications Dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-bell me-1"></i>
+                                {% if unread_notifications %}
+                                    <span class="badge bg-danger">{{ unread_notifications }}</span>
+                                {% endif %}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">Recent Notifications</h6></li>
+                                <li><a class="dropdown-item" href="#">Demo request confirmed</a></li>
+                                <li><a class="dropdown-item" href="#">New demo available</a></li>
+                                <li><a class="dropdown-item" href="#">Enquiry response received</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center" href="{% url 'customers:notifications' %}">View All</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- User Profile Dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>
+                                {{ user.first_name }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                        <i class="fas fa-user me-2"></i>My Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'customers:notifications' %}">
+                                        <i class="fas fa-bell me-2"></i>Notifications
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'accounts:signout' %}">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endblock %}
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="customer-content">
+                <!-- Flash Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle me-2"></i>
+                            {% elif message.tags == 'error' %}
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle me-2"></i>
+                            {% endif %}
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Page Content -->
+                {% block customer_content %}
+                    <div class="customer-card">
+                        <div class="customer-card-header">
+                            <h2 class="customer-card-title">
+                                <i class="fas fa-rocket"></i>
+                                Welcome to Customer Portal
+                            </h2>
+                        </div>
+                        <div class="customer-card-body">
+                            <p class="mb-0">This is the customer base template. Extend this template for customer pages.</p>
+                        </div>
+                    </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Toggle Button - Always Available -->
+    <button class="chatbot-toggle" id="chatbotToggle" title="Need Help? Chat with Demo Assistant">
+        <i class="fas fa-comments"></i>
+    </button>
+
+    <!-- Chatbot Window (Hidden by default) -->
+    <div id="chatbotWindow" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 10000; flex-direction: column; overflow: hidden; border: 1px solid #e5e7eb;">
+        <div style="background: var(--gradient-primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-robot" style="font-size: 1.2rem;"></i>
+                <div>
+                    <div style="font-weight: 600;">Demo Assistant</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;">Online - Ready to help</div>
+                </div>
+            </div>
+            <button id="closeChatbot" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="chatbotMessages" style="flex: 1; padding: 15px; overflow-y: auto; background: #f8fafc; height: 350px;">
+            <!-- Messages will be populated by JavaScript -->
+        </div>
+        <div style="padding: 15px; border-top: 1px solid #e5e7eb; background: white;">
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="chatbotInput" placeholder="Type your message..." style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 20px; outline: none;">
+                <button id="sendChatMessage" style="background: var(--primary-color); color: white; border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div style="display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap;">
+                <button class="chatbot-quick-btn" data-message="How do I request a demo?">Request Demo</button>
+                <button class="chatbot-quick-btn" data-message="Show me popular demos">Popular Demos</button>
+                <button class="chatbot-quick-btn" data-message="Contact sales team">Contact Sales</button>
+                <button class="chatbot-quick-btn" data-message="Help with enquiries">Send Enquiry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Customer Portal JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('customerSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mobileToggle = document.getElementById('mobileToggle');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const chatbotToggle = document.getElementById('chatbotToggle');
+
+            // Desktop sidebar toggle
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    const icon = sidebarToggle.querySelector('i');
+                    if (sidebar.classList.contains('collapsed')) {
+                        icon.className = 'fas fa-chevron-right';
+                    } else {
+                        icon.className = 'fas fa-chevron-left';
+                    }
+                    
+                    // Save state to localStorage
+                    localStorage.setItem('customerSidebarCollapsed', sidebar.classList.contains('collapsed'));
+                });
+            }
+
+            // Mobile sidebar toggle
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', function() {
+                    sidebar.classList.add('show');
+                    sidebarOverlay.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            // Close mobile sidebar
+            function closeMobileSidebar() {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            // Overlay click
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', closeMobileSidebar);
+            }
+
+            // ESC key to close mobile sidebar
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('show')) {
+                    closeMobileSidebar();
+                }
+            });
+
+            // Auto-close mobile sidebar on navigation
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 1024) {
+                        setTimeout(closeMobileSidebar, 100);
+                    }
+                });
+            });
+
+            // Restore sidebar state from localStorage
+            const savedState = localStorage.getItem('customerSidebarCollapsed');
+            if (savedState === 'true' && window.innerWidth > 1024) {
+                sidebar.classList.add('collapsed');
+                const icon = sidebarToggle?.querySelector('i');
+                if (icon) icon.className = 'fas fa-chevron-right';
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 1024) {
+                    closeMobileSidebar();
+                    // Restore collapsed state on desktop
+                    const savedState = localStorage.getItem('customerSidebarCollapsed');
+                    if (savedState === 'true') {
+                        sidebar.classList.add('collapsed');
+                    }
+                } else {
+                    sidebar.classList.remove('collapsed');
+                }
+            });
+
+            // Chatbot toggle
+            if (chatbotToggle) {
+                chatbotToggle.addEventListener('click', function() {
+                    // Here you would integrate with your chatbot
+                    console.log('Chatbot opened');
+                    // Example: Open chatbot modal or redirect to chatbot page
+                });
+            }
+
+            // Add fade-in animation to cards
+            const cards = document.querySelectorAll('.customer-card, .stat-card, .demo-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 100);
+            });
+
+            // Auto-dismiss alerts after 5 seconds
+            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+
+        // Global Customer Portal Functions
+        window.CustomerPortal = {
+            // Show loading state
+            showLoading: function(button) {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+                button.disabled = true;
+                button.dataset.originalText = originalText;
+            },
+
+            // Hide loading state
+            hideLoading: function(button) {
+                button.innerHTML = button.dataset.originalText;
+                button.disabled = false;
+            },
+
+            // Show toast notification
+            showToast: function(message, type = 'info') {
+                // Implementation for toast notifications
+                console.log(`${type.toUpperCase()}: ${message}`);
+            },
+
+            // Confirm dialog
+            confirm: function(message, callback) {
+                if (confirm(message)) {
+                    callback();
+                }
+            }
+        };
+    </script>
+
+    {% block customer_extra_js %}{% endblock %}
+</body>
+</html>

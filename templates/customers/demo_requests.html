@@ -1,0 +1,824 @@
+<!-- templates/customers/demo_requests.html - Fixed Version WITHOUT custom filter -->
+{% extends 'customers/base.html' %}
+{% load static %}
+
+{% block customer_title %}My Demo Requests - Customer Portal{% endblock %}
+{% block page_title %}My Demo Requests{% endblock %}
+
+{% block customer_extra_css %}
+<style>
+    /* Demo Requests Specific Styles */
+    .request-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-lg);
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+
+    .request-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .request-header {
+        padding: var(--spacing-lg);
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--gray-50);
+    }
+
+    .request-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin: 0;
+    }
+
+    .request-id {
+        color: var(--gray-500);
+        font-size: 0.875rem;
+        margin-top: var(--spacing-xs);
+    }
+
+    .request-body {
+        padding: var(--spacing-lg);
+    }
+
+    .request-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .info-icon {
+        width: 20px;
+        color: var(--primary-color);
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-right: var(--spacing-xs);
+    }
+
+    .info-value {
+        color: var(--gray-600);
+    }
+
+    .status-badge {
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: var(--radius-lg);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+
+    .status-confirmed {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .status-rescheduled {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #93c5fd;
+    }
+
+    .status-completed {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+    }
+
+    .filter-bar {
+        background: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-xl);
+        border: 1px solid var(--gray-200);
+    }
+
+    .filter-pills {
+        display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+        margin-top: var(--spacing-md);
+    }
+
+    .filter-pill {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-lg);
+        background: white;
+        color: var(--gray-700);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .filter-pill:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+        text-decoration: none;
+    }
+
+    .filter-pill.active {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .filter-pill.active:hover {
+        color: white;
+    }
+
+    .filter-count {
+        background: rgba(0, 0, 0, 0.1);
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: var(--spacing-xs);
+    }
+
+    .filter-pill.active .filter-count {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-xl) * 2;
+        color: var(--gray-500);
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: var(--spacing-lg);
+        opacity: 0.5;
+        color: var(--primary-color);
+    }
+
+    .pagination-wrapper {
+        margin-top: var(--spacing-xl);
+        display: flex;
+        justify-content: center;
+    }
+
+    .demo-thumbnail {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .demo-info {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .demo-details h4 {
+        margin: 0 0 var(--spacing-xs) 0;
+        color: var(--dark-color);
+        font-size: 1.125rem;
+    }
+
+    .demo-category {
+        color: var(--primary-color);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .request-notes {
+        background: var(--gray-50);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-top: var(--spacing-md);
+        border-left: 4px solid var(--info-color);
+    }
+
+    .request-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-lg);
+        flex-wrap: wrap;
+    }
+
+    /* Summary Stats */
+    .summary-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        padding: var(--spacing-md);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: var(--spacing-sm);
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: var(--spacing-xs);
+    }
+
+    /* Loading states */
+    .btn-loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .btn-loading::after {
+        content: '';
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin-left: 8px;
+        border: 2px solid currentColor;
+        border-radius: 50%;
+        border-right-color: transparent;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .request-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+        }
+
+        .request-info {
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+        }
+
+        .filter-pills {
+            justify-content: center;
+        }
+
+        .request-actions {
+            flex-direction: column;
+        }
+
+        .summary-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block customer_content %}
+<!-- CSRF Token for AJAX -->
+{% csrf_token %}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">My Demo Requests</h1>
+        <p class="text-muted mb-0">Track your live demo session requests and manage appointments</p>
+    </div>
+    <div>
+        <a href="{% url 'customers:request_demo' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Request New Demo
+        </a>
+    </div>
+</div>
+
+<!-- Summary Statistics -->
+{% comment %} {% if total_requests > 0 %}
+<div class="customer-card mb-4">
+    <div class="customer-card-header">
+        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Quick Overview</h6>
+    </div>
+    <div class="customer-card-body">
+        <div class="summary-stats">
+            <div class="stat-item">
+                <div class="stat-number">{{ total_requests }}</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ status_counts.pending|default:0 }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ status_counts.confirmed|default:0 }}</div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ status_counts.completed|default:0 }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ status_counts.cancelled|default:0 }}</div>
+                <div class="stat-label">Cancelled</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %} {% endcomment %}
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">Filter by Status</h6>
+        {% if current_status %}
+            <small class="text-muted">
+                Showing {{ page_obj.paginator.count }} request{{ page_obj.paginator.count|pluralize }} 
+                with status "{{ current_status|title }}"
+            </small>
+        {% else %}
+            <small class="text-muted">
+                Showing all {{ page_obj.paginator.count }} request{{ page_obj.paginator.count|pluralize }}
+            </small>
+        {% endif %}
+    </div>
+    <div class="filter-pills">
+        <a href="{% url 'customers:demo_requests' %}" 
+           class="filter-pill {% if not current_status %}active{% endif %}">
+            <i class="fas fa-list"></i>
+            All Requests
+            <span class="filter-count">{{ total_requests }}</span>
+        </a>
+        
+        <!-- Individual Status Filters -->
+        <a href="?status=pending" 
+           class="filter-pill {% if current_status == 'pending' %}active{% endif %}">
+            <i class="fas fa-clock"></i>
+            Pending
+            <span class="filter-count">{{ status_counts.pending|default:0 }}</span>
+        </a>
+        
+        <a href="?status=confirmed" 
+           class="filter-pill {% if current_status == 'confirmed' %}active{% endif %}">
+            <i class="fas fa-check"></i>
+            Confirmed
+            <span class="filter-count">{{ status_counts.confirmed|default:0 }}</span>
+        </a>
+        
+        <a href="?status=rescheduled" 
+           class="filter-pill {% if current_status == 'rescheduled' %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i>
+            Rescheduled
+            <span class="filter-count">{{ status_counts.rescheduled|default:0 }}</span>
+        </a>
+        
+        <a href="?status=completed" 
+           class="filter-pill {% if current_status == 'completed' %}active{% endif %}">
+            <i class="fas fa-check-circle"></i>
+            Completed
+            <span class="filter-count">{{ status_counts.completed|default:0 }}</span>
+        </a>
+        
+        <a href="?status=cancelled" 
+           class="filter-pill {% if current_status == 'cancelled' %}active{% endif %}">
+            <i class="fas fa-times"></i>
+            Cancelled
+            <span class="filter-count">{{ status_counts.cancelled|default:0 }}</span>
+        </a>
+    </div>
+</div>
+
+<!-- Demo Requests List -->
+{% if page_obj.object_list %}
+    {% for demo_request in page_obj.object_list %}
+        <div class="request-card" id="request-{{ demo_request.id }}">
+            <div class="request-header">
+                <div>
+                    <h3 class="request-title">{{ demo_request.demo.title }}</h3>
+                    <div class="request-id">Request #{{ demo_request.id }} • {{ demo_request.created_at|date:"M d, Y" }}</div>
+                </div>
+                <div>
+                    <span class="status-badge status-{{ demo_request.status }}">
+                        {{ demo_request.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="request-body">
+                <!-- Demo Information -->
+                <div class="demo-info">
+                    {% if demo_request.demo.thumbnail %}
+                        <img src="{{ demo_request.demo.thumbnail.url }}" alt="{{ demo_request.demo.title }}" class="demo-thumbnail">
+                    {% else %}
+                        <div class="demo-thumbnail" style="background: var(--gray-200); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-video text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div class="demo-details">
+                        <h4>{{ demo_request.demo.title }}</h4>
+                        <div class="demo-category">{{ demo_request.demo.category.name }}</div>
+                    </div>
+                </div>
+                
+                <!-- Request Information -->
+                <div class="request-info">
+                    <div class="info-item">
+                        <i class="fas fa-calendar info-icon"></i>
+                        <span class="info-label">Requested Date:</span>
+                        <span class="info-value">{{ demo_request.requested_date|date:"F d, Y" }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-clock info-icon"></i>
+                        <span class="info-label">Time Slot:</span>
+                        <span class="info-value">{{ demo_request.requested_time_slot }}</span>
+                    </div>
+                    
+                    {% if demo_request.confirmed_date %}
+                    <div class="info-item">
+                        <i class="fas fa-check-circle info-icon"></i>
+                        <span class="info-label">Confirmed Date:</span>
+                        <span class="info-value">{{ demo_request.confirmed_date|date:"F d, Y" }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if demo_request.confirmed_time_slot %}
+                    <div class="info-item">
+                        <i class="fas fa-clock info-icon"></i>
+                        <span class="info-label">Confirmed Time:</span>
+                        <span class="info-value">{{ demo_request.confirmed_time_slot }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="info-item">
+                        <i class="fas fa-user info-icon"></i>
+                        <span class="info-label">Status:</span>
+                        <span class="info-value">{{ demo_request.get_status_display }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-info-circle info-icon"></i>
+                        <span class="info-label">Created:</span>
+                        <span class="info-value">{{ demo_request.created_at|timesince }} ago</span>
+                    </div>
+                </div>
+                
+                <!-- Notes -->
+                {% if demo_request.notes %}
+                <div class="request-notes">
+                    <strong>Additional Notes:</strong><br>
+                    {{ demo_request.notes }}
+                </div>
+                {% endif %}
+                
+                <!-- Admin Notes -->
+                {% if demo_request.admin_notes %}
+                <div class="request-notes" style="border-left-color: var(--warning-color);">
+                    <strong>Admin Response:</strong><br>
+                    {{ demo_request.admin_notes }}
+                </div>
+                {% endif %}
+                
+                <!-- Action Buttons -->
+                <div class="request-actions">
+                    {% if demo_request.status == 'pending' %}
+                        <button class="btn btn-outline-danger btn-sm cancel-btn" data-request-id="{{ demo_request.id }}">
+                            <i class="fas fa-times me-1"></i>Cancel Request
+                        </button>
+                    {% endif %}
+                    
+                    {% if demo_request.status == 'confirmed' %}
+                        <a href="#" class="btn btn-success btn-sm">
+                            <i class="fas fa-video me-1"></i>Join Demo
+                        </a>
+                        <button class="btn btn-outline-secondary btn-sm reschedule-btn" data-request-id="{{ demo_request.id }}">
+                            <i class="fas fa-calendar-alt me-1"></i>Reschedule
+                        </button>
+                    {% endif %}
+                    
+                    {% if demo_request.status == 'completed' %}
+                        <a href="{% url 'customers:demo_detail' demo_request.demo.slug %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-1"></i>View Demo Again
+                        </a>
+                        <button class="btn btn-outline-info btn-sm feedback-btn" data-request-id="{{ demo_request.id }}">
+                            <i class="fas fa-star me-1"></i>Rate Experience
+                        </button>
+                    {% endif %}
+                    
+                    <a href="{% url 'customers:demo_detail' demo_request.demo.slug %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-play me-1"></i>Watch Demo Video
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <div class="pagination-wrapper">
+            <nav aria-label="Demo requests pagination">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if current_status %}&status={{ current_status }}{% endif %}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if current_status %}&status={{ current_status }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_status %}&status={{ current_status }}{% endif %}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+    
+{% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-calendar-times"></i>
+        </div>
+        <h3>No Demo Requests Found</h3>
+        {% if current_status %}
+            <p>No demo requests found with status <strong>"{{ current_status|title }}"</strong>.</p>
+            <a href="{% url 'customers:demo_requests' %}" class="btn btn-outline-primary mt-3">
+                <i class="fas fa-list me-2"></i>View All Requests
+            </a>
+        {% else %}
+            <p>You haven't requested any live demo sessions yet.</p>
+            <a href="{% url 'customers:request_demo' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-plus me-2"></i>Request Your First Demo
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block customer_extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cancel request functionality
+    document.querySelectorAll('.cancel-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const requestId = this.dataset.requestId;
+            cancelRequest(requestId, this);
+        });
+    });
+    
+    // Reschedule request functionality
+    document.querySelectorAll('.reschedule-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const requestId = this.dataset.requestId;
+            rescheduleRequest(requestId);
+        });
+    });
+    
+    // Feedback functionality
+    document.querySelectorAll('.feedback-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const requestId = this.dataset.requestId;
+            provideFeedback(requestId);
+        });
+    });
+    
+    // Add fade-in animation for cards
+    const cards = document.querySelectorAll('.request-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+
+function cancelRequest(requestId, buttonElement) {
+    if (confirm('Are you sure you want to cancel this demo request?')) {
+        // Add loading state
+        buttonElement.classList.add('btn-loading');
+        buttonElement.disabled = true;
+        
+        // Get CSRF token
+        const csrfToken = getCsrfToken();
+        if (!csrfToken) {
+            showToast('Security token not found. Please refresh the page.', 'error');
+            buttonElement.classList.remove('btn-loading');
+            buttonElement.disabled = false;
+            return;
+        }
+        
+        // Fix the URL - use the correct customer URL pattern
+        const currentPath = window.location.pathname;
+        const baseUrl = currentPath.includes('/customers/') ? '/customers/' : '/customer/';
+        
+        // Make AJAX call to cancel request
+        fetch(`${baseUrl}ajax/demo-request/${requestId}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Update the UI
+                const requestCard = document.getElementById(`request-${requestId}`);
+                const statusBadge = requestCard.querySelector('.status-badge');
+                const actionsDiv = requestCard.querySelector('.request-actions');
+                
+                // Update status badge
+                statusBadge.className = 'status-badge status-cancelled';
+                statusBadge.textContent = 'CANCELLED';
+                
+                // Remove action buttons
+                actionsDiv.innerHTML = `
+                    <div class="alert alert-info mb-0" style="font-size: 0.875rem;">
+                        <i class="fas fa-info-circle me-2"></i>
+                        This demo request has been cancelled.
+                    </div>
+                `;
+                
+                // Show success message
+                showToast('Demo request cancelled successfully!', 'success');
+                
+                // Refresh page after 2 seconds to update counts
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                throw new Error(data.error || 'Failed to cancel request');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Failed to cancel request. Please try again.', 'error');
+            
+            // Remove loading state
+            buttonElement.classList.remove('btn-loading');
+            buttonElement.disabled = false;
+        });
+    }
+}
+
+function rescheduleRequest(requestId) {
+    const message = `To reschedule your demo request #${requestId}, please contact our sales team:
+    
+📧 Email: support@chrp-india.com
+📞 Phone: +91-1234567890
+⏰ Business Hours: 9:00 AM - 6:00 PM (Mon-Fri)
+
+Our team will help you find a new suitable time slot.`;
+    
+    alert(message);
+}
+
+function provideFeedback(requestId) {
+    const demoSlug = document.querySelector(`[data-request-id="${requestId}"]`)
+                             .closest('.request-card')
+                             .querySelector('a[href*="/demos/"]')?.href;
+    
+    if (demoSlug) {
+        window.location.href = demoSlug + '#feedback';
+    } else {
+        alert('Feedback functionality - Please visit the demo page to provide feedback.');
+    }
+}
+
+function getCsrfToken() {
+    let token = null;
+    
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput) {
+        token = csrfInput.value;
+    }
+    
+    if (!token) {
+        const csrfMeta = document.querySelector('meta[name=csrf-token]');
+        if (csrfMeta) {
+            token = csrfMeta.getAttribute('content');
+        }
+    }
+    
+    if (!token) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrftoken') {
+                token = value;
+                break;
+            }
+        }
+    }
+    
+    return token;
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    const alertClass = type === 'error' ? 'danger' : type;
+    toast.className = `alert alert-${alertClass} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    const icon = type === 'success' ? 'check-circle' : 
+                 type === 'error' ? 'exclamation-triangle' : 
+                 'info-circle';
+    
+    toast.innerHTML = `
+        <i class="fas fa-${icon} me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,907 @@
+<!-- templates/admin/enquiries/respond.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Respond to Enquiry - {{ enquiry.enquiry_id }}{% endblock %}
+{% block page_title %}Respond to Enquiry{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_enquiries' %}">Enquiries</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_enquiry_detail' enquiry.id %}">{{ enquiry.enquiry_id }}</a>
+            </li>
+            <li class="breadcrumb-item active">Respond</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <a href="{% url 'core:admin_enquiry_detail' enquiry.id %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Details
+    </a>
+    <button type="submit" form="responseForm" class="btn btn-primary">
+        <i class="fas fa-paper-plane me-1"></i>Send Response
+    </button>
+    <button type="button" class="btn btn-outline-primary" onclick="saveDraft()">
+        <i class="fas fa-save me-1"></i>Save Draft
+    </button>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .enquiry-summary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-xl);
+        margin-bottom: 2rem;
+    }
+
+    .enquiry-summary-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .enquiry-summary-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.9rem;
+        opacity: 0.95;
+    }
+
+    .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    .main-section, .sidebar-section {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .section-title i {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .original-message {
+        background: var(--gray-50);
+        border-left: 4px solid var(--primary-color);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .customer-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .customer-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    .customer-name {
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .customer-email {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+    }
+
+    .message-time {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+    }
+
+    .message-content {
+        color: var(--dark-color);
+        line-height: 1.7;
+    }
+
+    .response-editor {
+        margin-bottom: 1.5rem;
+    }
+
+    .editor-toolbar {
+        background: var(--gray-50);
+        border: 2px solid var(--gray-200);
+        border-bottom: none;
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+        padding: 0.75rem;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .editor-btn {
+        background: white;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+    }
+
+    .editor-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .editor-btn.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .editor-textarea {
+        width: 100%;
+        min-height: 300px;
+        padding: 1rem;
+        border: 2px solid var(--gray-200);
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        resize: vertical;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .editor-textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .response-options {
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+    }
+
+    .option-item {
+        margin-bottom: 1rem;
+    }
+
+    .option-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .template-selector {
+        margin-bottom: 1.5rem;
+    }
+
+    .template-item {
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .template-item:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .template-item.selected {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+    }
+
+    .template-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .template-preview {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        line-height: 1.4;
+    }
+
+    .previous-responses {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .response-item {
+        border-left: 3px solid var(--primary-color);
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .response-item.internal {
+        border-left-color: var(--warning-color);
+        background: rgba(245, 158, 11, 0.05);
+        padding: 0.5rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .response-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .response-author {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 0.875rem;
+    }
+
+    .response-time {
+        font-size: 0.75rem;
+        color: var(--gray-500);
+    }
+
+    .response-text {
+        font-size: 0.875rem;
+        color: var(--dark-color);
+        line-height: 1.5;
+    }
+
+    .character-count {
+        text-align: right;
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-top: 0.5rem;
+    }
+
+    .attachment-area {
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .attachment-area:hover {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+    }
+
+    .attachment-area.dragover {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.1);
+    }
+
+    .attached-files {
+        margin-top: 1rem;
+    }
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: white;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        margin-bottom: 0.5rem;
+    }
+
+    .file-icon {
+        width: 30px;
+        height: 30px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+    }
+
+    .file-name {
+        flex: 1;
+        font-size: 0.875rem;
+        color: var(--dark-color);
+    }
+
+    .file-remove {
+        color: var(--danger-color);
+        cursor: pointer;
+    }
+
+    @media (max-width: 992px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-section, .sidebar-section {
+            padding: 1.5rem;
+        }
+        
+        .editor-toolbar {
+            padding: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Enquiry Summary -->
+<div class="enquiry-summary">
+    <div class="enquiry-summary-title">
+        Responding to: {{ enquiry.subject|default:"Business Enquiry" }}
+    </div>
+    <div class="enquiry-summary-meta">
+        <div class="summary-item">
+            <i class="fas fa-id-badge"></i>
+            {{ enquiry.enquiry_id }}
+        </div>
+        <div class="summary-item">
+            <i class="fas fa-user"></i>
+            {{ enquiry.full_name }}
+        </div>
+        <div class="summary-item">
+            <i class="fas fa-envelope"></i>
+            {{ enquiry.business_email }}
+        </div>
+        <div class="summary-item">
+            <i class="fas fa-calendar"></i>
+            {{ enquiry.created_at|date:"M d, Y g:i A" }}
+        </div>
+        <div class="summary-item">
+            <span class="badge bg-{% if enquiry.status == 'open' %}danger{% elif enquiry.status == 'in_progress' %}warning{% elif enquiry.status == 'answered' %}success{% else %}secondary{% endif %}">
+                {{ enquiry.get_status_display }}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="content-grid">
+    <!-- Left Column: Response Form -->
+    <div>
+        <!-- Original Message -->
+        <div class="main-section">
+            <h3 class="section-title">
+                <i class="fas fa-envelope-open-text"></i>Original Message
+            </h3>
+            
+            <div class="original-message">
+                <div class="message-header">
+                    <div class="customer-info">
+                        <div class="customer-avatar">
+                            {{ enquiry.first_name|first|upper }}{{ enquiry.last_name|first|upper }}
+                        </div>
+                        <div>
+                            <div class="customer-name">{{ enquiry.full_name }}</div>
+                            <div class="customer-email">{{ enquiry.business_email }}</div>
+                        </div>
+                    </div>
+                    <div class="message-time">
+                        {{ enquiry.created_at|timesince }} ago
+                    </div>
+                </div>
+                <div class="message-content">
+                    {{ enquiry.message|linebreaks }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Composer -->
+        <div class="main-section">
+            <h3 class="section-title">
+                <i class="fas fa-reply"></i>Compose Response
+            </h3>
+            
+            <form method="post" id="responseForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Response Editor -->
+                <div class="response-editor">
+                    <div class="editor-toolbar">
+                        <button type="button" class="editor-btn" onclick="formatText('bold')">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="formatText('italic')">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="formatText('underline')">
+                            <i class="fas fa-underline"></i>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="insertBulletList()">
+                            <i class="fas fa-list-ul"></i>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="insertNumberedList()">
+                            <i class="fas fa-list-ol"></i>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="insertLink()">
+                            <i class="fas fa-link"></i>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="insertTemplate()">
+                            <i class="fas fa-file-alt"></i> Template
+                        </button>
+                    </div>
+                    <textarea name="response_text" id="responseText" class="editor-textarea" required>Dear {{ enquiry.first_name }},
+
+Thank you for your enquiry regarding {{ enquiry.subject|default:"your business needs" }}.
+
+
+
+Best regards,
+{{ request.user.get_full_name|default:"Support Team" }}
+{{ request.user.email }}</textarea>
+                    <div class="character-count">
+                        <span id="charCount">0</span> characters
+                    </div>
+                </div>
+
+                <!-- Response Options -->
+                <div class="response-options">
+                    <div class="option-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="send_email" id="sendEmail" checked>
+                            <label class="form-check-label" for="sendEmail">
+                                <i class="fas fa-envelope me-1"></i>
+                                Send email to customer ({{ enquiry.business_email }})
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="option-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_internal_note" id="internalNote">
+                            <label class="form-check-label" for="internalNote">
+                                <i class="fas fa-sticky-note me-1"></i>
+                                Internal note only (not visible to customer)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="option-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="mark_answered" id="markAnswered" checked>
+                            <label class="form-check-label" for="markAnswered">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Mark enquiry as answered
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                <div class="mt-3">
+                    <label class="form-label">Attachments (optional)</label>
+                    <div class="attachment-area" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                        <p class="mb-0">Click or drag files here to attach</p>
+                        <small class="text-muted">PDF, DOC, DOCX, XLS, XLSX (Max 10MB)</small>
+                        <input type="file" id="fileInput" name="attachments" multiple style="display: none;" accept=".pdf,.doc,.docx,.xls,.xlsx">
+                    </div>
+                    <div class="attached-files" id="attachedFiles">
+                        <!-- Attached files will appear here -->
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Column: Sidebar -->
+    <div>
+        <!-- Response Templates -->
+        <div class="sidebar-section">
+            <h3 class="section-title">
+                <i class="fas fa-file-alt"></i>Quick Templates
+            </h3>
+            
+            <div class="template-selector">
+                <div class="template-item" onclick="useTemplate('acknowledgment')">
+                    <div class="template-title">Acknowledgment</div>
+                    <div class="template-preview">
+                        Thank you for your enquiry. We have received your message and will respond...
+                    </div>
+                </div>
+                
+                <div class="template-item" onclick="useTemplate('information')">
+                    <div class="template-title">Information Request</div>
+                    <div class="template-preview">
+                        To better assist you, could you please provide additional information...
+                    </div>
+                </div>
+                
+                <div class="template-item" onclick="useTemplate('schedule')">
+                    <div class="template-title">Schedule Meeting</div>
+                    <div class="template-preview">
+                        I would be happy to discuss this with you. Please let me know your availability...
+                    </div>
+                </div>
+                
+                <div class="template-item" onclick="useTemplate('closing')">
+                    <div class="template-title">Closing Response</div>
+                    <div class="template-preview">
+                        Thank you for your interest. If you have any further questions...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous Responses -->
+        {% if previous_responses %}
+        <div class="sidebar-section">
+            <h3 class="section-title">
+                <i class="fas fa-history"></i>Previous Responses
+            </h3>
+            
+            <div class="previous-responses">
+                {% for response in previous_responses %}
+                <div class="response-item {% if response.is_internal_note %}internal{% endif %}">
+                    <div class="response-header">
+                        <div class="response-author">
+                            {{ response.responded_by.get_full_name }}
+                            {% if response.is_internal_note %}
+                                <span class="badge bg-warning ms-1">Internal</span>
+                            {% endif %}
+                        </div>
+                        <div class="response-time">
+                            {{ response.created_at|timesince }} ago
+                        </div>
+                    </div>
+                    <div class="response-text">
+                        {{ response.response_text|truncatechars:150 }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div class="sidebar-section">
+            <h3 class="section-title">
+                <i class="fas fa-bolt"></i>Quick Actions
+            </h3>
+            
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-outline-primary" onclick="insertSignature()">
+                    <i class="fas fa-signature me-1"></i>Insert Signature
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="addCCRecipient()">
+                    <i class="fas fa-user-plus me-1"></i>Add CC Recipient
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="scheduleFollowUp()">
+                    <i class="fas fa-calendar-check me-1"></i>Schedule Follow-up
+                </button>
+                <button type="button" class="btn btn-outline-warning" onclick="saveDraft()">
+                    <i class="fas fa-save me-1"></i>Save as Draft
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+// Character counter
+const responseText = document.getElementById('responseText');
+const charCount = document.getElementById('charCount');
+
+responseText.addEventListener('input', function() {
+    charCount.textContent = this.value.length;
+});
+
+// Initial count
+charCount.textContent = responseText.value.length;
+
+// Internal note toggle
+document.getElementById('internalNote').addEventListener('change', function() {
+    const sendEmail = document.getElementById('sendEmail');
+    const markAnswered = document.getElementById('markAnswered');
+    
+    if (this.checked) {
+        sendEmail.checked = false;
+        sendEmail.disabled = true;
+        markAnswered.checked = false;
+    } else {
+        sendEmail.disabled = false;
+        sendEmail.checked = true;
+        markAnswered.checked = true;
+    }
+});
+
+// Text formatting functions
+function formatText(command) {
+    // This would integrate with a rich text editor in production
+    console.log('Format:', command);
+    alert('Rich text formatting would be implemented with a library like TinyMCE or Quill');
+}
+
+function insertBulletList() {
+    const textarea = document.getElementById('responseText');
+    const text = '\n• Point 1\n• Point 2\n• Point 3\n';
+    insertAtCursor(textarea, text);
+}
+
+function insertNumberedList() {
+    const textarea = document.getElementById('responseText');
+    const text = '\n1. Point 1\n2. Point 2\n3. Point 3\n';
+    insertAtCursor(textarea, text);
+}
+
+function insertLink() {
+    const url = prompt('Enter URL:');
+    if (url) {
+        const textarea = document.getElementById('responseText');
+        insertAtCursor(textarea, url);
+    }
+}
+
+function insertAtCursor(textarea, text) {
+    const startPos = textarea.selectionStart;
+    const endPos = textarea.selectionEnd;
+    
+    textarea.value = textarea.value.substring(0, startPos) + 
+                     text + 
+                     textarea.value.substring(endPos);
+    
+    textarea.selectionStart = startPos + text.length;
+    textarea.selectionEnd = startPos + text.length;
+    textarea.focus();
+    
+    // Update character count
+    charCount.textContent = textarea.value.length;
+}
+
+// Template functions
+function useTemplate(templateType) {
+    const templates = {
+        acknowledgment: `Dear {{ enquiry.first_name }},
+
+Thank you for reaching out to us regarding {{ enquiry.subject|default:"your enquiry" }}.
+
+We have received your message and appreciate your interest in our services. Our team is currently reviewing your enquiry and will provide you with a comprehensive response shortly.
+
+We typically respond within 24-48 business hours. If your matter is urgent, please don't hesitate to contact us directly at [phone number].
+
+Thank you for your patience.
+
+Best regards,
+{{ request.user.get_full_name|default:"Support Team" }}`,
+        
+        information: `Dear {{ enquiry.first_name }},
+
+Thank you for your enquiry about {{ enquiry.subject|default:"our services" }}.
+
+To better assist you and provide the most accurate information, could you please provide the following additional details:
+
+1. [Specific information needed]
+2. [Timeline or deadline if applicable]
+3. [Budget range or constraints]
+4. [Any specific requirements]
+
+Once we have this information, we'll be able to provide you with a tailored solution that best meets your needs.
+
+Please feel free to reach out if you have any immediate questions.
+
+Best regards,
+{{ request.user.get_full_name|default:"Support Team" }}`,
+        
+        schedule: `Dear {{ enquiry.first_name }},
+
+Thank you for your interest in {{ enquiry.subject|default:"our services" }}.
+
+I would be delighted to discuss this further with you and understand your specific requirements. I have the following time slots available for a call or meeting:
+
+• [Day], [Date] at [Time]
+• [Day], [Date] at [Time]
+• [Day], [Date] at [Time]
+
+Please let me know which time works best for you, or suggest an alternative if none of these suit your schedule.
+
+You can also book directly using this link: [booking link]
+
+Looking forward to speaking with you.
+
+Best regards,
+{{ request.user.get_full_name|default:"Support Team" }}`,
+        
+        closing: `Dear {{ enquiry.first_name }},
+
+Thank you for your enquiry regarding {{ enquiry.subject|default:"our services" }}.
+
+I hope the information provided has been helpful. We're committed to providing excellent service and support to all our customers.
+
+If you have any further questions or need additional clarification, please don't hesitate to reach out. We're here to help and ensure you have all the information you need.
+
+Thank you for considering our services.
+
+Best regards,
+{{ request.user.get_full_name|default:"Support Team" }}`
+    };
+    
+    if (templates[templateType]) {
+        document.getElementById('responseText').value = templates[templateType];
+        charCount.textContent = templates[templateType].length;
+        
+        // Highlight selected template
+        document.querySelectorAll('.template-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        event.target.closest('.template-item').classList.add('selected');
+    }
+}
+
+function insertSignature() {
+    const signature = `
+
+Best regards,
+{{ request.user.get_full_name|default:"" }}
+{{ request.user.job_title|default:"" }}
+{{ request.user.email }}
+{{ request.user.phone|default:"" }}`;
+    
+    const textarea = document.getElementById('responseText');
+    insertAtCursor(textarea, signature);
+}
+
+function addCCRecipient() {
+    const email = prompt('Enter CC recipient email:');
+    if (email) {
+        alert(`CC recipient ${email} will be added to the response.`);
+    }
+}
+
+function scheduleFollowUp() {
+    const date = prompt('Schedule follow-up date (YYYY-MM-DD):');
+    if (date) {
+        alert(`Follow-up scheduled for ${date}`);
+    }
+}
+
+function saveDraft() {
+    const responseText = document.getElementById('responseText').value;
+    localStorage.setItem('enquiry_response_draft_{{ enquiry.id }}', responseText);
+    alert('Draft saved successfully!');
+}
+
+// Load draft if exists
+window.addEventListener('load', function() {
+    const draft = localStorage.getItem('enquiry_response_draft_{{ enquiry.id }}');
+    if (draft && confirm('A draft response was found. Would you like to load it?')) {
+        document.getElementById('responseText').value = draft;
+        charCount.textContent = draft.length;
+    }
+});
+
+// File attachment handling
+const fileInput = document.getElementById('fileInput');
+const attachmentArea = document.querySelector('.attachment-area');
+const attachedFiles = document.getElementById('attachedFiles');
+
+// Drag and drop
+attachmentArea.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+});
+
+attachmentArea.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+});
+
+attachmentArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    
+    const files = e.dataTransfer.files;
+    handleFiles(files);
+});
+
+fileInput.addEventListener('change', function(e) {
+    handleFiles(this.files);
+});
+
+function handleFiles(files) {
+    for (let file of files) {
+        displayFile(file);
+    }
+}
+
+function displayFile(file) {
+    const fileItem = document.createElement('div');
+    fileItem.className = 'file-item';
+    
+    const icon = file.type.includes('pdf') ? 'fa-file-pdf' : 
+                 file.type.includes('doc') ? 'fa-file-word' : 
+                 file.type.includes('xls') ? 'fa-file-excel' : 'fa-file';
+    
+    fileItem.innerHTML = `
+        <div class="file-icon">
+            <i class="fas ${icon}"></i>
+        </div>
+        <div class="file-name">${file.name}</div>
+        <div class="file-remove" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </div>
+    `;
+    
+    attachedFiles.appendChild(fileItem);
+}
+
+// Form validation before submit
+document.getElementById('responseForm').addEventListener('submit', function(e) {
+    const responseText = document.getElementById('responseText').value.trim();
+    
+    if (!responseText) {
+        e.preventDefault();
+        alert('Please enter a response message.');
+        return false;
+    }
+    
+    // Clear draft on successful submit
+    localStorage.removeItem('enquiry_response_draft_{{ enquiry.id }}');
+    
+    // Show loading state
+    const submitBtn = document.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
+    submitBtn.disabled = true;
+});
+</script>
+{% endblock %}

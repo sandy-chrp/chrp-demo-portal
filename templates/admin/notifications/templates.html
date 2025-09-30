@@ -1,0 +1,141 @@
+<!-- templates/admin/notifications/templates.html -->
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block admin_title %}Notification Templates{% endblock %}
+{% block page_title %}Notification Templates{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    /* Following the base.html theme variables */
+    .template-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--spacing-lg);
+        transition: all 0.3s ease;
+    }
+    
+    .template-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .template-header {
+        padding: var(--spacing-lg);
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+    
+    .template-body {
+        padding: var(--spacing-lg);
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .status-active {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .status-inactive {
+        background: var(--gray-400);
+        color: white;
+    }
+    
+    .template-type {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-md);
+        display: inline-block;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Notification Templates</h2>
+            <p class="text-muted mb-0">Manage email and in-app notification templates</p>
+        </div>
+        <a href="{% url 'core:admin_notifications' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Notifications
+        </a>
+    </div>
+    
+    <!-- Templates Grid -->
+    <div class="row">
+        {% for template in templates %}
+        <div class="col-lg-6 mb-4">
+            <div class="template-card">
+                <div class="template-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ template.name }}</h5>
+                        <span class="template-type">{{ template.get_notification_type_display }}</span>
+                    </div>
+                </div>
+                <div class="template-body">
+                    <!-- Status Indicators -->
+                    <div class="mb-3">
+                        <span class="status-badge {% if template.is_active %}status-active{% else %}status-inactive{% endif %}">
+                            {% if template.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                        {% if template.send_email %}
+                        <span class="badge bg-info ms-2">
+                            <i class="fas fa-envelope me-1"></i>Email Enabled
+                        </span>
+                        {% endif %}
+                        {% if template.send_in_app %}
+                        <span class="badge bg-primary ms-2">
+                            <i class="fas fa-bell me-1"></i>In-App Enabled
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Template Preview -->
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Email Subject:</h6>
+                        <p class="mb-0 bg-light p-2 rounded">{{ template.email_subject|truncatechars:100 }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">In-App Title:</h6>
+                        <p class="mb-0 bg-light p-2 rounded">{{ template.title_template|truncatechars:100 }}</p>
+                    </div>
+                    
+                    <!-- Last Updated -->
+                    <div class="text-muted small mb-3">
+                        <i class="fas fa-clock me-1"></i>
+                        Last updated: {{ template.updated_at|date:"M d, Y g:i A" }}
+                    </div>
+                    
+                    <!-- Actions -->
+                    <a href="{% url 'core:admin_edit_notification_template' template.id %}" 
+                       class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Template
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No notification templates found</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

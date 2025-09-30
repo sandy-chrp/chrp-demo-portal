@@ -1,0 +1,868 @@
+<!-- templates/admin/demos/watch.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}{{ demo.title }} - Preview{% endblock %}
+{% block page_title %}Demo Preview{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_demos' %}">Demo Videos</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_demo_detail' demo.id %}">{{ demo.title }}</a>
+            </li>
+            <li class="breadcrumb-item active">Preview</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <a href="{% url 'core:admin_demo_detail' demo.id %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Details
+    </a>
+    <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-list me-1"></i>All Demos
+    </a>
+    <button type="button" class="btn btn-outline-primary" onclick="openFullscreen()">
+        <i class="fas fa-expand me-1"></i>Fullscreen
+    </button>
+    <a href="{% url 'core:admin_demo_detail' demo.id %}" class="btn btn-primary">
+        <i class="fas fa-edit me-1"></i>Edit Demo
+    </a>
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item" href="#" onclick="copyDemoLink()">
+                    <i class="fas fa-link me-2"></i>Copy Customer Link
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="#" onclick="downloadVideo()">
+                    <i class="fas fa-download me-2"></i>Download Video
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item" href="#" onclick="shareDemo()">
+                    <i class="fas fa-share me-2"></i>Share Demo
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .demo-preview-container {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .video-section {
+        background: #000;
+        position: relative;
+        padding: 0;
+        aspect-ratio: 16/9;
+        max-height: 70vh;
+        overflow: hidden;
+    }
+
+    .video-player {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    .video-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: rgba(255, 255, 255, 0.8);
+        background: linear-gradient(135deg, #1f2937, #374151);
+    }
+
+    .video-controls-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        padding: 2rem;
+        color: white;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .video-section:hover .video-controls-overlay {
+        opacity: 1;
+    }
+
+    .video-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 2rem;
+    }
+
+    .video-meta {
+        flex: 1;
+    }
+
+    .video-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .video-stats {
+        display: flex;
+        gap: 2rem;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .video-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .video-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .video-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .demo-details {
+        padding: 2rem;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    .demo-description {
+        background: var(--gray-50);
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .demo-metadata {
+        background: var(--gray-50);
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+    }
+
+    .metadata-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .metadata-item:last-child {
+        border-bottom: none;
+    }
+
+    .metadata-label {
+        font-weight: 500;
+        color: var(--gray-600);
+    }
+
+    .metadata-value {
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card.views { border-left-color: var(--info-color); }
+    .stat-card.likes { border-left-color: var(--danger-color); }
+    .stat-card.requests { border-left-color: var(--warning-color); }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+    }
+
+    .admin-preview-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(30, 60, 114, 0.9);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+        z-index: 10;
+    }
+
+    .status-indicators {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-inactive {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--gray-600);
+        border: 1px solid rgba(107, 114, 128, 0.2);
+    }
+
+    .status-featured {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .customer-view-sim {
+        background: var(--info-color);
+        color: white;
+        padding: 1rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .customer-view-sim i {
+        font-size: 1.5rem;
+    }
+
+    .customer-view-text {
+        flex: 1;
+    }
+
+    .customer-view-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .customer-view-desc {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .fullscreen-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #000;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .fullscreen-container.active {
+        display: flex;
+    }
+
+    .fullscreen-video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .fullscreen-controls {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .fullscreen-btn {
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .fullscreen-btn:hover {
+        background: rgba(0, 0, 0, 0.9);
+    }
+
+    @media (max-width: 992px) {
+        .details-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .stats-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .video-section {
+            max-height: 60vh;
+        }
+
+        .demo-preview-container {
+            margin-bottom: 1rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .video-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .video-stats {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stats-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .video-section {
+            max-height: 50vh;
+            aspect-ratio: 16/9;
+        }
+
+        .video-controls-overlay {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-size: 1.25rem;
+        }
+
+        .admin-preview-badge {
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .customer-view-sim {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .video-section {
+            max-height: 40vh;
+        }
+
+        .video-actions {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .status-indicators {
+            flex-wrap: wrap;
+        }
+
+        .demo-details {
+            padding: 1rem;
+        }
+    }
+
+    /* Professional video controls styling */
+    .video-player::-webkit-media-controls {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .video-player::-webkit-media-controls-panel {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    /* Loading state for video */
+    .video-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 1.2rem;
+        z-index: 5;
+    }
+
+    /* Improved fullscreen experience */
+    .fullscreen-container.active .fullscreen-video {
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
+        background: #000;
+    }
+
+    /* Professional poster image styling */
+    .video-player[poster] {
+        object-fit: cover;
+    }
+
+    .video-player[poster]:not([src]) {
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Customer View Simulation Notice -->
+{% comment %} <div class="customer-view-sim">
+    <i class="fas fa-eye"></i>
+    <div class="customer-view-text">
+        <div class="customer-view-title">Customer Preview Mode</div>
+        <div class="customer-view-desc">This is how customers will see this demo on the portal</div>
+    </div>
+    <a href="#" class="btn btn-light btn-sm" onclick="toggleCustomerView()">
+        <i class="fas fa-user me-1"></i>Customer View
+    </a>
+</div> {% endcomment %}
+
+<!-- Demo Preview Container -->
+<div class="demo-preview-container">
+    <!-- Video Section -->
+    <div class="video-section" id="videoSection">
+        <div class="admin-preview-badge">
+            <i class="fas fa-shield-alt me-1"></i>Admin Preview
+        </div>
+        
+        {% if demo.video_file %}
+            <video class="video-player" id="demoVideo" controls preload="metadata" poster="{% if demo.thumbnail %}{{ demo.thumbnail.url }}{% endif %}">
+                <source src="{{ demo.video_file.url }}" type="video/mp4">
+                <p>Your browser does not support the video tag. <a href="{{ demo.video_file.url }}">Download the video</a> instead.</p>
+            </video>
+        {% else %}
+            <div class="video-placeholder">
+                <i class="fas fa-video fa-4x mb-3" style="opacity: 0.5;"></i>
+                <h4 style="margin-bottom: 1rem;">No Video File</h4>
+                <p style="margin: 0; opacity: 0.8;">This demo doesn't have a video file attached.</p>
+                <a href="{% url 'core:admin_demo_detail' demo.id %}" class="btn btn-outline-light mt-3">
+                    <i class="fas fa-upload me-1"></i>Upload Video
+                </a>
+            </div>
+        {% endif %}
+
+        <div class="video-controls-overlay">
+            <div class="video-info">
+                <div class="video-meta">
+                    <div class="video-title">{{ demo.title }}</div>
+                    <div class="video-stats">
+                        <span><i class="fas fa-eye me-1"></i>{{ demo.views_count }} views</span>
+                        <span><i class="fas fa-heart me-1"></i>{{ demo.likes_count }} likes</span>
+                        <span><i class="fas fa-clock me-1"></i>{{ demo.formatted_duration }}</span>
+                        <span><i class="fas fa-calendar me-1"></i>{{ demo.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+                <div class="video-actions">
+                    <button class="video-btn" onclick="togglePlayPause()">
+                        <i class="fas fa-play" id="playPauseIcon"></i>
+                    </button>
+                    <button class="video-btn" onclick="openFullscreen()">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="video-btn" onclick="downloadVideo()">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Details -->
+    <div class="demo-details">
+        <!-- Status Indicators -->
+        <div class="status-indicators">
+            {% if demo.is_active %}
+                <div class="status-badge status-active">
+                    <i class="fas fa-eye"></i>Active
+                </div>
+            {% else %}
+                <div class="status-badge status-inactive">
+                    <i class="fas fa-eye-slash"></i>Inactive
+                </div>
+            {% endif %}
+            
+            {% if demo.is_featured %}
+                <div class="status-badge status-featured">
+                    <i class="fas fa-star"></i>Featured
+                </div>
+            {% endif %}
+            
+            <div class="status-badge" style="background: rgba(30, 60, 114, 0.1); color: var(--primary-color); border-color: rgba(30, 60, 114, 0.2);">
+                <i class="fas fa-folder"></i>{{ demo.category.name }}
+            </div>
+        </div>
+
+        <div class="details-grid">
+            <!-- Left Column: Description & Info -->
+            <div>
+                <div class="demo-description">
+                    <h5><i class="fas fa-align-left me-2 text-primary"></i>Description</h5>
+                    <p class="mb-0">{{ demo.description|default:"No description provided." }}</p>
+                </div>
+
+                <div class="demo-metadata">
+                    <h5 class="mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Demo Information</h5>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Demo ID</span>
+                        <span class="metadata-value">#{{ demo.id }}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Category</span>
+                        <span class="metadata-value">{{ demo.category.name }}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Duration</span>
+                        <span class="metadata-value">{{ demo.formatted_duration|default:"Not specified" }}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Created Date</span>
+                        <span class="metadata-value">{{ demo.created_at|date:"F d, Y" }}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Last Updated</span>
+                        <span class="metadata-value">{{ demo.updated_at|date:"F d, Y" }}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Created By</span>
+                        <span class="metadata-value">{{ demo.created_by.full_name|default:"System" }}</span>
+                    </div>
+                    <div class="metadata-item">
+                        <span class="metadata-label">Sort Order</span>
+                        <span class="metadata-value">{{ demo.sort_order|default:"Auto" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Stats -->
+            <div>
+                <h5 class="mb-3"><i class="fas fa-chart-bar me-2 text-primary"></i>Performance Stats</h5>
+                
+                <div class="stats-cards">
+                    <div class="stat-card views">
+                        <div class="stat-number">{{ demo.views_count }}</div>
+                        <div class="stat-label">Total Views</div>
+                    </div>
+                    
+                    <div class="stat-card likes">
+                        <div class="stat-number">{{ demo.likes_count }}</div>
+                        <div class="stat-label">Likes</div>
+                    </div>
+                    
+                    <div class="stat-card requests">
+                        <div class="stat-number">{{ demo_requests_count|default:0 }}</div>
+                        <div class="stat-label">Demo Requests</div>
+                    </div>
+                </div>
+
+                <div class="demo-metadata">
+                    <h6 class="mb-3">Quick Actions</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'core:admin_demo_detail' demo.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i>Edit Demo
+                        </a>
+                        <button class="btn btn-outline-info" onclick="copyDemoLink()">
+                            <i class="fas fa-link me-1"></i>Copy Customer Link
+                        </button>
+                        <button class="btn btn-outline-success" onclick="shareDemo()">
+                            <i class="fas fa-share me-1"></i>Share Demo
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="toggleStatus()">
+                            <i class="fas fa-{{ demo.is_active|yesno:'pause,play' }} me-1"></i>
+                            {{ demo.is_active|yesno:"Deactivate,Activate" }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Container -->
+<div class="fullscreen-container" id="fullscreenContainer">
+    <video class="fullscreen-video" id="fullscreenVideo" controls>
+        {% if demo.video_file %}
+            <source src="{{ demo.video_file.url }}" type="video/mp4">
+        {% endif %}
+    </video>
+    <div class="fullscreen-controls">
+        <button class="fullscreen-btn" onclick="closeFullscreen()" title="Exit Fullscreen">
+            <i class="fas fa-compress"></i>
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+let video = document.getElementById('demoVideo');
+let fullscreenVideo = document.getElementById('fullscreenVideo');
+
+// Play/Pause functionality
+function togglePlayPause() {
+    if (video) {
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        if (video.paused) {
+            video.play();
+            playPauseIcon.className = 'fas fa-pause';
+        } else {
+            video.pause();
+            playPauseIcon.className = 'fas fa-play';
+        }
+    }
+}
+
+// Update play/pause icon based on video state
+if (video) {
+    video.addEventListener('play', function() {
+        document.getElementById('playPauseIcon').className = 'fas fa-pause';
+    });
+    
+    video.addEventListener('pause', function() {
+        document.getElementById('playPauseIcon').className = 'fas fa-play';
+    });
+}
+
+// Fullscreen functionality
+function openFullscreen() {
+    const fullscreenContainer = document.getElementById('fullscreenContainer');
+    fullscreenContainer.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    if (video && fullscreenVideo) {
+        fullscreenVideo.currentTime = video.currentTime;
+        if (!video.paused) {
+            fullscreenVideo.play();
+        }
+    }
+}
+
+function closeFullscreen() {
+    const fullscreenContainer = document.getElementById('fullscreenContainer');
+    fullscreenContainer.classList.remove('active');
+    document.body.style.overflow = '';
+    
+    if (video && fullscreenVideo) {
+        video.currentTime = fullscreenVideo.currentTime;
+        if (!fullscreenVideo.paused) {
+            video.play();
+        }
+        fullscreenVideo.pause();
+    }
+}
+
+// ESC key to close fullscreen
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeFullscreen();
+    }
+});
+
+// Copy demo link
+function copyDemoLink() {
+    const demoSlug = '{{ demo.slug }}';
+    const customerLink = `${window.location.origin}/demos/${demoSlug}/`;
+    
+    navigator.clipboard.writeText(customerLink).then(function() {
+        // Show toast notification
+        showToast('Customer demo link copied to clipboard!', 'success');
+    }).catch(function(err) {
+        console.error('Could not copy text: ', err);
+        // Fallback: show link in prompt
+        prompt('Copy this customer demo link:', customerLink);
+    });
+}
+
+// Download video
+function downloadVideo() {
+    {% if demo.video_file %}
+        const link = document.createElement('a');
+        link.href = '{{ demo.video_file.url }}';
+        link.download = '{{ demo.title|slugify }}.mp4';
+        link.click();
+    {% else %}
+        alert('No video file available for download.');
+    {% endif %}
+}
+
+// Share demo
+function shareDemo() {
+    const demoData = {
+        title: '{{ demo.title|escapejs }}',
+        text: '{{ demo.description|truncatechars:100|escapejs }}',
+        url: `${window.location.origin}/demos/{{ demo.slug }}/`
+    };
+    
+    if (navigator.share) {
+        navigator.share(demoData);
+    } else {
+        // Fallback: copy link
+        copyDemoLink();
+    }
+}
+
+// Toggle demo status
+function toggleStatus() {
+    const demoId = {{ demo.id }};
+    const isActive = {{ demo.is_active|yesno:'true,false' }};
+    const action = isActive ? 'deactivate' : 'activate';
+    
+    if (confirm(`Are you sure you want to ${action} this demo?`)) {
+        fetch(`/admin/demos/${demoId}/toggle-status/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ activate: !isActive })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating demo status. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating demo status. Please try again.');
+        });
+    }
+}
+
+// Customer view toggle
+function toggleCustomerView() {
+    window.open(`/demos/{{ demo.slug }}/`, '_blank');
+}
+
+// Toast notification helper
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 5000);
+}
+
+// Video analytics tracking
+if (video) {
+    let watchTime = 0;
+    let lastTime = 0;
+    
+    video.addEventListener('timeupdate', function() {
+        const currentTime = Math.floor(video.currentTime);
+        if (currentTime > lastTime) {
+            watchTime += (currentTime - lastTime);
+            lastTime = currentTime;
+        }
+    });
+    
+    // Track when admin finishes watching
+    video.addEventListener('ended', function() {
+        console.log(`Admin watched full demo: ${watchTime} seconds`);
+        // You can send this data to backend for analytics
+    });
+}
+</script>
+{% endblock %}

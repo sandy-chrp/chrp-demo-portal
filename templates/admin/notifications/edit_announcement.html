@@ -1,0 +1,252 @@
+<!-- templates/admin/notifications/edit_announcement.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Edit Announcement{% endblock %}
+{% block page_title %}Edit System Announcement{% endblock %}
+
+{% block admin_extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .form-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .form-header {
+        border-bottom: 2px solid var(--gray-200);
+        padding-bottom: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .preview-panel {
+        background: var(--gray-100);
+        border: 2px dashed var(--gray-400);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+    }
+    
+    .announcement-preview {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .type-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .type-info { background: #dbeafe; color: #1e40af; }
+    .type-warning { background: #fef3c7; color: #92400e; }
+    .type-success { background: #d1fae5; color: #065f46; }
+    .type-maintenance { background: #fecaca; color: #991b1b; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Form Section -->
+        <div class="col-lg-8">
+            <div class="form-card">
+                <div class="form-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-bullhorn text-primary me-2"></i>
+                        Edit Announcement
+                    </h4>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Title and Type -->
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Title <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control" 
+                                   value="{{ announcement.title }}" required maxlength="200"
+                                   placeholder="Enter announcement title">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Type <span class="text-danger">*</span></label>
+                            <select name="announcement_type" class="form-select" required>
+                                {% for value, label in announcement_types %}
+                                <option value="{{ value }}" {% if announcement.announcement_type == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Message -->
+                    <div class="mb-3">
+                        <label class="form-label">Message <span class="text-danger">*</span></label>
+                        <textarea name="message" class="form-control" rows="5" required
+                                  placeholder="Enter announcement message">{{ announcement.message }}</textarea>
+                        <small class="text-muted">You can use basic HTML formatting</small>
+                    </div>
+                    
+                    <!-- Date Range -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Start Date <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="start_date" class="form-control" 
+                                   value="{{ announcement.start_date|date:'Y-m-d\TH:i' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">End Date <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="end_date" class="form-control" 
+                                   value="{{ announcement.end_date|date:'Y-m-d\TH:i' }}" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Display Options -->
+                    <div class="mb-4">
+                        <label class="form-label">Display Options</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="is_active" id="isActive"
+                                           {% if announcement.is_active %}checked{% endif %}>
+                                    <label class="form-check-label" for="isActive">
+                                        <strong>Active</strong>
+                                        <small class="text-muted d-block">Enable this announcement</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="show_on_login" id="showOnLogin"
+                                           {% if announcement.show_on_login %}checked{% endif %}>
+                                    <label class="form-check-label" for="showOnLogin">
+                                        <strong>Show on Login</strong>
+                                        <small class="text-muted d-block">Display when users log in</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="show_on_dashboard" id="showOnDashboard"
+                                           {% if announcement.show_on_dashboard %}checked{% endif %}>
+                                    <label class="form-check-label" for="showOnDashboard">
+                                        <strong>Show on Dashboard</strong>
+                                        <small class="text-muted d-block">Display on user dashboard</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <a href="{% url 'core:admin_system_announcements' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Preview Section -->
+        <div class="col-lg-4">
+            <!-- Current Status -->
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Current Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Created By</small>
+                        <strong>{{ announcement.created_by.full_name }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Created At</small>
+                        <strong>{{ announcement.created_at|date:"M d, Y g:i A" }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Last Updated</small>
+                        <strong>{{ announcement.updated_at|date:"M d, Y g:i A" }}</strong>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Current Status</small>
+                        {% if announcement.is_current %}
+                        <span class="badge bg-success">Currently Active</span>
+                        {% elif announcement.start_date > now %}
+                        <span class="badge bg-info">Scheduled</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Expired</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Live Preview -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-eye me-2"></i>Live Preview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="preview-panel">
+                        <h6 class="text-muted mb-3">How it will appear:</h6>
+                        <div class="announcement-preview">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 id="previewTitle" class="mb-0">{{ announcement.title }}</h6>
+                                <span id="previewType" class="type-badge type-{{ announcement.announcement_type }}">
+                                    {{ announcement.get_announcement_type_display }}
+                                </span>
+                            </div>
+                            <p id="previewMessage" class="mb-0 text-muted">{{ announcement.message|truncatewords:30 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+// Initialize date pickers
+flatpickr("input[type=datetime-local]", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    minDate: "today"
+});
+
+// Live preview updates
+document.querySelector('input[name="title"]').addEventListener('input', function() {
+    document.getElementById('previewTitle').textContent = this.value || 'Announcement Title';
+});
+
+document.querySelector('textarea[name="message"]').addEventListener('input', function() {
+    const preview = this.value || 'Announcement message will appear here...';
+    document.getElementById('previewMessage').textContent = 
+        preview.split(' ').slice(0, 30).join(' ') + (preview.split(' ').length > 30 ? '...' : '');
+});
+
+document.querySelector('select[name="announcement_type"]').addEventListener('change', function() {
+    const typeSpan = document.getElementById('previewType');
+    typeSpan.className = 'type-badge type-' + this.value;
+    typeSpan.textContent = this.options[this.selectedIndex].text;
+});
+</script>
+{% endblock %}

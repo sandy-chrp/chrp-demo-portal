@@ -1,0 +1,341 @@
+<!-- templates/admin/notifications/send_bulk.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Send Bulk Notification{% endblock %}
+{% block page_title %}Send Bulk Notification{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .user-select-box {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        background: #f8f9fa;
+    }
+    
+    .preview-card {
+        background: #f8f9fa;
+        border-left: 4px solid #3b82f6;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+    
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+    
+    .tips-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    
+    .user-checkbox-item {
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+    
+    .user-checkbox-item:hover {
+        background: white;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Main Form Card -->
+                <div class="form-section">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="fas fa-paper-plane fa-2x text-primary me-3"></i>
+                        <div>
+                            <h4 class="mb-0">Compose Bulk Notification</h4>
+                            <p class="text-muted mb-0">Send notifications to multiple users at once</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification Type -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Notification Type</label>
+                        <select name="notification_type" class="form-select" required>
+                            <option value="">Select Type...</option>
+                            {% for type_value, type_label in notification_types %}
+                            <option value="{{ type_value }}">{{ type_label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Title -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Notification Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control form-control-lg" 
+                               placeholder="Enter a clear, concise title" required maxlength="200"
+                               id="notificationTitle">
+                    </div>
+                    
+                    <!-- Message -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Message Content <span class="text-danger">*</span></label>
+                        <textarea name="message" class="form-control" rows="6" 
+                                  placeholder="Write your notification message here..." required
+                                  id="notificationMessage"></textarea>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            You can use basic HTML formatting (bold, italic, links)
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Recipient Selection -->
+                <div class="form-section">
+                    <h5 class="mb-3">
+                        <i class="fas fa-users text-primary me-2"></i>
+                        Select Recipients
+                    </h5>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Recipient Filter</label>
+                        <select name="user_filter" id="userFilter" class="form-select" onchange="toggleUserSelection()">
+                            <option value="all">All Active Users</option>
+                            <option value="approved">Approved Users Only</option>
+                            <option value="verified">Email Verified Users Only</option>
+                            <option value="recent">Recent Users (Last 30 days)</option>
+                            <option value="specific">Select Specific Users</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Specific Users Selection (Hidden by default) -->
+                    <div class="mb-3" id="specificUsersDiv" style="display: none;">
+                        <label class="form-label fw-bold">
+                            Select Users 
+                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="selectAllUsers()">
+                                Select All
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="deselectAllUsers()">
+                                Deselect All
+                            </button>
+                        </label>
+                        <div class="user-select-box">
+                            {% for user in all_users %}
+                            <div class="form-check user-checkbox-item">
+                                <input class="form-check-input user-checkbox" type="checkbox" 
+                                       name="specific_users" value="{{ user.id }}"
+                                       id="user{{ user.id }}">
+                                <label class="form-check-label" for="user{{ user.id }}">
+                                    <strong>{{ user.full_name }}</strong> - {{ user.email }}
+                                    {% if user.organization %}
+                                        <span class="badge bg-light text-dark">{{ user.organization }}</span>
+                                    {% endif %}
+                                    {% if not user.is_approved %}
+                                        <span class="badge bg-warning">Pending Approval</span>
+                                    {% endif %}
+                                    {% if not user.is_email_verified %}
+                                        <span class="badge bg-danger">Unverified</span>
+                                    {% endif %}
+                                </label>
+                            </div>
+                            {% empty %}
+                            <p class="text-muted text-center">No users available</p>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted mt-2 d-block">
+                            <span id="selectedCount">0</span> users selected
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Send Options -->
+                <div class="form-section">
+                    <h5 class="mb-3">
+                        <i class="fas fa-cog text-primary me-2"></i>
+                        Send Options
+                    </h5>
+                    
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="send_email" id="sendEmail">
+                        <label class="form-check-label" for="sendEmail">
+                            <strong>Also send as email notification</strong>
+                            <small class="text-muted d-block">Users will receive this notification in their email inbox</small>
+                        </label>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="high_priority" id="highPriority">
+                        <label class="form-check-label" for="highPriority">
+                            <strong>Mark as high priority</strong>
+                            <small class="text-muted d-block">Notification will be highlighted in user dashboard</small>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg" onclick="return confirmSend()">
+                        <i class="fas fa-paper-plane me-2"></i>Send Notification
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-lg" onclick="previewNotification()">
+                        <i class="fas fa-eye me-2"></i>Preview
+                    </button>
+                    <a href="{% url 'core:admin_notifications' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Right Column - Preview and Tips -->
+        <div class="col-lg-4">
+            <!-- Preview Card -->
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-eye me-2"></i>Live Preview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="preview-card">
+                        <h6 class="mb-2 fw-bold" id="previewTitle">Notification title will appear here...</h6>
+                        <p class="mb-0 text-muted" id="previewMessage">Your message content will be shown here as you type...</p>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            This is how the notification will appear to users
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statistics Card -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Quick Stats
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total Active Users:</span>
+                        <strong>{{ all_users|length }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Approved Users:</span>
+                        <strong>{{ all_users|length }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Email Verified:</span>
+                        <strong>{{ all_users|length }}</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tips Card -->
+            <div class="tips-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-lightbulb me-2"></i>Best Practices
+                </h5>
+                <ul class="mb-0">
+                    <li>Keep notifications concise and actionable</li>
+                    <li>Use clear subject lines that convey urgency</li>
+                    <li>Test with a small group before sending to all</li>
+                    <li>Avoid sending notifications during off-hours</li>
+                    <li>Include a clear call-to-action when needed</li>
+                    <li>Monitor engagement rates after sending</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+// Toggle user selection based on filter
+function toggleUserSelection() {
+    const filter = document.getElementById('userFilter').value;
+    const specificDiv = document.getElementById('specificUsersDiv');
+    specificDiv.style.display = filter === 'specific' ? 'block' : 'none';
+    updateSelectedCount();
+}
+
+// Select all users
+function selectAllUsers() {
+    document.querySelectorAll('.user-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    updateSelectedCount();
+}
+
+// Deselect all users
+function deselectAllUsers() {
+    document.querySelectorAll('.user-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    updateSelectedCount();
+}
+
+// Update selected count
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.user-checkbox:checked').length;
+    document.getElementById('selectedCount').textContent = checked;
+}
+
+// Live preview functionality
+function updatePreview() {
+    const title = document.getElementById('notificationTitle').value;
+    const message = document.getElementById('notificationMessage').value;
+    
+    document.getElementById('previewTitle').textContent = title || 'Notification title will appear here...';
+    document.getElementById('previewMessage').innerHTML = message || 'Your message content will be shown here as you type...';
+}
+
+// Preview notification in modal (optional)
+function previewNotification() {
+    updatePreview();
+    // You can add a modal here for full-screen preview
+}
+
+// Confirm before sending
+function confirmSend() {
+    const filter = document.getElementById('userFilter').value;
+    let recipientCount = {{ all_users|length }};
+    
+    if (filter === 'specific') {
+        recipientCount = document.querySelectorAll('.user-checkbox:checked').length;
+        if (recipientCount === 0) {
+            alert('Please select at least one recipient');
+            return false;
+        }
+    }
+    
+    return confirm(`Are you sure you want to send this notification to ${recipientCount} user(s)?`);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Live preview on input
+    document.getElementById('notificationTitle').addEventListener('input', updatePreview);
+    document.getElementById('notificationMessage').addEventListener('input', updatePreview);
+    
+    // Update count when checkboxes change
+    document.querySelectorAll('.user-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
+    });
+    
+    // Initial preview
+    updatePreview();
+});
+</script>
+{% endblock %}

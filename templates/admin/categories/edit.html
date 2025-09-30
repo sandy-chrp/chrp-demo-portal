@@ -1,0 +1,733 @@
+<!-- templates/admin/categories/edit.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Edit Category - {{ category.name }}{% endblock %}
+{% block page_title %}Edit Category: {{ category.name }}{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_categories' %}">Demo Categories</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_category_detail' category.id %}">{{ category.name }}</a>
+            </li>
+            <li class="breadcrumb-item active">Edit</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <!-- Current Status Badge -->
+    <span class="badge bg-{% if category.is_active %}success{% else %}secondary{% endif %} fs-6">
+        <i class="fas fa-{% if category.is_active %}check-circle{% else %}pause-circle{% endif %} me-1"></i>
+        {% if category.is_active %}Active{% else %}Inactive{% endif %}
+    </span>
+    
+    <!-- Navigation Actions -->
+    <div class="btn-group">
+        <a href="{% url 'core:admin_category_detail' category.id %}" 
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Details
+        </a>
+        
+        <a href="{% url 'core:admin_categories' %}" 
+           class="btn btn-outline-secondary">
+            <i class="fas fa-list me-1"></i>All Categories
+        </a>
+    </div>
+    
+    <!-- Quick Actions -->
+    {% if demo_count > 0 %}
+        <a href="{% url 'core:admin_demos' %}?category={{ category.slug }}" 
+           class="btn btn-outline-info">
+            <i class="fas fa-video me-1"></i>View Demos ({{ demo_count }})
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .form-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-lg);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        padding: var(--spacing-lg);
+        border-bottom: 1px solid var(--gray-200);
+        background: var(--gray-50);
+    }
+
+    .form-card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-card-title i {
+        margin-right: var(--spacing-md);
+        color: var(--primary-color);
+    }
+
+    .form-card-body {
+        padding: var(--spacing-xl);
+    }
+
+    .form-section {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .form-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 2px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+    }
+
+    .form-section-title i {
+        margin-right: var(--spacing-md);
+        color: var(--primary-color);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.15);
+    }
+
+    .form-text {
+        font-size: 0.8rem;
+        color: var(--gray-600);
+        margin-top: var(--spacing-xs);
+    }
+
+    .icon-preview {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        background: var(--gray-100);
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-md);
+        transition: all 0.3s ease;
+    }
+
+    .icon-preview.has-icon {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .icon-suggestions {
+        display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+        margin-top: var(--spacing-md);
+    }
+
+    .icon-suggestion {
+        width: 40px;
+        height: 40px;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .icon-suggestion:hover {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .category-stats {
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: var(--spacing-md);
+        background: white;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    .action-buttons {
+        background: var(--gray-50);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        display: flex;
+        gap: var(--spacing-md);
+        justify-content: space-between;
+        align-items: center;
+        margin-top: var(--spacing-xl);
+    }
+
+    .btn-group-custom {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    .preview-section {
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        margin-top: var(--spacing-lg);
+    }
+
+    .preview-category {
+        background: white;
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        border: 2px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .preview-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        background: var(--gray-100);
+        color: var(--gray-600);
+    }
+
+    .preview-icon.has-icon {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .preview-content h5 {
+        margin: 0 0 var(--spacing-xs) 0;
+        color: var(--dark-color);
+    }
+
+    .preview-content p {
+        margin: 0;
+        color: var(--gray-600);
+        font-size: 0.9rem;
+    }
+
+    .sort-help {
+        background: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        font-size: 0.9rem;
+        color: #0066cc;
+    }
+
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .btn-group-custom {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .icon-suggestions {
+            justify-content: center;
+        }
+    }
+
+    /* Form validation styles */
+    .is-invalid {
+        border-color: var(--danger-color);
+    }
+
+    .invalid-feedback {
+        color: var(--danger-color);
+        font-size: 0.8rem;
+        margin-top: var(--spacing-xs);
+    }
+
+    .is-valid {
+        border-color: var(--success-color);
+    }
+
+    .valid-feedback {
+        color: var(--success-color);
+        font-size: 0.8rem;
+        margin-top: var(--spacing-xs);
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- Category Statistics -->
+<div class="category-stats">
+    <h5 class="mb-3">
+        <i class="fas fa-chart-bar me-2 text-primary"></i>Category Statistics
+    </h5>
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-number">{{ demo_count }}</div>
+            <div class="stat-label">Total Demos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ active_demos }}</div>
+            <div class="stat-label">Active Demos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ total_views }}</div>
+            <div class="stat-label">Total Views</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ category.created_at|timesince|truncatechars:10 }}</div>
+            <div class="stat-label">Age</div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Form -->
+<form method="post" id="categoryEditForm" novalidate>
+    {% csrf_token %}
+    
+    <!-- Basic Information -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <h3 class="form-card-title">
+                <i class="fas fa-info-circle"></i>Basic Information
+            </h3>
+        </div>
+        <div class="form-card-body">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="form-section">
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">
+                                Category Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="categoryName" name="name" 
+                                   value="{{ category.name }}" required maxlength="100"
+                                   placeholder="Enter category name">
+                            <div class="form-text">
+                                This will be displayed to users and used for navigation.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="categoryDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="categoryDescription" name="description" 
+                                      rows="4" placeholder="Enter category description (optional)">{{ category.description }}</textarea>
+                            <div class="form-text">
+                                Provide a brief description of what this category contains.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="form-section">
+                        <label class="form-label">Preview</label>
+                        <div class="preview-category" id="categoryPreview">
+                            <div class="preview-icon" id="previewIcon">
+                                {% if category.icon %}
+                                    {{ category.icon|safe }}
+                                {% else %}
+                                    <i class="fas fa-folder"></i>
+                                {% endif %}
+                            </div>
+                            <div class="preview-content">
+                                <h5 id="previewName">{{ category.name }}</h5>
+                                <p id="previewDescription">
+                                    {% if category.description %}
+                                        {{ category.description|truncatechars:80 }}
+                                    {% else %}
+                                        No description
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual & Display Settings -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <h3 class="form-card-title">
+                <i class="fas fa-palette"></i>Visual & Display Settings
+            </h3>
+        </div>
+        <div class="form-card-body">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-section">
+                        <div class="mb-3">
+                            <label for="categoryIcon" class="form-label">Category Icon</label>
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="icon-preview" id="iconPreview">
+                                    {% if category.icon %}
+                                        {{ category.icon|safe }}
+                                    {% else %}
+                                        <i class="fas fa-folder"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1">
+                                    <input type="text" class="form-control" id="categoryIcon" name="icon" 
+                                           value="{{ category.icon }}" placeholder="🎯 or <i class='fas fa-target'></i>">
+                                    <div class="form-text">
+                                        Use an emoji (🎯) or Font Awesome HTML (&lt;i class='fas fa-target'&gt;&lt;/i&gt;)
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Icon Suggestions -->
+                            <div class="icon-suggestions">
+                                <div class="icon-suggestion" onclick="setIcon('🎯')" title="Target">🎯</div>
+                                <div class="icon-suggestion" onclick="setIcon('📊')" title="Chart">📊</div>
+                                <div class="icon-suggestion" onclick="setIcon('💼')" title="Business">💼</div>
+                                <div class="icon-suggestion" onclick="setIcon('🚀')" title="Rocket">🚀</div>
+                                <div class="icon-suggestion" onclick="setIcon('⚙️')" title="Settings">⚙️</div>
+                                <div class="icon-suggestion" onclick="setIcon('📱')" title="Mobile">📱</div>
+                                <div class="icon-suggestion" onclick="setIcon(`<i class='fas fa-desktop'></i>`)" title="Desktop">
+                                    <i class="fas fa-desktop"></i>
+                                </div>
+                                <div class="icon-suggestion" onclick="setIcon(`<i class='fas fa-code'></i>`)" title="Code">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <div class="icon-suggestion" onclick="setIcon(`<i class='fas fa-database'></i>`)" title="Database">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="icon-suggestion" onclick="setIcon(`<i class='fas fa-cloud'></i>`)" title="Cloud">
+                                    <i class="fas fa-cloud"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="form-section">
+                        <div class="mb-3">
+                            <label for="sortOrder" class="form-label">Sort Order</label>
+                            <input type="number" class="form-control" id="sortOrder" name="sort_order" 
+                                   value="{{ category.sort_order }}" min="0" max="999">
+                            <div class="sort-help">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Lower numbers appear first. Categories are sorted by this value, then alphabetically.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="isActive" name="is_active" 
+                                       {% if category.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="isActive">
+                                    <strong>Active Category</strong>
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Inactive categories are hidden from users but remain accessible in admin.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <div class="text-muted">
+            <i class="fas fa-info-circle me-1"></i>
+            Last updated: {{ category.created_at|date:"M j, Y g:i A" }}
+        </div>
+        
+        <div class="btn-group-custom">
+            <a href="{% url 'core:admin_category_detail' category.id %}" 
+               class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>Cancel
+            </a>
+            
+            <button type="button" class="btn btn-outline-info" onclick="previewChanges()">
+                <i class="fas fa-eye me-1"></i>Preview
+            </button>
+            
+            <button type="submit" class="btn btn-primary" id="saveButton">
+                <i class="fas fa-save me-1"></i>Save Changes
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewModalLabel">
+                    <i class="fas fa-eye me-2"></i>Category Preview
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-section">
+                    <h6>How this category will appear to users:</h6>
+                    <div class="preview-category" id="modalPreview">
+                        <div class="preview-icon" id="modalPreviewIcon">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="preview-content">
+                            <h5 id="modalPreviewName">Category Name</h5>
+                            <p id="modalPreviewDescription">Category description will appear here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" form="categoryEditForm" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+    // Form validation and interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('categoryEditForm');
+        const nameInput = document.getElementById('categoryName');
+        const descInput = document.getElementById('categoryDescription');
+        const iconInput = document.getElementById('categoryIcon');
+        const saveButton = document.getElementById('saveButton');
+
+        // Real-time preview updates
+        nameInput.addEventListener('input', updatePreview);
+        descInput.addEventListener('input', updatePreview);
+        iconInput.addEventListener('input', updateIconPreview);
+
+        // Form validation
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+            } else {
+                // Show loading state
+                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+                saveButton.disabled = true;
+            }
+        });
+
+        // Initialize preview
+        updatePreview();
+        updateIconPreview();
+    });
+
+    // Update preview in real-time
+    function updatePreview() {
+        const name = document.getElementById('categoryName').value || 'Category Name';
+        const description = document.getElementById('categoryDescription').value || 'No description';
+        
+        document.getElementById('previewName').textContent = name;
+        document.getElementById('previewDescription').textContent = 
+            description.length > 80 ? description.substring(0, 80) + '...' : description;
+    }
+
+    // Update icon preview
+    function updateIconPreview() {
+        const iconValue = document.getElementById('categoryIcon').value;
+        const iconPreview = document.getElementById('iconPreview');
+        const previewIcon = document.getElementById('previewIcon');
+        
+        if (iconValue.trim()) {
+            iconPreview.innerHTML = iconValue;
+            iconPreview.classList.add('has-icon');
+            
+            previewIcon.innerHTML = iconValue;
+            previewIcon.classList.add('has-icon');
+        } else {
+            iconPreview.innerHTML = '<i class="fas fa-folder"></i>';
+            iconPreview.classList.remove('has-icon');
+            
+            previewIcon.innerHTML = '<i class="fas fa-folder"></i>';
+            previewIcon.classList.remove('has-icon');
+        }
+    }
+
+    // Set icon from suggestions
+    function setIcon(iconValue) {
+        document.getElementById('categoryIcon').value = iconValue;
+        updateIconPreview();
+    }
+
+    // Show preview modal
+    function previewChanges() {
+        const name = document.getElementById('categoryName').value || 'Category Name';
+        const description = document.getElementById('categoryDescription').value || 'No description provided';
+        const iconValue = document.getElementById('categoryIcon').value;
+        
+        // Update modal preview
+        document.getElementById('modalPreviewName').textContent = name;
+        document.getElementById('modalPreviewDescription').textContent = description;
+        
+        const modalIcon = document.getElementById('modalPreviewIcon');
+        if (iconValue.trim()) {
+            modalIcon.innerHTML = iconValue;
+            modalIcon.classList.add('has-icon');
+        } else {
+            modalIcon.innerHTML = '<i class="fas fa-folder"></i>';
+            modalIcon.classList.remove('has-icon');
+        }
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+        modal.show();
+    }
+
+    // Form validation
+    function validateForm() {
+        let isValid = true;
+        
+        // Validate name
+        const nameInput = document.getElementById('categoryName');
+        const nameValue = nameInput.value.trim();
+        
+        if (!nameValue) {
+            showFieldError(nameInput, 'Category name is required.');
+            isValid = false;
+        } else if (nameValue.length > 100) {
+            showFieldError(nameInput, 'Category name must be 100 characters or less.');
+            isValid = false;
+        } else {
+            showFieldSuccess(nameInput);
+        }
+        
+        // Validate sort order
+        const sortInput = document.getElementById('sortOrder');
+        const sortValue = parseInt(sortInput.value);
+        
+        if (isNaN(sortValue) || sortValue < 0 || sortValue > 999) {
+            showFieldError(sortInput, 'Sort order must be a number between 0 and 999.');
+            isValid = false;
+        } else {
+            showFieldSuccess(sortInput);
+        }
+        
+        return isValid;
+    }
+
+    // Show field error
+    function showFieldError(field, message) {
+        field.classList.remove('is-valid');
+        field.classList.add('is-invalid');
+        
+        // Remove existing feedback
+        const existingFeedback = field.parentNode.querySelector('.invalid-feedback');
+        if (existingFeedback) {
+            existingFeedback.remove();
+        }
+        
+        // Add error message
+        const feedback = document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        feedback.textContent = message;
+        field.parentNode.appendChild(feedback);
+    }
+
+    // Show field success
+    function showFieldSuccess(field) {
+        field.classList.remove('is-invalid');
+        field.classList.add('is-valid');
+        
+        // Remove existing feedback
+        const existingFeedback = field.parentNode.querySelector('.invalid-feedback');
+        if (existingFeedback) {
+            existingFeedback.remove();
+        }
+    }
+
+    // Auto-generate slug preview (optional feature)
+    function generateSlug(name) {
+        return name.toLowerCase()
+                  .replace(/[^a-z0-9\s-]/g, '')
+                  .replace(/\s+/g, '-')
+                  .replace(/-+/g, '-')
+                  .trim('-');
+    }
+</script>
+{% endblock %}

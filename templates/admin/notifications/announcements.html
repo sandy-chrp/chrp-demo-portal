@@ -1,0 +1,169 @@
+<!-- templates/admin/notifications/announcements.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}System Announcements{% endblock %}
+{% block page_title %}System Announcements{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .announcement-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .announcement-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .announcement-type-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .type-info { background: #dbeafe; color: #1e40af; }
+    .type-warning { background: #fef3c7; color: #92400e; }
+    .type-success { background: #d1fae5; color: #065f46; }
+    .type-maintenance { background: #fecaca; color: #991b1b; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">System Announcements</h2>
+            <p class="text-muted mb-0">Manage system-wide announcements and alerts</p>
+        </div>
+        <a href="{% url 'core:admin_create_announcement' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create Announcement
+        </a>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {% if filter_status == 'all' %}active{% endif %}" 
+               href="?status=all">All Announcements</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if filter_status == 'active' %}active{% endif %}" 
+               href="?status=active">Active</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if filter_status == 'scheduled' %}active{% endif %}" 
+               href="?status=scheduled">Scheduled</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if filter_status == 'expired' %}active{% endif %}" 
+               href="?status=expired">Expired</a>
+        </li>
+    </ul>
+    
+    <!-- Announcements List -->
+    <div class="row">
+        {% for announcement in announcements %}
+        <div class="col-lg-6 mb-4">
+            <div class="card announcement-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title mb-0">{{ announcement.title }}</h5>
+                        <span class="announcement-type-badge type-{{ announcement.announcement_type }}">
+                            {{ announcement.get_announcement_type_display }}
+                        </span>
+                    </div>
+                    
+                    <p class="card-text">{{ announcement.message|truncatewords:30 }}</p>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ announcement.start_date|date:"M d, Y" }} - {{ announcement.end_date|date:"M d, Y" }}
+                        </small>
+                        <small class="text-muted d-block">
+                            <i class="fas fa-user me-1"></i>Created by {{ announcement.created_by.full_name }}
+                        </small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if announcement.is_current %}
+                            <span class="badge bg-success">Active</span>
+                            {% elif announcement.start_date > now %}
+                            <span class="badge bg-info">Scheduled</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Expired</span>
+                            {% endif %}
+                            
+                            {% if announcement.show_on_login %}
+                            <span class="badge bg-primary">Login</span>
+                            {% endif %}
+                            {% if announcement.show_on_dashboard %}
+                            <span class="badge bg-primary">Dashboard</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <a href="{% url 'core:admin_edit_announcement' announcement.id %}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="post" class="d-inline" 
+                                  action="{% url 'core:admin_delete_announcement' announcement.id %}"
+                                  onsubmit="return confirm('Delete this announcement?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-bullhorn fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No announcements found</p>
+                <a href="{% url 'core:admin_create_announcement' %}" class="btn btn-primary">
+                    Create First Announcement
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if announcements.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if announcements.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ announcements.previous_page_number }}&status={{ filter_status }}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in announcements.paginator.page_range %}
+            <li class="page-item {% if announcements.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}&status={{ filter_status }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            
+            {% if announcements.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ announcements.next_page_number }}&status={{ filter_status }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+

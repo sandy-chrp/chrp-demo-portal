@@ -1,0 +1,1499 @@
+<!-- templates/admin/demos/add.html - Updated with Business Categories -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Add New Demo{% endblock %}
+{% block page_title %}Add New Demo{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_demos' %}">Demo Videos</a>
+            </li>
+            <li class="breadcrumb-item active">Add New Demo</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to List
+    </a>
+    <button type="submit" form="demoForm" class="btn btn-primary">
+        <i class="fas fa-save me-1"></i>Save Demo
+    </button>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .form-section {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .section-title i {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-sm);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .form-label.required::after {
+        content: '*';
+        color: var(--danger-color);
+        margin-left: var(--spacing-xs);
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.1);
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-top: var(--spacing-xs);
+    }
+
+    /* Enhanced File Upload Area */
+    .file-upload-area {
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        text-align: center;
+        transition: all 0.3s ease;
+        background: var(--gray-50);
+        cursor: pointer;
+        position: relative;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .file-upload-area.dragover {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.1);
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(30, 60, 114, 0.2);
+    }
+
+    .file-upload-area.uploading {
+        border-color: var(--warning-color);
+        background: rgba(245, 158, 11, 0.1);
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .file-upload-area.uploaded {
+        border-color: var(--success-color);
+        background: rgba(16, 185, 129, 0.1);
+        border-style: solid;
+    }
+
+    .file-upload-area.has-error {
+        border-color: var(--danger-color);
+        background: rgba(239, 68, 68, 0.1);
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .file-upload-icon {
+        font-size: 3rem;
+        color: var(--gray-400);
+        margin-bottom: var(--spacing-md);
+        transition: all 0.3s ease;
+    }
+
+    .file-upload-area:hover .file-upload-icon {
+        color: var(--primary-color);
+        transform: scale(1.1);
+    }
+
+    .file-upload-area.uploading .file-upload-icon {
+        animation: pulse 2s infinite;
+        color: var(--warning-color);
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .file-upload-text {
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-sm);
+        font-weight: 500;
+    }
+
+    .file-upload-hint {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+    }
+
+    /* Upload Progress */
+    .upload-progress {
+        display: none;
+        width: 100%;
+        max-width: 300px;
+        margin-top: var(--spacing-md);
+    }
+
+    .upload-progress.show {
+        display: block;
+    }
+
+    .upload-status {
+        display: none;
+        align-items: center;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .upload-status.show {
+        display: flex;
+    }
+
+    .upload-status.success {
+        color: var(--success-color);
+    }
+
+    .upload-status.error {
+        color: var(--danger-color);
+    }
+
+    .upload-status.uploading {
+        color: var(--warning-color);
+    }
+
+    /* File Preview */
+    .file-preview {
+        display: none;
+        margin-top: var(--spacing-lg);
+        padding: var(--spacing-lg);
+        background: white;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .file-preview.show {
+        display: block;
+    }
+
+    .preview-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+        transition: all 0.3s ease;
+    }
+
+    .preview-item:hover {
+        background: var(--gray-100);
+        transform: translateX(5px);
+    }
+
+    .preview-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .preview-info {
+        flex: 1;
+    }
+
+    .preview-name {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-xs);
+        word-break: break-all;
+    }
+
+    .preview-details {
+        display: flex;
+        gap: var(--spacing-md);
+        font-size: 0.875rem;
+        color: var(--gray-600);
+    }
+
+    .preview-remove {
+        background: none;
+        border: none;
+        color: var(--danger-color);
+        cursor: pointer;
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        transition: all 0.2s ease;
+        font-size: 1.2rem;
+    }
+
+    .preview-remove:hover {
+        background: rgba(239, 68, 68, 0.1);
+        transform: scale(1.1);
+    }
+
+    .preview-thumbnail {
+        width: 80px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
+        margin-top: var(--spacing-xs);
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-check {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-top: 0;
+    }
+
+    .form-check-label {
+        font-weight: 500;
+        margin-left: var(--spacing-sm);
+    }
+
+    .help-text {
+        background: var(--info-color);
+        color: white;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .help-text i {
+        margin-right: var(--spacing-sm);
+    }
+
+    /* Customer Selection Styles */
+    .customer-controls {
+        padding: var(--spacing-md);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .customer-list-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        background: white;
+    }
+
+    .customer-list {
+        padding: var(--spacing-sm);
+    }
+
+    .customer-item {
+        margin-bottom: var(--spacing-sm);
+        transition: all 0.2s ease;
+    }
+
+    .customer-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .customer-item.hidden {
+        display: none;
+    }
+
+    .customer-label {
+        width: 100%;
+        margin-bottom: 0;
+        cursor: pointer;
+        padding: var(--spacing-md);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .customer-label:hover {
+        background: var(--gray-50);
+        border-color: var(--primary-color);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .customer-checkbox:checked + .customer-label {
+        background: rgba(30, 60, 114, 0.05);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(30, 60, 114, 0.1);
+    }
+
+    .customer-info {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .customer-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-color), #4a90e2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        flex-shrink: 0;
+        text-transform: uppercase;
+        box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);
+    }
+
+    .customer-details {
+        flex: 1;
+    }
+
+    .customer-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .customer-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+        font-size: 0.875rem;
+        color: var(--gray-600);
+    }
+
+    .customer-meta span {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    .customer-status {
+        flex-shrink: 0;
+    }
+
+    .selected-count .alert {
+        margin-bottom: 0;
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    #customerSelectionArea.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .no-customers {
+        padding: var(--spacing-xl);
+        color: var(--gray-500);
+    }
+
+    .form-actions {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+        position: sticky;
+        bottom: var(--spacing-lg);
+        z-index: 100;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    .progress-indicator {
+        display: none;
+        align-items: center;
+        gap: var(--spacing-sm);
+        color: var(--primary-color);
+        font-size: 0.875rem;
+    }
+
+    .progress-indicator.show {
+        display: flex;
+    }
+
+    #subcategoryLoader {
+        display: none;
+        margin-top: var(--spacing-xs);
+    }
+
+    #subcategoryLoader.show {
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .form-section {
+            padding: var(--spacing-lg);
+        }
+
+        .file-upload-area {
+            padding: var(--spacing-lg);
+            min-height: 120px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-group {
+            justify-content: center;
+        }
+
+        .customer-meta {
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+        
+        .customer-info {
+            flex-direction: column;
+            text-align: center;
+            gap: var(--spacing-sm);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<form method="post" enctype="multipart/form-data" id="demoForm" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <!-- Basic Information -->
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-info-circle"></i>Basic Information
+        </h3>
+
+        <div class="help-text">
+            <i class="fas fa-lightbulb"></i>
+            Provide clear and descriptive information to help customers understand what your demo covers.
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}" class="form-label required">
+                        <i class="fas fa-heading"></i>Demo Title
+                    </label>
+                    {{ form.title }}
+                    <div class="form-text">
+                        Choose a clear, descriptive title that explains what this demo shows.
+                    </div>
+                    {% if form.title.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.title.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}" class="form-label required">
+                        <i class="fas fa-align-left"></i>Description
+                    </label>
+                    {{ form.description }}
+                    <div class="form-text">
+                        Provide detailed description of what customers will learn from this demo.
+                    </div>
+                    {% if form.description.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.description.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Business Category and Subcategory -->
+                <div class="form-group">
+                    <label for="{{ form.business_category.id_for_label }}" class="form-label">
+                        <i class="fas fa-briefcase"></i>Business Category
+                    </label>
+                    {{ form.business_category }}
+                    <div class="form-text">
+                        Select the business category for this demo (optional).
+                    </div>
+                    {% if form.business_category.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.business_category.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.business_subcategory.id_for_label }}" class="form-label">
+                        <i class="fas fa-sitemap"></i>Business Subcategory
+                    </label>
+                    {{ form.business_subcategory }}
+                    <div id="subcategoryLoader">
+                        <small class="text-muted">
+                            <span class="spinner-border spinner-border-sm me-1"></span>Loading subcategories...
+                        </small>
+                    </div>
+                    <div class="form-text">
+                        Select a subcategory after choosing the business category (optional).
+                    </div>
+                    {% if form.business_subcategory.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.business_subcategory.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.duration.id_for_label }}" class="form-label">
+                        <i class="fas fa-clock"></i>Duration
+                    </label>
+                    {{ form.duration }}
+                    <div class="form-text">
+                        Video duration in HH:MM:SS format (e.g., 00:05:30 for 5 minutes 30 seconds)
+                    </div>
+                    {% if form.duration.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.duration.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Files -->
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-file-video"></i>Media Files
+        </h3>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label class="form-label required">
+                        <i class="fas fa-video"></i>Demo Video
+                    </label>
+                    
+                    <div class="file-upload-area" id="videoUploadArea">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            <strong>Click to upload</strong> or drag and drop your video file
+                        </div>
+                        <div class="file-upload-hint">
+                            MP4, AVI, MOV, WMV up to 100MB
+                        </div>
+                        <div class="upload-progress">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="upload-status">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Uploading...</span>
+                        </div>
+                        {{ form.video_file }}
+                    </div>
+                    
+                    <div id="videoPreview" class="file-preview">
+                        <!-- Video preview will be inserted here -->
+                    </div>
+                    
+                    {% if form.video_file.errors %}
+                        <div class="invalid-feedback d-block mt-2">
+                            {{ form.video_file.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-image"></i>Thumbnail Image
+                    </label>
+                    
+                    <div class="file-upload-area" id="thumbnailUploadArea">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            <strong>Click to upload</strong> or drag and drop thumbnail
+                        </div>
+                        <div class="file-upload-hint">
+                            JPG, PNG, WebP up to 5MB
+                        </div>
+                        <div class="upload-progress">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="upload-status">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Uploading...</span>
+                        </div>
+                        {{ form.thumbnail }}
+                    </div>
+                    
+                    <div id="thumbnailPreview" class="file-preview">
+                        <!-- Thumbnail preview will be inserted here -->
+                    </div>
+                    
+                    <div class="form-text">
+                        Upload an eye-catching thumbnail to represent your demo. If not provided, a default placeholder will be used.
+                    </div>
+                    
+                    {% if form.thumbnail.errors %}
+                        <div class="invalid-feedback d-block mt-2">
+                            {{ form.thumbnail.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Access Control -->
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-users"></i>Customer Access Control
+        </h3>
+
+        <div class="help-text">
+            <i class="fas fa-info-circle"></i>
+            Control which customers can access this demo. You can make it available to all customers or target specific customers only.
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <!-- All Customers Option -->
+                <div class="form-group">
+                    <div class="form-check form-switch mb-3">
+                        {{ form.all_customers }}
+                        <label class="form-check-label" for="{{ form.all_customers.id_for_label }}">
+                            <i class="fas fa-globe me-1"></i>
+                            <strong>Available to All Customers</strong>
+                        </label>
+                        <div class="form-text">
+                            When enabled, all approved customers can access this demo. When disabled, only selected customers can access it.
+                        </div>
+                    </div>
+                    {% if form.all_customers.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.all_customers.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Customer Selection -->
+                <div class="form-group" id="customerSelectionArea">
+                    <label class="form-label">
+                        <i class="fas fa-user-check"></i>Select Target Customers
+                    </label>
+                    
+                    <!-- Search and Filter Controls -->
+                    <div class="customer-controls mb-3">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="customerSearch">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-outline-primary w-100" id="selectAllBtn">
+                                    <i class="fas fa-check-double me-1"></i>Select All
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-outline-secondary w-100" id="clearAllBtn">
+                                    <i class="fas fa-times me-1"></i>Clear All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer List Container -->
+                    <div class="customer-list-container">
+                        <div class="customer-list" id="customerList">
+                            {% if customers %}
+                                {% for customer in customers %}
+                                <div class="customer-item" data-customer-id="{{ customer.id }}" 
+                                     data-search-text="{{ customer.full_name|lower }} {{ customer.email|lower }} {{ customer.organization|default:''|lower }}">
+                                    <div class="form-check">
+                                        <input class="form-check-input customer-checkbox" 
+                                               type="checkbox" 
+                                               name="target_customers" 
+                                               value="{{ customer.id }}" 
+                                               id="customer_{{ customer.id }}">
+                                        <label class="form-check-label customer-label" for="customer_{{ customer.id }}">
+                                            <div class="customer-info">
+                                                <div class="customer-avatar">
+                                                    {{ customer.first_name|first|upper }}{{ customer.last_name|first|upper }}
+                                                </div>
+                                                <div class="customer-details">
+                                                    <div class="customer-name">
+                                                        {{ customer.full_name }}
+                                                    </div>
+                                                    <div class="customer-meta">
+                                                        <span class="customer-email">
+                                                            <i class="fas fa-envelope me-1"></i>{{ customer.email }}
+                                                        </span>
+                                                        {% if customer.organization %}
+                                                        <span class="customer-org">
+                                                            <i class="fas fa-building me-1"></i>{{ customer.organization }}
+                                                        </span>
+                                                        {% endif %}
+                                                        <span class="customer-mobile">
+                                                            <i class="fas fa-phone me-1"></i>{{ customer.full_mobile }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="customer-status">
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check-circle me-1"></i>Approved
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                            <div class="no-customers text-center py-4">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Approved Customers Found</h5>
+                                <p class="text-muted">
+                                    {% if customer_count == 0 %}
+                                        There are no approved customers in the system yet.
+                                    {% else %}
+                                        Debug: Found {{ customer_count }} customers but they're not loading properly.
+                                    {% endif %}
+                                </p>
+                                <small class="text-muted">
+                                    Debug Info: Total customers in context = {{ customer_count|default:"Not available" }}
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Selected Count -->
+                    <div class="selected-count mt-3">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-1"></i>
+                            <span id="selectedCount">0</span> customer(s) selected
+                        </div>
+                    </div>
+
+                    {% if form.target_customers.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.target_customers.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-cogs"></i>Demo Settings
+        </h3>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label for="{{ form.sort_order.id_for_label }}" class="form-label">
+                        <i class="fas fa-sort-numeric-down"></i>Sort Order
+                    </label>
+                    {{ form.sort_order }}
+                    <div class="form-text">
+                        Lower numbers appear first in the demo list. Default is 0 for automatic ordering.
+                    </div>
+                    {% if form.sort_order.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.sort_order.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Demo Status:</strong> New demos are automatically set as Active and can be managed after creation.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+        <div class="progress-indicator" id="uploadProgress">
+            <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <span>Uploading files and creating demo...</span>
+        </div>
+        
+        <div class="btn-group">
+            <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>Cancel
+            </a>
+            <button type="button" class="btn btn-outline-primary" onclick="previewDemo()">
+                <i class="fas fa-eye me-1"></i>Preview
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i>Create Demo
+            </button>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced file upload handling with visual feedback
+    setupEnhancedFileUpload('video_file', 'videoUploadArea', 'videoPreview', ['mp4', 'avi', 'mov', 'wmv'], 'video');
+    setupEnhancedFileUpload('thumbnail', 'thumbnailUploadArea', 'thumbnailPreview', ['jpg', 'jpeg', 'png', 'webp'], 'image');
+    
+    // Business Category and Subcategory handling
+    setupCategorySubcategory();
+    
+    // Customer selection functionality
+    setupCustomerSelection();
+    
+    // Form validation
+    setupFormValidation();
+    
+    // Auto-save draft functionality
+    setupAutoSave();
+});
+
+function setupCategorySubcategory() {
+    const categorySelect = document.querySelector('[name="business_category"]');
+    const subcategorySelect = document.querySelector('[name="business_subcategory"]');
+    const subcategoryLoader = document.getElementById('subcategoryLoader');
+    
+    if (!categorySelect || !subcategorySelect) return;
+    
+    categorySelect.addEventListener('change', function() {
+        const categoryId = this.value;
+        
+        // Clear subcategory
+        subcategorySelect.innerHTML = '<option value="">Select subcategory...</option>';
+        
+        if (!categoryId) {
+            subcategorySelect.disabled = true;
+            return;
+        }
+        
+        // Show loader
+        subcategorySelect.disabled = true;
+        subcategoryLoader.classList.add('show');
+        
+        // Fetch subcategories via AJAX
+        fetch(`/auth/ajax/get-subcategories/?category_id=${categoryId}`)
+            .then(response => response.json())
+            .then(data => {
+                subcategorySelect.innerHTML = '<option value="">Select subcategory (optional)...</option>';
+                
+                if (data.success && data.subcategories) {
+                    data.subcategories.forEach(subcategory => {
+                        const option = document.createElement('option');
+                        option.value = subcategory.id;
+                        option.textContent = subcategory.name;
+                        subcategorySelect.appendChild(option);
+                    });
+                    subcategorySelect.disabled = false;
+                }
+                
+                subcategoryLoader.classList.remove('show');
+            })
+            .catch(error => {
+                console.error('Error loading subcategories:', error);
+                subcategoryLoader.classList.remove('show');
+                subcategorySelect.innerHTML = '<option value="">Error loading subcategories</option>';
+            });
+    });
+}
+
+function setupCustomerSelection() {
+    const allCustomersCheckbox = document.getElementById('allCustomersCheckbox');
+    const customerSelectionArea = document.getElementById('customerSelectionArea');
+    const customerSearch = document.getElementById('customerSearch');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const customerCheckboxes = document.querySelectorAll('.customer-checkbox');
+    const selectedCountSpan = document.getElementById('selectedCount');
+
+    // Toggle customer selection area based on "All Customers" checkbox
+    function toggleCustomerSelection() {
+        if (allCustomersCheckbox && allCustomersCheckbox.checked) {
+            customerSelectionArea.classList.add('disabled');
+            // Uncheck all customer checkboxes
+            customerCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectedCount();
+        } else if (customerSelectionArea) {
+            customerSelectionArea.classList.remove('disabled');
+        }
+    }
+
+    // Search functionality
+    function filterCustomers() {
+        const searchTerm = customerSearch.value.toLowerCase();
+        const customerItems = document.querySelectorAll('.customer-item');
+        
+        customerItems.forEach(item => {
+            const searchText = item.getAttribute('data-search-text');
+            if (searchText.includes(searchTerm)) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+    }
+
+    // Select all visible customers
+    function selectAllCustomers() {
+        const visibleCheckboxes = document.querySelectorAll('.customer-item:not(.hidden) .customer-checkbox');
+        visibleCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        updateSelectedCount();
+    }
+
+    // Clear all customer selections
+    function clearAllCustomers() {
+        customerCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        updateSelectedCount();
+    }
+
+    // Update selected count
+    function updateSelectedCount() {
+        const checkedCount = document.querySelectorAll('.customer-checkbox:checked').length;
+        if (selectedCountSpan) {
+            selectedCountSpan.textContent = checkedCount;
+            
+            // Update alert style based on count
+            const alert = selectedCountSpan.closest('.alert');
+            if (alert) {
+                alert.className = 'alert ' + (checkedCount > 0 ? 'alert-success' : 'alert-info');
+            }
+        }
+    }
+
+    // Event listeners
+    if (allCustomersCheckbox) {
+        allCustomersCheckbox.addEventListener('change', toggleCustomerSelection);
+    }
+    if (customerSearch) {
+        customerSearch.addEventListener('input', filterCustomers);
+    }
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', selectAllCustomers);
+    }
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', clearAllCustomers);
+    }
+    
+    customerCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
+    });
+
+    // Initial setup
+    toggleCustomerSelection();
+    updateSelectedCount();
+}
+
+function setupEnhancedFileUpload(inputName, uploadAreaId, previewId, allowedExtensions, fileType) {
+    const input = document.querySelector(`input[name="${inputName}"]`);
+    const uploadArea = document.getElementById(uploadAreaId);
+    const preview = document.getElementById(previewId);
+    
+    if (!input || !uploadArea || !preview) return;
+    
+    // Hide the actual file input
+    input.style.display = 'none';
+    
+    // Store original content for reset
+    const originalIcon = uploadArea.querySelector('.file-upload-icon i');
+    const originalText = uploadArea.querySelector('.file-upload-text');
+    const originalHint = uploadArea.querySelector('.file-upload-hint');
+    const uploadStatus = uploadArea.querySelector('.upload-status');
+    const progressBar = uploadArea.querySelector('.upload-progress');
+    
+    // Click to upload
+    uploadArea.addEventListener('click', function() {
+        if (!uploadArea.classList.contains('uploading')) {
+            input.click();
+        }
+    });
+    
+    // Enhanced drag and drop with visual feedback
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        if (!uploadArea.classList.contains('uploading')) {
+            uploadArea.classList.add('dragover');
+        }
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        if (!uploadArea.classList.contains('uploading')) {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
+        }
+    });
+    
+    // File input change
+    input.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            handleFileSelection(e.target.files[0]);
+        }
+    });
+    
+    function handleFileSelection(file) {
+        // Reset any previous states
+        resetUploadArea();
+        
+        // Validate file
+        if (!validateFile(file)) {
+            return;
+        }
+        
+        // Show upload state
+        showUploadState();
+        
+        // Simulate file processing/validation
+        setTimeout(() => {
+            showSuccessState(file);
+            showFilePreview(file);
+        }, 1500);
+    }
+    
+    function validateFile(file) {
+        // Check extension
+        const extension = file.name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes(extension)) {
+            showErrorState(`Invalid file type. Allowed: ${allowedExtensions.join(', ').toUpperCase()}`);
+            return false;
+        }
+        
+        // Check file size
+        const maxSize = fileType === 'video' ? 100 * 1024 * 1024 : 5 * 1024 * 1024; // 100MB for video, 5MB for image
+        if (file.size > maxSize) {
+            const maxSizeMB = maxSize / (1024 * 1024);
+            showErrorState(`File too large. Maximum size: ${maxSizeMB}MB`);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    function resetUploadArea() {
+        uploadArea.className = 'file-upload-area';
+        uploadStatus.classList.remove('show');
+        progressBar.classList.remove('show');
+        uploadStatus.className = 'upload-status';
+    }
+    
+    function showUploadState() {
+        uploadArea.classList.add('uploading');
+        
+        // Update icon to spinning
+        originalIcon.className = 'fas fa-spinner fa-spin';
+        
+        // Show upload status
+        uploadStatus.classList.add('show', 'uploading');
+        uploadStatus.querySelector('span').textContent = 'Processing file...';
+        
+        // Show progress bar with animation
+        progressBar.classList.add('show');
+        const progressBarFill = progressBar.querySelector('.progress-bar');
+        
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 95) {
+                progress = 95;
+                clearInterval(progressInterval);
+            }
+            progressBarFill.style.width = progress + '%';
+        }, 100);
+        
+        // Store interval for cleanup
+        uploadArea._progressInterval = progressInterval;
+    }
+    
+    function showSuccessState(file) {
+        // Clear progress interval
+        if (uploadArea._progressInterval) {
+            clearInterval(uploadArea._progressInterval);
+        }
+        
+        // Complete progress bar
+        const progressBarFill = progressBar.querySelector('.progress-bar');
+        progressBarFill.style.width = '100%';
+        
+        setTimeout(() => {
+            uploadArea.classList.remove('uploading');
+            uploadArea.classList.add('uploaded');
+            
+            // Update icon to success
+            originalIcon.className = 'fas fa-check-circle';
+            
+            // Update status
+            uploadStatus.className = 'upload-status show success';
+            uploadStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>File uploaded successfully!</span>';
+            
+            // Hide progress bar
+            setTimeout(() => {
+                progressBar.classList.remove('show');
+            }, 500);
+        }, 500);
+    }
+    
+    function showErrorState(message) {
+        uploadArea.classList.add('has-error');
+        
+        // Update icon to error
+        originalIcon.className = 'fas fa-exclamation-triangle';
+        
+        // Show error status
+        uploadStatus.classList.add('show', 'error');
+        uploadStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>${message}</span>`;
+        
+        // Reset after 3 seconds
+        setTimeout(() => {
+            resetToDefault();
+        }, 3000);
+    }
+    
+    function resetToDefault() {
+        uploadArea.className = 'file-upload-area';
+        originalIcon.className = fileType === 'video' ? 'fas fa-cloud-upload-alt' : 'fas fa-image';
+        uploadStatus.classList.remove('show');
+        progressBar.classList.remove('show');
+    }
+    
+    function showFilePreview(file) {
+        preview.innerHTML = '';
+        preview.classList.add('show');
+        
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+        
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+        
+        const icon = document.createElement('div');
+        icon.className = 'preview-icon';
+        icon.innerHTML = isVideo ? '<i class="fas fa-video"></i>' : '<i class="fas fa-image"></i>';
+        
+        const info = document.createElement('div');
+        info.className = 'preview-info';
+        
+        const name = document.createElement('div');
+        name.className = 'preview-name';
+        name.textContent = file.name;
+        
+        const details = document.createElement('div');
+        details.className = 'preview-details';
+        
+        const size = document.createElement('span');
+        size.textContent = formatFileSize(file.size);
+        
+        const type = document.createElement('span');
+        type.textContent = file.type;
+        
+        details.appendChild(size);
+        details.appendChild(type);
+        
+        info.appendChild(name);
+        info.appendChild(details);
+        
+        // Add thumbnail for images
+        if (isImage) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-thumbnail';
+                info.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'preview-remove';
+        removeBtn.type = 'button';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.onclick = function() {
+            preview.classList.remove('show');
+            preview.innerHTML = '';
+            input.value = '';
+            resetToDefault();
+        };
+        
+        previewItem.appendChild(icon);
+        previewItem.appendChild(info);
+        previewItem.appendChild(removeBtn);
+        
+        preview.appendChild(previewItem);
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function setupFormValidation() {
+    const form = document.getElementById('demoForm');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (form.checkValidity()) {
+            // Show loading state
+            document.getElementById('uploadProgress').classList.add('show');
+            
+            // Disable form elements
+            const buttons = form.querySelectorAll('button, input[type="submit"]');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.type === 'submit') {
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating...';
+                }
+            });
+            
+            // Submit the form
+            form.submit();
+        } else {
+            form.classList.add('was-validated');
+            
+            // Scroll to first error
+            const firstError = form.querySelector('.is-invalid, :invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+}
+
+function setupAutoSave() {
+    let autoSaveTimeout;
+    const form = document.getElementById('demoForm');
+    const inputs = form.querySelectorAll('input, textarea, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(saveFormDraft, 2000);
+        });
+    });
+}
+
+function saveFormDraft() {
+    const formData = new FormData(document.getElementById('demoForm'));
+    const draftData = {};
+    
+    for (let [key, value] of formData.entries()) {
+        if (key !== 'video_file' && key !== 'thumbnail') {
+            draftData[key] = value;
+        }
+    }
+    
+    localStorage.setItem('demo_form_draft', JSON.stringify(draftData));
+}
+
+function loadFormDraft() {
+    const draft = localStorage.getItem('demo_form_draft');
+    if (draft) {
+        const draftData = JSON.parse(draft);
+        for (let [key, value] of Object.entries(draftData)) {
+            const input = document.querySelector(`[name="${key}"]`);
+            if (input && input.type !== 'file') {
+                input.value = value;
+            }
+        }
+    }
+}
+
+function clearFormDraft() {
+    localStorage.removeItem('demo_form_draft');
+}
+
+function previewDemo() {
+    const form = document.getElementById('demoForm');
+    const formData = new FormData(form);
+    
+    const categoryText = document.querySelector('select[name="business_category"] option:checked')?.text || 'No category';
+    const subcategoryText = document.querySelector('select[name="business_subcategory"] option:checked')?.text || '';
+    
+    const previewHtml = `
+        <div class="modal fade" id="previewModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Demo Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="demo-preview">
+                            <h4>${formData.get('title') || 'Untitled Demo'}</h4>
+                            <p class="text-muted">${formData.get('description') || 'No description provided'}</p>
+                            <div class="mt-3">
+                                ${categoryText !== 'No category' ? `<span class="badge bg-primary">${categoryText}</span>` : ''}
+                                ${subcategoryText && subcategoryText !== 'Select subcategory...' ? `<span class="badge bg-info ms-2">${subcategoryText}</span>` : ''}
+                                ${formData.get('is_featured') ? '<span class="badge bg-warning ms-2">Featured</span>' : ''}
+                                ${formData.get('is_active') ? '<span class="badge bg-success ms-2">Active</span>' : '<span class="badge bg-secondary ms-2">Inactive</span>'}
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">Duration: ${formData.get('duration') || 'Not specified'}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" form="demoForm" class="btn btn-primary">Create Demo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', previewHtml);
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+    
+    document.getElementById('previewModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+// Load draft on page load
+window.addEventListener('load', loadFormDraft);
+
+// Clear draft on successful form submission
+window.addEventListener('beforeunload', function() {
+    if (document.getElementById('uploadProgress').classList.contains('show')) {
+        clearFormDraft();
+    }
+});
+</script>
+{% endblock %}

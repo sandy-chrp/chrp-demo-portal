@@ -1,0 +1,804 @@
+<!-- templates/admin/demos/list.html - Updated with Business Categories -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Demo Management{% endblock %}
+{% block page_title %}Demo Videos Management{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Demo Videos</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <!-- Quick Stats -->
+    <div class="d-none d-md-flex align-items-center gap-3 me-3">
+        <div class="text-center">
+            <div class="fw-bold text-primary">{{ demos.paginator.count }}</div>
+            <small class="text-muted">Total Demos</small>
+        </div>
+        <div class="text-center">
+            <div class="fw-bold text-success">{{ active_demos_count }}</div>
+            <small class="text-muted">Active</small>
+        </div>
+        <div class="text-center">
+            <div class="fw-bold text-info">{{ total_views }}</div>
+            <small class="text-muted">Total Views</small>
+        </div>
+    </div>
+    
+    <!-- Add Demo Button -->
+    <a href="{% url 'core:admin_add_demo' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Add New Demo
+    </a>
+    
+    <!-- Bulk Actions -->
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-cog me-1"></i>Actions
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" onclick="bulkActivate()">
+                <i class="fas fa-play me-2"></i>Activate Selected
+            </a></li>
+            <li><a class="dropdown-item" href="#" onclick="bulkDeactivate()">
+                <i class="fas fa-pause me-2"></i>Deactivate Selected
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="bulkDelete()">
+                <i class="fas fa-trash me-2"></i>Delete Selected
+            </a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .demo-thumbnail {
+        width: 60px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .demo-placeholder {
+        width: 60px;
+        height: 40px;
+        background: var(--gradient-primary);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-inactive {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--gray-600);
+        border: 1px solid rgba(107, 114, 128, 0.2);
+    }
+
+    .featured-badge {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .filter-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .stat-card {
+        background: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border-left: 4px solid;
+        text-align: center;
+    }
+
+    .stat-card.primary { border-left-color: var(--primary-color); }
+    .stat-card.success { border-left-color: var(--success-color); }
+    .stat-card.info { border-left-color: var(--info-color); }
+    .stat-card.warning { border-left-color: var(--warning-color); }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-label {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+
+    .table-actions {
+        display: flex;
+        gap: var(--spacing-xs);
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: var(--spacing-3xl);
+        color: var(--gray-600);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray-400);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .empty-state-actions {
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-xl);
+        flex-wrap: wrap;
+    }
+
+    .btn-primary-large {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary-large:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        background: linear-gradient(135deg, #1a3766 0%, #245086 100%);
+    }
+
+    .btn-secondary-large {
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .btn-secondary-large:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .category-subcategory {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .category-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: rgba(30, 60, 114, 0.1);
+        color: var(--primary-color);
+        border: 1px solid rgba(30, 60, 114, 0.2);
+    }
+
+    .subcategory-badge {
+        display: inline-block;
+        padding: 0.2rem 0.4rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.7rem;
+        background: rgba(23, 162, 184, 0.1);
+        color: var(--info-color);
+        border: 1px solid rgba(23, 162, 184, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
+
+<!-- Quick Stats -->
+<div class="stats-row">
+    <div class="stat-card primary">
+        <div class="stat-number text-primary">{{ demos.paginator.count }}</div>
+        <div class="stat-label">Total Demos</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-number text-success">{{ active_demos_count }}</div>
+        <div class="stat-label">Active Demos</div>
+    </div>
+    <div class="stat-card info">
+        <div class="stat-number text-info">{{ featured_demos_count }}</div>
+        <div class="stat-label">Featured Demos</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-number text-warning">{{ total_views }}</div>
+        <div class="stat-label">Total Views</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-card">
+    <form method="get" class="row g-3">
+        <div class="col-md-4">
+            <label class="form-label">Search Demos</label>
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" 
+                       value="{{ search|default:'' }}">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">Business Category</label>
+            <select name="category" class="form-select" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" 
+                            {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                <option value="featured" {% if status_filter == 'featured' %}selected{% endif %}>Featured</option>
+            </select>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">Sort By</label>
+            <select name="sort" class="form-select" onchange="this.form.submit()">
+                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+                <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest First</option>
+                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title A-Z</option>
+                <option value="-views_count" {% if sort_by == '-views_count' %}selected{% endif %}>Most Viewed</option>
+                <option value="-likes_count" {% if sort_by == '-likes_count' %}selected{% endif %}>Most Liked</option>
+            </select>
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-grid">
+                <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Clear
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Demo List -->
+{% if demos %}
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h3 class="admin-card-title">
+                <i class="fas fa-video"></i>Demo Videos
+            </h3>
+            <div class="d-flex align-items-center gap-2">
+                <small class="text-muted">{{ demos.start_index }}-{{ demos.end_index }} of {{ demos.paginator.count }} demos</small>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                    <label class="form-check-label" for="selectAll">Select All</label>
+                </div>
+            </div>
+        </div>
+        <div class="admin-card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" class="form-check-input" id="masterCheckbox" onchange="toggleSelectAll(this)">
+                            </th>
+                            <th width="80">Thumbnail</th>
+                            <th>Title & Description</th>
+                            <th width="150">Business Category</th>
+                            <th width="100">Duration</th>
+                            <th width="80">Views</th>
+                            <th width="80">Likes</th>
+                            <th width="100">Status</th>
+                            <th width="100">Created</th>
+                            <th width="150">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for demo in demos %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check-input demo-checkbox" value="{{ demo.id }}">
+                                </td>
+                                <td>
+                                    {% if demo.thumbnail %}
+                                        <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-thumbnail">
+                                    {% else %}
+                                        <div class="demo-placeholder">
+                                            <i class="fas fa-video"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div>
+                                        <div class="fw-semibold">{{ demo.title }}</div>
+                                        <small class="text-muted">{{ demo.description|truncatechars:60 }}</small>
+                                        {% if demo.is_featured %}
+                                            <span class="badge featured-badge ms-2">
+                                                <i class="fas fa-star me-1"></i>Featured
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="category-subcategory">
+                                        {% if demo.business_category %}
+                                            <span class="category-badge">{{ demo.business_category.name }}</span>
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                        {% if demo.business_subcategory %}
+                                            <span class="subcategory-badge">{{ demo.business_subcategory.name }}</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ demo.formatted_duration|default:"--:--" }}</td>
+                                <td>
+                                    <span class="fw-semibold">{{ demo.views_count }}</span>
+                                </td>
+                                <td>
+                                    <span class="fw-semibold">{{ demo.likes_count }}</span>
+                                </td>
+                                <td>
+                                    {% if demo.is_active %}
+                                        <span class="status-badge status-active">Active</span>
+                                    {% else %}
+                                        <span class="status-badge status-inactive">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ demo.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a href="{% url 'core:admin_demo_detail' demo.id %}" 
+                                           class="btn btn-sm btn-outline-primary" title="View/Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                        <button class="btn btn-sm btn-outline-{% if demo.is_active %}warning{% else %}success{% endif %}" 
+                                                onclick="toggleDemoStatus({{ demo.id }}, {{ demo.is_active|yesno:'false,true' }})"
+                                                title="{% if demo.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                            <i class="fas fa-{% if demo.is_active %}pause{% else %}play{% endif %}"></i>
+                                        </button>
+                                        
+                                        <a href="{% url 'core:admin_demo_watch' demo.id %}" target="_blank"
+                                           class="btn btn-sm btn-outline-info" title="Preview">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                onclick="deleteDemo({{ demo.id }}, '{{ demo.title|escapejs }}')"
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if demos.has_other_pages %}
+        <nav aria-label="Demo pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if demos.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ demos.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">{{ demos.number }} of {{ demos.paginator.num_pages }}</span>
+                </li>
+
+                {% if demos.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ demos.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ demos.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <!-- Empty State -->
+    <div class="admin-card">
+        <div class="admin-card-body">
+            <div class="empty-state">
+                <i class="fas fa-video"></i>
+                <h3>No Demo Videos Found</h3>
+                {% if search or category_filter or status_filter %}
+                    <p>No demos match your current filters. Try adjusting your search criteria or clear all filters.</p>
+                    <div class="empty-state-actions">
+                        <a href="{% url 'core:admin_demos' %}" class="btn-secondary-large">
+                            <i class="fas fa-times"></i>Clear All Filters
+                        </a>
+                        <a href="{% url 'core:admin_add_demo' %}" class="btn-primary-large">
+                            <i class="fas fa-plus"></i>Add New Demo
+                        </a>
+                    </div>
+                {% else %}
+                    <p>Welcome to demo management! Get started by uploading your first demo video to showcase your products and services.</p>
+                    <div class="empty-state-actions">
+                        <a href="{% url 'core:admin_add_demo' %}" class="btn-primary-large">
+                            <i class="fas fa-video"></i>Add First Demo
+                        </a>
+                        <a href="#" class="btn-secondary-large" onclick="showDemoTips()">
+                            <i class="fas fa-lightbulb"></i>Demo Tips
+                        </a>
+                    </div>
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Supported formats: MP4, AVI, MOV, WMV (Max size: 100MB)
+                        </small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+    // Get CSRF token from cookie or meta tag
+    function getCSRFToken() {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            return csrfToken.value;
+        }
+        
+        // Fallback: get from cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrftoken') {
+                return value;
+            }
+        }
+        return '';
+    }
+
+    // Toggle demo status
+    function toggleDemoStatus(demoId, activate) {
+        const action = activate ? 'activate' : 'deactivate';
+        if (confirm(`Are you sure you want to ${action} this demo?`)) {
+            fetch(`{% url 'core:admin_toggle_demo_status' 0 %}`.replace('0', demoId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ activate: activate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error updating demo status: ' + (data.message || 'Please try again.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating demo status. Please try again.');
+            });
+        }
+    }
+
+    // Delete demo
+    function deleteDemo(demoId, demoTitle) {
+        if (confirm(`Are you sure you want to delete "${demoTitle}"?\n\nThis action cannot be undone and will remove all associated data including views and requests.`)) {
+            fetch(`{% url 'core:admin_delete_demo' 0 %}`.replace('0', demoId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Demo deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Error deleting demo: ' + (data.message || 'Please try again.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting demo. Please try again.');
+            });
+        }
+    }
+
+    // Select all functionality
+    function toggleSelectAll(checkbox) {
+        const checkboxes = document.querySelectorAll('.demo-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = checkbox.checked;
+        });
+    }
+
+    // Bulk actions
+    function getSelectedDemos() {
+        const selected = [];
+        document.querySelectorAll('.demo-checkbox:checked').forEach(cb => {
+            selected.push(cb.value);
+        });
+        return selected;
+    }
+
+    function bulkActivate() {
+        const selected = getSelectedDemos();
+        if (selected.length === 0) {
+            alert('Please select demos to activate.');
+            return;
+        }
+        
+        if (confirm(`Activate ${selected.length} selected demos?`)) {
+            bulkUpdateStatus(selected, 'activate');
+        }
+    }
+
+    function bulkDeactivate() {
+        const selected = getSelectedDemos();
+        if (selected.length === 0) {
+            alert('Please select demos to deactivate.');
+            return;
+        }
+        
+        if (confirm(`Deactivate ${selected.length} selected demos?`)) {
+            bulkUpdateStatus(selected, 'deactivate');
+        }
+    }
+
+    function bulkDelete() {
+        const selected = getSelectedDemos();
+        if (selected.length === 0) {
+            alert('Please select demos to delete.');
+            return;
+        }
+        
+        if (confirm(`Are you sure you want to delete ${selected.length} selected demos?\n\nThis action cannot be undone.`)) {
+            fetch(`{% url 'core:admin_bulk_demo_actions' %}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    action: 'delete',
+                    demo_ids: selected 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Demos deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Error deleting demos: ' + (data.message || 'Please try again.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting demos. Please try again.');
+            });
+        }
+    }
+
+    function bulkUpdateStatus(demoIds, action) {
+        fetch(`{% url 'core:admin_bulk_demo_actions' %}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                action: action,
+                demo_ids: demoIds
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message || 'Demos updated successfully!');
+                location.reload();
+            } else {
+                alert('Error updating demos: ' + (data.message || 'Please try again.'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating demos. Please try again.');
+        });
+    }
+
+    // Show demo tips modal
+    function showDemoTips() {
+        const tipsModal = `
+            <div class="modal fade" id="demoTipsModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-lightbulb text-warning me-2"></i>
+                                Demo Video Best Practices
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-video me-2 text-primary"></i>Video Quality</h6>
+                                    <ul class="list-unstyled">
+                                        <li>• Use 1080p resolution minimum</li>
+                                        <li>• Keep duration between 3-10 minutes</li>
+                                        <li>• Ensure clear audio quality</li>
+                                        <li>• Use professional lighting</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-file me-2 text-success"></i>File Requirements</h6>
+                                    <ul class="list-unstyled">
+                                        <li>• Max file size: 100MB</li>
+                                        <li>• Formats: MP4, AVI, MOV, WMV</li>
+                                        <li>• Thumbnail: JPG, PNG (5MB max)</li>
+                                        <li>• Descriptive filenames</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-edit me-2 text-info"></i>Content Tips</h6>
+                                    <ul class="list-unstyled">
+                                        <li>• Start with clear introduction</li>
+                                        <li>• Focus on key features</li>
+                                        <li>• Include real use cases</li>
+                                        <li>• End with clear call-to-action</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-users me-2 text-warning"></i>User Experience</h6>
+                                    <ul class="list-unstyled">
+                                        <li>• Add business categories</li>
+                                        <li>• Write compelling descriptions</li>
+                                        <li>• Use eye-catching thumbnails</li>
+                                        <li>• Target specific customers</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <a href="{% url 'core:admin_add_demo' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Create Demo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if any
+        const existingModal = document.getElementById('demoTipsModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', tipsModal);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('demoTipsModal'));
+        modal.show();
+        
+        // Clean up when modal is hidden
+        document.getElementById('demoTipsModal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+        });
+    }
+
+    // Debug function to check CSRF token
+    console.log('CSRF Token:', getCSRFToken());
+</script>
+{% endblock %}

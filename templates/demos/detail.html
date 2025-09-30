@@ -1,0 +1,689 @@
+<!-- templates/demos/detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ demo.title }} - Demo Portal{% endblock %}
+{% block meta_description %}{{ demo.description|truncatechars:155 }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #1e3c72;
+        --secondary-color: #2a5298;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --info-color: #06b6d4;
+        --dark-color: #1f2937;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --gradient-primary: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    }
+
+    body {
+        background: var(--gray-50);
+    }
+
+    .demo-hero {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .demo-video-section {
+        position: relative;
+        background: #000;
+        aspect-ratio: 16/9;
+        max-height: 70vh;
+        overflow: hidden;
+    }
+
+    .demo-thumbnail {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .demo-thumbnail:hover {
+        transform: scale(1.02);
+    }
+
+    .play-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.4);
+        opacity: 1;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .play-overlay:hover {
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .play-button {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-size: 2rem;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .play-button:hover {
+        transform: scale(1.1);
+        background: white;
+    }
+
+    .demo-info {
+        padding: 2rem;
+    }
+
+    .demo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .demo-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+    }
+
+    .demo-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        color: var(--gray-600);
+        font-size: 0.9rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .demo-actions {
+        display: flex;
+        gap: 1rem;
+        flex-shrink: 0;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 2px solid;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-outline {
+        background: white;
+        color: var(--gray-700);
+        border-color: var(--gray-300);
+    }
+
+    .btn-outline:hover {
+        background: var(--gray-50);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+
+    .btn-like {
+        background: white;
+        color: var(--gray-600);
+        border-color: var(--gray-300);
+    }
+
+    .btn-like.liked {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+
+    .btn-like:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+
+    .demo-description {
+        background: var(--gray-50);
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .demo-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1rem;
+        border-radius: var(--radius-lg);
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid;
+    }
+
+    .stat-card.views { border-left-color: var(--info-color); }
+    .stat-card.likes { border-left-color: var(--danger-color); }
+    .stat-card.category { border-left-color: var(--primary-color); }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+    }
+
+    .related-demos {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title i {
+        color: var(--primary-color);
+        font-size: 1.25rem;
+    }
+
+    .demos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .demo-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        border: 1px solid var(--gray-200);
+    }
+
+    .demo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .demo-card-image {
+        position: relative;
+        aspect-ratio: 16/9;
+        overflow: hidden;
+    }
+
+    .demo-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+
+    .demo-card:hover .demo-card-image img {
+        transform: scale(1.05);
+    }
+
+    .demo-card-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .demo-card:hover .demo-card-overlay {
+        opacity: 1;
+    }
+
+    .demo-card-play {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-size: 1.25rem;
+    }
+
+    .demo-card-content {
+        padding: 1.25rem;
+    }
+
+    .demo-card-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .demo-card-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+        color: var(--gray-600);
+    }
+
+    .category-badge {
+        background: rgba(30, 60, 114, 0.1);
+        color: var(--primary-color);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-lg);
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .feedback-section {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .feedback-prompt {
+        text-align: center;
+        padding: 2rem;
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+    }
+
+    .breadcrumb-nav {
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb {
+        background: white;
+        padding: 1rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb-item {
+        color: var(--gray-600);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--primary-color);
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: var(--gray-400);
+        margin: 0 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .demo-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .demo-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .action-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .demo-title {
+            font-size: 1.5rem;
+        }
+
+        .demo-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .demos-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .demo-video-section {
+            max-height: 50vh;
+        }
+
+        .play-button {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .demo-info {
+            padding: 1rem;
+        }
+
+        .related-demos,
+        .feedback-section {
+            padding: 1rem;
+        }
+
+        .demo-actions {
+            flex-direction: column;
+        }
+
+        .action-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-nav">
+        <div class="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'core:dashboard' %}">
+                        <i class="fas fa-home me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'demos:list' %}">Demos</a>
+                </li>
+                {% if demo.category %}
+                <li class="breadcrumb-item">
+                    <a href="{% url 'demos:list' %}?category={{ demo.category.slug }}">{{ demo.category.name }}</a>
+                </li>
+                {% endif %}
+                <li class="breadcrumb-item active">{{ demo.title }}</li>
+            </ol>
+        </div>
+    </nav>
+
+    <!-- Demo Hero Section -->
+    <div class="demo-hero">
+        <!-- Video/Thumbnail Section -->
+        <div class="demo-video-section" id="videoSection">
+            {% if demo.thumbnail %}
+                <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-thumbnail" id="demoThumbnail">
+            {% else %}
+                <div class="demo-thumbnail" style="background: var(--gradient-primary); display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-video fa-4x" style="color: rgba(255,255,255,0.8);"></i>
+                </div>
+            {% endif %}
+            
+            <div class="play-overlay" onclick="watchDemo()">
+                <div class="play-button">
+                    <i class="fas fa-play"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demo Information -->
+        <div class="demo-info">
+            <div class="demo-header">
+                <div class="demo-details">
+                    <h1 class="demo-title">{{ demo.title }}</h1>
+                    <div class="demo-meta">
+                        {% if demo.category %}
+                        <div class="meta-item">
+                            <i class="fas fa-folder"></i>
+                            <span>{{ demo.category.name }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ demo.formatted_duration|default:"Duration not specified" }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ demo.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        {% if user_has_viewed %}
+                        <div class="meta-item">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <span>Watched</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="demo-actions">
+                    <a href="{% url 'demos:watch' demo.slug %}" class="action-btn btn-primary">
+                        <i class="fas fa-play"></i>
+                        Watch Demo
+                    </a>
+                    
+                    <button class="action-btn btn-like {% if user_has_liked %}liked{% endif %}" 
+                            onclick="toggleLike()" id="likeBtn">
+                        <i class="fas fa-heart"></i>
+                        <span id="likeText">{{ user_has_liked|yesno:"Liked,Like" }}</span>
+                        <span id="likeCount">({{ demo.likes_count }})</span>
+                    </button>
+
+                    <a href="{% url 'demos:request_demo' demo.slug %}" class="action-btn btn-outline">
+                        <i class="fas fa-calendar-plus"></i>
+                        Request Live Demo
+                    </a>
+                </div>
+            </div>
+
+            <!-- Description -->
+            {% if demo.description %}
+            <div class="demo-description">
+                <p class="mb-0">{{ demo.description }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Demo Statistics -->
+            <div class="demo-stats">
+                <div class="stat-card views">
+                    <div class="stat-number">{{ demo.views_count }}</div>
+                    <div class="stat-label">Views</div>
+                </div>
+                <div class="stat-card likes">
+                    <div class="stat-number">{{ demo.likes_count }}</div>
+                    <div class="stat-label">Likes</div>
+                </div>
+                <div class="stat-card category">
+                    <div class="stat-number">{{ demo.category.name|default:"General" }}</div>
+                    <div class="stat-label">Category</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Demos -->
+    {% if related_demos %}
+    <div class="related-demos">
+        <h3 class="section-title">
+            <i class="fas fa-video"></i>
+            Related Demos
+        </h3>
+        
+        <div class="demos-grid">
+            {% for related_demo in related_demos %}
+            <a href="{% url 'demos:detail' related_demo.slug %}" class="demo-card">
+                <div class="demo-card-image">
+                    {% if related_demo.thumbnail %}
+                        <img src="{{ related_demo.thumbnail.url }}" alt="{{ related_demo.title }}">
+                    {% else %}
+                        <div style="height: 100%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-video fa-2x" style="color: rgba(255,255,255,0.8);"></i>
+                        </div>
+                    {% endif %}
+                    <div class="demo-card-overlay">
+                        <div class="demo-card-play">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-card-content">
+                    <h4 class="demo-card-title">{{ related_demo.title }}</h4>
+                    <div class="demo-card-meta">
+                        <span class="category-badge">{{ related_demo.category.name }}</span>
+                        <span><i class="fas fa-eye me-1"></i>{{ related_demo.views_count }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Feedback Section -->
+    <div class="feedback-section">
+        <h3 class="section-title">
+            <i class="fas fa-comment"></i>
+            Your Feedback
+        </h3>
+        
+        {% if user_feedback %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                Thank you for your feedback! You can update it anytime.
+            </div>
+        {% endif %}
+
+        <div class="feedback-prompt">
+            <p class="mb-3">Help us improve by sharing your thoughts about this demo.</p>
+            <a href="{% url 'demos:feedback' demo.slug %}" class="action-btn btn-primary">
+                <i class="fas fa-comment-dots"></i>
+                {% if user_feedback %}Update Feedback{% else %}Give Feedback{% endif %}
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Like/Unlike functionality
+function toggleLike() {
+    fetch(`{% url 'demos:like_demo' demo.slug %}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const likeBtn = document.getElementById('likeBtn');
+            const likeText = document.getElementById('likeText');
+            const likeCount = document.getElementById('likeCount');
+            
+            if (data.liked) {
+                likeBtn.classList.add('liked');
+                likeText.textContent = 'Liked';
+            } else {
+                likeBtn.classList.remove('liked');
+                likeText.textContent = 'Like';
+            }
+            
+            likeCount.textContent = `(${data.likes_count})`;
+        } else {
+            alert(data.message || 'Error updating like status');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating like status');
+    });
+}
+
+// Watch demo function
+function watchDemo() {
+    window.location.href = "{% url 'demos:watch' demo.slug %}";
+}
+
+// Add CSRF token to all requests
+const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+</script>
+{% endblock %}

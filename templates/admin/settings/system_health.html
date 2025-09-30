@@ -1,0 +1,141 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}System Health{% endblock %}
+{% block page_title %}System Health Check{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .health-card {
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .health-healthy {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .health-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .health-error {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">System Health Status</h2>
+        <button class="btn btn-primary" onclick="location.reload()">
+            <i class="fas fa-sync me-2"></i>Refresh Status
+        </button>
+    </div>
+    
+    <div class="row">
+        <!-- Database Health -->
+        <div class="col-md-6 mb-4">
+            <div class="health-card health-{{ health_checks.database.status }}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-2">
+                            <i class="fas fa-database me-2"></i>Database
+                        </h5>
+                        <p class="mb-0">{{ health_checks.database.message }}</p>
+                    </div>
+                    <div>
+                        {% if health_checks.database.status == 'healthy' %}
+                            <i class="fas fa-check-circle fa-3x"></i>
+                        {% elif health_checks.database.status == 'warning' %}
+                            <i class="fas fa-exclamation-circle fa-3x"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle fa-3x"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cache Health -->
+        <div class="col-md-6 mb-4">
+            <div class="health-card health-{{ health_checks.cache.status }}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-2">
+                            <i class="fas fa-memory me-2"></i>Cache
+                        </h5>
+                        <p class="mb-0">{{ health_checks.cache.message }}</p>
+                    </div>
+                    <div>
+                        {% if health_checks.cache.status == 'healthy' %}
+                            <i class="fas fa-check-circle fa-3x"></i>
+                        {% elif health_checks.cache.status == 'warning' %}
+                            <i class="fas fa-exclamation-circle fa-3x"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle fa-3x"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Storage Health -->
+        <div class="col-md-6 mb-4">
+            <div class="health-card health-{{ health_checks.storage.status }}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-2">
+                            <i class="fas fa-hdd me-2"></i>Storage
+                        </h5>
+                        <p class="mb-0">{{ health_checks.storage.message }}</p>
+                    </div>
+                    <div>
+                        {% if health_checks.storage.status == 'healthy' %}
+                            <i class="fas fa-check-circle fa-3x"></i>
+                        {% elif health_checks.storage.status == 'warning' %}
+                            <i class="fas fa-exclamation-circle fa-3x"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle fa-3x"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Email Health -->
+        <div class="col-md-6 mb-4">
+            <div class="health-card health-{{ health_checks.email.status }}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-2">
+                            <i class="fas fa-envelope me-2"></i>Email
+                        </h5>
+                        <p class="mb-0">{{ health_checks.email.message }}</p>
+                    </div>
+                    <div>
+                        {% if health_checks.email.status == 'healthy' %}
+                            <i class="fas fa-check-circle fa-3x"></i>
+                        {% elif health_checks.email.status == 'warning' %}
+                            <i class="fas fa-exclamation-circle fa-3x"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle fa-3x"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="{% url 'core:admin_settings' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Settings
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .header {
+            text-align: center;
+            color: #1e3c72;
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="header">
+                <h1>🎉 Account Approved!</h1>
+            </div>
+            
+            <p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+            
+            <p>Great news! Your account has been approved by our admin team.</p>
+            
+            <p>You can now access all features of the Demo Portal.</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ site_url }}/auth/signin/" class="button">Sign In Now</a>
+            </div>
+            
+            <p><strong>Your Account Details:</strong></p>
+            <ul>
+                <li><strong>Email:</strong> {{ user.email }}</li>
+                <li><strong>Organization:</strong> {{ user.organization }}</li>
+                <li><strong>Job Title:</strong> {{ user.job_title }}</li>
+            </ul>
+            
+            <p>If you have any questions, feel free to contact our support team.</p>
+            
+            <p>Best regards,<br>
+            <strong>Demo Portal Team</strong><br>
+            CHRP India</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 Demo Portal. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

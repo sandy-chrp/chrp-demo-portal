@@ -1,0 +1,240 @@
+<!-- templates/admin/notifications/edit_template.html -->
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block admin_title %}Edit Template - {{ template.name }}{% endblock %}
+{% block page_title %}Edit Notification Template{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .variable-badge {
+        background: var(--info-color);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        margin: 0.25rem;
+        display: inline-block;
+        cursor: pointer;
+    }
+    
+    .variable-badge:hover {
+        background: var(--accent-color);
+    }
+    
+    .preview-section {
+        background: var(--gray-100);
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+    }
+    
+    .form-section {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-lg);
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Template Information -->
+                <div class="form-section">
+                    <h4 class="mb-4">
+                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        Template Information
+                    </h4>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Template Name</label>
+                        <input type="text" name="name" class="form-control" 
+                               value="{{ template.name }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <input type="text" class="form-control" 
+                               value="{{ template.get_notification_type_display }}" 
+                               disabled>
+                        <small class="text-muted">Template type cannot be changed</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Settings</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" 
+                                   name="is_active" id="isActive"
+                                   {% if template.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="isActive">
+                                Template is Active
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" 
+                                   name="send_email" id="sendEmail"
+                                   {% if template.send_email %}checked{% endif %}>
+                            <label class="form-check-label" for="sendEmail">
+                                Send Email Notifications
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" 
+                                   name="send_in_app" id="sendInApp"
+                                   {% if template.send_in_app %}checked{% endif %}>
+                            <label class="form-check-label" for="sendInApp">
+                                Send In-App Notifications
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Email Template -->
+                <div class="form-section">
+                    <h4 class="mb-4">
+                        <i class="fas fa-envelope text-primary me-2"></i>
+                        Email Template
+                    </h4>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email Subject</label>
+                        <input type="text" name="email_subject" class="form-control" 
+                               value="{{ template.email_subject }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email Body</label>
+                        <textarea name="email_body" class="form-control" rows="10" required>{{ template.email_body }}</textarea>
+                        <small class="text-muted">You can use HTML formatting</small>
+                    </div>
+                </div>
+                
+                <!-- In-App Template -->
+                <div class="form-section">
+                    <h4 class="mb-4">
+                        <i class="fas fa-bell text-primary me-2"></i>
+                        In-App Notification Template
+                    </h4>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Notification Title</label>
+                        <input type="text" name="title_template" class="form-control" 
+                               value="{{ template.title_template }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Notification Message</label>
+                        <textarea name="message_template" class="form-control" rows="4" required>{{ template.message_template }}</textarea>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                    <a href="{% url 'core:admin_notification_templates' %}" 
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Available Variables -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-code me-2"></i>Available Variables
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        {% verbatim %}
+                        Click to copy variable to clipboard. Use {{variable_name}} format in templates.
+                        {% endverbatim %}
+                    </p>
+                    <div>
+                        {% for variable in template_variables %}
+                        <span class="variable-badge" onclick="copyToClipboard('{{ variable }}')">
+                            {% verbatim %}{{{% endverbatim %}{{ variable }}{% verbatim %}}}{% endverbatim %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Preview -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-eye me-2"></i>Live Preview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="preview-section">
+                        <h6>Email Subject:</h6>
+                        <p id="emailSubjectPreview" class="mb-3">-</p>
+                        
+                        <h6>In-App Title:</h6>
+                        <p id="inAppTitlePreview" class="mb-3">-</p>
+                        
+                        <h6>In-App Message:</h6>
+                        <p id="inAppMessagePreview" class="mb-0">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+function copyToClipboard(variable) {
+    // Add the curly braces when copying
+    const text = '{{' + variable + '}}';
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success message
+        const toast = document.createElement('div');
+        toast.className = 'toast position-fixed bottom-0 end-0 m-3';
+        toast.innerHTML = `
+            <div class="toast-body bg-success text-white">
+                <i class="fas fa-check me-2"></i>Copied: ${text}
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.remove(), 2000);
+    });
+}
+
+// Live preview
+document.addEventListener('DOMContentLoaded', function() {
+    const emailSubject = document.querySelector('input[name="email_subject"]');
+    const titleTemplate = document.querySelector('input[name="title_template"]');
+    const messageTemplate = document.querySelector('textarea[name="message_template"]');
+    
+    function updatePreview() {
+        document.getElementById('emailSubjectPreview').textContent = emailSubject.value || '-';
+        document.getElementById('inAppTitlePreview').textContent = titleTemplate.value || '-';
+        document.getElementById('inAppMessagePreview').textContent = messageTemplate.value || '-';
+    }
+    
+    if (emailSubject && titleTemplate && messageTemplate) {
+        emailSubject.addEventListener('input', updatePreview);
+        titleTemplate.addEventListener('input', updatePreview);
+        messageTemplate.addEventListener('input', updatePreview);
+        updatePreview();
+    }
+});
+</script>
+{% endblock %}
