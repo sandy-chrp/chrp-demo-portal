@@ -682,15 +682,15 @@
                     </div>
                     {% endif %}
                     
-                    <div class="info-card">
+                    {% comment %} <div class="info-card">
                         <div class="info-header">
                             <i class="fas fa-history"></i>
                             Created
                         </div>
                         <div class="info-value">{{ demo_request.created_at|timesince }} ago</div>
-                    </div>
+                    </div> {% endcomment %}
                     
-                    {% if demo_request.handled_by %}
+                    {% comment %} {% if demo_request.handled_by %}
                     <div class="info-card">
                         <div class="info-header">
                             <i class="fas fa-user-tie"></i>
@@ -698,7 +698,7 @@
                         </div>
                         <div class="info-value">{{ demo_request.handled_by.get_full_name }}</div>
                     </div>
-                    {% endif %}
+                    {% endif %} {% endcomment %}
                 </div>
                 
                 <!-- Customer Notes -->

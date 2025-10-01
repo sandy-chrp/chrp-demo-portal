@@ -17093,3 +17093,154 @@ INFO 2025-10-01 17:50:59,000 basehttp 13556 22204 "GET /customer/enquiries/ HTTP
 INFO 2025-10-01 17:51:01,442 basehttp 13556 22204 "GET /customer/my-requests/ HTTP/1.1" 200 56006
 INFO 2025-10-01 17:51:03,162 basehttp 13556 22204 "GET /customer/request-demo/ HTTP/1.1" 200 54801
 INFO 2025-10-01 18:00:42,211 basehttp 13556 11784 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-01 18:20:24,442 autoreload 10116 21460 Watching for file changes with StatReloader
+INFO 2025-10-01 18:20:27,754 basehttp 10116 16764 "GET /admin/dashboard/ HTTP/1.1" 200 70259
+INFO 2025-10-01 18:20:42,162 basehttp 10116 19624 "POST /auth/signin/ HTTP/1.1" 302 0
+INFO 2025-10-01 18:20:42,192 basehttp 10116 19624 "GET /customer/ HTTP/1.1" 200 51973
+INFO 2025-10-01 18:20:45,201 basehttp 10116 19624 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:20:45,213 basehttp 10116 19624 "GET /media/demos/thumbnails/thumb_demo-testing-on-1-october_033c0b6e.jpg HTTP/1.1" 304 0
+INFO 2025-10-01 18:22:37,066 basehttp 10116 19624 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:22:41,920 basehttp 10116 19624 "GET /customer/my-requests/ HTTP/1.1" 200 62287
+INFO 2025-10-01 18:23:00,399 basehttp 10116 16764 "GET /admin/demos/ HTTP/1.1" 200 43554
+INFO 2025-10-01 18:23:00,422 basehttp 10116 23112 "GET /media/demos/thumbnails/thumb_demo-testing-on-1-october_033c0b6e.jpg HTTP/1.1" 304 0
+INFO 2025-10-01 18:23:00,422 basehttp 10116 16764 "GET /media/demos/thumbnails/thumb_testing-for-particular-customer_ebc456e4.png HTTP/1.1" 304 0
+INFO 2025-10-01 18:23:07,393 basehttp 10116 23112 "GET /admin/demos/add/ HTTP/1.1" 200 62702
+INFO 2025-10-01 18:24:15,251 basehttp 10116 19624 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:24:18,149 basehttp 10116 19624 "GET /customer/liked-demos/ HTTP/1.1" 200 56029
+INFO 2025-10-01 18:24:38,735 basehttp 10116 19624 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:24:39,191 basehttp 10116 19624 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:26:29,199 basehttp 10116 19624 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-01 18:26:29,275 basehttp 10116 19624 "GET /media/demos/thumbnails/thumb_testing-for-particular-customer_ebc456e4.png HTTP/1.1" 200 109
+INFO 2025-10-01 18:26:37,574 basehttp 10116 19624 "GET /customer/my-requests/ HTTP/1.1" 200 62287
+INFO 2025-10-01 18:26:37,600 basehttp 10116 27284 - Broken pipe from ('127.0.0.1', 50377)
+INFO 2025-10-01 18:29:55,526 basehttp 10116 19624 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-01 18:30:22,585 basehttp 10116 19624 "GET /customer/contact-sales/ HTTP/1.1" 200 61785
+INFO 2025-10-01 18:31:13,045 basehttp 10116 19624 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-01 18:31:14,465 basehttp 10116 19624 - Broken pipe from ('127.0.0.1', 50510)
+INFO 2025-10-01 18:31:17,125 basehttp 10116 3504 "GET /customer/contact-sales/ HTTP/1.1" 200 61785
+INFO 2025-10-01 18:31:23,739 basehttp 10116 3504 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-01 18:31:35,768 basehttp 10116 3504 "GET /customer/liked-demos/ HTTP/1.1" 200 56029
+INFO 2025-10-01 18:31:36,709 basehttp 10116 3504 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-01 18:32:04,020 basehttp 10116 3504 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-01 18:32:05,582 basehttp 10116 3504 - Broken pipe from ('127.0.0.1', 51048)
+INFO 2025-10-01 18:32:07,487 basehttp 10116 27696 "GET /customer/contact-sales/ HTTP/1.1" 200 61785
+INFO 2025-10-01 18:32:10,109 basehttp 10116 27696 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-01 18:32:11,516 basehttp 10116 1236 "GET /customer/demos/?business_category=17 HTTP/1.1" 200 55235
+INFO 2025-10-01 18:32:11,545 basehttp 10116 27696 - Broken pipe from ('127.0.0.1', 51052)
+INFO 2025-10-01 18:32:27,507 basehttp 10116 1236 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-01 18:32:34,720 basehttp 10116 2672 "GET /customer/liked-demos/ HTTP/1.1" 200 56029
+INFO 2025-10-01 18:32:34,745 basehttp 10116 1236 - Broken pipe from ('127.0.0.1', 51053)
+INFO 2025-10-01 18:32:35,578 basehttp 10116 2672 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:32:36,101 basehttp 10116 2672 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-01 18:33:32,779 basehttp 10116 19428 "GET /admin/customers/ HTTP/1.1" 200 65548
+INFO 2025-10-01 18:33:36,455 basehttp 10116 19428 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-01 18:33:41,598 basehttp 10116 19428 "GET /admin/customers/ HTTP/1.1" 200 65548
+INFO 2025-10-01 18:33:44,429 basehttp 10116 19428 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-01 18:37:48,127 basehttp 10116 19428 "GET /admin/customers/ HTTP/1.1" 200 65548
+INFO 2025-10-01 18:37:53,195 basehttp 10116 19428 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-01 18:37:56,668 basehttp 10116 13944 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:37:57,062 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 56029
+INFO 2025-10-01 18:38:39,185 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55547
+INFO 2025-10-01 18:39:26,670 basehttp 10116 19428 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-01 18:39:35,291 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55453
+INFO 2025-10-01 18:39:39,365 basehttp 10116 13944 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:39:54,329 basehttp 10116 13944 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:40:00,834 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55453
+INFO 2025-10-01 18:42:17,247 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55453
+INFO 2025-10-01 18:42:34,846 basehttp 10116 19428 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-01 18:42:39,099 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55181
+INFO 2025-10-01 18:42:51,039 basehttp 10116 13944 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-01 18:42:58,316 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55181
+INFO 2025-10-01 18:42:59,501 basehttp 10116 13944 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-01 18:43:00,109 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55181
+INFO 2025-10-01 18:44:43,505 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55181
+INFO 2025-10-01 18:45:18,687 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55181
+INFO 2025-10-01 18:45:48,257 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55181
+INFO 2025-10-01 18:46:05,208 basehttp 10116 13944 "GET /customer/liked-demos/ HTTP/1.1" 200 55181
+INFO 2025-10-01 18:46:05,238 basehttp 10116 13944 "GET /media/demos/thumbnails/thumb_demo-testing-on-1-october_033c0b6e.jpg HTTP/1.1" 304 0
+INFO 2025-10-01 18:46:12,238 basehttp 10116 13944 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-01 18:46:12,250 basehttp 10116 13944 "GET /media/demos/thumbnails/thumb_testing-for-particular-customer_ebc456e4.png HTTP/1.1" 304 0
+INFO 2025-10-01 18:46:14,055 basehttp 10116 13944 - Broken pipe from ('127.0.0.1', 64278)
+INFO 2025-10-01 18:46:59,611 basehttp 10116 15524 "GET /customer/liked-demos/ HTTP/1.1" 200 55277
+ERROR 2025-10-01 18:47:00,807 log 10116 15524 Internal Server Error: /demos/demo-testing-on-1-october/watch/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\demos\views.py", line 138, in watch_demo_view
+    return render(request, 'demos/watch.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: demos/watch.html
+ERROR 2025-10-01 18:47:00,810 basehttp 10116 15524 "GET /demos/demo-testing-on-1-october/watch/ HTTP/1.1" 500 96782
+INFO 2025-10-01 18:47:04,611 basehttp 10116 15524 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-01 18:47:06,832 basehttp 10116 15524 - Broken pipe from ('127.0.0.1', 50149)
+INFO 2025-10-01 18:48:17,414 basehttp 10116 25556 "GET /customer/liked-demos/ HTTP/1.1" 200 55277
+ERROR 2025-10-01 18:48:18,928 log 10116 25556 Internal Server Error: /demos/demo-testing-on-1-october/watch/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\demos\views.py", line 138, in watch_demo_view
+    return render(request, 'demos/watch.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: demos/watch.html
+ERROR 2025-10-01 18:48:18,929 basehttp 10116 25556 "GET /demos/demo-testing-on-1-october/watch/ HTTP/1.1" 500 96782
+INFO 2025-10-01 18:48:22,635 basehttp 10116 25556 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-01 18:48:24,025 basehttp 10116 25556 - Broken pipe from ('127.0.0.1', 50154)
+ERROR 2025-10-01 18:48:27,983 log 10116 24820 Internal Server Error: /demos/demo-testing-on-1-october/watch/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\demos\views.py", line 138, in watch_demo_view
+    return render(request, 'demos/watch.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: demos/watch.html
+ERROR 2025-10-01 18:48:27,984 basehttp 10116 24820 "GET /demos/demo-testing-on-1-october/watch/ HTTP/1.1" 500 96782
+INFO 2025-10-01 18:50:13,142 autoreload 14784 5876 Watching for file changes with StatReloader
+INFO 2025-10-01 18:50:18,600 basehttp 14784 15524 "GET /customer/liked-demos/ HTTP/1.1" 200 55277
+ERROR 2025-10-01 18:50:20,292 log 14784 15524 Internal Server Error: /demos/demo-testing-on-1-october/watch/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\demos\views.py", line 138, in watch_demo_view
+    return render(request, 'demos/watch.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: demos/watch.html
+ERROR 2025-10-01 18:50:20,295 basehttp 14784 15524 "GET /demos/demo-testing-on-1-october/watch/ HTTP/1.1" 500 96782
+INFO 2025-10-01 18:50:29,404 basehttp 14784 15524 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+WARNING 2025-10-01 18:50:31,891 log 14784 27428 Not Found: /favicon.ico
+WARNING 2025-10-01 18:50:31,892 basehttp 14784 27428 "GET /favicon.ico HTTP/1.1" 404 22586

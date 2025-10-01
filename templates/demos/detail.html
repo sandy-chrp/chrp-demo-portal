@@ -495,12 +495,14 @@
                     <i class="fas fa-video fa-4x" style="color: rgba(255,255,255,0.8);"></i>
                 </div>
             {% endif %}
-            
+                                <a href="{% url 'demos:watch' demo.slug %}">
+
             <div class="play-overlay" onclick="watchDemo()">
                 <div class="play-button">
                     <i class="fas fa-play"></i>
                 </div>
             </div>
+        </a>
         </div>
 
         <!-- Demo Information -->
