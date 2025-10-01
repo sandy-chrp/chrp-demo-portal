@@ -1,3 +1,4 @@
+<!-- templates/accounts/signup.html - COMPLETE FILE -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -8,7 +9,7 @@
     .signup-container {
         min-height: calc(100vh - 160px);
         padding: 2rem 0;
-        background: #f8f9fa;
+        background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
     }
     
     .signup-card {
@@ -18,33 +19,158 @@
         background: white;
     }
     
+    /* Sales Contact Banner */
+    .sales-banner {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(30, 60, 114, 0.3);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    .sales-banner::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+    
+    .sales-banner.hiding {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    
+    .sales-banner.dismissed {
+        display: none;
+    }
+    
+    .sales-banner-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .sales-banner h5 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sales-banner p {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        opacity: 0.95;
+    }
+    
+    .sales-contact-info {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.75rem;
+    }
+    
+    .sales-contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .sales-contact-item i {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .btn-contact-sales {
+        background: white;
+        color: #1e3c72;
+        border: none;
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-contact-sales:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Close button for sales banner */
+    .btn-close-banner {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        z-index: 10;
+    }
+    
+    .btn-close-banner:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+    
+    .btn-close-banner i {
+        font-size: 0.9rem;
+    }
+    
+    /* Form Styles */
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
     .form-control, .form-select {
         border: 2px solid #e0e0e0;
         border-radius: 8px;
         padding: 0.75rem;
         transition: all 0.3s;
+        font-size: 0.95rem;
     }
     
     .form-control:focus, .form-select:focus {
         border-color: #1e3c72;
         box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.15);
+        outline: none;
     }
     
-    /* CRITICAL: Hide error messages by default */
+    /* Validation Styles */
     .invalid-feedback, .valid-feedback {
         display: none;
         margin-top: 0.25rem;
         font-size: 0.875rem;
     }
     
-    /* Only show when field has is-invalid class */
     .form-control.is-invalid ~ .invalid-feedback,
-    .form-select.is-invalid ~ .invalid-feedback {
+    .form-select.is-invalid ~ .invalid-feedback,
+    .form-check-input.is-invalid ~ .invalid-feedback {
         display: block;
         color: #dc3545;
     }
     
-    /* Only show when field has is-valid class */
     .form-control.is-valid ~ .valid-feedback,
     .form-select.is-valid ~ .valid-feedback {
         display: block;
@@ -69,25 +195,7 @@
         background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
     }
     
-    .btn-primary {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        border: none;
-        padding: 0.75rem;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s;
-    }
-    
-    .btn-primary:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
-    }
-    
-    .btn-primary:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    
+    /* Password Strength Meter */
     .password-strength {
         height: 4px;
         border-radius: 2px;
@@ -112,6 +220,26 @@
         font-size: 0.875rem;
     }
     
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border: none;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
+    }
+    
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
     .loading-spinner {
         display: inline-block;
         width: 1rem;
@@ -125,6 +253,62 @@
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
+    
+    /* Modal Styles */
+    .modal-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border-bottom: none;
+    }
+    
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+    
+    .contact-method {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #1e3c72;
+    }
+    
+    .contact-method h6 {
+        color: #1e3c72;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .contact-method a {
+        color: #2a5298;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .contact-method a:hover {
+        text-decoration: underline;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sales-contact-info {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .sales-banner {
+            padding: 1rem;
+        }
+        
+        .sales-banner h5 {
+            font-size: 1rem;
+        }
+        
+        .btn-close-banner {
+            width: 28px;
+            height: 28px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -132,8 +316,43 @@
 <div class="container signup-container">
     <div class="row justify-content-center">
         <div class="col-lg-6 col-md-8">
+            <!-- Sales Contact Banner with Close Button -->
+            <div class="sales-banner" id="salesBanner">
+                <button type="button" class="btn-close-banner" id="closeSalesBanner" aria-label="Close banner">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="sales-banner-content">
+                    <h5>
+                        <i class="fas fa-bolt me-2"></i>
+                        Need Quick Access? Contact Our Sales Team
+                    </h5>
+                    <p class="mb-2">
+                        For enterprise solutions, bulk licenses, or immediate account activation, 
+                        our sales team is here to help you get started faster.
+                    </p>
+                    
+                    <div class="sales-contact-info">
+                        <div class="sales-contact-item">
+                            <i class="fas fa-phone-alt"></i>
+                            <span>+91-1234567890</span>
+                        </div>
+                        <div class="sales-contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>sales@chrp-india.com</span>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-contact-sales mt-2" data-bs-toggle="modal" data-bs-target="#salesModal">
+                        <i class="fas fa-comments"></i>
+                        Contact Sales Team
+                    </button>
+                </div>
+            </div>
+
+            <!-- Signup Card -->
             <div class="card signup-card">
-                <div class="card-body p-5">
+                <div class="card-body p-4 p-md-5">
                     <div class="text-center mb-4">
                         <h2 class="fw-bold text-primary">Create Account</h2>
                         <p class="text-muted">Join Demo Portal for exclusive business solutions</p>
@@ -161,13 +380,15 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">First Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="first_name" id="firstName" 
-                                       required value="{{ form.first_name.value|default:'' }}">
+                                       required value="{{ form.first_name.value|default:'' }}"
+                                       placeholder="John">
                                 <div class="invalid-feedback">Please enter your first name</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Last Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="last_name" id="lastName" 
-                                       required value="{{ form.last_name.value|default:'' }}">
+                                       required value="{{ form.last_name.value|default:'' }}"
+                                       placeholder="Doe">
                                 <div class="invalid-feedback">Please enter your last name</div>
                             </div>
                         </div>
@@ -179,14 +400,17 @@
                                    required placeholder="your@company.com" 
                                    value="{{ form.email.value|default:'' }}">
                             <div class="invalid-feedback" id="emailError">Please enter a valid business email</div>
-                            <small class="form-text text-muted">Use your business email address</small>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Use your business email address (personal emails not allowed)
+                            </small>
                         </div>
 
                         <!-- Mobile -->
                         <div class="mb-3">
                             <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <select class="form-select" name="country_code" style="max-width: 150px;">
+                                <select class="form-select" name="country_code" id="countryCode" style="max-width: 150px;">
                                     {% for code, label in form.fields.country_code.choices %}
                                         <option value="{{ code }}" {% if code == '+91' %}selected{% endif %}>
                                             {{ label }}
@@ -205,13 +429,15 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Job Title <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="job_title" id="jobTitle" 
-                                       required value="{{ form.job_title.value|default:'' }}">
+                                       required value="{{ form.job_title.value|default:'' }}"
+                                       placeholder="e.g., Sales Manager">
                                 <div class="invalid-feedback">Please enter your job title</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Organization <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="organization" id="organization" 
-                                       required value="{{ form.organization.value|default:'' }}">
+                                       required value="{{ form.organization.value|default:'' }}"
+                                       placeholder="Company name">
                                 <div class="invalid-feedback">Please enter your organization name</div>
                             </div>
                         </div>
@@ -223,7 +449,8 @@
                                 <select class="form-select" name="business_category" id="categorySelect" required>
                                     <option value="">Select category...</option>
                                     {% for category in form.fields.business_category.queryset %}
-                                        <option value="{{ category.id }}">
+                                        <option value="{{ category.id }}"
+                                                {% if form.business_category.value|stringformat:"s" == category.id|stringformat:"s" %}selected{% endif %}>
                                             {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
                                         </option>
                                     {% endfor %}
@@ -231,7 +458,7 @@
                                 <div class="invalid-feedback">Please select a business category</div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Subcategory</label>
+                                <label class="form-label">Subcategory <small class="text-muted">(Optional)</small></label>
                                 <select class="form-select" name="business_subcategory" id="subcategorySelect" disabled>
                                     <option value="">Select category first...</option>
                                 </select>
@@ -246,7 +473,7 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Password <span class="text-danger">*</span></label>
                                 <input type="password" class="form-control" name="password1" id="password1" 
-                                       required minlength="8">
+                                       required minlength="8" placeholder="Min 8 characters">
                                 <div class="password-strength">
                                     <div class="password-strength-bar" id="strengthBar"></div>
                                 </div>
@@ -255,41 +482,52 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                                <input type="password" class="form-control" name="password2" id="password2" required>
+                                <input type="password" class="form-control" name="password2" id="password2" 
+                                       required placeholder="Re-enter password">
                                 <div class="invalid-feedback" id="password2Error">Passwords must match</div>
-                                <div class="valid-feedback">Passwords match</div>
+                                <div class="valid-feedback">
+                                    <i class="fas fa-check-circle me-1"></i>Passwords match
+                                </div>
                             </div>
                         </div>
 
                         <!-- Referral -->
                         <div class="mb-3">
-                            <label class="form-label">How did you find us?</label>
-                            <select class="form-select" name="referral_source">
+                            <label class="form-label">How did you find us? <small class="text-muted">(Optional)</small></label>
+                            <select class="form-select" name="referral_source" id="referralSource">
                                 <option value="">Select source...</option>
                                 {% for value, label in form.fields.referral_source.choices %}
                                     {% if value %}
-                                        <option value="{{ value }}">{{ label }}</option>
+                                        <option value="{{ value }}"
+                                                {% if form.referral_source.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
                                     {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
 
                         <!-- Terms -->
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" required id="terms">
                                 <label class="form-check-label" for="terms">
                                     I agree to the <a href="#" target="_blank">Terms of Service</a> and 
-                                    <a href="#" target="_blank">Privacy Policy</a>
+                                    <a href="#" target="_blank">Privacy Policy</a> <span class="text-danger">*</span>
                                 </label>
-                                <div class="invalid-feedback">You must agree to the terms</div>
+                                <div class="invalid-feedback">You must agree to the terms and conditions</div>
                             </div>
                         </div>
 
                         <!-- Submit -->
-                        <button type="submit" class="btn btn-primary w-100 py-2" id="submitBtn">
+                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3" id="submitBtn">
                             <i class="fas fa-user-plus me-2"></i>Create Account
                         </button>
+                        
+                        <div class="text-center text-muted small">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Your data is secured with enterprise-grade encryption
+                        </div>
                     </form>
 
                     <hr class="my-4">
@@ -301,6 +539,66 @@
                         </p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sales Contact Modal -->
+<div class="modal fade" id="salesModal" tabindex="-1" aria-labelledby="salesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="salesModalLabel">
+                    <i class="fas fa-headset me-2"></i>Contact Sales Team
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Our sales team is available to assist you with:</p>
+                <ul class="mb-4">
+                    <li>Enterprise account setup and onboarding</li>
+                    <li>Bulk user licenses and team management</li>
+                    <li>Custom demo requests and presentations</li>
+                    <li>Priority account activation (within 24 hours)</li>
+                    <li>Pricing packages and volume discounts</li>
+                    <li>Integration and technical support</li>
+                </ul>
+                
+                <div class="contact-method">
+                    <h6><i class="fas fa-phone-alt me-2"></i>Phone Support</h6>
+                    <p class="mb-1">
+                        Call us: <a href="tel:+911234567890">+91-1234567890</a>
+                    </p>
+                    <small class="text-muted">Monday - Saturday: 9:00 AM - 7:00 PM IST</small>
+                </div>
+                
+                <div class="contact-method">
+                    <h6><i class="fas fa-envelope me-2"></i>Email Support</h6>
+                    <p class="mb-1">
+                        Email us: <a href="mailto:sales@chrp-india.com">sales@chrp-india.com</a>
+                    </p>
+                    <small class="text-muted">Response within 24 hours</small>
+                </div>
+                
+                <div class="contact-method">
+                    <h6><i class="fas fa-whatsapp me-2"></i>WhatsApp Business</h6>
+                    <p class="mb-1">
+                        Message us: <a href="https://wa.me/911234567890?text=Hi%2C%20I%20need%20help%20with%20account%20registration" target="_blank">+91-1234567890</a>
+                    </p>
+                    <small class="text-muted">Quick responses during business hours</small>
+                </div>
+                
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Priority Support:</strong> Mention "Quick Registration" for expedited account activation.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="mailto:sales@chrp-india.com?subject=Enterprise Account Registration" class="btn btn-primary">
+                    <i class="fas fa-envelope me-2"></i>Send Email
+                </a>
             </div>
         </div>
     </div>
@@ -322,9 +620,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileField = document.getElementById('mobileField');
     const termsCheckbox = document.getElementById('terms');
     
-    const blockedDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'ymail.com', 'aol.com', 'icloud.com', 'live.com'];
+    const blockedDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'ymail.com', 'aol.com', 'icloud.com', 'live.com', 'rediffmail.com', 'protonmail.com'];
     
-    // Prevent form default submission
+    // Close sales banner functionality
+    const closeSalesBannerBtn = document.getElementById('closeSalesBanner');
+    const salesBanner = document.getElementById('salesBanner');
+    
+    if (closeSalesBannerBtn && salesBanner) {
+        closeSalesBannerBtn.addEventListener('click', function() {
+            salesBanner.classList.add('hiding');
+            setTimeout(() => {
+                salesBanner.classList.add('dismissed');
+                localStorage.setItem('salesBannerDismissed', 'true');
+            }, 300);
+        });
+        
+        // Check if banner was previously dismissed
+        if (localStorage.getItem('salesBannerDismissed') === 'true') {
+            salesBanner.classList.add('dismissed');
+        }
+    }
+    
+    // Prevent default form submission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -332,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return false;
     });
     
-    // Text inputs validation
+    // Text inputs real-time validation
     const textInputs = form.querySelectorAll('input[type="text"]');
     textInputs.forEach(input => {
         input.addEventListener('blur', function() {
@@ -410,7 +727,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Password strength
+    // Password strength indicator
     password1.addEventListener('input', function() {
         const password = this.value;
         let strength = 0;
@@ -428,7 +745,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (strength <= 1) {
             strengthBar.classList.add('strength-weak');
             strengthText.textContent = 'Weak password';
-            strengthText.className = 'text-warning';
+            strengthText.className = 'text-danger';
         } else if (strength === 2) {
             strengthBar.classList.add('strength-medium');
             strengthText.textContent = 'Medium password';
@@ -487,7 +804,7 @@ document.addEventListener('DOMContentLoaded', function() {
     password2.addEventListener('input', validatePasswordMatch);
     password2.addEventListener('blur', validatePasswordMatch);
     
-    // Category validation
+    // Category and subcategory handling
     categorySelect.addEventListener('change', function() {
         const categoryId = this.value;
         
@@ -521,7 +838,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (loader) loader.style.display = 'none';
             })
             .catch(() => {
-                subcategorySelect.innerHTML = '<option value="">Error loading</option>';
+                subcategorySelect.innerHTML = '<option value="">Error loading subcategories</option>';
                 if (loader) loader.style.display = 'none';
             });
     });
@@ -605,7 +922,7 @@ document.addEventListener('DOMContentLoaded', function() {
             isValid = false;
         }
         
-        // Validate terms - CRITICAL
+        // Validate terms
         if (!termsCheckbox.checked) {
             termsCheckbox.classList.add('is-invalid');
             const errorMsg = termsCheckbox.closest('.form-check').querySelector('.invalid-feedback');
@@ -615,7 +932,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (!isValid) {
-            // Show alert with all errors
             alert('Please fix the following errors:\n\n• ' + errors.join('\n• '));
             
             const firstError = form.querySelector('.is-invalid');
@@ -624,17 +940,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 firstError.focus();
             }
             
-            // Re-enable button
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
             return;
         }
         
-        // All valid - submit
+        // All valid - submit form
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="loading-spinner me-2"></span>Sending verification code...';
         form.submit();
     }
+    
+    // Track sales modal opens for analytics
+    const salesModalTriggers = document.querySelectorAll('[data-bs-toggle="modal"][data-bs-target="#salesModal"]');
+    salesModalTriggers.forEach(trigger => {
+        trigger.addEventListener('click', function() {
+            console.log('Sales contact modal opened');
+        });
+    });
 });
 </script>
 {% endblock %}

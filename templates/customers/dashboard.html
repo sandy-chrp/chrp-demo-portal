@@ -237,8 +237,7 @@
         <p class="welcome-subtitle">Explore our demo library and grow your business with CHRP India solutions.</p>
     </div>
 </div>
-
-<!-- Statistics Cards -->
+{% comment %} 
 <div class="stats-grid">
     <div class="stat-card primary">
         <div class="stat-icon">
@@ -289,7 +288,7 @@
         </div>
         {% endif %}
     </div>
-</div>
+</div> {% endcomment %}
 
 <div class="row">
     <!-- Featured Demos -->
@@ -346,10 +345,8 @@
         </div>
     </div>
 
-    <!-- Recent Activity & Notifications -->
     <div class="col-lg-4">
-        <!-- Recent Notifications -->
-        <div class="customer-card">
+        {% comment %} <div class="customer-card">
             <div class="customer-card-header">
                 <h3 class="customer-card-title">
                     <i class="fas fa-bell"></i>
@@ -383,9 +380,8 @@
                     </div>
                 {% endif %}
             </div>
-        </div>
+        </div> {% endcomment %}
 
-        <!-- Recent Activity -->
         <div class="customer-card">
             <div class="customer-card-header">
                 <h3 class="customer-card-title">
@@ -438,8 +434,7 @@
         </div>
     </div>
 </div>
-
-<!-- Quick Actions Cards -->
+{% comment %} 
 <div class="customer-card">
     <div class="customer-card-header">
         <h2 class="customer-card-title">
@@ -479,9 +474,8 @@
             </div>
         </div>
     </div>
-</div>
-
-<!-- Quick Stats Progress -->
+</div> {% endcomment %}
+{% comment %} 
 <div class="customer-card">
     <div class="customer-card-header">
         <h2 class="customer-card-title">
@@ -523,7 +517,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> {% endcomment %}
 {% endblock %}
 
 {% block customer_extra_js %}

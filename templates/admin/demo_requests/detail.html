@@ -317,8 +317,8 @@
                     <div class="info-value">{{ demo_request.demo.title }}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Category</div>
-                    <div class="info-value">{{ demo_request.demo.category.name }}</div>
+                    <div class="info-label">Demo Type</div>
+                    <div class="info-value">{{ demo_request.demo.get_demo_type_display }}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Duration</div>
@@ -328,6 +328,16 @@
                     <div class="info-label">Views</div>
                     <div class="info-value">{{ demo_request.demo.views_count }}</div>
                 </div>
+                {% if demo_request.demo.is_featured %}
+                <div class="info-item">
+                    <div class="info-label">Featured</div>
+                    <div class="info-value">
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-star me-1"></i>Featured Demo
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
             </div>
             
             {% if demo_request.demo.description %}
@@ -342,11 +352,59 @@
             <div class="col-md-4">
                 <img src="{{ demo_request.demo.thumbnail.url }}" 
                      alt="{{ demo_request.demo.title }}" 
-                     class="img-fluid rounded">
+                     class="img-fluid rounded shadow-sm">
             </div>
         {% endif %}
     </div>
 </div>
+
+
+
+<!-- Business Category Information -->
+{% if demo_request.business_category or demo_request.business_subcategory %}
+<div class="detail-card">
+    <div class="detail-header">
+        <i class="fas fa-briefcase"></i>Business Category Information
+    </div>
+
+    <div class="info-grid">
+        {% if demo_request.business_category %}
+        <div class="info-item">
+            <div class="info-label">Business Category</div>
+            <div class="info-value">
+                {% if demo_request.business_category.icon %}{{ demo_request.business_category.icon }} {% endif %}
+                {{ demo_request.business_category.name }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if demo_request.business_subcategory %}
+        <div class="info-item">
+            <div class="info-label">Business Subcategory</div>
+            <div class="info-value">{{ demo_request.business_subcategory.name }}</div>
+        </div>
+        {% endif %}
+        
+        {% if demo_request.is_international %}
+        <div class="info-item">
+            <div class="info-label">Customer Type</div>
+            <div class="info-value">
+                <span class="badge bg-info">
+                    <i class="fas fa-globe me-1"></i>International Customer
+                </span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if demo_request.business_category.description %}
+    <div class="mt-3">
+        <div class="info-label">Category Description</div>
+        <div class="info-value text-muted">{{ demo_request.business_category.description }}</div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
 
 <!-- Schedule Information -->
 <div class="detail-card">

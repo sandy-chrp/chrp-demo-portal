@@ -636,20 +636,20 @@
                             <span class="nav-text">Categories</span>
                         </a>
                     </div>
-                    <div class="nav-item">
+                    {% comment %} <div class="nav-item">
                         <a href="{% url 'core:admin_business_subcategories' %}" 
                         class="nav-link {% if 'business_subcategor' in request.resolver_match.url_name %}active{% endif %}"
                         data-tooltip="Manage Business Subcategories">
                             <i class="fas fa-layer-group"></i>
                             <span class="nav-text">Subcategories</span>
                         </a>
-                    </div>
+                    </div> {% endcomment %}
                 <div class="nav-item">
                     <a href="{% url 'core:admin_demos' %}" 
                        class="nav-link {% if 'demos' in request.resolver_match.url_name %}active{% endif %}"
                        data-tooltip="Manage Demo Videos">
                         <i class="fas fa-video"></i>
-                        <span class="nav-text">Demo Videos</span>
+                        <span class="nav-text">Add Demos</span>
                     </a>
                 </div>
                 <div class="nav-item">

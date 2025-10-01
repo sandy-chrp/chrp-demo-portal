@@ -1,4 +1,4 @@
-<!-- templates/customers/send_enquiry.html -->
+<!-- templates/customers/send_enquiry.html - Complete Updated Version -->
 {% extends 'customers/base.html' %}
 {% load static %}
 
@@ -109,6 +109,7 @@
         transition: all 0.3s ease;
         width: 100%;
         background-color: white;
+        cursor: pointer;
     }
 
     .form-select:focus {
@@ -205,22 +206,6 @@
         transform: none;
     }
 
-    .submit-btn.loading {
-        opacity: 0.8;
-        pointer-events: none;
-    }
-
-    .submit-btn.loading::after {
-        content: '';
-        width: 20px;
-        height: 20px;
-        border: 2px solid currentColor;
-        border-radius: 50%;
-        border-right-color: transparent;
-        animation: spin 1s linear infinite;
-        margin-left: var(--spacing-sm);
-    }
-
     /* Guidelines section */
     .guidelines-card {
         background: #f0f9ff;
@@ -282,7 +267,7 @@
     }
 
     /* Validation styles */
-    .form-control.is-invalid {
+    .form-control.is-invalid, .form-select.is-invalid {
         border-color: var(--danger-color);
         box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
     }
@@ -294,16 +279,9 @@
         display: block;
     }
 
-    .form-control.is-valid {
+    .form-control.is-valid, .form-select.is-valid {
         border-color: var(--success-color);
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-    }
-
-    .valid-feedback {
-        color: var(--success-color);
-        font-size: 0.875rem;
-        margin-top: var(--spacing-xs);
-        display: block;
     }
 
     /* Responsive */
@@ -327,10 +305,6 @@
         .submit-section {
             padding: var(--spacing-lg);
         }
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
     }
 </style>
 {% endblock %}
@@ -421,6 +395,42 @@
             <form id="enquiryForm" method="post">
                 {% csrf_token %}
                 
+                <!-- Business Category Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-building"></i>
+                        Business Category
+                    </h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="business_category" class="form-label required-field">Your Business Category</label>
+                                <select class="form-select" id="business_category" name="business_category" required>
+                                    <option value="">-- Select Category --</option>
+                                    {% for category in business_categories %}
+                                        <option value="{{ category.id }}">
+                                            {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Choose the category that best describes your business</div>
+                                <div class="invalid-feedback" id="categoryError"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6" id="subcategoryWrapper" style="display: none;">
+                            <div class="form-group">
+                                <label for="business_subcategory" class="form-label">Subcategory (Optional)</label>
+                                <select class="form-select" id="business_subcategory" name="business_subcategory">
+                                    <option value="">-- All Subcategories --</option>
+                                </select>
+                                <div class="form-text">Narrow down to a specific subcategory if needed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Enquiry Details Section -->
                 <div class="form-section">
                     <h3 class="section-title">
@@ -428,27 +438,11 @@
                         Enquiry Details
                     </h3>
                     
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="category" class="form-label">Category</label>
-                                <select class="form-select" id="category" name="category_id">
-                                    <option value="">Select category (optional)</option>
-                                    {% for category in categories %}
-                                        <option value="{{ category.id }}">{{ category.name }}</option>
-                                    {% endfor %}
-                                </select>
-                                <div class="form-text">Choose the category that best describes your enquiry</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="subject" class="form-label">Subject</label>
-                                <input type="text" class="form-control" id="subject" name="subject" 
-                                       placeholder="Brief subject of your enquiry" maxlength="200">
-                                <div class="form-text">Optional: A brief subject line for your enquiry</div>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="subject" class="form-label">Subject (Optional)</label>
+                        <input type="text" class="form-control" id="subject" name="subject" 
+                               placeholder="Brief subject of your enquiry" maxlength="200">
+                        <div class="form-text">A brief subject line for your enquiry (will be auto-generated if left empty)</div>
                     </div>
                 </div>
                 
@@ -543,10 +537,48 @@
 {% block customer_extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const BASE_URL = window.location.pathname.includes('/customer/') ? '/customer/' : '/customers/';
     const form = document.getElementById('enquiryForm');
+    const categorySelect = document.getElementById('business_category');
+    const subcategorySelect = document.getElementById('business_subcategory');
+    const subcategoryWrapper = document.getElementById('subcategoryWrapper');
     const messageTextarea = document.getElementById('message');
     const messageCounter = document.getElementById('messageCounter');
     const submitBtn = document.getElementById('submitBtn');
+    
+    // Business category change handler
+    categorySelect.addEventListener('change', function() {
+        const categoryId = this.value;
+        
+        if (categoryId) {
+            loadSubcategories(categoryId);
+            categorySelect.classList.remove('is-invalid');
+            categorySelect.classList.add('is-valid');
+        } else {
+            subcategoryWrapper.style.display = 'none';
+            subcategorySelect.innerHTML = '<option value="">-- All Subcategories --</option>';
+            categorySelect.classList.remove('is-valid');
+        }
+    });
+    
+    // Load subcategories dynamically
+    function loadSubcategories(categoryId) {
+        fetch(`${BASE_URL}ajax/subcategories/${categoryId}/`)
+            .then(response => response.json())
+            .then(data => {
+                subcategorySelect.innerHTML = '<option value="">-- All Subcategories --</option>';
+                
+                if (data.subcategories && data.subcategories.length > 0) {
+                    data.subcategories.forEach(sub => {
+                        subcategorySelect.innerHTML += `<option value="${sub.id}">${sub.name}</option>`;
+                    });
+                    subcategoryWrapper.style.display = 'block';
+                } else {
+                    subcategoryWrapper.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error loading subcategories:', error));
+    }
     
     // Character counter for message
     function updateCharacterCounter() {
@@ -565,31 +597,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Update counter on input
     messageTextarea.addEventListener('input', updateCharacterCounter);
     
     // Form validation
     function validateForm() {
-        const message = messageTextarea.value.trim();
-        const messageError = document.getElementById('messageError');
         let isValid = true;
         
         // Clear previous errors
+        categorySelect.classList.remove('is-invalid', 'is-valid');
         messageTextarea.classList.remove('is-invalid', 'is-valid');
-        messageError.textContent = '';
+        document.getElementById('categoryError').textContent = '';
+        document.getElementById('messageError').textContent = '';
+        
+        // Validate category
+        if (!categorySelect.value) {
+            categorySelect.classList.add('is-invalid');
+            document.getElementById('categoryError').textContent = 'Please select a business category.';
+            isValid = false;
+        } else {
+            categorySelect.classList.add('is-valid');
+        }
         
         // Validate message
+        const message = messageTextarea.value.trim();
         if (!message) {
             messageTextarea.classList.add('is-invalid');
-            messageError.textContent = 'Message is required.';
+            document.getElementById('messageError').textContent = 'Message is required.';
             isValid = false;
         } else if (message.length < 10) {
             messageTextarea.classList.add('is-invalid');
-            messageError.textContent = 'Message must be at least 10 characters long.';
+            document.getElementById('messageError').textContent = 'Message must be at least 10 characters long.';
             isValid = false;
         } else if (message.length > 2000) {
             messageTextarea.classList.add('is-invalid');
-            messageError.textContent = 'Message cannot exceed 2000 characters.';
+            document.getElementById('messageError').textContent = 'Message cannot exceed 2000 characters.';
             isValid = false;
         } else {
             messageTextarea.classList.add('is-valid');
@@ -600,97 +641,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Real-time validation
     messageTextarea.addEventListener('blur', validateForm);
-    messageTextarea.addEventListener('input', function() {
-        if (this.classList.contains('is-invalid') || this.classList.contains('is-valid')) {
-            setTimeout(validateForm, 300);
-        }
-    });
+    categorySelect.addEventListener('blur', validateForm);
     
     // Form submission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
         if (!validateForm()) {
-            showToast('Please fix the form errors before submitting.', 'error');
             return;
         }
         
         // Show loading state
-        submitBtn.classList.add('loading');
         submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
         
-        // Submit form
-        const formData = new FormData(form);
-        
-        fetch('{% url "customers:send_enquiry" %}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                showToast('Enquiry submitted successfully! We will respond within 24 hours.', 'success');
-                
-                // Reset form after success
-                setTimeout(() => {
-                    window.location.href = '{% url "customers:enquiries" %}';
-                }, 2000);
-            } else {
-                throw new Error('Failed to submit enquiry');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Error submitting enquiry. Please try again.', 'error');
-        })
-        .finally(() => {
-            submitBtn.classList.remove('loading');
-            submitBtn.disabled = false;
-        });
+        // Submit form normally (not AJAX)
+        this.submit();
     });
-    
-    // Toast notification function
-    function showToast(message, type = 'info') {
-        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-        const toastId = 'toast-' + Date.now();
-        
-        const alertClass = type === 'error' ? 'danger' : type;
-        const icon = type === 'success' ? 'check-circle' : 
-                   type === 'error' ? 'exclamation-triangle' : 
-                   'info-circle';
-        
-        const toastHtml = `
-            <div class="toast show" id="${toastId}" role="alert">
-                <div class="toast-header bg-${alertClass} text-white">
-                    <i class="fas fa-${icon} me-2"></i>
-                    <strong class="me-auto">Demo Portal</strong>
-                    <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${toastId}').remove()"></button>
-                </div>
-                <div class="toast-body">
-                    ${message}
-                </div>
-            </div>
-        `;
-        
-        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            const toast = document.getElementById(toastId);
-            if (toast) toast.remove();
-        }, 5000);
-    }
-    
-    function createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '11000';
-        document.body.appendChild(container);
-        return container;
-    }
     
     // Initialize character counter
     updateCharacterCounter();

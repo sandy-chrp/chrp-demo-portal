@@ -17,6 +17,7 @@ from demos.models import Demo, DemoCategory, DemoRequest, DemoView, DemoLike, De
 from enquiries.models import BusinessEnquiry, EnquiryCategory, EnquiryResponse
 from notifications.models import Notification
 from core.models import SiteSettings, ContactMessage
+from accounts.models import BusinessCategory, BusinessSubCategory
 
 
 def get_customer_context(user):
@@ -93,26 +94,44 @@ def customer_dashboard(request):
     
     return render(request, 'customers/dashboard.html', context)
 
+from django.db.models import Count
+
 @login_required
 def browse_demos(request):
-    """Browse available demo videos"""
+    """Browse available demo videos with customer access control"""
     if not request.user.is_approved:
         return redirect('accounts:pending_approval')
     
     # Get filter parameters
-    category_id = request.GET.get('category')
+    business_category_id = request.GET.get('business_category')
+    business_subcategory_id = request.GET.get('business_subcategory')
     search_query = request.GET.get('search', '').strip()
     sort_by = request.GET.get('sort', 'newest')
     
-    # Base queryset - only demos user can access
-    demos = Demo.objects.filter(is_active=True).filter(
-        Q(target_customers=request.user) | Q(target_customers__isnull=True)
-    )
+    # Base queryset with customer access control
+    # Show demos where: no customers selected (available to all) OR user is in the selected customers
+    demos = Demo.objects.filter(is_active=True).annotate(
+        customer_count=Count('target_customers')
+    ).filter(
+        Q(customer_count=0) |  # No customers selected = available to all
+        Q(target_customers=request.user)  # OR user is specifically selected
+    ).distinct()
     
-    # Apply filters
-    if category_id:
-        demos = demos.filter(category_id=category_id)
+    # Apply business category filter if selected
+    if business_category_id:
+        demos = demos.filter(
+            Q(target_business_categories__id=business_category_id) |
+            Q(target_business_categories__isnull=True)
+        ).distinct()
     
+    # Apply business subcategory filter if selected
+    if business_subcategory_id:
+        demos = demos.filter(
+            Q(target_business_subcategories__id=business_subcategory_id) |
+            Q(target_business_subcategories__isnull=True)
+        ).distinct()
+    
+    # Apply search filter
     if search_query:
         demos = demos.filter(
             Q(title__icontains=search_query) |
@@ -132,12 +151,23 @@ def browse_demos(request):
         demos = demos.order_by('title')
     
     # Pagination
-    paginator = Paginator(demos, 12)  # 12 demos per page
+    paginator = Paginator(demos, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Get categories for filter
-    categories = DemoCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
+    # Get business categories for filter
+    business_categories = BusinessCategory.objects.filter(
+        is_active=True
+    ).distinct().order_by('sort_order', 'name')
+    
+    # Get subcategories for selected category
+    if business_category_id:
+        business_subcategories = BusinessSubCategory.objects.filter(
+            category_id=business_category_id,
+            is_active=True
+        ).distinct().order_by('sort_order', 'name')
+    else:
+        business_subcategories = BusinessSubCategory.objects.none()
     
     # Add user interaction data
     user_views = DemoView.objects.filter(user=request.user).values_list('demo_id', flat=True)
@@ -146,8 +176,10 @@ def browse_demos(request):
     context = get_customer_context(request.user)
     context.update({
         'page_obj': page_obj,
-        'categories': categories,
-        'current_category': int(category_id) if category_id else None,
+        'business_categories': business_categories,
+        'business_subcategories': business_subcategories,
+        'current_business_category': int(business_category_id) if business_category_id else None,
+        'current_business_subcategory': int(business_subcategory_id) if business_subcategory_id else None,
         'search_query': search_query,
         'sort_by': sort_by,
         'user_views': list(user_views),
@@ -155,6 +187,7 @@ def browse_demos(request):
     })
     
     return render(request, 'customers/browse_demos.html', context)
+
 
 @login_required
 def demo_detail(request, slug):
@@ -164,9 +197,13 @@ def demo_detail(request, slug):
     
     demo = get_object_or_404(Demo, slug=slug, is_active=True)
     
-    # Check if user can access this demo
-    if not demo.can_customer_access(request.user):
-        raise Http404("Demo not found")
+    # Check if user can access this demo (business category check)
+    user_category = request.user.business_category
+    user_subcategory = request.user.business_subcategory
+    
+    if not demo.is_available_for_business(user_category, user_subcategory):
+        if not demo.can_customer_access(request.user):
+            raise Http404("Demo not found")
     
     # Record view
     demo_view, created = DemoView.objects.get_or_create(
@@ -176,7 +213,6 @@ def demo_detail(request, slug):
     )
     
     if created:
-        # Increment view count
         Demo.objects.filter(id=demo.id).update(views_count=F('views_count') + 1)
     
     # Get user interactions
@@ -187,15 +223,16 @@ def demo_detail(request, slug):
     approved_feedbacks = DemoFeedback.objects.filter(
         demo=demo,
         is_approved=True
-    ).order_by('-created_at')[:5]
+    ).select_related('user').order_by('-created_at')[:5]
     
-    # Get related demos
+    # Get related demos based on business categories
     related_demos = Demo.objects.filter(
-        category=demo.category,
         is_active=True
     ).filter(
-        Q(target_customers=request.user) | Q(target_customers__isnull=True)
-    ).exclude(id=demo.id)[:4]
+        Q(target_business_categories=user_category) |
+        Q(target_business_subcategories=user_subcategory) |
+        Q(target_business_categories__isnull=True)
+    ).exclude(id=demo.id).distinct()[:4]
     
     context = get_customer_context(request.user)
     context.update({
@@ -204,7 +241,7 @@ def demo_detail(request, slug):
         'user_feedback': user_feedback,
         'approved_feedbacks': approved_feedbacks,
         'related_demos': related_demos,
-        'can_request_demo': True,  # Customer can request live demo
+        'can_request_demo': True,
     })
     
     return render(request, 'customers/demo_detail.html', context)
@@ -297,56 +334,143 @@ def demo_requests(request):
     })
     
     return render(request, 'customers/demo_requests.html', context)
+
+
+from django.db.models import Count
+
 @login_required
 def request_demo(request):
-    """Request a live demo session"""
+    """Request demo - shows specific demo if coming from browse page, otherwise general service request"""
     if not request.user.is_approved:
         return redirect('accounts:pending_approval')
     
+    demo_id = request.GET.get('demo')
+    
+    if demo_id:
+        try:
+            # Check customer access control - same logic as browse_demos
+            selected_demo = Demo.objects.filter(
+                id=demo_id,
+                is_active=True
+            ).annotate(
+                customer_count=Count('target_customers')
+            ).filter(
+                Q(customer_count=0) |  # Available to all
+                Q(target_customers=request.user)  # OR user is selected
+            ).distinct().first()
+            
+            if not selected_demo:
+                messages.error(request, 'This demo is not available to you. Please contact support for access.')
+                return redirect('customers:browse_demos')
+            
+            if request.method == 'POST':
+                requested_date = request.POST.get('requested_date')
+                time_slot_id = request.POST.get('time_slot_id')
+                notes = request.POST.get('notes', '').strip()
+                
+                try:
+                    time_slot = TimeSlot.objects.get(id=time_slot_id, is_active=True)
+                    
+                    DemoRequest.objects.create(
+                        user=request.user,
+                        demo=selected_demo,
+                        requested_date=requested_date,
+                        requested_time_slot=time_slot,
+                        notes=notes
+                    )
+                    
+                    messages.success(request, f'Demo request for "{selected_demo.title}" submitted successfully!')
+                    return redirect('customers:demo_requests')
+                except TimeSlot.DoesNotExist:
+                    messages.error(request, 'Invalid time slot selected.')
+            
+            time_slots = TimeSlot.objects.filter(is_active=True).order_by('start_time')
+            
+            from datetime import date, timedelta
+            today = date.today()
+            max_date = today + timedelta(days=30)
+            
+            context = get_customer_context(request.user)
+            context.update({
+                'selected_demo': selected_demo,
+                'time_slots': time_slots,
+                'min_date': today.isoformat(),
+                'max_date': max_date.isoformat(),
+            })
+            
+            return render(request, 'customers/request_demo_specific.html', context)
+            
+        except Exception as e:
+            messages.error(request, 'An error occurred. Please try again.')
+            return redirect('customers:browse_demos')
+    
+    # General service request form
     if request.method == 'POST':
-        demo_id = request.POST.get('demo_id')
+        business_category_id = request.POST.get('business_category')
+        business_subcategory_id = request.POST.get('business_subcategory', '')
         requested_date = request.POST.get('requested_date')
         time_slot_id = request.POST.get('time_slot_id')
         notes = request.POST.get('notes', '').strip()
         
-        # Validation
         try:
-            demo = Demo.objects.get(id=demo_id, is_active=True)
-            if not demo.can_customer_access(request.user):
-                raise Demo.DoesNotExist()
-                
             time_slot = TimeSlot.objects.get(id=time_slot_id, is_active=True)
+            category = BusinessCategory.objects.get(id=business_category_id)
             
-            # Create demo request
-            demo_request = DemoRequest.objects.create(
+            enquiry_subject = f"Service Consultation Request - {category.name}"
+            if business_subcategory_id:
+                subcategory = BusinessSubCategory.objects.get(id=business_subcategory_id)
+                enquiry_subject += f" ({subcategory.name})"
+            
+            enquiry_message = f"""Service Consultation Request
+
+Business Category: {category.name}
+"""
+            if business_subcategory_id:
+                enquiry_message += f"Subcategory: {subcategory.name}\n"
+            
+            enquiry_message += f"""
+Preferred Date: {requested_date}
+Preferred Time: {time_slot}
+
+Customer Requirements:
+{notes}
+"""
+            
+            BusinessEnquiry.objects.create(
                 user=request.user,
-                demo=demo,
-                requested_date=requested_date,
-                requested_time_slot=time_slot,
-                notes=notes
+                first_name=request.user.first_name,
+                last_name=request.user.last_name,
+                business_email=request.user.email,
+                mobile=request.user.mobile,
+                country_code=request.user.country_code,
+                job_title=request.user.job_title,
+                organization=request.user.organization,
+                subject=enquiry_subject,
+                message=enquiry_message
             )
             
-            messages.success(request, 'Demo request submitted successfully! We will contact you soon.')
-            return redirect('customers:demo_requests')
+            messages.success(request, 'Service request submitted successfully! Our team will contact you within 24 hours.')
+            return redirect('customers:enquiries')
             
-        except (Demo.DoesNotExist, TimeSlot.DoesNotExist, ValueError):
-            messages.error(request, 'Invalid demo request. Please try again.')
+        except (TimeSlot.DoesNotExist, BusinessCategory.DoesNotExist):
+            messages.error(request, 'Invalid request. Please try again.')
     
-    # Get available demos
-    available_demos = Demo.objects.filter(is_active=True).filter(
-        Q(target_customers=request.user) | Q(target_customers__isnull=True)
-    ).order_by('title')
-    
-    # Get time slots
+    business_categories = BusinessCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
     time_slots = TimeSlot.objects.filter(is_active=True).order_by('start_time')
+    
+    from datetime import date, timedelta
+    today = date.today()
+    max_date = today + timedelta(days=30)
     
     context = get_customer_context(request.user)
     context.update({
-        'available_demos': available_demos,
+        'business_categories': business_categories,
         'time_slots': time_slots,
+        'min_date': today.isoformat(),
+        'max_date': max_date.isoformat(),
     })
     
-    return render(request, 'customers/request_demo.html', context)
+    return render(request, 'customers/request_service.html', context)
 
 @login_required
 def enquiries(request):
@@ -403,48 +527,78 @@ def enquiries(request):
 
 @login_required
 def send_enquiry(request):
-    """Send a business enquiry"""
+    """Send a business enquiry with business category selection"""
     if not request.user.is_approved:
         return redirect('accounts:pending_approval')
     
     if request.method == 'POST':
         # Get form data
-        category_id = request.POST.get('category_id')
+        business_category_id = request.POST.get('business_category')
+        business_subcategory_id = request.POST.get('business_subcategory', '')
         subject = request.POST.get('subject', '').strip()
         message = request.POST.get('message', '').strip()
         
         # Validation
+        if not business_category_id:
+            messages.error(request, 'Please select a business category.')
+            return redirect('customers:send_enquiry')
+        
         if not message or len(message) < 10:
             messages.error(request, 'Message must be at least 10 characters long.')
             return redirect('customers:send_enquiry')
         
-        # Create enquiry
-        enquiry = BusinessEnquiry.objects.create(
-            user=request.user,
-            category_id=category_id if category_id else None,
-            first_name=request.user.first_name,
-            last_name=request.user.last_name,
-            business_email=request.user.email,
-            mobile=request.user.mobile,
-            country_code=request.user.country_code,
-            job_title=request.user.job_title,
-            organization=request.user.organization,
-            subject=subject,
-            message=message
-        )
-        
-        messages.success(request, f'Enquiry submitted successfully! Reference ID: {enquiry.enquiry_id}')
-        return redirect('customers:enquiries')
+        try:
+            category = BusinessCategory.objects.get(id=business_category_id)
+            
+            # Build enquiry subject
+            enquiry_subject = subject if subject else f"Business Enquiry - {category.name}"
+            if business_subcategory_id:
+                subcategory = BusinessSubCategory.objects.get(id=business_subcategory_id)
+                enquiry_subject += f" ({subcategory.name})"
+            
+            # Build detailed message
+            enquiry_message = f"""Business Category: {category.name}
+"""
+            if business_subcategory_id:
+                enquiry_message += f"Subcategory: {subcategory.name}\n"
+            
+            enquiry_message += f"""
+
+Customer Message:
+{message}
+"""
+            
+            # Create enquiry
+            enquiry = BusinessEnquiry.objects.create(
+                user=request.user,
+                first_name=request.user.first_name,
+                last_name=request.user.last_name,
+                business_email=request.user.email,
+                mobile=request.user.mobile,
+                country_code=request.user.country_code,
+                job_title=request.user.job_title,
+                organization=request.user.organization,
+                subject=enquiry_subject,
+                message=enquiry_message
+            )
+            
+            messages.success(request, f'Enquiry submitted successfully! Reference ID: {enquiry.enquiry_id}')
+            return redirect('customers:enquiries')
+            
+        except BusinessCategory.DoesNotExist:
+            messages.error(request, 'Invalid business category selected.')
+            return redirect('customers:send_enquiry')
     
-    # Get enquiry categories
-    categories = EnquiryCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
+    # Get business categories for the form
+    business_categories = BusinessCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
     
     context = get_customer_context(request.user)
     context.update({
-        'categories': categories,
+        'business_categories': business_categories,
     })
     
     return render(request, 'customers/send_enquiry.html', context)
+
 @login_required
 def contact_sales(request):
     """Contact sales team"""
@@ -486,65 +640,94 @@ def contact_sales(request):
 
 @login_required
 def notifications(request):
-    """Customer notifications"""
+    """Customer notifications - FIXED VERSION"""
     if not request.user.is_approved:
         return redirect('accounts:pending_approval')
     
-    # Get filter type
     notification_type = request.GET.get('type', '').strip()
     
-    # Base queryset
-    notifications = Notification.objects.filter(user=request.user)
+    notifications_qs = Notification.objects.filter(user=request.user)
     
-    # Apply filters
     if notification_type == 'unread':
-        notifications = notifications.filter(is_read=False)
+        notifications_qs = notifications_qs.filter(is_read=False)
     elif notification_type and notification_type != 'all':
-        notifications = notifications.filter(notification_type=notification_type)
+        notifications_qs = notifications_qs.filter(notification_type=notification_type)
     
-    # Order by creation date
-    notifications = notifications.order_by('-created_at')
+    notifications_qs = notifications_qs.order_by('is_read', '-created_at')
     
-    # Mark as read when viewing (optional)
-    unread_notifications = notifications.filter(is_read=False)
-    for notification in unread_notifications:
-        notification.mark_as_read()
-    
-    # Pagination
-    paginator = Paginator(notifications, 15)
+    paginator = Paginator(notifications_qs, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    
+    # Get all notification types with counts - FIXED
+    from django.db.models import Count
+    type_data = Notification.objects.filter(
+        user=request.user
+    ).values('notification_type').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Create a list of tuples (type, count) instead of dict
+    available_types = [(item['notification_type'], item['count']) for item in type_data]
     
     context = get_customer_context(request.user)
     context.update({
         'page_obj': page_obj,
         'current_filter': notification_type,
+        'available_types': available_types,  # Now list of tuples
+        'unread_count': Notification.objects.filter(user=request.user, is_read=False).count(),
     })
     
     return render(request, 'customers/notifications.html', context)
 
-
 @login_required
 @require_http_methods(["POST"])
 def mark_notification_read(request, notification_id):
+    """Mark single notification as read"""
     try:
-        notification = get_object_or_404(Notification, id=notification_id, user=request.user)
-        notification.mark_as_read()
-        return JsonResponse({'success': True})
-    except:
-        return JsonResponse({'error': 'Failed to mark notification as read'}, status=500)
+        notification = get_object_or_404(
+            Notification, 
+            id=notification_id, 
+            user=request.user
+        )
+        
+        if not notification.is_read:
+            notification.mark_as_read()
+            
+        return JsonResponse({
+            'success': True,
+            'message': 'Notification marked as read'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': 'Failed to mark notification as read'
+        }, status=500)
 
 @login_required  
 @require_http_methods(["POST"])
 def mark_all_notifications_read(request):
+    """Mark all notifications as read"""
     try:
-        count = Notification.objects.filter(user=request.user, is_read=False).update(
+        # Only mark unread notifications
+        updated_count = Notification.objects.filter(
+            user=request.user, 
+            is_read=False
+        ).update(
             is_read=True,
             read_at=timezone.now()
         )
-        return JsonResponse({'success': True, 'count': count})
-    except:
-        return JsonResponse({'error': 'Failed to mark notifications as read'}, status=500)
+        
+        return JsonResponse({
+            'success': True,
+            'count': updated_count,
+            'message': f'{updated_count} notification(s) marked as read'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': 'Failed to mark notifications as read'
+        }, status=500)
 
 # AJAX Views
 @login_required
@@ -696,3 +879,85 @@ def cancel_demo_request(request, request_id):
         return JsonResponse({
             'error': 'An error occurred while cancelling the request'
         }, status=500)
+    
+
+
+@login_required
+@require_http_methods(["GET"])
+def ajax_subcategories(request, category_id):
+    """AJAX endpoint to get subcategories"""
+    subcategories = BusinessSubCategory.objects.filter(
+        category_id=category_id,
+        is_active=True
+    ).order_by('sort_order', 'name')
+    
+    data = {
+        'subcategories': [
+            {
+                'id': sub.id,
+                'name': sub.name,
+            }
+            for sub in subcategories
+        ]
+    }
+    
+    return JsonResponse(data)
+
+
+@login_required
+@require_http_methods(["GET"])
+def ajax_demos_by_category(request):
+    """AJAX endpoint to get demos by category/subcategory"""
+    category_id = request.GET.get('category')
+    subcategory_id = request.GET.get('subcategory', '')
+    
+    demos = Demo.objects.filter(is_active=True)
+    
+    if category_id:
+        demos = demos.filter(
+            Q(target_business_categories__id=category_id) |
+            Q(target_business_categories__isnull=True)
+        )
+    
+    if subcategory_id:
+        demos = demos.filter(
+            Q(target_business_subcategories__id=subcategory_id) |
+            Q(target_business_subcategories__isnull=True)
+        )
+    
+    demos = demos.distinct().order_by('-is_featured', 'sort_order', '-created_at')
+    
+    data = {
+        'demos': [
+            {
+                'id': demo.id,
+                'title': demo.title,
+                'thumbnail': demo.thumbnail.url if demo.thumbnail else None,
+                'category': demo.primary_business_category.name if demo.primary_business_category else None,
+                'subcategories': [sub.name for sub in demo.target_business_subcategories.all()[:2]],
+                'views': demo.views_count,
+            }
+            for demo in demos
+        ]
+    }
+    
+    return JsonResponse(data)
+
+@login_required
+@require_http_methods(["GET"])
+def ajax_demo_detail(request, demo_id):
+    """AJAX endpoint to get single demo details"""
+    try:
+        demo = Demo.objects.get(id=demo_id, is_active=True)
+        
+        data = {
+            'demo': {
+                'id': demo.id,
+                'title': demo.title,
+                'category_id': demo.primary_business_category.id if demo.primary_business_category else None,
+            }
+        }
+        
+        return JsonResponse(data)
+    except Demo.DoesNotExist:
+        return JsonResponse({'error': 'Demo not found'}, status=404)

@@ -1,0 +1,401 @@
+<!-- templates/customers/request_demo_specific.html - For specific demo from browse page -->
+{% extends 'customers/base.html' %}
+{% load static %}
+
+{% block customer_title %}Request Demo - {{ selected_demo.title }}{% endblock %}
+{% block page_title %}Request Demo Session{% endblock %}
+
+{% block customer_extra_css %}
+<style>
+    body {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .page-header {
+        background: white;
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-xl);
+        border: 1px solid var(--gray-200);
+    }
+
+    .demo-info-card {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border: 2px solid #3b82f6;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .demo-info-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .demo-thumbnail {
+        width: 120px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: var(--radius-lg);
+        border: 3px solid white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .demo-details h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .demo-tags {
+        display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+    }
+
+    .demo-tag {
+        background: var(--primary-color);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .service-request-form {
+        background: white;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        border: 1px solid var(--gray-200);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-xl);
+        border-bottom: 2px solid var(--gray-100);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-lg);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .section-title i {
+        color: var(--primary-color);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-sm);
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .required {
+        color: var(--danger-color);
+        margin-left: 4px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: var(--spacing-md);
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-lg);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        outline: none;
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: var(--spacing-xs);
+    }
+
+    .time-slots {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
+    }
+
+    .time-slot {
+        background: var(--gray-50);
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-md);
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .time-slot:hover {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+    }
+
+    .time-slot.selected {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+    }
+
+    .time-slot input[type="radio"] {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .slot-time {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .slot-type {
+        font-size: 0.75rem;
+        color: var(--gray-500);
+    }
+
+    .submit-section {
+        text-align: center;
+        padding-top: var(--spacing-lg);
+    }
+
+    .btn-submit {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: var(--spacing-md) calc(var(--spacing-xl) * 2);
+        border-radius: var(--radius-lg);
+        font-size: 1.125rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+        .demo-info-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .time-slots {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block customer_content %}
+<div class="page-header">
+    <div class="text-center">
+        <h1 class="h2 mb-2">
+            <i class="fas fa-video me-2 text-primary"></i>
+            Request Live Demo Session
+        </h1>
+        <p class="text-muted mb-0">Schedule a personalized demo for the selected video</p>
+    </div>
+</div>
+
+<!-- Selected Demo Info -->
+<div class="demo-info-card">
+    <div class="demo-info-header">
+        {% if selected_demo.thumbnail %}
+            <img src="{{ selected_demo.thumbnail.url }}" alt="{{ selected_demo.title }}" class="demo-thumbnail">
+        {% else %}
+            <div class="demo-thumbnail" style="background: var(--gray-300); display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-video fa-2x text-muted"></i>
+            </div>
+        {% endif %}
+        
+        <div class="demo-details">
+            <h3>{{ selected_demo.title }}</h3>
+            <div class="demo-tags">
+                {% if selected_demo.primary_business_category %}
+                    <span class="demo-tag">
+                        {% if selected_demo.primary_business_category.icon %}
+                            {{ selected_demo.primary_business_category.icon }}
+                        {% endif %}
+                        {{ selected_demo.primary_business_category.name }}
+                    </span>
+                {% endif %}
+                {% for subcat in selected_demo.target_business_subcategories.all|slice:":2" %}
+                    <span class="demo-tag" style="background: var(--secondary-color);">
+                        {{ subcat.name }}
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <p class="mb-0 text-muted">
+        <i class="fas fa-info-circle me-2"></i>
+        You're requesting a live demo session for this video. Our team will walk you through all features in detail.
+    </p>
+</div>
+
+<form method="POST" id="demoRequestForm" class="service-request-form">
+    {% csrf_token %}
+    
+    <!-- Hidden field for demo ID -->
+    <input type="hidden" name="demo_id" value="{{ selected_demo.id }}">
+    
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-calendar"></i>
+            Select Date & Time
+        </h3>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label class="form-label">
+                    <i class="fas fa-calendar me-1"></i>
+                    Preferred Date
+                    <span class="required">*</span>
+                </label>
+                <input type="date" 
+                       name="requested_date" 
+                       id="requestedDate"
+                       class="form-control" 
+                       min="{{ min_date }}"
+                       max="{{ max_date }}"
+                       required>
+                <small class="form-text">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Monday - Saturday only
+                </small>
+            </div>
+            
+            <div class="col-md-6">
+                <label class="form-label">
+                    <i class="fas fa-clock me-1"></i>
+                    Preferred Time Slot
+                    <span class="required">*</span>
+                </label>
+                <div class="time-slots">
+                    {% for slot in time_slots %}
+                        <label class="time-slot" for="slot_{{ slot.id }}">
+                            <input type="radio" 
+                                   name="time_slot_id" 
+                                   value="{{ slot.id }}" 
+                                   id="slot_{{ slot.id }}" 
+                                   required>
+                            <div class="slot-time">
+                                {{ slot.start_time|time:"g:i A" }} - {{ slot.end_time|time:"g:i A" }}
+                            </div>
+                            <div class="slot-type">{{ slot.get_slot_type_display }}</div>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-section">
+        <h3 class="section-title">
+            <i class="fas fa-sticky-note"></i>
+            Additional Information
+        </h3>
+        
+        <label class="form-label">
+            <i class="fas fa-comments me-1"></i>
+            Questions or Specific Topics (Optional)
+        </label>
+        <textarea name="notes" 
+                  class="form-control" 
+                  rows="4"
+                  placeholder="Any specific features or areas you'd like us to focus on during the demo..."></textarea>
+        <small class="form-text">
+            Help us prepare a more relevant demo by sharing what interests you most
+        </small>
+    </div>
+    
+    <div class="submit-section">
+        <button type="submit" class="btn-submit" id="submitBtn">
+            <i class="fas fa-paper-plane me-2"></i>
+            Request Demo Session
+        </button>
+        <div class="mt-3">
+            <small class="text-muted">
+                <i class="fas fa-check-circle me-1"></i>
+                We'll confirm your demo session within 24 hours
+            </small>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block customer_extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    
+    const dateInput = document.getElementById('requestedDate');
+    const form = document.getElementById('demoRequestForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'INPUT') {
+                this.querySelector('input').checked = true;
+            }
+            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+    
+    dateInput.addEventListener('change', function() {
+        const date = new Date(this.value);
+        if (date.getDay() === 0) {
+            alert('Sundays are not available. Please select another date.');
+            this.value = '';
+        }
+    });
+    
+    form.addEventListener('submit', function(e) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+    });
+});
+</script>
+{% endblock %}

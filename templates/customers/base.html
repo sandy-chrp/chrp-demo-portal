@@ -695,6 +695,17 @@
                         <span class="nav-text">Browse Demos</span>
                     </a>
                 </div>
+
+                <div class="nav-item">
+                    <a href="{% url 'customers:liked_demos' %}" 
+                    class="nav-link {% if 'liked_demos' in request.resolver_match.url_name %}active{% endif %}"
+                    data-tooltip="My Liked Videos">
+<i class="fas fa-star"></i>                        <span class="nav-text">Liked Videos</span>
+                        {% if total_demos_liked %}
+                            <span class="badge bg-danger">{{ total_demos_liked }}</span>
+                        {% endif %}
+                    </a>
+                </div>
                 <div class="nav-item">
                     <a href="{% url 'customers:demo_requests' %}" 
                        class="nav-link {% if 'demo_requests' in request.resolver_match.url_name %}active{% endif %}"
@@ -706,14 +717,14 @@
                         {% endif %}
                     </a>
                 </div>
-                <div class="nav-item">
+                {% comment %} <div class="nav-item">
                     <a href="{% url 'customers:request_demo' %}" 
                        class="nav-link {% if 'request_demo' in request.resolver_match.url_name %}active{% endif %}"
                        data-tooltip="Request Live Demo">
                         <i class="fas fa-calendar-plus"></i>
                         <span class="nav-text">Request Demo</span>
                     </a>
-                </div>
+                </div> {% endcomment %}
                 
                 <div class="nav-section">Business Support</div>
                 <div class="nav-item">

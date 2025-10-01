@@ -1,4 +1,4 @@
-<!-- templates/customers/demo_detail.html - Complete Fixed Version -->
+<!-- templates/customers/demo_detail.html - Complete Fixed & Dynamic Version with Star Icons -->
 {% extends 'customers/base.html' %}
 {% load static %}
 
@@ -41,7 +41,7 @@
         position: relative;
         width: 100%;
         height: 0;
-        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        padding-bottom: 56.25%;
         background: #000;
     }
 
@@ -56,7 +56,7 @@
         background: #000;
     }
 
-    /* Security overlays only for video */
+    /* Security overlays */
     .video-protection-overlay {
         position: absolute;
         top: 0;
@@ -256,17 +256,17 @@
 
     .btn-like {
         background: transparent;
-        color: var(--danger-color);
-        border: 2px solid var(--danger-color);
+        color: #f59e0b;
+        border: 2px solid #f59e0b;
     }
 
     .btn-like:hover {
-        background: var(--danger-color);
+        background: #f59e0b;
         color: white;
     }
 
     .btn-like.liked {
-        background: var(--danger-color);
+        background: #f59e0b;
         color: white;
     }
 
@@ -332,7 +332,7 @@
         margin-bottom: var(--spacing-md);
     }
 
-    /* Feedback section - Allow normal text selection */
+    /* Feedback section */
     .feedback-section {
         background: white;
         padding: var(--spacing-xl);
@@ -402,6 +402,37 @@
     .feedback-date {
         color: var(--gray-500);
         font-size: 0.875rem;
+    }
+
+    /* Category badges */
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--primary-color);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .category-badge:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .subcategory-badge {
+        background: var(--gray-200);
+        color: var(--gray-700);
+    }
+
+    .subcategory-badge:hover {
+        background: var(--gray-300);
+        color: var(--gray-800);
     }
 
     /* Security warning */
@@ -486,7 +517,6 @@
         }
     }
 
-    /* Video controls styling */
     .demo-video::-webkit-media-controls {
         display: none !important;
     }
@@ -499,7 +529,6 @@
         display: none !important;
     }
 
-    /* Toast notifications */
     .toast {
         position: fixed;
         top: 20px;
@@ -511,16 +540,16 @@
 {% endblock %}
 
 {% block customer_content %}
-<!-- CSRF Token for AJAX -->
+<!-- CSRF Token -->
 {% csrf_token %}
 
-<!-- Security Warning (Hidden by default) -->
+<!-- Security Warning -->
 <div class="security-warning" id="securityWarning">
     <i class="fas fa-shield-alt me-2"></i>
     <span id="warningText">Unauthorized action detected!</span>
 </div>
 
-<!-- Breadcrumb -->
+<!-- Breadcrumb - FIXED FOR BUSINESS CATEGORIES -->
 <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
@@ -529,9 +558,13 @@
         <li class="breadcrumb-item">
             <a href="{% url 'customers:browse_demos' %}">Demos</a>
         </li>
+        {% if demo.primary_business_category %}
         <li class="breadcrumb-item">
-            <a href="{% url 'customers:browse_demos' %}?category={{ demo.category.id }}">{{ demo.category.name }}</a>
+            <a href="{% url 'customers:browse_demos' %}?business_category={{ demo.primary_business_category.id }}">
+                {{ demo.primary_business_category.name }}
+            </a>
         </li>
+        {% endif %}
         <li class="breadcrumb-item active">{{ demo.title|truncatechars:30 }}</li>
     </ol>
 </nav>
@@ -554,10 +587,8 @@
             Your browser does not support the video tag.
         </video>
         
-        <!-- Security Overlays -->
         <div class="video-protection-overlay"></div>
         
-        <!-- Watermarks -->
         <div class="video-watermark">
             {{ user.email }} - CONFIDENTIAL
         </div>
@@ -597,23 +628,43 @@
     </div>
 </div>
 
-<!-- Demo Information -->
+<!-- Demo Information - UPDATED WITH BUSINESS CATEGORIES AND STAR ICON -->
 <div class="demo-header">
     <div class="row">
         <div class="col-lg-8">
             <h1 class="demo-title">{{ demo.title }}</h1>
             
+            <!-- Category Badges -->
+            <div class="mb-3">
+                {% if demo.primary_business_category %}
+                    <a href="{% url 'customers:browse_demos' %}?business_category={{ demo.primary_business_category.id }}" 
+                       class="category-badge">
+                        {% if demo.primary_business_category.icon %}
+                            {{ demo.primary_business_category.icon }}
+                        {% else %}
+                            <i class="fas fa-tag"></i>
+                        {% endif %}
+                        {{ demo.primary_business_category.name }}
+                    </a>
+                {% endif %}
+                
+                {% for subcategory in demo.target_business_subcategories.all|slice:":3" %}
+                    <a href="{% url 'customers:browse_demos' %}?business_category={{ subcategory.category.id }}&business_subcategory={{ subcategory.id }}" 
+                       class="category-badge subcategory-badge ms-2">
+                        {{ subcategory.name }}
+                    </a>
+                {% endfor %}
+                
+                {% comment %} <span class="badge bg-secondary ms-2">{{ demo.get_demo_type_display }}</span> {% endcomment %}
+            </div>
+            
             <div class="demo-meta-info">
-                <div class="meta-item">
-                    <i class="fas fa-folder"></i>
-                    <span>{{ demo.category.name }}</span>
-                </div>
                 <div class="meta-item">
                     <i class="fas fa-eye"></i>
                     <span>{{ demo.views_count }} views</span>
                 </div>
                 <div class="meta-item">
-                    <i class="fas fa-heart"></i>
+                    <i class="fas fa-star text-warning"></i>
                     <span id="likesCount">{{ demo.likes_count }}</span> likes
                 </div>
                 {% if demo.duration %}
@@ -626,12 +677,12 @@
                     <i class="fas fa-calendar"></i>
                     <span>{{ demo.created_at|date:"M d, Y" }}</span>
                 </div>
-                {% if demo.created_by %}
+                {% comment %} {% if demo.created_by %}
                 <div class="meta-item">
                     <i class="fas fa-user"></i>
-                    <span>{{ demo.created_by.first_name }} {{ demo.created_by.last_name }}</span>
+                    <span>{{ demo.created_by.get_full_name }}</span>
                 </div>
-                {% endif %}
+                {% endif %} {% endcomment %}
             </div>
             
             <div class="demo-description">
@@ -645,22 +696,24 @@
                     class="action-btn btn-like {% if user_liked %}liked{% endif %}" 
                     id="likeBtn"
                     data-demo-id="{{ demo.id }}">
-                    <i class="fas fa-heart"></i>
+                    <i class="fas fa-star"></i>
                     <span id="likeText">{% if user_liked %}Liked{% else %}Like{% endif %}</span>
                 </button>
                 
-                <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
+                {% comment %} <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
                    class="action-btn btn-request-demo">
                     <i class="fas fa-calendar-plus"></i>
                     Request Live Demo
-                </a>
+                </a> {% endcomment %}
                 
-                <a href="{% url 'customers:browse_demos' %}?category={{ demo.category.id }}" 
+                {% if demo.primary_business_category %}
+                <a href="{% url 'customers:browse_demos' %}?business_category={{ demo.primary_business_category.id }}" 
                    class="action-btn" 
                    style="background: var(--gray-200); color: var(--gray-700);">
                     <i class="fas fa-list"></i>
-                    More {{ demo.category.name }}
+                    More {{ demo.primary_business_category.name }}
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -746,9 +799,12 @@
                 <i class="fas fa-play-circle"></i>
                 Related Demos
             </h3>
-            <a href="{% url 'customers:browse_demos' %}?category={{ demo.category.id }}" class="btn btn-outline-primary btn-sm">
+            {% if demo.primary_business_category %}
+            <a href="{% url 'customers:browse_demos' %}?business_category={{ demo.primary_business_category.id }}" 
+               class="btn btn-outline-primary btn-sm">
                 View All <i class="fas fa-arrow-right ms-1"></i>
             </a>
+            {% endif %}
         </div>
         <div class="customer-card-body">
             <div class="related-grid">
@@ -766,7 +822,7 @@
                             <div class="related-meta">
                                 <i class="fas fa-eye me-1"></i>{{ related_demo.views_count }} views
                                 <span class="mx-2">•</span>
-                                <i class="fas fa-heart me-1"></i>{{ related_demo.likes_count }} likes
+                                <i class="fas fa-star text-warning me-1"></i>{{ related_demo.likes_count }} likes
                             </div>
                             <a href="{% url 'customers:demo_detail' related_demo.slug %}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-play me-1"></i>Watch Demo
@@ -787,10 +843,7 @@
 
 {% block customer_extra_js %}
 <script>
-// COMPLETE DEMO DETAIL PAGE WITH BALANCED SECURITY AND WORKING FEEDBACK
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // Get elements
     const video = document.getElementById('demoVideo');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const progressBar = document.getElementById('progressBar');
@@ -803,7 +856,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const securityWarning = document.getElementById('securityWarning');
     const warningText = document.getElementById('warningText');
     
-    // Initialize components
     initializeVideoSecurity();
     initializeVideoControls();
     initializeLikeFeature();
@@ -811,32 +863,25 @@ document.addEventListener('DOMContentLoaded', function() {
     updateTimestamp();
     setInterval(updateTimestamp, 1000);
     
-    // VIDEO SECURITY - More Balanced Approach
     function initializeVideoSecurity() {
-        // Video-specific protection only
         video.oncontextmenu = () => false;
         video.ondragstart = () => false;
         video.onselectstart = () => false;
-        
-        // Remove default controls
         video.controls = false;
         video.controlsList = "nodownload nofullscreen noremoteplayback";
         video.disablePictureInPicture = true;
-        video.disableRemotePlaybook = true;
         
-        // Block only dangerous keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            // Only block specific dangerous shortcuts
-            const dangerousShortcuts = [
-                e.key === 'F12', // Developer tools
-                e.key === 'PrintScreen', // Print screen
-                (e.ctrlKey && e.shiftKey && e.key === 'I'), // Ctrl+Shift+I
-                (e.ctrlKey && e.shiftKey && e.key === 'J'), // Ctrl+Shift+J
-                (e.ctrlKey && e.shiftKey && e.key === 'C'), // Ctrl+Shift+C
-                (e.ctrlKey && e.key === 'u'), // Ctrl+U (view source)
+            const dangerous = [
+                e.key === 'F12',
+                e.key === 'PrintScreen',
+                (e.ctrlKey && e.shiftKey && e.key === 'I'),
+                (e.ctrlKey && e.shiftKey && e.key === 'J'),
+                (e.ctrlKey && e.shiftKey && e.key === 'C'),
+                (e.ctrlKey && e.key === 'u'),
             ];
             
-            if (dangerousShortcuts.some(condition => condition)) {
+            if (dangerous.some(condition => condition)) {
                 e.preventDefault();
                 e.stopPropagation();
                 showSecurityWarning('Developer action blocked');
@@ -844,7 +889,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Block video context menu only
         const videoContainer = document.querySelector('.video-content');
         if (videoContainer) {
             videoContainer.addEventListener('contextmenu', function(e) {
@@ -854,7 +898,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Basic focus protection
         window.addEventListener('blur', function() {
             if (!video.paused) {
                 video.pause();
@@ -871,9 +914,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
     
-    // VIDEO CONTROLS
     function initializeVideoControls() {
-        // Play/Pause
         playPauseBtn.addEventListener('click', function() {
             if (video.paused) {
                 video.play();
@@ -882,15 +923,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Update button state
         video.addEventListener('play', updatePlayPauseButton);
         video.addEventListener('pause', updatePlayPauseButton);
-        
-        // Progress tracking
         video.addEventListener('timeupdate', updateProgress);
         video.addEventListener('loadedmetadata', updateDuration);
         
-        // Progress bar clicking
         progressTrack.addEventListener('click', function(e) {
             const rect = progressTrack.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
@@ -898,14 +935,12 @@ document.addEventListener('DOMContentLoaded', function() {
             video.currentTime = percentage * video.duration;
         });
         
-        // Volume controls
         volumeBtn.addEventListener('click', toggleMute);
         volumeSlider.addEventListener('input', function() {
             video.volume = this.value;
             updateVolumeButton();
         });
         
-        // Spacebar for play/pause
         document.addEventListener('keydown', function(e) {
             if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
                 e.preventDefault();
@@ -972,17 +1007,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // LIKE FUNCTIONALITY
     function initializeLikeFeature() {
         const likeBtn = document.getElementById('likeBtn');
         if (likeBtn) {
             likeBtn.addEventListener('click', function() {
                 const demoId = this.dataset.demoId;
-                
-                // Show loading
                 this.classList.add('loading');
                 
-                // Get URL
                 const currentPath = window.location.pathname;
                 const baseUrl = currentPath.includes('/customers/') ? '/customers/' : '/customer/';
                 
@@ -1018,13 +1049,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // FEEDBACK FUNCTIONALITY - FIXED
     function initializeFeedbackFeature() {
         const feedbackForm = document.getElementById('feedbackForm');
         const ratingStars = document.querySelectorAll('.star');
         let selectedRating = 0;
         
-        // Star rating interaction
         ratingStars.forEach(star => {
             star.addEventListener('click', function() {
                 selectedRating = parseInt(this.dataset.rating);
@@ -1038,7 +1067,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Reset stars on mouse leave
         document.getElementById('ratingStars').addEventListener('mouseleave', function() {
             updateStarDisplay();
         });
@@ -1063,7 +1091,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Feedback form submission
         if (feedbackForm) {
             feedbackForm.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1071,7 +1098,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const feedbackText = document.getElementById('feedbackText').value.trim();
                 const rating = selectedRating;
                 
-                // Validation
                 if (!feedbackText) {
                     showToast('Please enter your feedback', 'warning');
                     return;
@@ -1082,14 +1108,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                // Show loading state
                 const submitBtn = feedbackForm.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.classList.add('loading');
                 submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
                 submitBtn.disabled = true;
                 
-                // Get CSRF token
                 const csrfToken = getCsrfToken();
                 if (!csrfToken) {
                     showToast('Security token not found. Please refresh the page.', 'error');
@@ -1097,15 +1121,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                // Construct URL
                 const currentPath = window.location.pathname;
                 const baseUrl = currentPath.includes('/customers/') ? '/customers/' : '/customer/';
                 const feedbackUrl = `${baseUrl}ajax/demo/{{ demo.id }}/feedback/`;
                 
-                console.log('Submitting feedback to:', feedbackUrl);
-                console.log('Data:', {feedback: feedbackText, rating: rating});
-                
-                // Submit feedback
                 fetch(feedbackUrl, {
                     method: 'POST',
                     headers: {
@@ -1119,19 +1138,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                 })
                 .then(response => {
-                    console.log('Response status:', response.status);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Response data:', data);
                     if (data.success) {
                         showToast(data.message, 'success');
                         feedbackForm.style.display = 'none';
                         
-                        // Show success message
                         const successMsg = document.createElement('div');
                         successMsg.className = 'alert alert-success';
                         successMsg.innerHTML = '<i class="fas fa-check-circle me-2"></i>Thank you for your feedback! It will be reviewed by our team.';
@@ -1159,7 +1175,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // UTILITY FUNCTIONS
     function getCsrfToken() {
         const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
         if (csrfInput) return csrfInput.value;
@@ -1201,7 +1216,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         toastContainer.insertAdjacentHTML('beforeend', toastHtml);
         
-        // Auto remove after 5 seconds
         setTimeout(() => {
             const toast = document.getElementById(toastId);
             if (toast) toast.remove();

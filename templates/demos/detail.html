@@ -1,4 +1,4 @@
-<!-- templates/demos/detail.html -->
+<!-- templates/demos/detail.html - UPDATED WITH STAR ICONS -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -184,15 +184,15 @@
     }
 
     .btn-like.liked {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger-color);
-        border-color: var(--danger-color);
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+        border-color: var(--warning-color);
     }
 
     .btn-like:hover {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger-color);
-        border-color: var(--danger-color);
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-color);
+        border-color: var(--warning-color);
     }
 
     .demo-description {
@@ -220,7 +220,7 @@
     }
 
     .stat-card.views { border-left-color: var(--info-color); }
-    .stat-card.likes { border-left-color: var(--danger-color); }
+    .stat-card.likes { border-left-color: var(--warning-color); }
     .stat-card.category { border-left-color: var(--primary-color); }
 
     .stat-number {
@@ -541,15 +541,15 @@
                     
                     <button class="action-btn btn-like {% if user_has_liked %}liked{% endif %}" 
                             onclick="toggleLike()" id="likeBtn">
-                        <i class="fas fa-heart"></i>
+                        <i class="fas fa-star"></i>
                         <span id="likeText">{{ user_has_liked|yesno:"Liked,Like" }}</span>
                         <span id="likeCount">({{ demo.likes_count }})</span>
                     </button>
 
-                    <a href="{% url 'demos:request_demo' demo.slug %}" class="action-btn btn-outline">
+                    {% comment %} <a href="{% url 'demos:request_demo' demo.slug %}" class="action-btn btn-outline">
                         <i class="fas fa-calendar-plus"></i>
                         Request Live Demo
-                    </a>
+                    </a> {% endcomment %}
                 </div>
             </div>
 

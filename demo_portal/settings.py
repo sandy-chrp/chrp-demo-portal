@@ -237,6 +237,9 @@ CSRF_COOKIE_HTTPONLY = True
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
+LOGIN_REDIRECT_URL = '/accounts/signin/'  # General
+
+
 BLOCKED_EMAIL_DOMAINS = [
     # Gmail variants
     'gmail.com', 'googlemail.com',

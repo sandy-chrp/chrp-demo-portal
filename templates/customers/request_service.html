@@ -1,9 +1,9 @@
-<!-- templates/customers/request_demo.html - Complete Fixed Version -->
+<!-- templates/customers/request_service.html - Service Request with Category Selection -->
 {% extends 'customers/base.html' %}
 {% load static %}
 
-{% block customer_title %}Request Demo - Customer Portal{% endblock %}
-{% block page_title %}Request Live Demo{% endblock %}
+{% block customer_title %}Request Service - Customer Portal{% endblock %}
+{% block page_title %}Request Service{% endblock %}
 
 {% block customer_extra_css %}
 <style>
@@ -21,12 +21,14 @@
         border: 1px solid var(--gray-200);
     }
 
-    .demo-request-form {
+    .service-request-form {
         background: white;
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow-md);
         padding: var(--spacing-xl);
         border: 1px solid var(--gray-200);
+        max-width: 900px;
+        margin: 0 auto;
     }
 
     .form-section {
@@ -71,7 +73,7 @@
         font-size: 0.95rem;
     }
 
-    .form-label .required {
+    .required {
         color: var(--danger-color);
         margin-left: 4px;
     }
@@ -103,72 +105,6 @@
         font-size: 0.875rem;
         color: var(--gray-500);
         margin-top: var(--spacing-xs);
-    }
-
-    .demo-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: var(--spacing-md);
-        margin-top: var(--spacing-md);
-    }
-
-    .demo-card {
-        background: var(--gray-50);
-        border: 2px solid var(--gray-300);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-md);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .demo-card:hover {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
-        transform: translateY(-2px);
-    }
-
-    .demo-card.selected {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
-        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
-    }
-
-    .demo-card input[type="radio"] {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-    }
-
-    .demo-card-content {
-        padding-right: 35px;
-    }
-
-    .demo-card-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--dark-color);
-        margin-bottom: var(--spacing-xs);
-        line-height: 1.3;
-    }
-
-    .demo-card-meta {
-        display: flex;
-        gap: var(--spacing-sm);
-        flex-wrap: wrap;
-        font-size: 0.75rem;
-        align-items: center;
-    }
-
-    .demo-tag {
-        background: var(--primary-color);
-        color: white;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-weight: 600;
     }
 
     .time-slots {
@@ -221,14 +157,6 @@
         color: var(--gray-500);
     }
 
-    .info-alert {
-        background: #eff6ff;
-        border-left: 4px solid #3b82f6;
-        padding: var(--spacing-md);
-        border-radius: var(--radius-lg);
-        margin-bottom: var(--spacing-lg);
-    }
-
     .submit-section {
         text-align: center;
         padding-top: var(--spacing-lg);
@@ -257,14 +185,16 @@
         cursor: not-allowed;
     }
 
-    .loading-spinner {
-        text-align: center;
-        padding: var(--spacing-lg);
-        color: var(--primary-color);
+    .info-alert {
+        background: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-lg);
     }
 
     @media (max-width: 768px) {
-        .demo-grid, .time-slots {
+        .time-slots {
             grid-template-columns: 1fr;
         }
     }
@@ -277,9 +207,9 @@
         <div>
             <h1 class="h2 mb-2">
                 <i class="fas fa-calendar-plus me-2 text-primary"></i>
-                Request Live Demo
+                Request Service Consultation
             </h1>
-            <p class="text-muted mb-0">Fill out the form below to schedule a personalized demo session</p>
+            <p class="text-muted mb-0">Schedule a consultation session with our team</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{% url 'customers:browse_demos' %}" class="btn btn-outline-secondary">
@@ -296,14 +226,15 @@
     <div class="d-flex align-items-start gap-2">
         <i class="fas fa-info-circle mt-1"></i>
         <div>
-            <strong>How It Works:</strong> Select your business category to see relevant demos, choose your preferred demo, date and time slot. Our team will confirm your session within 24 hours.
+            <strong>Quick Guide:</strong> Select your business category, choose your preferred date and time, and share your requirements. Our team will contact you within 24 hours.
         </div>
     </div>
 </div>
 
-<form method="POST" id="demoRequestForm" class="demo-request-form">
+<form method="POST" id="serviceRequestForm" class="service-request-form">
     {% csrf_token %}
     
+    <!-- Step 1: Business Category -->
     <div class="form-section">
         <h3 class="section-title">
             <span class="step-number">1</span>
@@ -313,6 +244,7 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">
+                    <i class="fas fa-building me-1"></i>
                     Select Your Business Category
                     <span class="required">*</span>
                 </label>
@@ -322,8 +254,7 @@
                         required>
                     <option value="">-- Select Category --</option>
                     {% for category in business_categories %}
-                        <option value="{{ category.id }}" 
-                                {% if selected_category_id == category.id %}selected{% endif %}>
+                        <option value="{{ category.id }}">
                             {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
                         </option>
                     {% endfor %}
@@ -333,6 +264,7 @@
             
             <div class="col-md-6" id="subcategoryWrapper" style="display: none;">
                 <label class="form-label">
+                    <i class="fas fa-tags me-1"></i>
                     Subcategory (Optional)
                 </label>
                 <select name="business_subcategory" 
@@ -340,29 +272,15 @@
                         class="form-select">
                     <option value="">-- All Subcategories --</option>
                 </select>
-                <small class="form-text">Narrow down to a specific subcategory</small>
+                <small class="form-text">Narrow down to a specific subcategory if needed</small>
             </div>
         </div>
     </div>
     
-    <div class="form-section" id="demoSection" style="display: none;">
+    <!-- Step 2: Date & Time -->
+    <div class="form-section">
         <h3 class="section-title">
             <span class="step-number">2</span>
-            Select Demo
-            <span class="required">*</span>
-        </h3>
-        
-        <div id="demoContainer">
-            <div class="loading-spinner">
-                <i class="fas fa-spinner fa-spin fa-2x"></i>
-                <p class="mt-2">Loading available demos...</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="form-section" id="dateTimeSection" style="display: none;">
-        <h3 class="section-title">
-            <span class="step-number">3</span>
             Preferred Date & Time
         </h3>
         
@@ -392,60 +310,57 @@
                     Select Time Slot
                     <span class="required">*</span>
                 </label>
-                {% if time_slots %}
-                    <div class="time-slots">
-                        {% for slot in time_slots %}
-                            <label class="time-slot" for="slot_{{ slot.id }}">
-                                <input type="radio" 
-                                       name="time_slot_id" 
-                                       value="{{ slot.id }}" 
-                                       id="slot_{{ slot.id }}" 
-                                       required>
-                                <div class="slot-time">
-                                    {{ slot.start_time|time:"g:i A" }} - {{ slot.end_time|time:"g:i A" }}
-                                </div>
-                                <div class="slot-type">{{ slot.get_slot_type_display }}</div>
-                            </label>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        No time slots available
-                    </div>
-                {% endif %}
+                <div class="time-slots">
+                    {% for slot in time_slots %}
+                        <label class="time-slot" for="slot_{{ slot.id }}">
+                            <input type="radio" 
+                                   name="time_slot_id" 
+                                   value="{{ slot.id }}" 
+                                   id="slot_{{ slot.id }}" 
+                                   required>
+                            <div class="slot-time">
+                                {{ slot.start_time|time:"g:i A" }} - {{ slot.end_time|time:"g:i A" }}
+                            </div>
+                            <div class="slot-type">{{ slot.get_slot_type_display }}</div>
+                        </label>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="form-section" id="notesSection" style="display: none;">
+    <!-- Step 3: Requirements -->
+    <div class="form-section">
         <h3 class="section-title">
-            <span class="step-number">4</span>
-            Additional Information
+            <span class="step-number">3</span>
+            Your Requirements
         </h3>
         
         <label class="form-label">
-            <i class="fas fa-sticky-note me-1"></i>
-            Notes or Specific Requirements (Optional)
+            <i class="fas fa-comments me-1"></i>
+            Tell us about your needs
+            <span class="required">*</span>
         </label>
         <textarea name="notes" 
                   class="form-control" 
-                  rows="4"
-                  placeholder="Tell us about your specific needs, questions, or areas of interest..."></textarea>
+                  rows="5"
+                  placeholder="Please describe your business needs, specific requirements, or questions you'd like to discuss..."
+                  required></textarea>
         <small class="form-text">
-            Help us prepare for your demo by sharing any specific topics or features you'd like to discuss
+            Help us prepare for your consultation by sharing detailed information about what you're looking for
         </small>
     </div>
     
-    <div class="submit-section" id="submitSection" style="display: none;">
+    <!-- Submit -->
+    <div class="submit-section">
         <button type="submit" class="btn-submit" id="submitBtn">
             <i class="fas fa-paper-plane me-2"></i>
-            Submit Demo Request
+            Submit Request
         </button>
         <div class="mt-3">
             <small class="text-muted">
                 <i class="fas fa-check-circle me-1"></i>
-                Our team will review and confirm your request within 24 hours
+                Our team will contact you within 24 hours
             </small>
         </div>
     </div>
@@ -458,36 +373,21 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('contextmenu', e => e.preventDefault());
     
     const BASE_URL = window.location.pathname.includes('/customer/') ? '/customer/' : '/customers/';
-    const urlParams = new URLSearchParams(window.location.search);
-    const preSelectedDemoId = urlParams.get('demo');
-    
     const categorySelect = document.getElementById('businessCategory');
     const subcategorySelect = document.getElementById('businessSubcategory');
     const subcategoryWrapper = document.getElementById('subcategoryWrapper');
-    const demoSection = document.getElementById('demoSection');
-    const demoContainer = document.getElementById('demoContainer');
-    const dateTimeSection = document.getElementById('dateTimeSection');
-    const notesSection = document.getElementById('notesSection');
-    const submitSection = document.getElementById('submitSection');
     const dateInput = document.getElementById('requestedDate');
+    const form = document.getElementById('serviceRequestForm');
+    const submitBtn = document.getElementById('submitBtn');
     
     categorySelect.addEventListener('change', function() {
         const categoryId = this.value;
         
         if (categoryId) {
             loadSubcategories(categoryId);
-            loadDemos(categoryId);
         } else {
-            hideSections();
-        }
-    });
-    
-    subcategorySelect.addEventListener('change', function() {
-        const categoryId = categorySelect.value;
-        const subcategoryId = this.value;
-        
-        if (categoryId) {
-            loadDemos(categoryId, subcategoryId);
+            subcategoryWrapper.style.display = 'none';
+            subcategorySelect.innerHTML = '<option value="">-- All Subcategories --</option>';
         }
     });
     
@@ -509,90 +409,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error:', error));
     }
     
-    function loadDemos(categoryId, subcategoryId = '') {
-        demoContainer.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Loading demos...</p></div>';
-        
-        let url = `${BASE_URL}ajax/demos/?category=${categoryId}`;
-        if (subcategoryId) url += `&subcategory=${subcategoryId}`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                demoContainer.innerHTML = '';
-                
-                if (data.demos && data.demos.length > 0) {
-                    const demoGrid = document.createElement('div');
-                    demoGrid.className = 'demo-grid';
-                    
-                    data.demos.forEach(demo => {
-                        const isSelected = preSelectedDemoId == demo.id;
-                        demoGrid.innerHTML += `
-                            <label class="demo-card ${isSelected ? 'selected' : ''}" for="demo_${demo.id}">
-                                <input type="radio" 
-                                       name="demo_id" 
-                                       value="${demo.id}" 
-                                       id="demo_${demo.id}"
-                                       ${isSelected ? 'checked' : ''}
-                                       required>
-                                <div class="demo-card-content">
-                                    <div class="demo-card-title">${demo.title}</div>
-                                    <div class="demo-card-meta">
-                                        ${demo.category ? `<span class="demo-tag">${demo.category}</span>` : ''}
-                                        <span class="text-muted"><i class="fas fa-eye"></i> ${demo.views}</span>
-                                    </div>
-                                </div>
-                            </label>
-                        `;
-                    });
-                    
-                    demoContainer.appendChild(demoGrid);
-                    
-                    demoContainer.querySelectorAll('.demo-card').forEach(card => {
-                        card.addEventListener('click', function(e) {
-                            if (e.target.tagName !== 'INPUT') {
-                                this.querySelector('input').checked = true;
-                            }
-                            demoContainer.querySelectorAll('.demo-card').forEach(c => c.classList.remove('selected'));
-                            this.classList.add('selected');
-                        });
-                    });
-                    
-                    showSections();
-                } else {
-                    demoContainer.innerHTML = `
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>No demos available for this category.</strong>
-                            <p class="mb-0 mt-2">Please select a different category or <a href="{% url 'customers:contact_sales' %}">contact our sales team</a> for assistance.</p>
-                        </div>
-                    `;
-                    hideSections();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                demoContainer.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        Error loading demos. Please refresh the page.
-                    </div>
-                `;
-            });
-    }
-    
-    function showSections() {
-        demoSection.style.display = 'block';
-        dateTimeSection.style.display = 'block';
-        notesSection.style.display = 'block';
-        submitSection.style.display = 'block';
-    }
-    
-    function hideSections() {
-        dateTimeSection.style.display = 'none';
-        notesSection.style.display = 'none';
-        submitSection.style.display = 'none';
-    }
-    
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.addEventListener('click', function(e) {
             if (e.target.tagName !== 'INPUT') {
@@ -603,26 +419,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    if (dateInput) {
-        dateInput.addEventListener('change', function() {
-            const date = new Date(this.value);
-            if (date.getDay() === 0) {
-                alert('Sundays are not available. Please select another date.');
-                this.value = '';
-            }
-        });
-    }
-    
-    const form = document.getElementById('demoRequestForm');
-    const submitBtn = document.getElementById('submitBtn');
+    dateInput.addEventListener('change', function() {
+        const date = new Date(this.value);
+        if (date.getDay() === 0) {
+            alert('Sundays are not available. Please select another date.');
+            this.value = '';
+        }
+    });
     
     form.addEventListener('submit', function(e) {
         const category = categorySelect.value;
-        const demo = document.querySelector('input[name="demo_id"]:checked');
         const date = dateInput.value;
         const slot = document.querySelector('input[name="time_slot_id"]:checked');
+        const notes = document.querySelector('textarea[name="notes"]').value.trim();
         
-        if (!category || !demo || !date || !slot) {
+        if (!category || !date || !slot || !notes) {
             e.preventDefault();
             alert('Please fill all required fields');
             return;
@@ -631,22 +442,6 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
     });
-    
-    if (preSelectedDemoId) {
-        fetch(`${BASE_URL}ajax/demo/${preSelectedDemoId}/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.demo && data.demo.category_id) {
-                    categorySelect.value = data.demo.category_id;
-                    categorySelect.dispatchEvent(new Event('change'));
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-    
-    if (categorySelect.value) {
-        categorySelect.dispatchEvent(new Event('change'));
-    }
 });
 </script>
 {% endblock %}

@@ -2,11 +2,14 @@ from django import forms
 from django.contrib.auth import get_user_model
 from demos.models import Demo, DemoRequest, TimeSlot
 from enquiries.models import BusinessEnquiry, EnquiryCategory
+from django.utils import timezone
+from demos.models import Demo, DemoRequest, TimeSlot
 
 User = get_user_model()
 
+
 class DemoRequestForm(forms.ModelForm):
-    """Form for requesting live demo sessions"""
+    """Form for requesting live demo sessions with business category filtering"""
     
     demo = forms.ModelChoiceField(
         queryset=Demo.objects.filter(is_active=True),
@@ -53,10 +56,35 @@ class DemoRequestForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         if user:
-            # Filter demos based on user access
-            accessible_demos = Demo.objects.filter(is_active=True).filter(
-                models.Q(target_customers=user) | models.Q(target_customers__isnull=True)
-            )
+            # Start with active demos
+            accessible_demos = Demo.objects.filter(is_active=True)
+            
+            # Filter by user's business category
+            if user.business_category:
+                accessible_demos = accessible_demos.filter(
+                    models.Q(target_business_categories=user.business_category) |
+                    models.Q(target_business_categories__isnull=True)  # Include "All Categories" demos
+                ).distinct()
+            
+            # Filter by user's business subcategory if exists
+            if user.business_subcategory:
+                accessible_demos = accessible_demos.filter(
+                    models.Q(target_business_subcategories=user.business_subcategory) |
+                    models.Q(target_business_subcategories__isnull=True)  # Include "All Subcategories" demos
+                ).distinct()
+            
+            # Apply customer access control
+            accessible_demos = accessible_demos.filter(
+                models.Q(target_customers=user) | 
+                models.Q(target_customers__isnull=True)  # Include demos for all customers
+            ).distinct()
+            
+            # Prefetch related data for better performance
+            accessible_demos = accessible_demos.prefetch_related(
+                'target_business_categories',
+                'target_business_subcategories'
+            ).order_by('title')
+            
             self.fields['demo'].queryset = accessible_demos
     
     def clean_requested_date(self):
@@ -71,7 +99,17 @@ class DemoRequestForm(forms.ModelForm):
             raise forms.ValidationError("Demo requests cannot be made for Sundays.")
         
         return date
-
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        demo = cleaned_data.get('demo')
+        requested_date = cleaned_data.get('requested_date')
+        
+        # Additional validation: Check if demo is still active
+        if demo and not demo.is_active:
+            raise forms.ValidationError("Selected demo is no longer available.")
+        
+        return cleaned_data
 class BusinessEnquiryForm(forms.ModelForm):
     """Form for sending business enquiries"""
     

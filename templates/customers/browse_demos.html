@@ -1,4 +1,4 @@
-<!-- templates/customers/browse_demos.html - Browse Demos with Security -->
+<!-- templates/customers/browse_demos.html - Browse Demos with Fixed Navigation -->
 {% extends 'customers/base.html' %}
 
 {% block customer_title %}Browse Demos - Customer Portal{% endblock %}
@@ -16,13 +16,19 @@
         -webkit-tap-highlight-color: transparent;
     }
 
-    /* Disable right-click and drag for all content */
-    * {
+    /* Disable selection for text content only */
+    .demo-card-content, .demo-title, .demo-description {
         -webkit-user-select: none;
         -khtml-user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
+    }
+
+    /* Allow buttons and links to work */
+    a, button, .btn {
+        pointer-events: auto !important;
+        cursor: pointer !important;
     }
 
     img, video {
@@ -31,7 +37,6 @@
         -moz-user-drag: none;
         -o-user-drag: none;
         user-drag: none;
-        pointer-events: none;
     }
 
     /* Filters Section */
@@ -75,6 +80,7 @@
         font-size: 0.875rem;
         font-weight: 500;
         transition: all 0.3s ease;
+        cursor: pointer;
     }
 
     .filter-pill:hover {
@@ -135,10 +141,6 @@
         transition: all 0.3s ease;
         border: 1px solid var(--gray-200);
         position: relative;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
     }
 
     .demo-card:hover {
@@ -159,10 +161,6 @@
         object-fit: cover;
         transition: all 0.3s ease;
         -webkit-user-drag: none;
-        -khtml-user-drag: none;
-        -moz-user-drag: none;
-        -o-user-drag: none;
-        user-drag: none;
         pointer-events: none;
     }
 
@@ -182,6 +180,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        pointer-events: none;
     }
 
     .demo-card:hover .demo-overlay {
@@ -217,6 +216,7 @@
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
+        z-index: 2;
     }
 
     .demo-card-content {
@@ -282,6 +282,10 @@
         font-weight: 600;
         transition: all 0.3s ease;
         flex: 1;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .btn-watch:hover {
@@ -298,6 +302,10 @@
         border-radius: var(--radius-lg);
         font-weight: 600;
         transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .btn-request:hover {
@@ -379,19 +387,6 @@
         }
     }
 
-    /* Protection Overlay */
-    .content-protection::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: transparent;
-        z-index: 999;
-        pointer-events: none;
-    }
-
     /* Watermark */
     .demo-watermark {
         position: absolute;
@@ -417,13 +412,13 @@
     </div>
     <div class="d-flex gap-2">
         <a href="{% url 'customers:request_demo' %}" class="btn btn-primary">
-            <i class="fas fa-calendar-plus me-2"></i>Request Live Demo
+            <i class="fas fa-calendar-plus me-2"></i>Scheduled Demo
         </a>
     </div>
 </div>
 
 <!-- Filters Section -->
-<div class="filters-section content-protection">
+<div class="filters-section">
     <form method="GET" id="filterForm">
         <div class="row g-4 align-items-end">
             <!-- Search -->
@@ -464,19 +459,38 @@
             </div>
         </div>
         
-        <!-- Category Filter -->
-        {% if categories %}
+        <!-- Business Category Filter -->
+        {% if business_categories %}
         <div class="filter-group mt-4">
-            <label class="filter-label">Categories</label>
+            <label class="filter-label">Business Categories</label>
             <div class="filter-pills">
                 <a href="?search={{ search_query }}&sort={{ sort_by }}" 
-                   class="filter-pill {% if not current_category %}active{% endif %}">
+                   class="filter-pill {% if not current_business_category %}active{% endif %}">
                     All Categories
                 </a>
-                {% for category in categories %}
-                    <a href="?category={{ category.id }}&search={{ search_query }}&sort={{ sort_by }}" 
-                       class="filter-pill {% if current_category == category.id %}active{% endif %}">
+                {% for category in business_categories %}
+                    <a href="?business_category={{ category.id }}&search={{ search_query }}&sort={{ sort_by }}" 
+                       class="filter-pill {% if current_business_category == category.id %}active{% endif %}">
                         {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Business Subcategory Filter -->
+        {% if business_subcategories %}
+        <div class="filter-group mt-3">
+            <label class="filter-label">Subcategories</label>
+            <div class="filter-pills">
+                <a href="?business_category={{ current_business_category }}&search={{ search_query }}&sort={{ sort_by }}" 
+                   class="filter-pill {% if not current_business_subcategory %}active{% endif %}">
+                    All Subcategories
+                </a>
+                {% for subcategory in business_subcategories %}
+                    <a href="?business_category={{ current_business_category }}&business_subcategory={{ subcategory.id }}&search={{ search_query }}&sort={{ sort_by }}" 
+                       class="filter-pill {% if current_business_subcategory == subcategory.id %}active{% endif %}">
+                        {{ subcategory.name }}
                     </a>
                 {% endfor %}
             </div>
@@ -494,6 +508,13 @@
                 {% if search_query %}
                     for "<strong>{{ search_query }}</strong>"
                 {% endif %}
+                {% if current_business_category %}
+                    {% for cat in business_categories %}
+                        {% if cat.id == current_business_category %}
+                            in <strong>{{ cat.name }}</strong>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </p>
         {% endif %}
     </div>
@@ -507,7 +528,7 @@
 {% if page_obj.object_list %}
     <div class="demos-grid">
         {% for demo in page_obj.object_list %}
-            <div class="demo-card content-protection">
+            <div class="demo-card">
                 <!-- Watermark -->
                 <div class="demo-watermark">{{ user.email }}</div>
                 
@@ -542,7 +563,13 @@
                 
                 <!-- Content -->
                 <div class="demo-card-content">
-                    <div class="demo-category">{{ demo.category.name }}</div>
+                    <div class="demo-category">
+                        {% if demo.primary_business_category %}
+                            {{ demo.primary_business_category.name }}
+                        {% else %}
+                            {{ demo.get_demo_type_display }}
+                        {% endif %}
+                    </div>
                     <h3 class="demo-title">{{ demo.title }}</h3>
                     <p class="demo-description">{{ demo.description|truncatewords:20 }}</p>
                     
@@ -555,9 +582,9 @@
                                 <span><i class="fas fa-clock me-1"></i>{{ demo.formatted_duration }}</span>
                             {% endif %}
                         </div>
-                        <div class="demo-date">
+                        {% comment %} <div class="demo-date">
                             {{ demo.created_at|date:"M d" }}
-                        </div>
+                        </div> {% endcomment %}
                     </div>
                     
                     <!-- Actions -->
@@ -565,11 +592,12 @@
                         <a href="{% url 'customers:demo_detail' demo.slug %}" class="btn btn-watch">
                             <i class="fas fa-play me-2"></i>Watch Demo
                         </a>
-                        <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
-                           class="btn btn-request" title="Request Live Demo">
+                    <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
+                        class="btn btn-request" 
+                        title="Request Live Demo Session">
                             <i class="fas fa-calendar"></i>
                         </a>
-                    </div>
+                                            </div>
                 </div>
             </div>
         {% endfor %}
@@ -582,12 +610,12 @@
                 <ul class="pagination">
                     {% if page_obj.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page=1&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">
+                            <a class="page-link" href="?page=1&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
                                 <i class="fas fa-angle-double-left"></i>
                             </a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
                                 <i class="fas fa-angle-left"></i>
                             </a>
                         </li>
@@ -600,19 +628,19 @@
                             </li>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">{{ num }}</a>
+                                <a class="page-link" href="?page={{ num }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">{{ num }}</a>
                             </li>
                         {% endif %}
                     {% endfor %}
                     
                     {% if page_obj.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
                                 <i class="fas fa-angle-right"></i>
                             </a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&category={{ current_category }}&search={{ search_query }}&sort={{ sort_by }}">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
                                 <i class="fas fa-angle-double-right"></i>
                             </a>
                         </li>
@@ -629,7 +657,7 @@
             <i class="fas fa-search"></i>
         </div>
         <h3>No Demos Found</h3>
-        {% if search_query or current_category %}
+        {% if search_query or current_business_category or current_business_subcategory %}
             <p>No demos match your current filters. Try adjusting your search criteria.</p>
             <a href="{% url 'customers:browse_demos' %}" class="btn btn-primary mt-3">
                 <i class="fas fa-times me-2"></i>Clear Filters
@@ -646,91 +674,54 @@
 
 {% block customer_extra_js %}
 <script>
-// Enhanced Security Protection for Demo Browsing
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Complete security protection (same as dashboard)
+    // TEST: Check if buttons are clickable
+    document.querySelectorAll('.btn-request').forEach(btn => {
+        console.log('Found button:', btn.href);
+        
+        btn.addEventListener('click', function(e) {
+            console.log('Button clicked!');
+            console.log('Going to:', this.href);
+            // Don't prevent default - let it navigate
+        });
+    });
     
-    // Disable right-click context menu
+    // Disable right-click on images and text only
     document.addEventListener('contextmenu', function(e) {
+        if (e.target.closest('a') || e.target.closest('button')) {
+            return true;
+        }
         e.preventDefault();
         return false;
     });
     
-    // Disable keyboard shortcuts
+    // Disable specific keyboard shortcuts only
     document.addEventListener('keydown', function(e) {
-        // F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S, Ctrl+A, Ctrl+P, Ctrl+C, Print Screen
         if (e.keyCode === 123 || 
             (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
             (e.ctrlKey && e.shiftKey && e.keyCode === 74) ||
             (e.ctrlKey && e.keyCode === 85) ||
-            (e.ctrlKey && e.keyCode === 83) ||
-            (e.ctrlKey && e.keyCode === 65) ||
-            (e.ctrlKey && e.keyCode === 80) ||
-            (e.ctrlKey && e.keyCode === 67) ||
             e.keyCode === 44) {
             e.preventDefault();
             return false;
         }
     });
     
-    // Disable drag and drop
-    document.addEventListener('dragstart', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    // Disable image saving
-    document.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    // Disable selection for protected content
-    document.addEventListener('selectstart', function(e) {
-        if (e.target.closest('.content-protection, .demo-card, .demo-thumbnail')) {
-            e.preventDefault();
-            return false;
-        }
-    });
-    
-    // Auto-submit filters on change
-    const filterForm = document.getElementById('filterForm');
-    const sortSelect = filterForm.querySelector('select[name="sort"]');
-    const searchInput = filterForm.querySelector('input[name="search"]');
-    
+    // Auto-submit filters on sort change
+    const sortSelect = document.querySelector('select[name="sort"]');
     if (sortSelect) {
         sortSelect.addEventListener('change', function() {
-            filterForm.submit();
+            this.form.submit();
         });
     }
     
-    // Debounced search
-    if (searchInput) {
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                filterForm.submit();
-            }, 1000);
-        });
-    }
-    
-    // Enhanced protection for demo thumbnails
-    const demoThumbnails = document.querySelectorAll('.demo-thumbnail');
-    demoThumbnails.forEach(thumbnail => {
-        thumbnail.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
+    // Protect thumbnails from drag
+    document.querySelectorAll('.demo-thumbnail').forEach(thumbnail => {
         thumbnail.addEventListener('dragstart', function(e) {
             e.preventDefault();
             return false;
         });
-        
-        // Disable pointer events completely
-        thumbnail.style.pointerEvents = 'none';
     });
     
     // Animate demo cards on scroll
@@ -748,7 +739,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, observerOptions);
     
-    // Observe demo cards
     const demoCards = document.querySelectorAll('.demo-card');
     demoCards.forEach((card, index) => {
         card.style.opacity = '0';
@@ -756,146 +746,6 @@ document.addEventListener('DOMContentLoaded', function() {
         card.style.transition = 'all 0.6s ease';
         card.style.transitionDelay = `${index * 100}ms`;
         observer.observe(card);
-    });
-    
-    // Prevent screenshot apps detection
-    let devtools = {open: false};
-    const threshold = 160;
-    setInterval(function() {
-        if (window.outerHeight - window.innerHeight > threshold || 
-            window.outerWidth - window.innerWidth > threshold) {
-            if (!devtools.open) {
-                devtools.open = true;
-                alert('Developer tools detected. For security reasons, please close them.');
-            }
-        } else {
-            devtools.open = false;
-        }
-    }, 1000);
-    
-    // Disable clipboard operations
-    document.addEventListener('copy', function(e) {
-        e.preventDefault();
-        e.clipboardData.setData('text/plain', 'Copying is not allowed');
-        return false;
-    });
-    
-    // Screen recording detection
-    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-        navigator.mediaDevices.getDisplayMedia = function() {
-            alert('Screen recording is not allowed for security reasons.');
-            return Promise.reject(new Error('Screen recording blocked'));
-        };
-    }
-    
-    // Blur content when window loses focus
-    window.addEventListener('blur', function() {
-        document.body.style.filter = 'blur(5px)';
-        document.body.style.pointerEvents = 'none';
-    });
-    
-    window.addEventListener('focus', function() {
-        document.body.style.filter = 'none';
-        document.body.style.pointerEvents = 'auto';
-    });
-    
-    // Add watermarks to demo cards
-    function addDemoWatermarks() {
-        const demoCards = document.querySelectorAll('.demo-card');
-        demoCards.forEach(card => {
-            const watermark = document.createElement('div');
-            watermark.style.cssText = `
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(-45deg);
-                color: rgba(0, 0, 0, 0.05);
-                font-size: 1rem;
-                font-weight: bold;
-                pointer-events: none;
-                z-index: 2;
-                user-select: none;
-                white-space: nowrap;
-            `;
-            watermark.textContent = '{{ user.email }} - CONFIDENTIAL';
-            card.appendChild(watermark);
-        });
-    }
-    
-    addDemoWatermarks();
-    
-    // Override common screenshot methods
-    if (typeof html2canvas !== 'undefined') {
-        html2canvas = function() {
-            alert('Screenshot functionality is disabled.');
-            return Promise.reject(new Error('Screenshots not allowed'));
-        };
-    }
-    
-    // Disable screenshot libraries
-    window.html2canvas = undefined;
-    window.domtoimage = undefined;
-    window.rasterizeHTML = undefined;
-    
-    // Console protection
-    Object.defineProperty(window, 'console', {
-        value: console,
-        writable: false,
-        configurable: false
-    });
-    
-    // Clear console periodically
-    setInterval(function() {
-        if (typeof console !== 'undefined' && console.clear) {
-            console.clear();
-        }
-    }, 2000);
-    
-    // Print protection
-    window.addEventListener('beforeprint', function(e) {
-        e.preventDefault();
-        alert('Printing is not allowed for security reasons.');
-        return false;
-    });
-    
-    // Additional protection: Hide content when print is detected
-    const printMediaQuery = window.matchMedia('print');
-    printMediaQuery.addEventListener('change', function(e) {
-        if (e.matches) {
-            document.body.style.display = 'none';
-        } else {
-            document.body.style.display = 'block';
-        }
-    });
-});
-
-// Disable common methods used for content extraction
-window.addEventListener('load', function() {
-    // Disable common DOM manipulation methods
-    const originalQuerySelector = document.querySelector;
-    const originalQuerySelectorAll = document.querySelectorAll;
-    const originalGetElementById = document.getElementById;
-    
-    // Override with security checks
-    document.querySelector = function(selector) {
-        if (selector.includes('demo-thumbnail') || selector.includes('content-protection')) {
-            console.warn('Access to protected content is restricted');
-            return null;
-        }
-        return originalQuerySelector.call(this, selector);
-    };
-    
-    // Block access to sensitive elements
-    const protectedClasses = ['demo-thumbnail', 'content-protection', 'demo-card'];
-    protectedClasses.forEach(className => {
-        const elements = document.getElementsByClassName(className);
-        for (let element of elements) {
-            Object.defineProperty(element, 'innerHTML', {
-                get: function() { return ''; },
-                set: function() { return false; },
-                configurable: false
-            });
-        }
     });
 });
 </script>

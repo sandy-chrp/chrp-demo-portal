@@ -11,7 +11,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from datetime import datetime, timedelta
 import json
-
+from accounts.models import BusinessCategory, BusinessSubCategory
 from demos.models import Demo, DemoRequest, TimeSlot
 from accounts.models import CustomUser
 from enquiries.models import BusinessEnquiry
@@ -180,8 +180,8 @@ def admin_create_demo_request_view(request):
         requested_time_slot_id = request.POST.get('requested_time_slot_id')
         
         # Business Category fields
-        business_category_id = request.POST.get('business_category_id')
-        business_subcategory_id = request.POST.get('business_subcategory_id')
+        business_category_id = request.POST.get('business_category_id', '').strip()
+        business_subcategory_id = request.POST.get('business_subcategory_id', '').strip()
         
         # Location fields
         postal_code = request.POST.get('postal_code', '')
@@ -221,19 +221,27 @@ def admin_create_demo_request_view(request):
             business_category = None
             business_subcategory = None
             
-            if business_category_id:
-                from accounts.models import BusinessCategory
-                business_category = get_object_or_404(BusinessCategory, id=business_category_id)
-            
-            if business_subcategory_id:
-                from accounts.models import BusinessSubCategory
-                business_subcategory = get_object_or_404(BusinessSubCategory, id=business_subcategory_id)
-                
-                # Validate subcategory belongs to category
-                if business_category and business_subcategory.category != business_category:
-                    messages.error(request, 'Selected subcategory does not belong to the selected category')
+            if business_category_id:  # Only if not empty string
+                try:
+                    from accounts.models import BusinessCategory
+                    business_category = BusinessCategory.objects.get(id=business_category_id)
+                except (BusinessCategory.DoesNotExist, ValueError):
+                    messages.error(request, 'Invalid business category selected')
                     return redirect('core:admin_create_demo_request')
-            
+
+            if business_subcategory_id:  # Only if not empty string
+                try:
+                    from accounts.models import BusinessSubCategory
+                    business_subcategory = BusinessSubCategory.objects.get(id=business_subcategory_id)
+                    
+                    # Validate subcategory belongs to category
+                    if business_category and business_subcategory.category != business_category:
+                        messages.error(request, 'Selected subcategory does not belong to the selected category')
+                        return redirect('core:admin_create_demo_request')
+                except (BusinessSubCategory.DoesNotExist, ValueError):
+                    messages.error(request, 'Invalid business subcategory selected')
+                    return redirect('core:admin_create_demo_request')
+                        
             # Verify demo is available for the business category/subcategory
             if not demo.is_available_for_business(business_category, business_subcategory):
                 messages.warning(request, 
@@ -263,8 +271,8 @@ def admin_create_demo_request_view(request):
                 demo=demo,
                 requested_date=requested_date,
                 requested_time_slot=time_slot,
-                business_category=business_category,
-                business_subcategory=business_subcategory,
+                business_category=business_category,  # This will be None if empty, which is correct
+                business_subcategory=business_subcategory,  # This will be None if empty, which is correct
                 postal_code=postal_code,
                 city=city,
                 country_region=country_region,
@@ -349,7 +357,7 @@ def admin_create_demo_request_view(request):
     ).order_by('first_name', 'last_name')
     
     # Get all active demos initially (will be filtered by JS based on selection)
-    all_demos = Demo.objects.filter(is_active=True).select_related('category').prefetch_related(
+    all_demos = Demo.objects.filter(is_active=True).prefetch_related(
         'target_business_categories', 
         'target_business_subcategories'
     ).order_by('title')
@@ -360,7 +368,7 @@ def admin_create_demo_request_view(request):
         demos_data.append({
             'id': demo.id,
             'title': demo.title,
-            'category': demo.category.name,
+            'demo_type': demo.get_demo_type_display(),  # ✅ Use demo_type instead
             'description': demo.description[:100],
             'duration': demo.formatted_duration,
             'business_categories': list(demo.target_business_categories.values_list('id', flat=True)),
@@ -432,7 +440,7 @@ def admin_get_filtered_demos(request):
         demos_data.append({
             'id': demo.id,
             'title': demo.title,
-            'category': demo.category.name,
+            'demo_type': demo.get_demo_type_display(),
             'description': demo.description[:100] + '...' if len(demo.description) > 100 else demo.description,
             'duration': demo.formatted_duration,
         })
@@ -547,14 +555,31 @@ def admin_edit_demo_request_view(request, request_id):
     demo_request = get_object_or_404(DemoRequest, id=request_id)
     
     if request.method == 'POST':
+        user_id = request.POST.get('user_id')
         demo_id = request.POST.get('demo_id')
         requested_date = request.POST.get('requested_date')
         requested_time_slot_id = request.POST.get('requested_time_slot_id')
-        notes = request.POST.get('notes', '')
-        admin_notes = request.POST.get('admin_notes', '')
         status = request.POST.get('status')
         
+        # Business category fields - handle empty strings
+        business_category_id = request.POST.get('business_category_id', '').strip()
+        business_subcategory_id = request.POST.get('business_subcategory_id', '').strip()
+        
+        # Location fields
+        postal_code = request.POST.get('postal_code', '').strip()
+        city = request.POST.get('city', '').strip()
+        country_region = request.POST.get('country_region', '').strip()
+        
+        # Notes
+        notes = request.POST.get('notes', '')
+        admin_notes = request.POST.get('admin_notes', '')
+        
         try:
+            # Update user if changed
+            if user_id:
+                user = get_object_or_404(CustomUser, id=user_id, is_active=True)
+                demo_request.user = user
+            
             # Update demo
             if demo_id:
                 demo = get_object_or_404(Demo, id=demo_id, is_active=True)
@@ -571,11 +596,45 @@ def admin_edit_demo_request_view(request, request_id):
                 time_slot = get_object_or_404(TimeSlot, id=requested_time_slot_id)
                 demo_request.requested_time_slot = time_slot
             
+            # Update business category - convert empty string to None
+            business_category = None
+            business_subcategory = None
+            
+            if business_category_id:
+                try:
+                    business_category = BusinessCategory.objects.get(id=business_category_id)
+                except (BusinessCategory.DoesNotExist, ValueError):
+                    messages.warning(request, 'Invalid business category selected')
+            
+            if business_subcategory_id:
+                try:
+                    business_subcategory = BusinessSubCategory.objects.get(id=business_subcategory_id)
+                    if business_category and business_subcategory.category != business_category:
+                        messages.warning(request, 'Selected subcategory does not belong to the selected category')
+                        business_subcategory = None
+                except (BusinessSubCategory.DoesNotExist, ValueError):
+                    messages.warning(request, 'Invalid business subcategory selected')
+            
+            demo_request.business_category = business_category
+            demo_request.business_subcategory = business_subcategory
+            
+            # Update location - FIX HERE
+            demo_request.postal_code = postal_code
+            demo_request.city = city
+            demo_request.country_region = country_region if country_region else None
+            
+            # Fix is_international - convert to proper boolean
+            if country_region and country_region.strip():
+                demo_request.is_international = (country_region != 'IN')
+            else:
+                demo_request.is_international = False  # Default to False if no country
+            
             # Update other fields
             demo_request.notes = notes
             demo_request.admin_notes = admin_notes
             demo_request.status = status
             demo_request.handled_by = request.user
+            
             demo_request.save()
             
             messages.success(request, 'Demo request updated successfully')
@@ -589,6 +648,10 @@ def admin_edit_demo_request_view(request, request_id):
     demos = Demo.objects.filter(is_active=True).order_by('title')
     time_slots = TimeSlot.objects.filter(is_active=True).order_by('start_time')
     
+    # Get business categories and subcategories
+    business_categories = BusinessCategory.objects.filter(is_active=True).order_by('name')
+    business_subcategories = BusinessSubCategory.objects.filter(is_active=True).select_related('category').order_by('category__name', 'name')
+    
     # Context for sidebar badges
     pending_approvals = CustomUser.objects.filter(is_approved=False, is_active=True).count()
     open_enquiries = BusinessEnquiry.objects.filter(status='open').count()
@@ -599,6 +662,8 @@ def admin_edit_demo_request_view(request, request_id):
         'customers': customers,
         'demos': demos,
         'time_slots': time_slots,
+        'business_categories': business_categories,
+        'business_subcategories': business_subcategories,
         'pending_approvals': pending_approvals,
         'open_enquiries': open_enquiries,
         'demo_requests_pending': demo_requests_pending,

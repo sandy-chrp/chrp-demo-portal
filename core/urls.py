@@ -36,6 +36,9 @@ urlpatterns = [
     path('admin/logout/', views.admin_logout_view, name='admin_logout'),
     path('admin/dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     
+    path('dashboard/', views.dashboard_redirect, name='dashboard'),
+
+
     # =====================================
     # ADMIN CUSTOMER MANAGEMENT (CRUD)
     # =====================================

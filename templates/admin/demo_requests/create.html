@@ -694,41 +694,41 @@
 
         <div class="row">
             <div class="col-md-8">
-                <div class="mb-3">
-                    <label for="demo_id" class="form-label required">
-                        <i class="fas fa-play-circle"></i>Select Demo
-                    </label>
-                    <select name="demo_id" id="demo_id" class="form-select" required onchange="updateDemoInfo()">
-                        <option value="">Choose a demo...</option>
-                        {% for demo in demos %}
-                            <option value="{{ demo.id }}" 
-                                    data-title="{{ demo.title }}"
-                                    data-description="{{ demo.description|truncatechars:100 }}"
-                                    data-category="{{ demo.category.name }}"
-                                    data-duration="{{ demo.formatted_duration }}">
-                                {{ demo.title }} ({{ demo.category.name }})
-                            </option>
-                        {% endfor %}
-                    </select>
-                    <div class="form-text">
-                        Select which demo the customer wants to see.
-                    </div>
-                </div>
+        <div class="mb-3">
+            <label for="demo_id" class="form-label required">
+                <i class="fas fa-play-circle"></i>Select Demo
+            </label>
+            <select name="demo_id" id="demo_id" class="form-select" required onchange="updateDemoInfo()">
+                <option value="">Choose a demo...</option>
+                {% for demo in demos %}
+                    <option value="{{ demo.id }}" 
+                            data-title="{{ demo.title }}"
+                            data-description="{{ demo.description|truncatechars:100 }}"
+                            data-demo-type="{{ demo.get_demo_type_display }}"
+                            data-duration="{{ demo.formatted_duration }}">
+                        {{ demo.title }}
+                    </option>
+                {% endfor %}
+            </select>
+            <div class="form-text">
+                Select which demo the customer wants to see.
+            </div>
+        </div>
 
-                <!-- Demo Details Display -->
-                <div class="demo-info" id="demoInfo">
-                    <h6><i class="fas fa-info-circle me-2"></i>Demo Details</h6>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <strong>Category:</strong> <span id="demoCategory">-</span><br>
-                            <strong>Duration:</strong> <span id="demoDuration">-</span>
-                        </div>
-                        <div class="col-sm-6">
-                            <strong>Description:</strong><br>
-                            <small id="demoDescription" class="text-muted">-</small>
-                        </div>
-                    </div>
+        <!-- Demo Details Display -->
+        <div class="demo-info" id="demoInfo">
+            <h6><i class="fas fa-info-circle me-2"></i>Demo Details</h6>
+            <div class="row">
+                <div class="col-sm-6">
+                    <strong>Type:</strong> <span id="demoCategory">-</span><br>
+                    <strong>Duration:</strong> <span id="demoDuration">-</span>
                 </div>
+                <div class="col-sm-6">
+                    <strong>Description:</strong><br>
+                    <small id="demoDescription" class="text-muted">-</small>
+                </div>
+            </div>
+        </div>
             </div>
         </div>
     </div>
@@ -838,11 +838,11 @@ let selectedDate = null;
 let businessCategories = {};
 let businessSubcategories = {};
 
-// NEW: Demo filtering variables
+// Demo filtering variables
 let allDemosData = {{ demos_json|safe }};
 let filteredDemos = [...allDemosData];
 
-// Fix current date initialization
+// Current date initialization
 const today = new Date();
 let currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -890,19 +890,15 @@ function updateBusinessSubcategories() {
     
     const selectedCategoryId = categorySelect.value;
     
-    // Clear subcategory options
     subcategorySelect.innerHTML = '<option value="">Select Subcategory (Optional)</option>';
     
-    // If no category selected, disable subcategory
     if (!selectedCategoryId) {
         subcategorySelect.disabled = true;
         return;
     }
     
-    // Enable subcategory select
     subcategorySelect.disabled = false;
     
-    // Add subcategories for selected category
     const subcategories = businessSubcategories[selectedCategoryId] || [];
     
     if (subcategories.length === 0) {
@@ -920,7 +916,7 @@ function updateBusinessSubcategories() {
     });
 }
 
-// NEW: Filter demos based on business category and subcategory
+// Filter demos based on business category and subcategory
 function filterDemosByBusiness() {
     const categorySelect = document.getElementById('business_category_id');
     const subcategorySelect = document.getElementById('business_subcategory_id');
@@ -931,39 +927,31 @@ function filterDemosByBusiness() {
     const selectedCategoryId = categorySelect ? parseInt(categorySelect.value) : null;
     const selectedSubcategoryId = subcategorySelect ? parseInt(subcategorySelect.value) : null;
     
-    // Store current selected demo
     const currentDemoId = demoSelect.value;
     
-    // Clear demo select
     demoSelect.innerHTML = '<option value="">Choose a demo...</option>';
     
-    // Filter demos based on business category/subcategory
     filteredDemos = allDemosData.filter(demo => {
-        // If demo is for all categories/subcategories, include it
         if (demo.is_for_all_categories && demo.is_for_all_subcategories) {
             return true;
         }
         
-        // If no category selected, show all demos
         if (!selectedCategoryId && !selectedSubcategoryId) {
             return true;
         }
         
-        // Check if demo matches selected category
         if (selectedCategoryId && 
             (demo.is_for_all_categories || 
              demo.business_categories.includes(selectedCategoryId))) {
             return true;
         }
         
-        // Check if demo matches selected subcategory
         if (selectedSubcategoryId && 
             (demo.is_for_all_subcategories || 
              demo.business_subcategories.includes(selectedSubcategoryId))) {
             return true;
         }
         
-        // If demo has specific category/subcategory requirements and none match, exclude it
         if (!demo.is_for_all_categories && !demo.is_for_all_subcategories) {
             return false;
         }
@@ -971,35 +959,31 @@ function filterDemosByBusiness() {
         return false;
     });
     
-    // Sort filtered demos by title
     filteredDemos.sort((a, b) => a.title.localeCompare(b.title));
     
-    // Group demos by category for better organization
-    const demosByCategory = {};
+    const demosByType = {};
     filteredDemos.forEach(demo => {
-        if (!demosByCategory[demo.category]) {
-            demosByCategory[demo.category] = [];
+        const demoType = demo.demo_type || 'Other';
+        if (!demosByType[demoType]) {
+            demosByType[demoType] = [];
         }
-        demosByCategory[demo.category].push(demo);
+        demosByType[demoType].push(demo);
     });
     
-    // Add filtered demos to select with category grouping
     let addedCount = 0;
-    Object.keys(demosByCategory).sort().forEach(category => {
-        // Create optgroup for category
+    Object.keys(demosByType).sort().forEach(demoType => {
         const optgroup = document.createElement('optgroup');
-        optgroup.label = `📁 ${category}`;
+        optgroup.label = `📁 ${demoType}`;
         
-        demosByCategory[category].forEach(demo => {
+        demosByType[demoType].forEach(demo => {
             const option = document.createElement('option');
             option.value = demo.id;
             option.textContent = `${demo.title} (${demo.duration || 'Duration N/A'})`;
             option.dataset.title = demo.title;
             option.dataset.description = demo.description;
-            option.dataset.category = demo.category;
+            option.dataset.demoType = demo.demo_type;
             option.dataset.duration = demo.duration || '';
             
-            // Add visual indicator if demo is specifically for this business
             if (selectedCategoryId && !demo.is_for_all_categories) {
                 if (demo.business_categories.includes(selectedCategoryId)) {
                     option.textContent = `⭐ ${option.textContent}`;
@@ -1014,25 +998,20 @@ function filterDemosByBusiness() {
         demoSelect.appendChild(optgroup);
     });
     
-    // Show count and message
     updateDemoFilterMessage(addedCount, selectedCategoryId, selectedSubcategoryId);
     
-    // Try to restore previous selection if it's still available
     if (currentDemoId && filteredDemos.some(d => d.id == currentDemoId)) {
         demoSelect.value = currentDemoId;
         updateDemoInfo();
     }
     
-    // Enable/disable demo select based on results
     demoSelect.disabled = addedCount === 0;
     
-    // Highlight recommended demos
     highlightRecommendedDemos(selectedCategoryId, selectedSubcategoryId);
 }
 
-// NEW: Update demo filter message
+// Update demo filter message
 function updateDemoFilterMessage(count, categoryId, subcategoryId) {
-    // Remove existing message
     const existingMessage = document.getElementById('demoFilterMessage');
     if (existingMessage) {
         existingMessage.remove();
@@ -1041,7 +1020,6 @@ function updateDemoFilterMessage(count, categoryId, subcategoryId) {
     const demoSelect = document.getElementById('demo_id');
     if (!demoSelect) return;
     
-    // Create new message
     const messageDiv = document.createElement('div');
     messageDiv.id = 'demoFilterMessage';
     messageDiv.className = 'form-text mt-2';
@@ -1080,16 +1058,14 @@ function updateDemoFilterMessage(count, categoryId, subcategoryId) {
         `;
     }
     
-    // Insert message after demo select
     demoSelect.parentNode.appendChild(messageDiv);
 }
 
-// NEW: Highlight recommended demos
+// Highlight recommended demos
 function highlightRecommendedDemos(categoryId, subcategoryId) {
     const demoSelect = document.getElementById('demo_id');
     if (!demoSelect) return;
     
-    // Add visual styling to recommended options
     const options = demoSelect.querySelectorAll('option');
     options.forEach(option => {
         if (option.textContent.startsWith('⭐')) {
@@ -1099,7 +1075,7 @@ function highlightRecommendedDemos(categoryId, subcategoryId) {
     });
 }
 
-// MODIFIED: Update customer information with business category AND trigger demo filtering
+// Update customer information with business category and trigger demo filtering
 function updateCustomerInfoWithCategory() {
     const select = document.getElementById('user_id');
     const customerInfo = document.getElementById('customerInfo');
@@ -1107,7 +1083,6 @@ function updateCustomerInfoWithCategory() {
     if (select && select.value) {
         const option = select.options[select.selectedIndex];
         
-        // Update existing customer info
         const emailEl = document.getElementById('customerEmail');
         const mobileEl = document.getElementById('customerMobile');
         const orgEl = document.getElementById('customerOrg');
@@ -1118,7 +1093,6 @@ function updateCustomerInfoWithCategory() {
         if (orgEl) orgEl.textContent = option.dataset.organization || 'No organization';
         if (jobEl) jobEl.textContent = option.dataset.jobTitle || 'No job title';
         
-        // Pre-fill business category if customer has one
         const customerCategoryId = option.dataset.businessCategoryId;
         const customerSubcategoryId = option.dataset.businessSubcategoryId;
         
@@ -1128,7 +1102,6 @@ function updateCustomerInfoWithCategory() {
                 categorySelect.value = customerCategoryId;
                 updateBusinessSubcategories();
                 
-                // Set subcategory after categories are loaded
                 setTimeout(() => {
                     if (customerSubcategoryId) {
                         const subcategorySelect = document.getElementById('business_subcategory_id');
@@ -1136,13 +1109,11 @@ function updateCustomerInfoWithCategory() {
                             subcategorySelect.value = customerSubcategoryId;
                         }
                     }
-                    // NEW: Filter demos after setting categories
                     filterDemosByBusiness();
                 }, 100);
             }
         }
         
-        // Auto-populate country based on customer's country code
         const countryCode = option.dataset.country || '+91';
         updateCountryRegionBasedOnCode(countryCode);
         
@@ -1150,7 +1121,6 @@ function updateCustomerInfoWithCategory() {
     } else {
         if (customerInfo) customerInfo.classList.remove('show');
         
-        // Reset business category selections
         const categorySelect = document.getElementById('business_category_id');
         const subcategorySelect = document.getElementById('business_subcategory_id');
         if (categorySelect) categorySelect.value = '';
@@ -1159,7 +1129,6 @@ function updateCustomerInfoWithCategory() {
             subcategorySelect.disabled = true;
         }
         
-        // NEW: Reset demo filtering when no customer selected
         filterDemosByBusiness();
     }
 }
@@ -1169,7 +1138,6 @@ function updateCountryRegionBasedOnCode(countryCode) {
     const countryRegionSelect = document.getElementById('country_region');
     if (!countryRegionSelect) return;
     
-    // Map country codes to country/region values
     const countryMap = {
         '+91': 'IN',
         '+1': 'US',
@@ -1182,7 +1150,6 @@ function updateCountryRegionBasedOnCode(countryCode) {
     const countryRegion = countryMap[countryCode] || 'OTHER';
     countryRegionSelect.value = countryRegion;
     
-    // Update international flag
     updateInternationalFlag(countryRegion);
 }
 
@@ -1246,17 +1213,14 @@ function generateCalendar() {
             dayElement.classList.add('calendar-day');
             dayElement.textContent = date.getDate();
             
-            // Mark other month days
             if (date.getMonth() !== currentDate.getMonth()) {
                 dayElement.classList.add('other-month');
             }
             
-            // Mark today
             if (date.getTime() === today.getTime()) {
                 dayElement.classList.add('today');
             }
             
-            // Disable past dates and Sundays
             if (date < today || date.getDay() === 0) {
                 dayElement.classList.add('disabled');
             } else {
@@ -1466,7 +1430,7 @@ function updateDemoInfo() {
         const durationEl = document.getElementById('demoDuration');
         const descriptionEl = document.getElementById('demoDescription');
         
-        if (categoryEl) categoryEl.textContent = option.dataset.category || '-';
+        if (categoryEl) categoryEl.textContent = option.dataset.demoType || '-';
         if (durationEl) durationEl.textContent = option.dataset.duration || 'Not specified';
         if (descriptionEl) descriptionEl.textContent = option.dataset.description || '-';
         
@@ -1507,7 +1471,7 @@ Auto-confirm: ${formData.get('auto_confirm') ? 'Yes' : 'No'}
 Customer will receive notification and email upon creation.`);
 }
 
-// NEW: Validate demo selection
+// Validate demo selection
 function validateDemoSelection() {
     const demoSelect = document.getElementById('demo_id');
     const categorySelect = document.getElementById('business_category_id');
@@ -1540,17 +1504,14 @@ function validateBusinessCategory() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize business categories
     initializeBusinessCategories();
     
-    // Add event listeners
     const categorySelect = document.getElementById('business_category_id');
     if (categorySelect) {
         categorySelect.addEventListener('change', function() {
             updateBusinessSubcategories();
-            filterDemosByBusiness(); // NEW: Filter demos when category changes
+            filterDemosByBusiness();
             
-            // Show category description
             const selectedOption = this.options[this.selectedIndex];
             const description = selectedOption.dataset.description;
             const categoryInfo = document.getElementById('businessCategoryInfo');
@@ -1565,7 +1526,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // NEW: Add subcategory change listener for demo filtering
     const subcategorySelect = document.getElementById('business_subcategory_id');
     if (subcategorySelect) {
         subcategorySelect.addEventListener('change', function() {
@@ -1580,7 +1540,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Modal reset when closed
     const modal = document.getElementById('dateTimeModal');
     if (modal) {
         modal.addEventListener('hidden.bs.modal', function() {
@@ -1612,7 +1571,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Form validation
     const form = document.getElementById('createRequestForm');
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -1635,19 +1593,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            // NEW: Validate demo selection
             if (!validateDemoSelection()) {
                 e.preventDefault();
                 return false;
             }
             
-            // Validate business category
             if (!validateBusinessCategory()) {
                 e.preventDefault();
                 return false;
             }
             
-            // Check if business category is recommended
             const categorySelect = document.getElementById('business_category_id');
             if (!categorySelect || !categorySelect.value) {
                 const confirmProceed = confirm(
@@ -1662,7 +1617,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Show loading state
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating & Sending Notification...';
@@ -1671,9 +1625,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Initial setup
     updateBusinessSubcategories();
-    filterDemosByBusiness(); // NEW: Initialize demo filtering
+    filterDemosByBusiness();
 });
 </script>
 {% endblock %}

@@ -1,4 +1,4 @@
-<!-- templates/admin/demo_requests/edit.html - FIXED with dynamic time slots -->
+<!-- templates/admin/demo_requests/edit.html - COMPLETE FIXED VERSION -->
 {% extends 'admin/base.html' %}
 
 {% block admin_title %}Edit Demo Request{% endblock %}
@@ -369,7 +369,7 @@
                         {% for demo in demos %}
                             <option value="{{ demo.id }}" 
                                     {% if demo.id == demo_request.demo.id %}selected{% endif %}>
-                                {{ demo.title }} ({{ demo.category.name }})
+                                {{ demo.title }} ({{ demo.get_demo_type_display }})
                             </option>
                         {% endfor %}
                     </select>
@@ -379,6 +379,63 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Business Category Information -->
+    <div class="form-section">
+        <div class="section-title">
+            <i class="fas fa-briefcase"></i>Business Category Information
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="business_category_id" class="form-label">
+                        <i class="fas fa-building"></i>Business Category
+                    </label>
+                    <select name="business_category_id" id="business_category_id" class="form-select">
+                        <option value="">Select Business Category...</option>
+                        {% for category in business_categories %}
+                            <option value="{{ category.id }}" 
+                                    {% if demo_request.business_category and demo_request.business_category.id == category.id %}selected{% endif %}>
+                                {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">
+                        Business category for this customer
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="business_subcategory_id" class="form-label">
+                        <i class="fas fa-sitemap"></i>Business Subcategory
+                    </label>
+                    <select name="business_subcategory_id" id="business_subcategory_id" class="form-select">
+                        <option value="">Select Subcategory (Optional)</option>
+                        {% for subcategory in business_subcategories %}
+                            <option value="{{ subcategory.id }}" 
+                                    data-parent="{{ subcategory.category.id }}"
+                                    {% if demo_request.business_subcategory and demo_request.business_subcategory.id == subcategory.id %}selected{% endif %}>
+                                {{ subcategory.name }} ({{ subcategory.category.name }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">
+                        Specific subcategory if applicable
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if demo_request.is_international %}
+        <div class="alert alert-info">
+            <i class="fas fa-globe me-2"></i>
+            <strong>International Customer:</strong> This customer is from outside India
+        </div>
+        {% endif %}
     </div>
 
     <!-- Date & Time Selection -->
@@ -668,7 +725,7 @@
 
 {% block admin_extra_js %}
 <script>
-// FIXED: Use dynamic time slots from database instead of hardcoded array
+// Time slots from database
 const timeSlots = [
     {% for slot in time_slots %}
     {
@@ -685,11 +742,8 @@ const timeSlots = [
 let selectedDate = null;
 let selectedSlot = null;
 
-// Fix current date initialization
 const today = new Date();
 let currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-console.log('Edit Demo Request - Time Slots Loaded:', timeSlots);
 
 function openEditDateTimeModal() {
     const modal = document.getElementById('editDateTimeModal');
@@ -719,7 +773,6 @@ function generateCalendar() {
         const startDate = new Date(firstDay);
         startDate.setDate(startDate.getDate() - firstDay.getDay());
         
-        // Create today's date properly without timezone issues
         const now = new Date();
         const todayDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         
@@ -727,7 +780,6 @@ function generateCalendar() {
             const date = new Date(startDate);
             date.setDate(startDate.getDate() + i);
             
-            // Create date without time component for comparison
             const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
             
             const dayElement = document.createElement('div');
@@ -742,7 +794,6 @@ function generateCalendar() {
                 dayElement.classList.add('today');
             }
             
-            // For edit mode, disable Sundays but allow past dates with warning
             if (dateOnly.getDay() === 0) {
                 dayElement.classList.add('disabled');
             } else {
@@ -760,8 +811,6 @@ function selectDate(date, element) {
     });
     
     element.classList.add('selected');
-    
-    // Create new date object to avoid timezone issues
     selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     
     const selectedDateDisplay = document.getElementById('selectedDateDisplay');
@@ -782,7 +831,6 @@ function showTimeSlots() {
     const timeSlotsList = document.getElementById('timeSlotsList');
     if (!timeSlotsList) return;
     
-    // Group slots by type
     const morningSlots = timeSlots.filter(slot => slot.type === 'morning');
     const afternoonSlots = timeSlots.filter(slot => slot.type === 'afternoon');
     
@@ -828,7 +876,6 @@ function showTimeSlots() {
     
     timeSlotsList.innerHTML = html;
     
-    // Add event listeners to all time slot buttons
     const timeSlotButtons = timeSlotsList.querySelectorAll('.time-slot-btn');
     timeSlotButtons.forEach(button => {
         button.addEventListener('click', function(e) {
@@ -919,11 +966,9 @@ function formatDate(date) {
 }
 
 function formatDateForInput(date) {
-    // Use local timezone instead of UTC to avoid date shift
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    
     return `${year}-${month}-${day}`;
 }
 
@@ -957,6 +1002,32 @@ function deleteRequest() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
+    // Business category and subcategory filtering
+    const categorySelect = document.getElementById('business_category_id');
+    const subcategorySelect = document.getElementById('business_subcategory_id');
+    
+    if (categorySelect && subcategorySelect) {
+        function filterSubcategories() {
+            const selectedCategoryId = categorySelect.value;
+            const subcategoryOptions = subcategorySelect.querySelectorAll('option[data-parent]');
+            
+            subcategoryOptions.forEach(option => {
+                if (!selectedCategoryId || option.dataset.parent === selectedCategoryId) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                    if (option.selected) {
+                        option.selected = false;
+                        subcategorySelect.value = '';
+                    }
+                }
+            });
+        }
+        
+        categorySelect.addEventListener('change', filterSubcategories);
+        filterSubcategories();
+    }
+    
     // Add confirm button event listener
     const confirmButton = document.getElementById('confirmEditDateTime');
     if (confirmButton) {

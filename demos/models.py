@@ -363,6 +363,13 @@ class DemoRequest(models.Model):
         related_name='demo_requests',
         verbose_name="Business Subcategory"
     )
+    country_region = models.CharField(
+        max_length=50, 
+        blank=True,  # ✅ Allows empty in forms
+        null=True,   # ✅ ADD THIS - Allows NULL in database
+        default='IN',  # Optional: default value
+        verbose_name="Country/Region"
+    )
     
     # Scheduling
     requested_date = models.DateField(verbose_name="Requested Date")
@@ -388,7 +395,6 @@ class DemoRequest(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     postal_code = models.CharField(max_length=20, blank=True, verbose_name="Postal/ZIP Code")
     city = models.CharField(max_length=100, blank=True, verbose_name="City")
-    country_region = models.CharField(max_length=5, blank=True, verbose_name="Country/Region")
     timezone = models.CharField(max_length=50, blank=True, verbose_name="Timezone")
     
     # Geographic metadata

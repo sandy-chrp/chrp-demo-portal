@@ -1,4 +1,4 @@
-<!-- templates/customers/demo_requests.html - Fixed Version WITHOUT custom filter -->
+<!-- templates/customers/demo_requests.html - Complete Dynamic Version -->
 {% extends 'customers/base.html' %}
 {% load static %}
 
@@ -7,7 +7,7 @@
 
 {% block customer_extra_css %}
 <style>
-    /* Demo Requests Specific Styles */
+    /* Request Card Styles */
     .request-card {
         background: white;
         border-radius: var(--radius-xl);
@@ -15,6 +15,7 @@
         margin-bottom: var(--spacing-lg);
         border: 1px solid var(--gray-200);
         transition: all 0.3s ease;
+        overflow: hidden;
     }
 
     .request-card:hover {
@@ -27,94 +28,202 @@
         border-bottom: 1px solid var(--gray-200);
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        background: var(--gray-50);
+        align-items: flex-start;
+        background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+        gap: var(--spacing-md);
+    }
+
+    .request-title-section {
+        flex: 1;
+        min-width: 0;
     }
 
     .request-title {
         font-size: 1.25rem;
         font-weight: 700;
         color: var(--dark-color);
-        margin: 0;
+        margin: 0 0 var(--spacing-xs) 0;
+        line-height: 1.3;
     }
 
     .request-id {
         color: var(--gray-500);
         font-size: 0.875rem;
-        margin-top: var(--spacing-xs);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        flex-wrap: wrap;
     }
 
     .request-body {
         padding: var(--spacing-lg);
     }
 
-    .request-info {
+    /* Demo Info Card */
+    .demo-info-card {
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .demo-thumbnail {
+        width: 100px;
+        height: 75px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        border: 2px solid white;
+        box-shadow: var(--shadow-sm);
+        flex-shrink: 0;
+    }
+
+    .demo-placeholder {
+        width: 100px;
+        height: 75px;
+        background: linear-gradient(135deg, var(--gray-200), var(--gray-300));
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+        box-shadow: var(--shadow-sm);
+        flex-shrink: 0;
+    }
+
+    .demo-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .demo-details h4 {
+        margin: 0 0 var(--spacing-xs) 0;
+        color: var(--dark-color);
+        font-size: 1.125rem;
+        font-weight: 600;
+    }
+
+    .demo-categories {
+        display: flex;
+        gap: var(--spacing-xs);
+        flex-wrap: wrap;
+        margin-top: var(--spacing-xs);
+    }
+
+    .category-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--primary-color);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .subcategory-tag {
+        background: var(--gray-700);
+    }
+
+    .demo-type-tag {
+        background: var(--info-color);
+    }
+
+    /* Request Information Grid */
+    .request-info-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-lg);
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: var(--spacing-md);
         margin-bottom: var(--spacing-lg);
     }
 
-    .info-item {
+    .info-card {
+        background: var(--gray-50);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-lg);
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+        background: var(--gray-100);
+        transform: translateX(4px);
+    }
+
+    .info-card.confirmed {
+        border-left-color: var(--success-color);
+    }
+
+    .info-header {
         display: flex;
         align-items: center;
         gap: var(--spacing-sm);
-    }
-
-    .info-icon {
-        width: 20px;
-        color: var(--primary-color);
-    }
-
-    .info-label {
+        margin-bottom: var(--spacing-xs);
+        color: var(--gray-600);
+        font-size: 0.875rem;
         font-weight: 600;
-        color: var(--gray-700);
-        margin-right: var(--spacing-xs);
+    }
+
+    .info-header i {
+        color: var(--primary-color);
+        width: 18px;
     }
 
     .info-value {
-        color: var(--gray-600);
+        color: var(--dark-color);
+        font-weight: 600;
+        font-size: 1rem;
     }
 
+    /* Status Badges */
     .status-badge {
         padding: var(--spacing-xs) var(--spacing-md);
-        border-radius: var(--radius-lg);
+        border-radius: 20px;
         font-size: 0.875rem;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
     }
 
     .status-pending {
-        background: #fef3c7;
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
         color: #92400e;
-        border: 1px solid #fde68a;
+        border: 2px solid #fbbf24;
     }
 
     .status-confirmed {
-        background: #d1fae5;
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
         color: #065f46;
-        border: 1px solid #a7f3d0;
+        border: 2px solid #10b981;
     }
 
     .status-rescheduled {
-        background: #dbeafe;
+        background: linear-gradient(135deg, #dbeafe, #93c5fd);
         color: #1e40af;
-        border: 1px solid #93c5fd;
+        border: 2px solid #3b82f6;
     }
 
     .status-completed {
-        background: #dcfce7;
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
         color: #166534;
-        border: 1px solid #bbf7d0;
+        border: 2px solid #22c55e;
     }
 
     .status-cancelled {
-        background: #fee2e2;
+        background: linear-gradient(135deg, #fee2e2, #fca5a5);
         color: #991b1b;
-        border: 1px solid #fca5a5;
+        border: 2px solid #ef4444;
     }
 
+    /* Filter Bar */
     .filter-bar {
         background: white;
         padding: var(--spacing-lg);
@@ -124,27 +233,35 @@
         border: 1px solid var(--gray-200);
     }
 
+    .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+
     .filter-pills {
         display: flex;
         gap: var(--spacing-sm);
         flex-wrap: wrap;
-        margin-top: var(--spacing-md);
     }
 
     .filter-pill {
         padding: var(--spacing-sm) var(--spacing-md);
         border: 2px solid var(--gray-300);
-        border-radius: var(--radius-lg);
+        border-radius: 20px;
         background: white;
         color: var(--gray-700);
         text-decoration: none;
         font-size: 0.875rem;
-        font-weight: 500;
+        font-weight: 600;
         transition: all 0.3s ease;
-        position: relative;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: var(--spacing-xs);
+        cursor: pointer;
     }
 
     .filter-pill:hover {
@@ -152,12 +269,14 @@
         color: var(--primary-color);
         background: rgba(30, 60, 114, 0.05);
         text-decoration: none;
+        transform: translateY(-2px);
     }
 
     .filter-pill.active {
         border-color: var(--primary-color);
-        background: var(--primary-color);
+        background: var(--gradient-primary);
         color: white;
+        box-shadow: var(--shadow-md);
     }
 
     .filter-pill.active:hover {
@@ -165,72 +284,44 @@
     }
 
     .filter-count {
-        background: rgba(0, 0, 0, 0.1);
-        padding: 2px 6px;
+        background: rgba(255, 255, 255, 0.3);
+        padding: 2px 8px;
         border-radius: 10px;
         font-size: 0.75rem;
-        font-weight: 600;
-        margin-left: var(--spacing-xs);
-    }
-
-    .filter-pill.active .filter-count {
-        background: rgba(255, 255, 255, 0.2);
-    }
-
-    .empty-state {
+        font-weight: 700;
+        min-width: 24px;
         text-align: center;
-        padding: var(--spacing-xl) * 2;
-        color: var(--gray-500);
     }
 
-    .empty-icon {
-        font-size: 4rem;
-        margin-bottom: var(--spacing-lg);
-        opacity: 0.5;
-        color: var(--primary-color);
+    .filter-pill:not(.active) .filter-count {
+        background: var(--gray-200);
+        color: var(--gray-700);
     }
 
-    .pagination-wrapper {
-        margin-top: var(--spacing-xl);
-        display: flex;
-        justify-content: center;
-    }
-
-    .demo-thumbnail {
-        width: 80px;
-        height: 60px;
-        object-fit: cover;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--gray-200);
-    }
-
-    .demo-info {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .demo-details h4 {
-        margin: 0 0 var(--spacing-xs) 0;
-        color: var(--dark-color);
-        font-size: 1.125rem;
-    }
-
-    .demo-category {
-        color: var(--primary-color);
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    .request-notes {
+    /* Notes Section */
+    .notes-section {
         background: var(--gray-50);
         padding: var(--spacing-md);
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-lg);
         margin-top: var(--spacing-md);
         border-left: 4px solid var(--info-color);
     }
 
+    .notes-section.admin {
+        border-left-color: var(--warning-color);
+        background: #fffbeb;
+    }
+
+    .notes-header {
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-xs);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+
+    /* Action Buttons */
     .request-actions {
         display: flex;
         gap: var(--spacing-sm);
@@ -238,48 +329,63 @@
         flex-wrap: wrap;
     }
 
-    /* Summary Stats */
-    .summary-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-lg);
-        padding: var(--spacing-md);
-        background: var(--gray-50);
-        border-radius: var(--radius-md);
+    .action-btn {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        border: 2px solid;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        cursor: pointer;
+        text-decoration: none;
     }
 
-    .stat-item {
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        text-decoration: none;
+    }
+
+    /* Empty State */
+    .empty-state {
         text-align: center;
-        padding: var(--spacing-sm);
+        padding: calc(var(--spacing-xl) * 3);
+        color: var(--gray-500);
     }
 
-    .stat-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--primary-color);
+    .empty-icon {
+        font-size: 5rem;
+        margin-bottom: var(--spacing-lg);
+        opacity: 0.3;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    .stat-label {
-        font-size: 0.75rem;
-        color: var(--gray-600);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-top: var(--spacing-xs);
+    .empty-state h3 {
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-md);
     }
 
-    /* Loading states */
+    /* Loading State */
     .btn-loading {
         opacity: 0.6;
         pointer-events: none;
+        position: relative;
     }
 
     .btn-loading::after {
         content: '';
-        display: inline-block;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
         width: 16px;
         height: 16px;
-        margin-left: 8px;
         border: 2px solid currentColor;
         border-radius: 50%;
         border-right-color: transparent;
@@ -287,19 +393,63 @@
     }
 
     @keyframes spin {
-        to { transform: rotate(360deg); }
+        to { transform: translateY(-50%) rotate(360deg); }
     }
 
+    /* Pagination */
+    .pagination-wrapper {
+        margin-top: var(--spacing-xl);
+        display: flex;
+        justify-content: center;
+    }
+
+    .pagination .page-link {
+        border: 2px solid var(--gray-300);
+        color: var(--gray-700);
+        padding: var(--spacing-sm) var(--spacing-md);
+        margin: 0 var(--spacing-xs);
+        border-radius: var(--radius-md);
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .pagination .page-link:hover {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--gradient-primary);
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
         .request-header {
             flex-direction: column;
-            align-items: flex-start;
-            gap: var(--spacing-sm);
+            align-items: stretch;
         }
 
-        .request-info {
+        .status-badge {
+            align-self: flex-start;
+        }
+
+        .demo-info-card {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .demo-thumbnail,
+        .demo-placeholder {
+            width: 100%;
+            height: 140px;
+        }
+
+        .request-info-grid {
             grid-template-columns: 1fr;
-            gap: var(--spacing-md);
         }
 
         .filter-pills {
@@ -310,22 +460,46 @@
             flex-direction: column;
         }
 
-        .summary-stats {
-            grid-template-columns: repeat(2, 1fr);
+        .action-btn {
+            width: 100%;
+            justify-content: center;
         }
+
+        .filter-header {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    /* Smooth Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .request-card {
+        animation: fadeInUp 0.6s ease forwards;
     }
 </style>
 {% endblock %}
 
 {% block customer_content %}
-<!-- CSRF Token for AJAX -->
 {% csrf_token %}
 
 <!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <div>
-        <h1 class="h2 mb-1">My Demo Requests</h1>
-        <p class="text-muted mb-0">Track your live demo session requests and manage appointments</p>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-calendar-check me-2 text-primary"></i>
+            My Demo Requests
+        </h1>
+        <p class="text-muted mb-0">Track and manage your live demo session requests</p>
     </div>
     <div>
         <a href="{% url 'customers:request_demo' %}" class="btn btn-primary">
@@ -334,63 +508,31 @@
     </div>
 </div>
 
-<!-- Summary Statistics -->
-{% comment %} {% if total_requests > 0 %}
-<div class="customer-card mb-4">
-    <div class="customer-card-header">
-        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Quick Overview</h6>
-    </div>
-    <div class="customer-card-body">
-        <div class="summary-stats">
-            <div class="stat-item">
-                <div class="stat-number">{{ total_requests }}</div>
-                <div class="stat-label">Total</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">{{ status_counts.pending|default:0 }}</div>
-                <div class="stat-label">Pending</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">{{ status_counts.confirmed|default:0 }}</div>
-                <div class="stat-label">Confirmed</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">{{ status_counts.completed|default:0 }}</div>
-                <div class="stat-label">Completed</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">{{ status_counts.cancelled|default:0 }}</div>
-                <div class="stat-label">Cancelled</div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %} {% endcomment %}
-
 <!-- Filter Bar -->
 <div class="filter-bar">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="mb-0">Filter by Status</h6>
-        {% if current_status %}
-            <small class="text-muted">
-                Showing {{ page_obj.paginator.count }} request{{ page_obj.paginator.count|pluralize }} 
-                with status "{{ current_status|title }}"
-            </small>
-        {% else %}
-            <small class="text-muted">
-                Showing all {{ page_obj.paginator.count }} request{{ page_obj.paginator.count|pluralize }}
-            </small>
-        {% endif %}
+    <div class="filter-header">
+        <h6 class="mb-0">
+            <i class="fas fa-filter me-2"></i>
+            Filter by Status
+        </h6>
+        <small class="text-muted">
+            {% if current_status %}
+                Showing <strong>{{ page_obj.paginator.count }}</strong> request{{ page_obj.paginator.count|pluralize }} 
+                with status "<strong>{{ current_status|title }}</strong>"
+            {% else %}
+                Showing all <strong>{{ page_obj.paginator.count }}</strong> request{{ page_obj.paginator.count|pluralize }}
+            {% endif %}
+        </small>
     </div>
+    
     <div class="filter-pills">
         <a href="{% url 'customers:demo_requests' %}" 
            class="filter-pill {% if not current_status %}active{% endif %}">
-            <i class="fas fa-list"></i>
+            <i class="fas fa-th-list"></i>
             All Requests
-            <span class="filter-count">{{ total_requests }}</span>
+            <span class="filter-count">{{ status_counts.all }}</span>
         </a>
         
-        <!-- Individual Status Filters -->
         <a href="?status=pending" 
            class="filter-pill {% if current_status == 'pending' %}active{% endif %}">
             <i class="fas fa-clock"></i>
@@ -400,7 +542,7 @@
         
         <a href="?status=confirmed" 
            class="filter-pill {% if current_status == 'confirmed' %}active{% endif %}">
-            <i class="fas fa-check"></i>
+            <i class="fas fa-check-circle"></i>
             Confirmed
             <span class="filter-count">{{ status_counts.confirmed|default:0 }}</span>
         </a>
@@ -414,14 +556,14 @@
         
         <a href="?status=completed" 
            class="filter-pill {% if current_status == 'completed' %}active{% endif %}">
-            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-check-double"></i>
             Completed
             <span class="filter-count">{{ status_counts.completed|default:0 }}</span>
         </a>
         
         <a href="?status=cancelled" 
            class="filter-pill {% if current_status == 'cancelled' %}active{% endif %}">
-            <i class="fas fa-times"></i>
+            <i class="fas fa-times-circle"></i>
             Cancelled
             <span class="filter-count">{{ status_counts.cancelled|default:0 }}</span>
         </a>
@@ -431,122 +573,197 @@
 <!-- Demo Requests List -->
 {% if page_obj.object_list %}
     {% for demo_request in page_obj.object_list %}
-        <div class="request-card" id="request-{{ demo_request.id }}">
+        <div class="request-card" id="request-{{ demo_request.id }}" style="animation-delay: {{ forloop.counter0|add:100 }}ms;">
+            <!-- Request Header -->
             <div class="request-header">
-                <div>
+                <div class="request-title-section">
                     <h3 class="request-title">{{ demo_request.demo.title }}</h3>
-                    <div class="request-id">Request #{{ demo_request.id }} • {{ demo_request.created_at|date:"M d, Y" }}</div>
+                    <div class="request-id">
+                        <span><i class="fas fa-hashtag"></i> Request #{{ demo_request.id }}</span>
+                        <span>•</span>
+                        <span><i class="fas fa-calendar"></i> {{ demo_request.created_at|date:"M d, Y" }}</span>
+                        <span>•</span>
+                        <span><i class="fas fa-clock"></i> {{ demo_request.created_at|time:"g:i A" }}</span>
+                    </div>
                 </div>
                 <div>
                     <span class="status-badge status-{{ demo_request.status }}">
+                        {% if demo_request.status == 'pending' %}
+                            <i class="fas fa-hourglass-half"></i>
+                        {% elif demo_request.status == 'confirmed' %}
+                            <i class="fas fa-check"></i>
+                        {% elif demo_request.status == 'rescheduled' %}
+                            <i class="fas fa-redo"></i>
+                        {% elif demo_request.status == 'completed' %}
+                            <i class="fas fa-check-double"></i>
+                        {% elif demo_request.status == 'cancelled' %}
+                            <i class="fas fa-ban"></i>
+                        {% endif %}
                         {{ demo_request.get_status_display }}
                     </span>
                 </div>
             </div>
             
             <div class="request-body">
-                <!-- Demo Information -->
-                <div class="demo-info">
+                <!-- Demo Information Card -->
+                <div class="demo-info-card">
                     {% if demo_request.demo.thumbnail %}
-                        <img src="{{ demo_request.demo.thumbnail.url }}" alt="{{ demo_request.demo.title }}" class="demo-thumbnail">
+                        <img src="{{ demo_request.demo.thumbnail.url }}" 
+                             alt="{{ demo_request.demo.title }}" 
+                             class="demo-thumbnail">
                     {% else %}
-                        <div class="demo-thumbnail" style="background: var(--gray-200); display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-video text-muted"></i>
+                        <div class="demo-placeholder">
+                            <i class="fas fa-video fa-2x text-muted"></i>
                         </div>
                     {% endif %}
+                    
                     <div class="demo-details">
                         <h4>{{ demo_request.demo.title }}</h4>
-                        <div class="demo-category">{{ demo_request.demo.category.name }}</div>
+                        <div class="demo-categories">
+                            {% if demo_request.demo.primary_business_category %}
+                                <span class="category-tag">
+                                    {% if demo_request.demo.primary_business_category.icon %}
+                                        {{ demo_request.demo.primary_business_category.icon }}
+                                    {% else %}
+                                        <i class="fas fa-tag"></i>
+                                    {% endif %}
+                                    {{ demo_request.demo.primary_business_category.name }}
+                                </span>
+                            {% endif %}
+                            
+                            {% for subcategory in demo_request.demo.target_business_subcategories.all|slice:":2" %}
+                                <span class="category-tag subcategory-tag">
+                                    {{ subcategory.name }}
+                                </span>
+                            {% endfor %}
+                            
+                            <span class="category-tag demo-type-tag">
+                                {{ demo_request.demo.get_demo_type_display }}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Request Information -->
-                <div class="request-info">
-                    <div class="info-item">
-                        <i class="fas fa-calendar info-icon"></i>
-                        <span class="info-label">Requested Date:</span>
-                        <span class="info-value">{{ demo_request.requested_date|date:"F d, Y" }}</span>
+                <!-- Request Information Grid -->
+                <div class="request-info-grid">
+                    <div class="info-card">
+                        <div class="info-header">
+                            <i class="fas fa-calendar"></i>
+                            Requested Date
+                        </div>
+                        <div class="info-value">{{ demo_request.requested_date|date:"F d, Y" }}</div>
                     </div>
                     
-                    <div class="info-item">
-                        <i class="fas fa-clock info-icon"></i>
-                        <span class="info-label">Time Slot:</span>
-                        <span class="info-value">{{ demo_request.requested_time_slot }}</span>
+                    <div class="info-card">
+                        <div class="info-header">
+                            <i class="fas fa-clock"></i>
+                            Time Slot
+                        </div>
+                        <div class="info-value">{{ demo_request.requested_time_slot }}</div>
                     </div>
                     
                     {% if demo_request.confirmed_date %}
-                    <div class="info-item">
-                        <i class="fas fa-check-circle info-icon"></i>
-                        <span class="info-label">Confirmed Date:</span>
-                        <span class="info-value">{{ demo_request.confirmed_date|date:"F d, Y" }}</span>
+                    <div class="info-card confirmed">
+                        <div class="info-header">
+                            <i class="fas fa-check-circle"></i>
+                            Confirmed Date
+                        </div>
+                        <div class="info-value">{{ demo_request.confirmed_date|date:"F d, Y" }}</div>
                     </div>
                     {% endif %}
                     
                     {% if demo_request.confirmed_time_slot %}
-                    <div class="info-item">
-                        <i class="fas fa-clock info-icon"></i>
-                        <span class="info-label">Confirmed Time:</span>
-                        <span class="info-value">{{ demo_request.confirmed_time_slot }}</span>
+                    <div class="info-card confirmed">
+                        <div class="info-header">
+                            <i class="fas fa-clock"></i>
+                            Confirmed Time
+                        </div>
+                        <div class="info-value">{{ demo_request.confirmed_time_slot }}</div>
                     </div>
                     {% endif %}
                     
-                    <div class="info-item">
-                        <i class="fas fa-user info-icon"></i>
-                        <span class="info-label">Status:</span>
-                        <span class="info-value">{{ demo_request.get_status_display }}</span>
+                    <div class="info-card">
+                        <div class="info-header">
+                            <i class="fas fa-history"></i>
+                            Created
+                        </div>
+                        <div class="info-value">{{ demo_request.created_at|timesince }} ago</div>
                     </div>
                     
-                    <div class="info-item">
-                        <i class="fas fa-info-circle info-icon"></i>
-                        <span class="info-label">Created:</span>
-                        <span class="info-value">{{ demo_request.created_at|timesince }} ago</span>
+                    {% if demo_request.handled_by %}
+                    <div class="info-card">
+                        <div class="info-header">
+                            <i class="fas fa-user-tie"></i>
+                            Handled By
+                        </div>
+                        <div class="info-value">{{ demo_request.handled_by.get_full_name }}</div>
                     </div>
+                    {% endif %}
                 </div>
                 
-                <!-- Notes -->
+                <!-- Customer Notes -->
                 {% if demo_request.notes %}
-                <div class="request-notes">
-                    <strong>Additional Notes:</strong><br>
-                    {{ demo_request.notes }}
+                <div class="notes-section">
+                    <div class="notes-header">
+                        <i class="fas fa-sticky-note"></i>
+                        Your Notes
+                    </div>
+                    <p class="mb-0">{{ demo_request.notes }}</p>
                 </div>
                 {% endif %}
                 
-                <!-- Admin Notes -->
+                <!-- Admin Response -->
                 {% if demo_request.admin_notes %}
-                <div class="request-notes" style="border-left-color: var(--warning-color);">
-                    <strong>Admin Response:</strong><br>
-                    {{ demo_request.admin_notes }}
+                <div class="notes-section admin">
+                    <div class="notes-header">
+                        <i class="fas fa-comment-alt"></i>
+                        Team Response
+                    </div>
+                    <p class="mb-0">{{ demo_request.admin_notes }}</p>
                 </div>
                 {% endif %}
                 
                 <!-- Action Buttons -->
                 <div class="request-actions">
                     {% if demo_request.status == 'pending' %}
-                        <button class="btn btn-outline-danger btn-sm cancel-btn" data-request-id="{{ demo_request.id }}">
-                            <i class="fas fa-times me-1"></i>Cancel Request
+                        <button class="action-btn btn-outline-danger cancel-btn" 
+                                data-request-id="{{ demo_request.id }}">
+                            <i class="fas fa-times"></i>
+                            Cancel Request
                         </button>
                     {% endif %}
                     
                     {% if demo_request.status == 'confirmed' %}
-                        <a href="#" class="btn btn-success btn-sm">
-                            <i class="fas fa-video me-1"></i>Join Demo
+                        <a href="#" class="action-btn btn-success">
+                            <i class="fas fa-video"></i>
+                            Join Demo Session
                         </a>
-                        <button class="btn btn-outline-secondary btn-sm reschedule-btn" data-request-id="{{ demo_request.id }}">
-                            <i class="fas fa-calendar-alt me-1"></i>Reschedule
+                        <button class="action-btn btn-outline-secondary reschedule-btn" 
+                                data-request-id="{{ demo_request.id }}">
+                            <i class="fas fa-calendar-alt"></i>
+                            Reschedule
                         </button>
                     {% endif %}
                     
                     {% if demo_request.status == 'completed' %}
-                        <a href="{% url 'customers:demo_detail' demo_request.demo.slug %}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-eye me-1"></i>View Demo Again
-                        </a>
-                        <button class="btn btn-outline-info btn-sm feedback-btn" data-request-id="{{ demo_request.id }}">
-                            <i class="fas fa-star me-1"></i>Rate Experience
+                        <button class="action-btn btn-outline-warning feedback-btn" 
+                                data-request-id="{{ demo_request.id }}"
+                                data-demo-slug="{{ demo_request.demo.slug }}">
+                            <i class="fas fa-star"></i>
+                            Rate Experience
                         </button>
                     {% endif %}
                     
-                    <a href="{% url 'customers:demo_detail' demo_request.demo.slug %}" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-play me-1"></i>Watch Demo Video
+                    <a href="{% url 'customers:demo_detail' demo_request.demo.slug %}" 
+                       class="action-btn btn-primary">
+                        <i class="fas fa-play"></i>
+                        Watch Demo Video
+                    </a>
+                    
+                    <a href="{% url 'customers:contact_sales' %}" 
+                       class="action-btn btn-outline-primary">
+                        <i class="fas fa-headset"></i>
+                        Contact Support
                     </a>
                 </div>
             </div>
@@ -608,15 +825,25 @@
         </div>
         <h3>No Demo Requests Found</h3>
         {% if current_status %}
-            <p>No demo requests found with status <strong>"{{ current_status|title }}"</strong>.</p>
-            <a href="{% url 'customers:demo_requests' %}" class="btn btn-outline-primary mt-3">
-                <i class="fas fa-list me-2"></i>View All Requests
-            </a>
+            <p class="mb-4">No demo requests found with status <strong>"{{ current_status|title }}"</strong>.</p>
+            <div class="d-flex gap-2 justify-content-center flex-wrap">
+                <a href="{% url 'customers:demo_requests' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-list me-2"></i>View All Requests
+                </a>
+                <a href="{% url 'customers:request_demo' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Scheduled Demo
+                </a>
+            </div>
         {% else %}
-            <p>You haven't requested any live demo sessions yet.</p>
-            <a href="{% url 'customers:request_demo' %}" class="btn btn-primary mt-3">
-                <i class="fas fa-plus me-2"></i>Request Your First Demo
-            </a>
+            <p class="mb-4">You haven't requested any live demo sessions yet. Start exploring our demos!</p>
+            <div class="d-flex gap-2 justify-content-center flex-wrap">
+                <a href="{% url 'customers:browse_demos' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-video me-2"></i>Browse Demos
+                </a>
+                <a href="{% url 'customers:request_demo' %}" class="btn btn-primary">
+                    <i class="fas fa-calendar-plus me-2"></i>Request Your First Demo
+                </a>
+            </div>
         {% endif %}
     </div>
 {% endif %}
@@ -625,198 +852,188 @@
 {% block customer_extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Cancel request functionality
+    initializeCancelButtons();
+    initializeRescheduleButtons();
+    initializeFeedbackButtons();
+    animateCards();
+});
+
+function initializeCancelButtons() {
     document.querySelectorAll('.cancel-btn').forEach(button => {
         button.addEventListener('click', function() {
             const requestId = this.dataset.requestId;
             cancelRequest(requestId, this);
         });
     });
-    
-    // Reschedule request functionality
+}
+
+function initializeRescheduleButtons() {
     document.querySelectorAll('.reschedule-btn').forEach(button => {
         button.addEventListener('click', function() {
             const requestId = this.dataset.requestId;
             rescheduleRequest(requestId);
         });
     });
-    
-    // Feedback functionality
+}
+
+function initializeFeedbackButtons() {
     document.querySelectorAll('.feedback-btn').forEach(button => {
         button.addEventListener('click', function() {
-            const requestId = this.dataset.requestId;
-            provideFeedback(requestId);
+            const demoSlug = this.dataset.demoSlug;
+            provideFeedback(demoSlug);
         });
     });
-    
-    // Add fade-in animation for cards
+}
+
+function animateCards() {
     const cards = document.querySelectorAll('.request-card');
     cards.forEach((card, index) => {
         card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'all 0.6s ease';
+        card.style.transform = 'translateY(30px)';
         
         setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
         }, index * 100);
     });
-});
+}
 
 function cancelRequest(requestId, buttonElement) {
-    if (confirm('Are you sure you want to cancel this demo request?')) {
-        // Add loading state
-        buttonElement.classList.add('btn-loading');
-        buttonElement.disabled = true;
-        
-        // Get CSRF token
-        const csrfToken = getCsrfToken();
-        if (!csrfToken) {
-            showToast('Security token not found. Please refresh the page.', 'error');
-            buttonElement.classList.remove('btn-loading');
-            buttonElement.disabled = false;
-            return;
-        }
-        
-        // Fix the URL - use the correct customer URL pattern
-        const currentPath = window.location.pathname;
-        const baseUrl = currentPath.includes('/customers/') ? '/customers/' : '/customer/';
-        
-        // Make AJAX call to cancel request
-        fetch(`${baseUrl}ajax/demo-request/${requestId}/cancel/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Update the UI
-                const requestCard = document.getElementById(`request-${requestId}`);
-                const statusBadge = requestCard.querySelector('.status-badge');
-                const actionsDiv = requestCard.querySelector('.request-actions');
-                
-                // Update status badge
-                statusBadge.className = 'status-badge status-cancelled';
-                statusBadge.textContent = 'CANCELLED';
-                
-                // Remove action buttons
-                actionsDiv.innerHTML = `
-                    <div class="alert alert-info mb-0" style="font-size: 0.875rem;">
-                        <i class="fas fa-info-circle me-2"></i>
-                        This demo request has been cancelled.
-                    </div>
-                `;
-                
-                // Show success message
-                showToast('Demo request cancelled successfully!', 'success');
-                
-                // Refresh page after 2 seconds to update counts
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-            } else {
-                throw new Error(data.error || 'Failed to cancel request');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Failed to cancel request. Please try again.', 'error');
-            
-            // Remove loading state
-            buttonElement.classList.remove('btn-loading');
-            buttonElement.disabled = false;
-        });
+    if (!confirm('Are you sure you want to cancel this demo request? This action cannot be undone.')) {
+        return;
     }
+    
+    buttonElement.classList.add('btn-loading');
+    buttonElement.disabled = true;
+    
+    const csrfToken = getCsrfToken();
+    if (!csrfToken) {
+        showToast('Security token not found. Please refresh the page.', 'error');
+        resetButton(buttonElement);
+        return;
+    }
+    
+    const currentPath = window.location.pathname;
+    const baseUrl = currentPath.includes('/customers/') ? '/customers/' : '/customer/';
+    
+    fetch(`${baseUrl}ajax/demo-request/${requestId}/cancel/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const requestCard = document.getElementById(`request-${requestId}`);
+            const statusBadge = requestCard.querySelector('.status-badge');
+            const actionsDiv = requestCard.querySelector('.request-actions');
+            
+            statusBadge.className = 'status-badge status-cancelled';
+            statusBadge.innerHTML = '<i class="fas fa-ban"></i> CANCELLED';
+            
+            actionsDiv.innerHTML = `
+                <div class="alert alert-info mb-0 w-100">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This demo request has been cancelled successfully.
+                </div>
+            `;
+            
+            showToast(data.message || 'Demo request cancelled successfully!', 'success');
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            throw new Error(data.error || 'Failed to cancel request');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to cancel request. Please try again.', 'error');
+        resetButton(buttonElement);
+    });
 }
 
 function rescheduleRequest(requestId) {
-    const message = `To reschedule your demo request #${requestId}, please contact our sales team:
-    
+    const message = `To reschedule your demo request #${requestId}, please contact our support team:
+
 📧 Email: support@chrp-india.com
 📞 Phone: +91-1234567890
-⏰ Business Hours: 9:00 AM - 6:00 PM (Mon-Fri)
+⏰ Business Hours: 9:00 AM - 6:00 PM (Mon-Sat)
 
-Our team will help you find a new suitable time slot.`;
+Our team will help you find a new suitable time slot for your demo session.`;
     
-    alert(message);
+    if (confirm(message + '\n\nWould you like to contact support now?')) {
+        window.location.href = '{% url "customers:contact_sales" %}';
+    }
 }
 
-function provideFeedback(requestId) {
-    const demoSlug = document.querySelector(`[data-request-id="${requestId}"]`)
-                             .closest('.request-card')
-                             .querySelector('a[href*="/demos/"]')?.href;
-    
-    if (demoSlug) {
-        window.location.href = demoSlug + '#feedback';
-    } else {
-        alert('Feedback functionality - Please visit the demo page to provide feedback.');
-    }
+function provideFeedback(demoSlug) {
+    window.location.href = `/customers/demos/${demoSlug}/#feedback`;
+}
+
+function resetButton(button) {
+    button.classList.remove('btn-loading');
+    button.disabled = false;
 }
 
 function getCsrfToken() {
-    let token = null;
-    
     const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-    if (csrfInput) {
-        token = csrfInput.value;
+    if (csrfInput) return csrfInput.value;
+    
+    const csrfMeta = document.querySelector('meta[name=csrf-token]');
+    if (csrfMeta) return csrfMeta.getAttribute('content');
+    
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') return value;
     }
     
-    if (!token) {
-        const csrfMeta = document.querySelector('meta[name=csrf-token]');
-        if (csrfMeta) {
-            token = csrfMeta.getAttribute('content');
-        }
-    }
-    
-    if (!token) {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            if (name === 'csrftoken') {
-                token = value;
-                break;
-            }
-        }
-    }
-    
-    return token;
+    return null;
 }
 
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     const alertClass = type === 'error' ? 'danger' : type;
+    const icon = type === 'success' ? 'check-circle' : 
+                 type === 'error' ? 'exclamation-triangle' : 
+                 type === 'warning' ? 'exclamation-circle' : 'info-circle';
+    
     toast.className = `alert alert-${alertClass} alert-dismissible fade show position-fixed`;
     toast.style.cssText = `
         top: 20px;
         right: 20px;
         z-index: 9999;
-        min-width: 300px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        min-width: 350px;
+        max-width: 500px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        animation: slideInRight 0.3s ease;
     `;
     
-    const icon = type === 'success' ? 'check-circle' : 
-                 type === 'error' ? 'exclamation-triangle' : 
-                 'info-circle';
-    
     toast.innerHTML = `
-        <i class="fas fa-${icon} me-2"></i>${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${icon} me-2 fa-lg"></i>
+            <div class="flex-grow-1">${message}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     `;
     
     document.body.appendChild(toast);
     
     setTimeout(() => {
         if (toast.parentNode) {
-            toast.remove();
+            toast.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
         }
     }, 5000);
 }

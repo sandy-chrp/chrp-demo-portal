@@ -17,7 +17,7 @@ from django.db import models  # Add this import
 from accounts.models import BusinessCategory, BusinessSubCategory
 # Get the custom user model
 User = get_user_model()  # This will give us User
-
+from enquiries.models import BusinessEnquiry, EnquiryResponse, EnquiryCategory
 from demos.models import Demo, DemoRequest, DemoView, DemoLike, DemoCategory
 from enquiries.models import BusinessEnquiry
 from notifications.models import Notification, SystemAnnouncement
@@ -29,6 +29,15 @@ from .models import SiteSettings, ContactMessage
 # Helper function to check if user is admin
 def is_admin(user):
     return user.is_authenticated and (user.is_staff or user.is_superuser)
+
+def dashboard_redirect(request):
+    """Redirect to appropriate dashboard based on user type"""
+    if request.user.is_authenticated:
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('core:admin_dashboard')
+        else:
+            return redirect('customers:dashboard')
+    return redirect('accounts:signin')
 
 # =====================================
 # CUSTOMER PORTAL VIEWS
@@ -603,7 +612,7 @@ def admin_demos_view(request):
 @login_required
 @user_passes_test(is_admin)
 def admin_add_demo_view(request):
-    """Admin add new demo - UPDATED"""
+    """Admin add new demo - UPDATED WITH CUSTOMER SELECTION"""
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
@@ -617,6 +626,9 @@ def admin_add_demo_view(request):
         # Get business categories
         business_category_ids = request.POST.getlist('target_business_categories')
         business_subcategory_ids = request.POST.getlist('target_business_subcategories')
+        
+        # Get target customers
+        customer_ids = request.POST.getlist('target_customers')
         
         try:
             # Validate required fields
@@ -663,6 +675,15 @@ def admin_add_demo_view(request):
                 subcategories = BusinessSubCategory.objects.filter(id__in=business_subcategory_ids)
                 demo.target_business_subcategories.set(subcategories)
             
+            # Set target customers
+            if customer_ids:
+                from accounts.models import CustomUser
+                customers = CustomUser.objects.filter(id__in=customer_ids, is_approved=True)
+                demo.target_customers.set(customers)
+                messages.info(request, f'Demo will be available to {customers.count()} specific customers.')
+            else:
+                messages.info(request, 'Demo will be available to all approved customers.')
+            
             messages.success(request, f'Demo "{demo.title}" created successfully!')
             return redirect('core:admin_demo_detail', demo_id=demo.id)
             
@@ -671,12 +692,17 @@ def admin_add_demo_view(request):
             return redirect('core:admin_add_demo')
     
     # GET request - show form
-    from accounts.models import BusinessCategory, BusinessSubCategory
+    from accounts.models import BusinessCategory, BusinessSubCategory, CustomUser
     business_categories = BusinessCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
     business_subcategories = BusinessSubCategory.objects.filter(is_active=True).select_related('category').order_by('sort_order', 'name')
     
+    # Get all approved customers for selection
+    customers = CustomUser.objects.filter(
+        is_approved=True,
+        is_active=True
+    ).select_related('business_category').order_by('first_name', 'last_name')
+    
     # Context for sidebar
-    from accounts.models import CustomUser
     pending_approvals = CustomUser.objects.filter(is_approved=False, is_active=True).count()
     open_enquiries = BusinessEnquiry.objects.filter(status='open').count()
     demo_requests_pending = DemoRequest.objects.filter(status='pending').count()
@@ -684,6 +710,7 @@ def admin_add_demo_view(request):
     context = {
         'business_categories': business_categories,
         'business_subcategories': business_subcategories,
+        'customers': customers,  # NEW: Added customers to context
         'demo_types': Demo.DEMO_TYPE_CHOICES,
         'pending_approvals': pending_approvals,
         'open_enquiries': open_enquiries,
@@ -695,7 +722,7 @@ def admin_add_demo_view(request):
 @login_required
 @user_passes_test(is_admin)
 def admin_demo_detail_view(request, demo_id):
-    """View and edit demo details - UPDATED"""
+    """View and edit demo details - UPDATED WITH CUSTOMER SELECTION"""
     
     demo = get_object_or_404(
         Demo.objects.prefetch_related(
@@ -761,6 +788,17 @@ def admin_demo_detail_view(request, demo_id):
         else:
             demo.target_business_subcategories.clear()
         
+        # NEW: Update target customers
+        customer_ids = request.POST.getlist('target_customers')
+        if customer_ids:
+            from accounts.models import CustomUser
+            customers = CustomUser.objects.filter(id__in=customer_ids, is_approved=True)
+            demo.target_customers.set(customers)
+            messages.info(request, f'Demo access updated for {customers.count()} specific customers.')
+        else:
+            demo.target_customers.clear()
+            messages.info(request, 'Demo is now available to all approved customers.')
+        
         messages.success(request, f'Demo "{demo.title}" has been updated successfully!')
         return redirect('core:admin_demo_detail', demo_id=demo.id)
     
@@ -789,6 +827,12 @@ def admin_demo_detail_view(request, demo_id):
     business_categories = BusinessCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
     business_subcategories = BusinessSubCategory.objects.filter(is_active=True).select_related('category').order_by('sort_order', 'name')
     
+    # NEW: Get all approved customers for selection
+    customers = CustomUser.objects.filter(
+        is_approved=True,
+        is_active=True
+    ).select_related('business_category').order_by('first_name', 'last_name')
+    
     # Context for sidebar
     pending_approvals = CustomUser.objects.filter(is_approved=False, is_active=True).count()
     open_enquiries = BusinessEnquiry.objects.filter(status='open').count()
@@ -799,6 +843,7 @@ def admin_demo_detail_view(request, demo_id):
         'demo_types': Demo.DEMO_TYPE_CHOICES,
         'business_categories': business_categories,
         'business_subcategories': business_subcategories,
+        'customers': customers,  # NEW: Added customers list
         'total_views': total_views,
         'total_likes': total_likes,
         'total_requests': total_requests,
@@ -814,11 +859,12 @@ def admin_demo_detail_view(request, demo_id):
     
     return render(request, 'admin/demos/detail.html', context)
 
+
 @login_required
 @user_passes_test(is_admin)
 @require_http_methods(["POST"])
 def admin_delete_demo_view(request, demo_id):
-    """Delete demo - UNCHANGED"""
+    """Delete demo - UPDATED WITH REDIRECT"""
     demo = get_object_or_404(Demo, id=demo_id)
     demo_title = demo.title
     
@@ -832,16 +878,13 @@ def admin_delete_demo_view(request, demo_id):
         # Delete demo (CASCADE will handle related objects)
         demo.delete()
         
-        return JsonResponse({
-            'success': True,
-            'message': f'Demo "{demo_title}" has been deleted successfully.'
-        })
+        messages.success(request, f'Demo "{demo_title}" has been deleted successfully.')
+        return redirect('core:admin_demos')
+        
     except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': f'Error deleting demo: {str(e)}'
-        })
-      
+        messages.error(request, f'Error deleting demo: {str(e)}')
+        return redirect('core:admin_demos')
+
 @login_required
 @user_passes_test(is_admin)
 @require_http_methods(["POST"])

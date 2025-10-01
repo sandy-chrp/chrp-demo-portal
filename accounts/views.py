@@ -13,6 +13,7 @@ from datetime import timedelta
 import json
 import secrets
 import random
+from django.urls import reverse
 
 from demos.models import Demo, DemoView, DemoRequest
 from enquiries.models import BusinessEnquiry
@@ -366,8 +367,8 @@ def signin_view(request):
 def signout_view(request):
     """User logout view"""
     logout(request)
-    messages.info(request, 'You have been logged out successfully.')
-    return redirect('core:home')
+    messages.success(request, 'You have been logged out successfully.')  # 'success' message
+    return redirect('accounts:signin')
 
 def pending_approval_view(request):
     """Account pending approval page"""
@@ -508,10 +509,7 @@ def get_subcategories(request):
 # Add these imports at the top if not already present
 from django.utils.crypto import get_random_string
 
-# Add these views to your accounts/views.py file
-
 def forgot_password_view(request):
-    """Forgot password view"""
     if request.method == 'POST':
         form = ForgotPasswordForm(request.POST)
         if form.is_valid():
@@ -525,9 +523,11 @@ def forgot_password_view(request):
                     user.password_reset_expires = timezone.now() + timedelta(hours=1)
                     user.save()
                     
-                    # Send reset email
-                    site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
-                    reset_url = f"{site_url}/auth/reset-password/{token}/"
+                    # ✅ FIX: Use reverse() instead of hardcoded URL
+                    reset_url = request.build_absolute_uri(
+                        reverse('accounts:reset_password', kwargs={'token': token})
+                    )
+                    
                     subject = "Reset Your Password - Demo Portal"
                     message = f"""
 Dear {user.full_name if hasattr(user, 'full_name') else user.username},
@@ -589,32 +589,42 @@ def reset_password_view(request, token):
     
     return render(request, 'accounts/reset_password.html', {'form': form, 'token': token})
 
+from django.shortcuts import redirect
+
 def verify_email_view(request, token):
     """Email verification view"""
     try:
-        user = CustomUser.objects.get(email_verification_token=token)
+        user = CustomUser.objects.get(verification_token=token)
+        
+        if user.is_email_verified:
+            messages.info(request, 'Email already verified!')
+            return redirect('accounts:signin')
+        
         user.is_email_verified = True
-        user.email_verification_token = None
+        user.verification_token = None
         user.save()
         
-        messages.success(request, 'Email verified successfully!')
+        messages.success(request, 'Email verified successfully! You can now login.')
+        
+        # Redirect to signin instead of profile
         return redirect('accounts:signin')
+        
     except CustomUser.DoesNotExist:
-        messages.error(request, 'Invalid verification link.')
+        messages.error(request, 'Invalid verification link!')
         return redirect('accounts:signin')
 
 @login_required
 def resend_verification_view(request):
-    """Resend email verification"""
     if hasattr(request.user, 'is_email_verified'):
         if not request.user.is_email_verified:
-            # Generate token and send email
             token = secrets.token_urlsafe(32)
             request.user.email_verification_token = token
             request.user.save()
             
-            site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
-            verification_url = f"{site_url}/auth/verify-email/{token}/"
+            # ✅ FIX: Use reverse()
+            verification_url = request.build_absolute_uri(
+                reverse('accounts:verify_email', kwargs={'token': token})
+            )
             
             subject = "Verify Your Email - Demo Portal"
             message = f"""
