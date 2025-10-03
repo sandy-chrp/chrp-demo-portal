@@ -1,1 +1,11 @@
-.env
+# Open .gitignore in notepad or VS Code
+notepad .gitignore
+
+# Or use echo to append
+echo media/demos/videos/ >> .gitignore
+echo media/demos/webgl/ >> .gitignore
+echo media/demos/thumbnails/ >> .gitignore
+echo *.mp4 >> .gitignore
+echo *.avi >> .gitignore
+echo *.mov >> .gitignore
+echo *.wmv >> .gitignore
