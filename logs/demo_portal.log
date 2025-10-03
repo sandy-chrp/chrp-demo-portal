@@ -17244,3 +17244,1457 @@ ERROR 2025-10-01 18:50:20,295 basehttp 14784 15524 "GET /demos/demo-testing-on-1
 INFO 2025-10-01 18:50:29,404 basehttp 14784 15524 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
 WARNING 2025-10-01 18:50:31,891 log 14784 27428 Not Found: /favicon.ico
 WARNING 2025-10-01 18:50:31,892 basehttp 14784 27428 "GET /favicon.ico HTTP/1.1" 404 22586
+INFO 2025-10-03 09:28:23,966 autoreload 25436 23976 Watching for file changes with StatReloader
+INFO 2025-10-03 09:28:30,421 basehttp 25436 25872 "GET / HTTP/1.1" 302 0
+INFO 2025-10-03 09:28:30,548 basehttp 25436 25872 "GET /dashboard/ HTTP/1.1" 200 34537
+WARNING 2025-10-03 09:28:30,647 basehttp 25436 25872 "GET /static/images/favicon.ico HTTP/1.1" 404 1914
+INFO 2025-10-03 09:28:37,322 basehttp 25436 21368 "GET /auth/signout/ HTTP/1.1" 302 0
+INFO 2025-10-03 09:28:37,329 basehttp 25436 21368 "GET /auth/signin/ HTTP/1.1" 200 26212
+INFO 2025-10-03 09:28:59,626 basehttp 25436 21368 "POST /auth/signin/ HTTP/1.1" 200 26227
+INFO 2025-10-03 09:29:09,929 basehttp 25436 21368 "POST /auth/signin/ HTTP/1.1" 302 0
+INFO 2025-10-03 09:29:09,957 basehttp 25436 21368 "GET /customer/ HTTP/1.1" 200 51973
+WARNING 2025-10-03 09:29:10,031 log 25436 21368 Not Found: /favicon.ico
+WARNING 2025-10-03 09:29:10,031 basehttp 25436 21368 "GET /favicon.ico HTTP/1.1" 404 22586
+INFO 2025-10-03 09:29:13,944 basehttp 25436 21368 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-03 09:29:13,955 basehttp 25436 21368 "GET /media/demos/thumbnails/thumb_demo-testing-on-1-october_033c0b6e.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 09:29:17,900 basehttp 25436 21368 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-03 09:29:44,739 basehttp 25436 21368 "GET /customer/liked-demos/ HTTP/1.1" 200 55277
+INFO 2025-10-03 09:29:51,869 basehttp 25436 21368 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-03 09:29:53,686 basehttp 25436 21368 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-03 09:29:53,729 basehttp 25436 21368 "GET /media/demos/thumbnails/thumb_testing-for-particular-customer_ebc456e4.png HTTP/1.1" 200 109
+INFO 2025-10-03 09:30:07,237 basehttp 25436 20080 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-03 09:30:07,257 basehttp 25436 21368 - Broken pipe from ('127.0.0.1', 62279)
+INFO 2025-10-03 09:33:03,945 basehttp 25436 20080 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 09:33:05,641 basehttp 25436 20080 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-03 09:33:07,180 basehttp 25436 20080 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 09:33:08,453 basehttp 25436 20080 "GET /customer/demos/ HTTP/1.1" 200 54056
+INFO 2025-10-03 09:37:48,234 basehttp 25436 20080 "GET /customer/demos/ HTTP/1.1" 200 56042
+INFO 2025-10-03 09:38:08,105 basehttp 25436 20080 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=oldest HTTP/1.1" 200 54464
+INFO 2025-10-03 09:39:01,952 basehttp 25436 20080 "GET /customer/request-demo/ HTTP/1.1" 200 54893
+INFO 2025-10-03 09:39:06,701 basehttp 25436 20080 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 09:39:09,580 basehttp 25436 20080 "GET /customer/demos/ HTTP/1.1" 200 56042
+INFO 2025-10-03 09:39:37,923 basehttp 25436 20080 "GET /customer/demos/?search=&business_category=18&business_subcategory=&sort=popular HTTP/1.1" 200 54244
+INFO 2025-10-03 09:39:45,759 basehttp 25436 20080 "GET /customer/demos/?search=&business_category=18&business_subcategory=&sort=popular HTTP/1.1" 200 54244
+INFO 2025-10-03 09:39:47,768 basehttp 25436 20080 "GET /customer/demos/?search=&business_category=18&business_subcategory=&sort=liked HTTP/1.1" 200 54244
+INFO 2025-10-03 09:42:11,184 basehttp 25436 20080 "GET /customer/demos/ HTTP/1.1" 200 56042
+INFO 2025-10-03 09:42:19,012 basehttp 25436 20080 "GET /customer/liked-demos/ HTTP/1.1" 200 55233
+INFO 2025-10-03 09:42:29,251 basehttp 25436 20080 "GET /customer/liked-demos/ HTTP/1.1" 200 55233
+INFO 2025-10-03 09:42:46,451 basehttp 25436 20080 "GET /customer/liked-demos/ HTTP/1.1" 200 55233
+INFO 2025-10-03 09:43:18,598 basehttp 25436 20080 "GET /customer/enquiries/ HTTP/1.1" 200 55593
+INFO 2025-10-03 09:43:37,647 basehttp 25436 20080 "GET /customer/send-enquiry/ HTTP/1.1" 200 59443
+INFO 2025-10-03 09:43:38,665 basehttp 25436 20080 "GET /customer/enquiries/ HTTP/1.1" 200 55593
+INFO 2025-10-03 09:43:40,904 basehttp 25436 20080 "GET /customer/contact-sales/ HTTP/1.1" 200 61785
+INFO 2025-10-03 09:43:43,698 basehttp 25436 20080 "GET /auth/profile/ HTTP/1.1" 200 68757
+INFO 2025-10-03 09:44:09,010 basehttp 25436 20080 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 09:44:38,390 autoreload 25436 23976 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 09:44:41,409 autoreload 23240 12132 Watching for file changes with StatReloader
+INFO 2025-10-03 09:45:01,638 basehttp 23240 26980 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 09:45:03,276 basehttp 23240 26980 "GET /customer/demos/ HTTP/1.1" 200 59044
+INFO 2025-10-03 09:45:14,239 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=oldest HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:16,119 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=newest HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:17,629 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=newest HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:22,599 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=oldest HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:23,744 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=popular HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:25,383 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=liked HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:26,929 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=liked HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:28,912 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=title HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:30,247 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=oldest HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:31,519 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=newest HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:49,540 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=&business_subcategory=&sort=newest HTTP/1.1" 200 59044
+INFO 2025-10-03 09:45:54,608 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=16&business_subcategory=&sort=newest HTTP/1.1" 200 56782
+INFO 2025-10-03 09:45:59,346 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=17&business_subcategory=158&sort=newest HTTP/1.1" 200 59413
+INFO 2025-10-03 09:46:02,536 basehttp 23240 26980 "GET /customer/demos/?search=&business_category=17&business_subcategory=159&sort=newest HTTP/1.1" 200 56789
+INFO 2025-10-03 09:46:10,893 basehttp 23240 26980 "GET /customer/demos/ HTTP/1.1" 200 59044
+INFO 2025-10-03 09:46:17,221 basehttp 23240 26980 "GET /customer/liked-demos/ HTTP/1.1" 200 55233
+INFO 2025-10-03 09:54:19,190 autoreload 23240 12132 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\liked_demos_views.py changed, reloading.
+INFO 2025-10-03 09:54:20,084 autoreload 21716 23708 Watching for file changes with StatReloader
+ERROR 2025-10-03 09:54:27,334 log 21716 6156 Internal Server Error: /customer/liked-demos/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\liked_demos_views.py", line 124, in liked_demos
+    business_categories = BusinessCategory.objects.filter(
+                          ^^^^^^^^^^^^^^^^
+NameError: name 'BusinessCategory' is not defined. Did you mean: 'business_category_id'?
+ERROR 2025-10-03 09:54:27,335 basehttp 21716 6156 "GET /customer/liked-demos/ HTTP/1.1" 500 82642
+INFO 2025-10-03 09:54:47,277 autoreload 21716 23708 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\liked_demos_views.py changed, reloading.
+INFO 2025-10-03 09:54:48,385 autoreload 11956 28140 Watching for file changes with StatReloader
+INFO 2025-10-03 09:54:51,708 basehttp 11956 13368 "GET /customer/liked-demos/ HTTP/1.1" 200 65517
+INFO 2025-10-03 09:55:33,800 basehttp 11956 13368 "GET /customer/liked-demos/ HTTP/1.1" 200 65035
+INFO 2025-10-03 09:56:33,839 basehttp 11956 13368 "GET /customer/liked-demos/ HTTP/1.1" 200 64848
+INFO 2025-10-03 09:56:47,615 basehttp 11956 13368 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 09:56:55,039 basehttp 11956 13368 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 09:56:56,980 basehttp 11956 13368 "GET /customer/demos/ HTTP/1.1" 200 59044
+INFO 2025-10-03 09:57:38,078 basehttp 11956 13368 "GET /customer/demos/ HTTP/1.1" 200 59000
+INFO 2025-10-03 09:58:10,524 basehttp 11956 13368 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 09:58:14,087 basehttp 11956 13368 "GET /customer/demos/ HTTP/1.1" 200 59000
+INFO 2025-10-03 09:58:17,003 basehttp 11956 13368 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 09:58:20,504 basehttp 11956 13368 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-03 09:58:26,796 basehttp 11956 13368 "GET /customer/my-requests/?status=pending HTTP/1.1" 200 56128
+INFO 2025-10-03 09:58:27,520 basehttp 11956 13368 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 61702
+INFO 2025-10-03 09:58:48,755 basehttp 11956 13368 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 09:58:49,598 basehttp 11956 13368 "GET /customer/demos/ HTTP/1.1" 200 59000
+INFO 2025-10-03 09:58:52,265 basehttp 11956 13368 "GET /customer/request-demo/?demo=9 HTTP/1.1" 200 51073
+INFO 2025-10-03 09:59:10,990 basehttp 11956 13368 "GET /customer/demos/ HTTP/1.1" 200 59000
+INFO 2025-10-03 09:59:19,147 basehttp 11956 13368 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 09:59:21,607 basehttp 11956 13368 "GET /customer/demos/ HTTP/1.1" 200 59000
+INFO 2025-10-03 09:59:23,009 basehttp 11956 13368 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 09:59:31,800 basehttp 11956 13368 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-03 09:59:46,949 basehttp 11956 13368 - Broken pipe from ('127.0.0.1', 59887)
+INFO 2025-10-03 10:00:02,065 basehttp 11956 16472 "GET /customer/demos/ HTTP/1.1" 200 59000
+INFO 2025-10-03 10:00:04,921 basehttp 11956 16472 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 10:00:09,564 basehttp 11956 16472 "GET /customer/demos/ HTTP/1.1" 200 59000
+INFO 2025-10-03 10:00:13,111 basehttp 11956 16472 "GET /customer/demos/ HTTP/1.1" 200 59000
+INFO 2025-10-03 10:00:14,464 basehttp 11956 16472 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-03 10:00:15,900 basehttp 11956 9344 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 10:00:15,927 basehttp 11956 16472 - Broken pipe from ('127.0.0.1', 50158)
+INFO 2025-10-03 10:00:17,185 basehttp 11956 9344 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-03 10:00:19,560 basehttp 11956 5716 "GET /customer/demos/ HTTP/1.1" 200 59000
+INFO 2025-10-03 10:00:19,585 basehttp 11956 9344 - Broken pipe from ('127.0.0.1', 50159)
+INFO 2025-10-03 10:01:30,652 basehttp 11956 5716 "GET /customer/demos/ HTTP/1.1" 200 58920
+INFO 2025-10-03 10:01:32,799 basehttp 11956 5716 "GET /customer/demos/ HTTP/1.1" 200 58920
+INFO 2025-10-03 10:01:35,544 basehttp 11956 5716 "GET /customer/request-demo/?demo=9 HTTP/1.1" 200 51073
+INFO 2025-10-03 10:01:51,780 basehttp 11956 5716 "GET /customer/demos/ HTTP/1.1" 200 58850
+INFO 2025-10-03 10:01:59,138 basehttp 11956 5716 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-03 10:02:00,503 basehttp 11956 5716 - Broken pipe from ('127.0.0.1', 50161)
+INFO 2025-10-03 10:03:52,087 basehttp 11956 20668 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:03:53,970 basehttp 11956 20668 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-03 10:03:55,460 basehttp 11956 20668 - Broken pipe from ('127.0.0.1', 49454)
+INFO 2025-10-03 10:04:38,551 basehttp 11956 19340 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:04:41,370 basehttp 11956 19340 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-03 10:04:52,279 basehttp 11956 240 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:04:52,303 basehttp 11956 19340 - Broken pipe from ('127.0.0.1', 49455)
+INFO 2025-10-03 10:04:54,051 basehttp 11956 240 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-03 10:05:13,758 basehttp 11956 240 - Broken pipe from ('127.0.0.1', 62841)
+INFO 2025-10-03 10:05:55,133 basehttp 11956 14452 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:05:56,757 basehttp 11956 14452 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 10:05:59,703 basehttp 11956 14452 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-03 10:06:02,647 basehttp 11956 14452 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:06:03,975 basehttp 11956 14452 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71083
+INFO 2025-10-03 10:06:21,708 basehttp 11956 14452 - Broken pipe from ('127.0.0.1', 62847)
+INFO 2025-10-03 10:07:16,762 basehttp 11956 19944 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71098
+INFO 2025-10-03 10:07:34,145 basehttp 11956 19944 - Broken pipe from ('127.0.0.1', 55730)
+WARNING 2025-10-03 10:08:05,723 log 11956 15704 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 10:08:05,724 basehttp 11956 15704 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 10:11:24,187 basehttp 11956 15704 "GET /customer/enquiries/ HTTP/1.1" 200 55593
+INFO 2025-10-03 10:11:50,809 basehttp 11956 15704 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:11:52,156 basehttp 11956 15704 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 10:11:53,436 basehttp 11956 15704 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-03 10:11:57,443 basehttp 11956 15704 "GET /customer/send-enquiry/ HTTP/1.1" 200 59443
+INFO 2025-10-03 10:11:58,635 basehttp 11956 15704 "GET /customer/contact-sales/ HTTP/1.1" 200 61785
+INFO 2025-10-03 10:13:03,992 basehttp 11956 15704 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 10:13:04,712 basehttp 11956 15704 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:13:05,625 basehttp 11956 15704 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 10:13:06,825 basehttp 11956 15704 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-03 10:13:08,981 basehttp 11956 15704 "GET /customer/enquiries/ HTTP/1.1" 200 55593
+INFO 2025-10-03 10:13:11,588 basehttp 11956 15704 "GET /customer/send-enquiry/ HTTP/1.1" 200 59443
+INFO 2025-10-03 10:13:26,832 basehttp 11956 15704 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:13:28,542 basehttp 11956 15704 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+INFO 2025-10-03 10:13:30,891 basehttp 11956 15704 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-03 10:13:31,747 basehttp 11956 15704 "GET /customer/liked-demos/ HTTP/1.1" 200 64705
+WARNING 2025-10-03 10:17:07,362 log 11956 15704 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 10:17:07,363 basehttp 11956 15704 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 10:17:43,245 basehttp 11956 15704 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+WARNING 2025-10-03 10:17:43,285 log 11956 15704 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 10:17:43,286 basehttp 11956 15704 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 10:17:47,377 basehttp 11956 15704 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:17:48,889 basehttp 11956 15704 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:18:46,057 basehttp 11956 15704 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:18:47,752 basehttp 11956 15704 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 66099
+INFO 2025-10-03 10:19:02,854 basehttp 11956 15704 - Broken pipe from ('127.0.0.1', 55731)
+WARNING 2025-10-03 10:19:25,193 log 11956 9784 Not Found: /favicon.ico
+WARNING 2025-10-03 10:19:25,193 basehttp 11956 9784 "GET /favicon.ico HTTP/1.1" 404 22586
+INFO 2025-10-03 10:24:07,282 basehttp 11956 19452 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 66227
+INFO 2025-10-03 10:24:07,290 basehttp 11956 9784 - Broken pipe from ('127.0.0.1', 57733)
+INFO 2025-10-03 10:24:22,412 basehttp 11956 19452 - Broken pipe from ('127.0.0.1', 61176)
+WARNING 2025-10-03 10:24:27,637 log 11956 17424 Not Found: /favicon.ico
+WARNING 2025-10-03 10:24:27,637 basehttp 11956 17424 "GET /favicon.ico HTTP/1.1" 404 22586
+INFO 2025-10-03 10:25:50,013 basehttp 11956 16328 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 66228
+INFO 2025-10-03 10:25:50,021 basehttp 11956 17424 - Broken pipe from ('127.0.0.1', 61182)
+WARNING 2025-10-03 10:25:53,977 log 11956 17740 Not Found: /favicon.ico
+WARNING 2025-10-03 10:25:53,977 basehttp 11956 17740 "GET /favicon.ico HTTP/1.1" 404 22586
+INFO 2025-10-03 10:26:20,104 basehttp 11956 16328 "GET /media/demos/videos/demo-testing-on-1-october_78821d9e.mp4 HTTP/1.1" 200 56866076
+INFO 2025-10-03 10:30:08,885 basehttp 11956 16328 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 69613
+WARNING 2025-10-03 10:30:12,741 log 11956 17740 Not Found: /favicon.ico
+WARNING 2025-10-03 10:30:12,742 basehttp 11956 17740 "GET /favicon.ico HTTP/1.1" 404 22586
+INFO 2025-10-03 10:30:38,998 basehttp 11956 16328 "GET /media/demos/videos/demo-testing-on-1-october_78821d9e.mp4 HTTP/1.1" 200 56866076
+INFO 2025-10-03 10:31:15,729 basehttp 11956 16328 "GET /customer/request-demo/?demo=9 HTTP/1.1" 200 51073
+INFO 2025-10-03 10:32:37,870 basehttp 11956 16328 "GET /customer/request-demo/?demo=9 HTTP/1.1" 200 50769
+INFO 2025-10-03 10:32:53,654 basehttp 11956 16328 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:32:55,969 basehttp 11956 16328 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 69613
+INFO 2025-10-03 10:32:59,356 basehttp 11956 17740 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:32:59,380 basehttp 11956 16328 - Broken pipe from ('127.0.0.1', 60928)
+INFO 2025-10-03 10:33:00,672 basehttp 11956 17740 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 69613
+INFO 2025-10-03 10:33:06,155 basehttp 11956 10696 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:33:06,182 basehttp 11956 17740 - Broken pipe from ('127.0.0.1', 60929)
+INFO 2025-10-03 10:33:08,082 basehttp 11956 10696 "GET /customer/my-requests/ HTTP/1.1" 200 61648
+INFO 2025-10-03 10:33:36,492 basehttp 11956 10696 "GET /customer/contact-sales/ HTTP/1.1" 200 61785
+INFO 2025-10-03 10:35:55,908 basehttp 11956 10696 "GET /customer/my-requests/ HTTP/1.1" 200 61517
+INFO 2025-10-03 10:36:02,749 basehttp 11956 10696 "GET /customer/request-demo/ HTTP/1.1" 200 54893
+INFO 2025-10-03 10:36:08,634 basehttp 11956 10696 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:36:56,647 basehttp 11956 10696 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:37:00,038 basehttp 11956 10696 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:37:00,723 basehttp 11956 10696 "GET /customer/my-requests/ HTTP/1.1" 200 61519
+INFO 2025-10-03 10:37:53,497 basehttp 11956 10696 "GET /customer/my-requests/ HTTP/1.1" 200 60333
+INFO 2025-10-03 10:38:55,624 basehttp 11956 10696 "GET /customer/my-requests/ HTTP/1.1" 200 60211
+INFO 2025-10-03 10:39:13,269 basehttp 11956 10696 "GET /customer/request-demo/ HTTP/1.1" 200 54893
+INFO 2025-10-03 10:39:40,841 basehttp 11956 10696 "GET /customer/my-requests/ HTTP/1.1" 200 60211
+INFO 2025-10-03 10:39:42,655 basehttp 11956 10696 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:39:45,352 basehttp 11956 10696 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:39:47,009 basehttp 11956 10696 "GET /customer/my-requests/ HTTP/1.1" 200 60211
+INFO 2025-10-03 10:39:59,401 basehttp 11956 10696 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:40:00,829 basehttp 11956 10696 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 10:43:31,029 basehttp 11956 10696 "GET /customer/ HTTP/1.1" 200 51494
+INFO 2025-10-03 10:43:32,458 basehttp 11956 10696 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:43:33,299 basehttp 11956 10696 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:43:34,627 basehttp 11956 10696 "GET /customer/my-requests/ HTTP/1.1" 200 60211
+INFO 2025-10-03 10:48:56,069 basehttp 11956 28176 "GET /customer/my-requests/ HTTP/1.1" 200 60211
+INFO 2025-10-03 10:49:27,640 basehttp 11956 28176 "GET /customer/my-requests/ HTTP/1.1" 200 60121
+INFO 2025-10-03 10:54:01,280 basehttp 11956 28176 "GET /customer/my-requests/ HTTP/1.1" 200 60121
+INFO 2025-10-03 10:54:05,138 basehttp 11956 28176 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:54:08,474 basehttp 11956 28176 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:54:12,289 basehttp 11956 28176 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 10:54:14,993 basehttp 11956 28176 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:54:18,384 basehttp 11956 28176 "GET /customer/my-requests/ HTTP/1.1" 200 60121
+INFO 2025-10-03 10:54:34,407 basehttp 11956 28176 "GET /customer/my-requests/?status=rescheduled HTTP/1.1" 200 56007
+INFO 2025-10-03 10:54:35,836 basehttp 11956 28176 "GET /customer/my-requests/?status=rescheduled HTTP/1.1" 200 56007
+INFO 2025-10-03 10:54:37,128 basehttp 11956 28176 "GET /customer/my-requests/?status=pending HTTP/1.1" 200 55999
+INFO 2025-10-03 10:54:37,721 basehttp 11956 28176 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 60175
+INFO 2025-10-03 10:54:38,371 basehttp 11956 28176 "GET /customer/my-requests/?status=rescheduled HTTP/1.1" 200 56007
+INFO 2025-10-03 10:54:38,961 basehttp 11956 28176 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 60175
+INFO 2025-10-03 10:54:39,659 basehttp 11956 28176 "GET /customer/my-requests/?status=rescheduled HTTP/1.1" 200 56007
+INFO 2025-10-03 10:54:40,407 basehttp 11956 28176 "GET /customer/my-requests/?status=completed HTTP/1.1" 200 56003
+INFO 2025-10-03 10:57:12,626 basehttp 11956 28176 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 10:57:13,588 basehttp 11956 28176 "GET /customer/my-requests/ HTTP/1.1" 200 60121
+INFO 2025-10-03 10:57:17,127 basehttp 11956 28176 "GET /customer/request-demo/ HTTP/1.1" 200 54893
+INFO 2025-10-03 11:13:25,009 autoreload 11956 28140 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\urls.py changed, reloading.
+INFO 2025-10-03 11:13:25,770 autoreload 23276 6308 Watching for file changes with StatReloader
+INFO 2025-10-03 11:15:45,290 autoreload 23276 6308 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\urls.py changed, reloading.
+INFO 2025-10-03 11:15:46,426 autoreload 22480 7004 Watching for file changes with StatReloader
+INFO 2025-10-03 11:16:40,045 autoreload 22480 7004 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\ajax_views.py changed, reloading.
+INFO 2025-10-03 11:16:41,026 autoreload 1240 18964 Watching for file changes with StatReloader
+INFO 2025-10-03 11:17:22,569 autoreload 1240 18964 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 11:17:23,278 autoreload 1136 22736 Watching for file changes with StatReloader
+INFO 2025-10-03 11:17:29,025 basehttp 1136 26960 "GET /customer/request-demo/ HTTP/1.1" 200 54893
+INFO 2025-10-03 11:17:38,408 basehttp 1136 26960 "GET /customer/my-requests/ HTTP/1.1" 200 56289
+INFO 2025-10-03 11:18:17,701 basehttp 1136 26960 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 69613
+INFO 2025-10-03 11:18:19,152 basehttp 1136 26960 - Broken pipe from ('127.0.0.1', 49547)
+INFO 2025-10-03 11:18:21,456 basehttp 1136 11992 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 69613
+INFO 2025-10-03 11:18:23,051 basehttp 1136 2828 "GET /customer/demos/?business_category=17 HTTP/1.1" 200 59345
+INFO 2025-10-03 11:18:23,082 basehttp 1136 11992 - Broken pipe from ('127.0.0.1', 49548)
+INFO 2025-10-03 11:18:36,715 basehttp 1136 2828 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:18:39,237 basehttp 1136 2828 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 69613
+INFO 2025-10-03 11:18:43,197 basehttp 1136 13720 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:18:43,223 basehttp 1136 2828 - Broken pipe from ('127.0.0.1', 49556)
+INFO 2025-10-03 11:18:46,129 basehttp 1136 13720 "GET /customer/my-requests/ HTTP/1.1" 200 56289
+INFO 2025-10-03 11:18:48,095 basehttp 1136 13720 "GET /customer/my-requests/ HTTP/1.1" 200 56289
+ERROR 2025-10-03 11:19:12,887 log 1136 13720 Internal Server Error: /customer/ajax/demo-request/10/cancel/
+ERROR 2025-10-03 11:19:12,888 basehttp 1136 13720 "POST /customer/ajax/demo-request/10/cancel/ HTTP/1.1" 500 59
+ERROR 2025-10-03 11:19:25,182 log 1136 13720 Internal Server Error: /customer/ajax/demo-request/10/cancel/
+ERROR 2025-10-03 11:19:25,182 basehttp 1136 13720 "POST /customer/ajax/demo-request/10/cancel/ HTTP/1.1" 500 59
+INFO 2025-10-03 11:19:39,726 basehttp 1136 13720 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 56289
+INFO 2025-10-03 11:24:00,472 autoreload 1136 22736 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\urls.py changed, reloading.
+INFO 2025-10-03 11:24:01,428 autoreload 20656 10972 Watching for file changes with StatReloader
+INFO 2025-10-03 11:24:33,535 basehttp 20656 6364 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 56289
+INFO 2025-10-03 11:24:41,970 basehttp 20656 6364 "POST /customer/ajax/demo-request/10/cancel/ HTTP/1.1" 200 67
+INFO 2025-10-03 11:24:43,503 basehttp 20656 6364 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 52002
+INFO 2025-10-03 11:24:45,338 basehttp 20656 6364 "GET /customer/my-requests/ HTTP/1.1" 200 56011
+INFO 2025-10-03 11:24:47,567 basehttp 20656 6364 "GET /customer/my-requests/ HTTP/1.1" 200 56011
+INFO 2025-10-03 11:24:59,908 basehttp 20656 6364 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 69613
+INFO 2025-10-03 11:25:18,301 basehttp 20656 6364 - Broken pipe from ('127.0.0.1', 56148)
+INFO 2025-10-03 11:25:44,342 basehttp 20656 17340 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 69613
+INFO 2025-10-03 11:25:47,609 basehttp 20656 2764 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:25:47,641 basehttp 20656 17340 - Broken pipe from ('127.0.0.1', 56296)
+INFO 2025-10-03 11:25:51,112 basehttp 20656 2764 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:25:53,718 basehttp 20656 2764 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:25:56,475 basehttp 20656 2764 "GET /customer/my-requests/ HTTP/1.1" 200 55794
+INFO 2025-10-03 11:26:00,095 basehttp 20656 2764 "GET /customer/request-demo/ HTTP/1.1" 200 54893
+INFO 2025-10-03 11:26:03,072 basehttp 20656 2764 "GET /customer/ajax/subcategories/18/ HTTP/1.1" 200 105
+INFO 2025-10-03 11:26:18,459 basehttp 20656 2764 "POST /customer/request-demo/ HTTP/1.1" 302 0
+INFO 2025-10-03 11:26:18,496 basehttp 20656 2764 "GET /customer/enquiries/ HTTP/1.1" 200 60187
+INFO 2025-10-03 11:26:23,868 basehttp 20656 2764 "GET /customer/my-requests/ HTTP/1.1" 200 55794
+INFO 2025-10-03 11:26:26,008 basehttp 20656 2764 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:26:32,615 basehttp 20656 2764 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 69613
+INFO 2025-10-03 11:26:38,372 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 55794
+INFO 2025-10-03 11:26:38,405 basehttp 20656 2764 - Broken pipe from ('127.0.0.1', 56297)
+INFO 2025-10-03 11:26:41,020 basehttp 20656 10484 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:26:41,776 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 55794
+INFO 2025-10-03 11:26:43,919 basehttp 20656 10484 "GET /customer/my-requests/?status=pending HTTP/1.1" 200 52000
+INFO 2025-10-03 11:26:44,525 basehttp 20656 10484 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 52002
+INFO 2025-10-03 11:26:45,138 basehttp 20656 10484 "GET /customer/my-requests/?status=completed HTTP/1.1" 200 52002
+INFO 2025-10-03 11:26:45,737 basehttp 20656 10484 "GET /customer/my-requests/?status=cancelled HTTP/1.1" 200 55794
+INFO 2025-10-03 11:27:00,053 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 55794
+INFO 2025-10-03 11:27:04,420 basehttp 20656 10484 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:27:05,248 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 55794
+INFO 2025-10-03 11:27:06,106 basehttp 20656 10484 "GET /customer/enquiries/ HTTP/1.1" 200 59654
+INFO 2025-10-03 11:27:20,067 basehttp 20656 13940 "GET / HTTP/1.1" 302 0
+INFO 2025-10-03 11:27:20,185 basehttp 20656 13940 "GET /admin/dashboard/ HTTP/1.1" 200 72447
+WARNING 2025-10-03 11:27:21,301 log 20656 13940 Not Found: /favicon.ico
+WARNING 2025-10-03 11:27:21,301 basehttp 20656 13940 "GET /favicon.ico HTTP/1.1" 404 22586
+INFO 2025-10-03 11:27:24,882 basehttp 20656 13940 "GET /admin/enquiries/ HTTP/1.1" 200 49213
+INFO 2025-10-03 11:27:27,468 basehttp 20656 13940 "GET /admin/enquiries/6/respond/ HTTP/1.1" 200 53978
+INFO 2025-10-03 11:27:35,481 basehttp 20656 13940 "POST /admin/enquiries/6/respond/ HTTP/1.1" 302 0
+INFO 2025-10-03 11:27:35,523 basehttp 20656 13940 "GET /admin/enquiries/6/ HTTP/1.1" 200 50134
+INFO 2025-10-03 11:27:38,973 basehttp 20656 10484 "GET /customer/enquiries/ HTTP/1.1" 200 60504
+INFO 2025-10-03 11:27:42,065 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 55794
+INFO 2025-10-03 11:27:45,102 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 55794
+INFO 2025-10-03 11:27:49,562 basehttp 20656 10484 "GET /customer/enquiries/ HTTP/1.1" 200 60504
+INFO 2025-10-03 11:27:59,273 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 55794
+INFO 2025-10-03 11:28:02,075 basehttp 20656 10484 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:28:04,913 basehttp 20656 10484 "GET /customer/request-demo/?demo=9 HTTP/1.1" 200 50769
+INFO 2025-10-03 11:28:15,307 basehttp 20656 10484 "POST /customer/request-demo/?demo=9 HTTP/1.1" 302 0
+INFO 2025-10-03 11:28:15,331 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59924
+INFO 2025-10-03 11:28:16,584 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59394
+INFO 2025-10-03 11:28:29,385 basehttp 20656 10484 "POST /customer/ajax/demo-request/11/cancel/ HTTP/1.1" 200 67
+INFO 2025-10-03 11:28:30,918 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59337
+INFO 2025-10-03 11:29:49,303 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59337
+INFO 2025-10-03 11:29:52,212 basehttp 20656 10484 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:29:53,005 basehttp 20656 10484 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:29:53,682 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59337
+INFO 2025-10-03 11:29:59,622 basehttp 20656 10484 "GET /customer/request-demo/ HTTP/1.1" 200 54893
+INFO 2025-10-03 11:30:01,923 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59337
+INFO 2025-10-03 11:30:07,050 basehttp 20656 10484 "GET /customer/enquiries/ HTTP/1.1" 200 60505
+INFO 2025-10-03 11:30:13,414 basehttp 20656 10484 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:30:26,427 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59337
+INFO 2025-10-03 11:33:04,090 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 60139
+INFO 2025-10-03 11:33:43,739 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:34:00,045 basehttp 20656 10484 "GET /customer/my-requests/?status=cancelled HTTP/1.1" 200 59704
+INFO 2025-10-03 11:34:00,656 basehttp 20656 10484 "GET /customer/my-requests/?status=completed HTTP/1.1" 200 52369
+INFO 2025-10-03 11:34:01,136 basehttp 20656 10484 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 52369
+INFO 2025-10-03 11:34:01,887 basehttp 20656 10484 "GET /customer/my-requests/?status=pending HTTP/1.1" 200 52367
+INFO 2025-10-03 11:34:02,738 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:34:04,252 basehttp 20656 10484 "GET /customer/my-requests/?status=cancelled HTTP/1.1" 200 59704
+INFO 2025-10-03 11:34:04,688 basehttp 20656 10484 "GET /customer/my-requests/?status=completed HTTP/1.1" 200 52369
+INFO 2025-10-03 11:34:05,160 basehttp 20656 10484 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 52369
+INFO 2025-10-03 11:34:05,608 basehttp 20656 10484 "GET /customer/my-requests/?status=pending HTTP/1.1" 200 52367
+INFO 2025-10-03 11:34:06,298 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:34:06,872 basehttp 20656 10484 "GET /customer/my-requests/?status=pending HTTP/1.1" 200 52367
+INFO 2025-10-03 11:34:07,367 basehttp 20656 10484 "GET /customer/my-requests/?status=confirmed HTTP/1.1" 200 52369
+INFO 2025-10-03 11:34:08,111 basehttp 20656 10484 "GET /customer/my-requests/?status=completed HTTP/1.1" 200 52369
+INFO 2025-10-03 11:34:08,562 basehttp 20656 10484 "GET /customer/my-requests/?status=cancelled HTTP/1.1" 200 59704
+INFO 2025-10-03 11:34:09,542 basehttp 20656 10484 "GET /customer/my-requests/?status=completed HTTP/1.1" 200 52369
+INFO 2025-10-03 11:34:11,420 basehttp 20656 10484 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:34:12,157 basehttp 20656 10484 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:34:13,572 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:34:16,477 basehttp 20656 10484 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:34:22,810 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:34:36,076 basehttp 20656 10484 "GET /customer/enquiries/ HTTP/1.1" 200 60505
+INFO 2025-10-03 11:34:38,834 basehttp 20656 10484 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:34:41,879 basehttp 20656 10484 "GET /customer/ HTTP/1.1" 200 52891
+INFO 2025-10-03 11:34:45,715 basehttp 20656 10484 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:34:48,396 basehttp 20656 10484 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:34:49,790 basehttp 20656 10484 "GET /customer/ HTTP/1.1" 200 52891
+INFO 2025-10-03 11:35:05,444 basehttp 20656 10484 "GET /customer/ HTTP/1.1" 200 52891
+INFO 2025-10-03 11:35:06,578 basehttp 20656 10484 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:35:07,261 basehttp 20656 10484 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:35:08,027 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:35:09,857 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:35:12,048 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:35:15,344 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:35:18,543 basehttp 20656 10484 "GET /customer/request-demo/ HTTP/1.1" 200 54893
+INFO 2025-10-03 11:35:28,342 basehttp 20656 10484 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:35:30,415 basehttp 20656 10484 "GET /customer/request-demo/ HTTP/1.1" 200 54893
+INFO 2025-10-03 11:36:24,403 basehttp 20656 10484 "GET /customer/request-demo/ HTTP/1.1" 200 53772
+INFO 2025-10-03 11:38:49,609 basehttp 20656 10484 "GET /customer/request-demo/ HTTP/1.1" 200 53772
+INFO 2025-10-03 11:40:44,029 autoreload 20656 10972 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 11:40:44,774 autoreload 5540 9280 Watching for file changes with StatReloader
+INFO 2025-10-03 11:41:36,624 basehttp 5540 14308 "GET /admin/customers/ HTTP/1.1" 200 65558
+INFO 2025-10-03 11:41:40,774 basehttp 5540 3472 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:41:41,784 basehttp 5540 3472 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:41:45,766 basehttp 5540 3472 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:42:00,437 basehttp 5540 3472 "GET /customer/request-demo/ HTTP/1.1" 200 53772
+INFO 2025-10-03 11:42:37,979 basehttp 5540 14308 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 11:42:38,450 basehttp 5540 14308 "GET /admin/demos/ HTTP/1.1" 200 43554
+INFO 2025-10-03 11:42:38,476 basehttp 5540 14308 "GET /media/demos/thumbnails/thumb_testing-for-particular-customer_ebc456e4.png HTTP/1.1" 304 0
+INFO 2025-10-03 11:42:38,478 basehttp 5540 14308 "GET /media/demos/thumbnails/thumb_demo-testing-on-1-october_033c0b6e.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 11:42:42,143 basehttp 5540 14308 "GET /admin/dashboard/ HTTP/1.1" 200 74748
+INFO 2025-10-03 11:42:49,242 basehttp 5540 3472 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:42:50,758 basehttp 5540 3472 "GET /customer/ HTTP/1.1" 200 52891
+INFO 2025-10-03 11:42:53,219 basehttp 5540 3472 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:42:56,694 basehttp 5540 3472 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:42:57,940 basehttp 5540 3472 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:42:59,490 basehttp 5540 3472 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:43:07,499 basehttp 5540 3472 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:43:10,580 basehttp 5540 3472 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:43:15,358 basehttp 5540 3472 "GET /customer/request-demo/ HTTP/1.1" 200 53772
+INFO 2025-10-03 11:44:00,679 basehttp 5540 3472 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:44:03,272 basehttp 5540 3472 "GET /customer/ HTTP/1.1" 200 52891
+INFO 2025-10-03 11:44:05,821 basehttp 5540 3472 "GET /customer/demos/ HTTP/1.1" 200 58983
+INFO 2025-10-03 11:44:07,460 basehttp 5540 3472 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:44:09,370 basehttp 5540 3472 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:44:18,895 basehttp 5540 3472 "GET /customer/request-demo/ HTTP/1.1" 200 53772
+INFO 2025-10-03 11:44:23,666 basehttp 5540 3472 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:44:34,769 basehttp 5540 3472 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:44:37,919 basehttp 5540 3472 "GET /customer/request-demo/ HTTP/1.1" 200 53772
+INFO 2025-10-03 11:48:08,410 basehttp 5540 3472 "GET /customer/request-demo/ HTTP/1.1" 200 53772
+INFO 2025-10-03 11:48:24,342 basehttp 5540 24428 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 11:48:28,094 basehttp 5540 3472 "GET /customer/enquiries/ HTTP/1.1" 200 60506
+INFO 2025-10-03 11:48:34,689 basehttp 5540 3472 "GET /customer/enquiries/ HTTP/1.1" 200 60506
+INFO 2025-10-03 11:48:36,284 basehttp 5540 3472 "GET /customer/send-enquiry/ HTTP/1.1" 200 59443
+INFO 2025-10-03 11:48:37,172 basehttp 5540 3472 "GET /customer/enquiries/ HTTP/1.1" 200 60506
+INFO 2025-10-03 11:54:11,455 autoreload 5540 9280 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 11:54:12,382 autoreload 26792 20668 Watching for file changes with StatReloader
+INFO 2025-10-03 11:57:10,172 autoreload 23860 25592 Watching for file changes with StatReloader
+INFO 2025-10-03 11:57:14,832 basehttp 23860 17800 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 11:57:19,254 basehttp 23860 18936 "GET /customer/ HTTP/1.1" 200 52891
+INFO 2025-10-03 11:57:20,679 basehttp 23860 18936 "GET /customer/demos/ HTTP/1.1" 200 61553
+INFO 2025-10-03 11:57:31,034 basehttp 23860 18936 "GET /customer/liked-demos/ HTTP/1.1" 200 64555
+INFO 2025-10-03 11:57:33,791 basehttp 23860 18936 "GET /customer/my-requests/ HTTP/1.1" 200 59704
+INFO 2025-10-03 11:57:44,040 basehttp 23860 18936 "GET /customer/request-demo/ HTTP/1.1" 200 53772
+INFO 2025-10-03 11:57:46,167 basehttp 23860 18936 "GET /customer/ajax/subcategories/17/ HTTP/1.1" 200 98
+INFO 2025-10-03 11:58:01,556 basehttp 23860 18936 "POST /customer/request-demo/ HTTP/1.1" 302 0
+INFO 2025-10-03 11:58:01,589 basehttp 23860 18936 "GET /customer/my-requests/ HTTP/1.1" 200 63630
+INFO 2025-10-03 11:58:03,058 basehttp 23860 18936 "GET /customer/my-requests/ HTTP/1.1" 200 63128
+INFO 2025-10-03 11:58:10,992 basehttp 23860 18936 "GET /customer/enquiries/ HTTP/1.1" 200 60599
+INFO 2025-10-03 11:58:26,994 basehttp 23860 18936 "GET /customer/enquiries/ HTTP/1.1" 200 60599
+INFO 2025-10-03 11:58:29,884 basehttp 23860 18936 "GET /customer/my-requests/ HTTP/1.1" 200 63128
+INFO 2025-10-03 11:58:32,681 basehttp 23860 18936 "GET /customer/my-requests/ HTTP/1.1" 200 63128
+INFO 2025-10-03 11:59:01,146 autoreload 23860 25592 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 11:59:01,891 autoreload 9436 10836 Watching for file changes with StatReloader
+INFO 2025-10-03 11:59:07,121 basehttp 9436 24780 "GET /customer/my-requests/ HTTP/1.1" 200 63128
+INFO 2025-10-03 11:59:08,432 basehttp 9436 24780 "GET /customer/my-requests/ HTTP/1.1" 200 63128
+INFO 2025-10-03 11:59:27,010 autoreload 9436 10836 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 11:59:27,687 autoreload 10576 22540 Watching for file changes with StatReloader
+INFO 2025-10-03 11:59:32,032 basehttp 10576 16284 "GET /admin/dashboard/ HTTP/1.1" 200 77964
+INFO 2025-10-03 11:59:36,397 basehttp 10576 13684 "GET /customer/ HTTP/1.1" 200 53680
+INFO 2025-10-03 11:59:37,897 basehttp 10576 13684 "GET /customer/demos/ HTTP/1.1" 200 61646
+INFO 2025-10-03 11:59:39,200 basehttp 10576 13684 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 11:59:40,278 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 63128
+INFO 2025-10-03 11:59:43,519 basehttp 10576 13684 "GET /customer/request-demo/ HTTP/1.1" 200 53865
+INFO 2025-10-03 11:59:45,559 basehttp 10576 13684 "GET /customer/ajax/subcategories/17/ HTTP/1.1" 200 98
+INFO 2025-10-03 11:59:57,008 basehttp 10576 13684 "POST /customer/request-demo/ HTTP/1.1" 302 0
+INFO 2025-10-03 11:59:57,044 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66962
+INFO 2025-10-03 12:00:03,296 basehttp 10576 13684 "GET /customer/enquiries/ HTTP/1.1" 200 60599
+INFO 2025-10-03 12:00:13,642 basehttp 10576 13684 "GET /customer/enquiries/ HTTP/1.1" 200 60599
+INFO 2025-10-03 12:00:18,583 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66460
+INFO 2025-10-03 12:00:24,037 basehttp 10576 13684 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:00:50,328 basehttp 10576 13684 "GET /customer/demos/?search=&business_category=17&business_subcategory=158&sort=newest HTTP/1.1" 200 64576
+INFO 2025-10-03 12:00:53,071 basehttp 10576 13684 "GET /customer/demos/?search=&business_category=17&business_subcategory=158&sort=popular HTTP/1.1" 200 64576
+INFO 2025-10-03 12:00:54,288 basehttp 10576 13684 "GET /customer/demos/?search=&business_category=17&business_subcategory=158&sort=popular HTTP/1.1" 200 64576
+INFO 2025-10-03 12:00:56,944 basehttp 10576 13684 "GET /customer/demos/?search=&business_category=17&business_subcategory=158&sort=liked HTTP/1.1" 200 64576
+INFO 2025-10-03 12:01:03,005 basehttp 10576 13684 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:01:07,567 basehttp 10576 13684 "GET /customer/demos/?search=&business_category=&business_subcategory=&sort=liked HTTP/1.1" 200 64207
+INFO 2025-10-03 12:01:10,494 basehttp 10576 13684 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:01:11,902 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66460
+INFO 2025-10-03 12:01:14,123 basehttp 10576 13684 "GET /customer/enquiries/ HTTP/1.1" 200 60599
+INFO 2025-10-03 12:01:16,810 basehttp 10576 13684 "GET /customer/send-enquiry/ HTTP/1.1" 200 59536
+INFO 2025-10-03 12:01:18,050 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66460
+INFO 2025-10-03 12:01:21,096 basehttp 10576 13684 "GET /customer/ HTTP/1.1" 200 53667
+INFO 2025-10-03 12:01:23,142 basehttp 10576 13684 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:01:25,874 basehttp 10576 13684 "GET /customer/ HTTP/1.1" 200 53667
+INFO 2025-10-03 12:01:36,309 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66460
+INFO 2025-10-03 12:01:37,740 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66460
+INFO 2025-10-03 12:02:26,701 basehttp 10576 16284 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 12:02:29,111 basehttp 10576 16284 "GET /admin/customers/ HTTP/1.1" 200 65558
+INFO 2025-10-03 12:02:31,178 basehttp 10576 16284 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 12:02:35,307 basehttp 10576 16284 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 12:02:44,934 basehttp 10576 13684 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:02:45,704 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66460
+INFO 2025-10-03 12:03:59,946 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66460
+ERROR 2025-10-03 12:04:13,524 log 10576 13684 Internal Server Error: /customer/my-requests/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 505, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'endfor'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py", line 327, in demo_requests
+    return render(request, 'customers/demo_requests.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 853, in do_for
+    nodelist_loop = parser.parse(
+        (
+    ...<2 lines>...
+        )
+    )
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 507, in parse
+    self.invalid_block_tag(token, command, parse_until)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 558, in invalid_block_tag
+    raise self.error(
+    ...<8 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 586: 'endfor', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+ERROR 2025-10-03 12:04:13,529 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 500 323816
+INFO 2025-10-03 12:04:28,874 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66152
+INFO 2025-10-03 12:04:47,458 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66027
+INFO 2025-10-03 12:04:57,958 basehttp 10576 13684 "GET /customer/my-requests/ HTTP/1.1" 200 66027
+WARNING 2025-10-03 12:05:02,247 log 10576 13684 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 12:05:02,247 basehttp 10576 13684 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+WARNING 2025-10-03 12:05:40,995 log 10576 13684 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 12:05:40,997 basehttp 10576 13684 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 12:10:59,586 basehttp 10576 13548 "GET /customer/ HTTP/1.1" 200 53667
+INFO 2025-10-03 12:11:00,883 basehttp 10576 13548 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:11:01,758 basehttp 10576 13548 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:11:02,981 basehttp 10576 13548 "GET /customer/my-requests/ HTTP/1.1" 200 66027
+WARNING 2025-10-03 12:11:06,822 log 10576 13548 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 12:11:06,823 basehttp 10576 13548 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 12:11:28,360 basehttp 10576 13548 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:11:31,029 basehttp 10576 13548 "GET /customer/request-demo/?demo=12 HTTP/1.1" 200 50593
+INFO 2025-10-03 12:11:43,590 basehttp 10576 13548 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 71822
+INFO 2025-10-03 12:11:45,699 basehttp 10576 13548 - Broken pipe from ('127.0.0.1', 51679)
+INFO 2025-10-03 12:11:47,097 basehttp 10576 13372 "GET /customer/request-demo/?demo=9 HTTP/1.1" 200 50862
+INFO 2025-10-03 12:12:02,476 basehttp 10576 13372 "POST /customer/request-demo/?demo=9 HTTP/1.1" 302 0
+INFO 2025-10-03 12:12:02,514 basehttp 10576 13372 "GET /customer/my-requests/ HTTP/1.1" 200 70071
+WARNING 2025-10-03 12:12:10,011 log 10576 13372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 12:12:10,012 basehttp 10576 13372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+WARNING 2025-10-03 12:12:33,717 log 10576 13372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 12:12:33,718 basehttp 10576 13372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 12:13:02,426 basehttp 10576 13372 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:13:04,723 basehttp 10576 13372 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:13:05,625 basehttp 10576 13372 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:13:06,222 basehttp 10576 13372 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:13:10,875 basehttp 10576 13372 "GET /customer/enquiries/ HTTP/1.1" 200 60599
+INFO 2025-10-03 12:13:13,713 basehttp 10576 13372 "GET /customer/send-enquiry/ HTTP/1.1" 200 59536
+INFO 2025-10-03 12:13:14,687 basehttp 10576 13372 "GET /customer/enquiries/ HTTP/1.1" 200 60599
+INFO 2025-10-03 12:13:15,454 basehttp 10576 13372 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:13:16,004 basehttp 10576 13372 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:13:16,466 basehttp 10576 13372 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:13:17,636 basehttp 10576 13372 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:13:25,927 basehttp 10576 13372 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:13:29,437 basehttp 10576 13372 "GET /auth/profile/ HTTP/1.1" 200 69405
+INFO 2025-10-03 12:13:38,706 basehttp 10576 13372 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:13:41,548 basehttp 10576 13372 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:13:43,464 basehttp 10576 13372 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:13:45,059 basehttp 10576 13372 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:13:50,163 basehttp 10576 13372 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:14:01,983 basehttp 10576 13372 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:14:02,777 basehttp 10576 13372 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:14:03,484 basehttp 10576 13372 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:14:04,420 basehttp 10576 13372 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:14:05,599 basehttp 10576 13372 "GET /customer/enquiries/ HTTP/1.1" 200 60599
+INFO 2025-10-03 12:14:06,934 basehttp 10576 13372 "GET /customer/send-enquiry/ HTTP/1.1" 200 59536
+INFO 2025-10-03 12:14:08,455 basehttp 10576 13372 "GET /customer/contact-sales/ HTTP/1.1" 200 61878
+INFO 2025-10-03 12:14:10,173 basehttp 10576 13372 "GET /auth/profile/ HTTP/1.1" 200 69405
+INFO 2025-10-03 12:14:11,902 basehttp 10576 13372 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:14:14,166 basehttp 10576 13372 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:14:16,258 basehttp 10576 13372 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:14:30,055 basehttp 10576 13384 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 12:14:37,817 basehttp 10576 13384 "GET /admin/demos/10/ HTTP/1.1" 200 78896
+INFO 2025-10-03 12:14:52,946 basehttp 10576 13384 - Broken pipe from ('127.0.0.1', 50219)
+INFO 2025-10-03 12:14:56,287 basehttp 10576 9248 "POST /admin/demos/10/ HTTP/1.1" 302 0
+INFO 2025-10-03 12:14:56,310 basehttp 10576 9248 "GET /admin/demos/10/ HTTP/1.1" 200 79881
+INFO 2025-10-03 12:15:01,778 basehttp 10576 6196 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 12:15:01,801 basehttp 10576 9248 - Broken pipe from ('127.0.0.1', 63821)
+INFO 2025-10-03 12:15:02,950 basehttp 10576 6196 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 12:15:18,277 basehttp 10576 13372 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:18:49,218 basehttp 10576 6196 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 12:18:56,039 basehttp 10576 6196 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 12:18:57,341 basehttp 10576 6196 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 12:18:58,057 basehttp 10576 6196 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 12:18:59,776 basehttp 10576 6196 "GET /admin/demo-requests/ HTTP/1.1" 200 77963
+INFO 2025-10-03 12:19:40,623 basehttp 10576 6196 "GET /admin/customers/ HTTP/1.1" 200 65558
+INFO 2025-10-03 12:19:45,779 basehttp 10576 6196 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 12:19:48,984 basehttp 10576 6196 "GET /admin/dashboard/ HTTP/1.1" 200 83440
+INFO 2025-10-03 12:20:24,805 basehttp 10576 6196 "GET /admin/customers/ HTTP/1.1" 200 65558
+INFO 2025-10-03 12:20:26,866 basehttp 10576 6196 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 12:20:33,278 basehttp 10576 21100 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:20:35,240 basehttp 10576 21100 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:25:29,248 autoreload 10576 22540 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 12:25:30,477 autoreload 27120 7384 Watching for file changes with StatReloader
+INFO 2025-10-03 12:25:33,379 basehttp 27120 20184 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:25:35,733 basehttp 27120 20184 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:25:37,375 basehttp 27120 20184 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:25:38,667 basehttp 27120 20184 "GET /customer/demos/ HTTP/1.1" 200 64207
+INFO 2025-10-03 12:25:40,339 basehttp 27120 20184 "GET /customer/ HTTP/1.1" 200 53663
+INFO 2025-10-03 12:25:47,734 basehttp 27120 26480 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 12:34:02,090 autoreload 388 20668 Watching for file changes with StatReloader
+INFO 2025-10-03 12:34:07,271 basehttp 388 11880 "GET /admin/demos/10/ HTTP/1.1" 200 78898
+INFO 2025-10-03 12:34:22,453 basehttp 388 11880 - Broken pipe from ('127.0.0.1', 56237)
+INFO 2025-10-03 12:34:25,145 basehttp 388 26984 "POST /admin/demos/10/ HTTP/1.1" 302 0
+INFO 2025-10-03 12:34:25,192 basehttp 388 26984 "GET /admin/demos/10/ HTTP/1.1" 200 79881
+INFO 2025-10-03 12:34:28,172 basehttp 388 9024 "GET /customer/demos/ HTTP/1.1" 200 66837
+INFO 2025-10-03 12:34:30,589 basehttp 388 9024 "GET /customer/ HTTP/1.1" 200 54787
+INFO 2025-10-03 12:34:41,792 basehttp 388 26984 - Broken pipe from ('127.0.0.1', 55329)
+INFO 2025-10-03 12:34:51,226 basehttp 388 9024 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 70791
+INFO 2025-10-03 12:34:57,301 basehttp 388 9024 - Broken pipe from ('127.0.0.1', 61280)
+INFO 2025-10-03 12:34:59,403 basehttp 388 19440 "GET /customer/request-demo/?demo=10 HTTP/1.1" 200 50884
+INFO 2025-10-03 12:35:29,126 basehttp 388 19440 "GET /customer/demos/ HTTP/1.1" 200 66839
+INFO 2025-10-03 12:35:48,072 basehttp 388 19440 "GET /customer/demos/ HTTP/1.1" 200 66839
+INFO 2025-10-03 12:35:50,100 basehttp 388 19440 "GET /customer/demos/ HTTP/1.1" 200 66839
+INFO 2025-10-03 12:35:51,436 basehttp 388 19440 "GET /customer/ HTTP/1.1" 200 54787
+INFO 2025-10-03 12:36:30,602 basehttp 388 19440 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:36:32,745 basehttp 388 19440 "GET /customer/ HTTP/1.1" 200 54787
+INFO 2025-10-03 12:36:35,003 basehttp 388 19440 "GET /customer/demos/ HTTP/1.1" 200 66839
+INFO 2025-10-03 12:36:36,307 basehttp 388 19440 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:36:37,703 basehttp 388 19440 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:36:42,917 basehttp 388 19440 "GET /customer/ HTTP/1.1" 200 54787
+INFO 2025-10-03 12:36:47,565 basehttp 388 19440 "GET /customer/demos/ HTTP/1.1" 200 66839
+INFO 2025-10-03 12:36:49,805 basehttp 388 19440 "GET /customer/ HTTP/1.1" 200 54787
+INFO 2025-10-03 12:36:59,840 basehttp 388 19440 "GET /customer/contact-sales/ HTTP/1.1" 200 61878
+INFO 2025-10-03 12:37:19,208 basehttp 388 19440 "GET /customer/demos/ HTTP/1.1" 200 66839
+INFO 2025-10-03 12:37:20,485 basehttp 388 19440 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:37:21,792 basehttp 388 19440 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:37:23,313 basehttp 388 19440 "GET /customer/enquiries/ HTTP/1.1" 200 60608
+INFO 2025-10-03 12:37:26,685 basehttp 388 19440 "GET /customer/demos/ HTTP/1.1" 200 66839
+INFO 2025-10-03 12:37:27,958 basehttp 388 19440 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:37:29,675 basehttp 388 19440 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:37:32,543 basehttp 388 19440 "GET /customer/enquiries/ HTTP/1.1" 200 60608
+INFO 2025-10-03 12:37:33,365 basehttp 388 19440 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:37:37,546 basehttp 388 19440 "GET /customer/ HTTP/1.1" 200 54787
+INFO 2025-10-03 12:42:58,518 basehttp 388 10064 "GET /customer/ HTTP/1.1" 200 54787
+INFO 2025-10-03 12:43:00,722 basehttp 388 10064 "GET /customer/demos/ HTTP/1.1" 200 66839
+INFO 2025-10-03 12:43:02,523 basehttp 388 10064 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 12:43:03,735 basehttp 388 10064 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 12:44:01,212 autoreload 388 20668 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 12:44:04,084 autoreload 23148 20792 Watching for file changes with StatReloader
+INFO 2025-10-03 12:44:05,604 basehttp 23148 27528 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+ERROR 2025-10-03 12:44:08,238 log 23148 27528 Internal Server Error: /customer/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py", line 99, in customer_dashboard
+    return render(request, 'customers/dashboard.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 320, in render
+    if match:
+       ^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 412, in __bool__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1549, in execute_sql
+    sql, params = self.as_sql()
+                  ~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 736, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ~~~~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases or bool(combinator),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 84, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 73, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ~~~~~~~~~~~~~~~^
+        with_col_aliases=with_col_aliases,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 279, in get_select
+    related_klass_infos = self.get_related_selections(select, select_mask)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\sql\compiler.py", line 1367, in get_related_selections
+    raise FieldError(
+    ...<6 lines>...
+    )
+django.core.exceptions.FieldError: Invalid field name(s) given in select_related: 'primary_business_category'. Choices are: created_by
+ERROR 2025-10-03 12:44:08,244 basehttp 23148 27528 "GET /customer/ HTTP/1.1" 500 209388
+INFO 2025-10-03 12:46:12,666 autoreload 23148 20792 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 12:46:13,468 autoreload 3908 28216 Watching for file changes with StatReloader
+INFO 2025-10-03 12:46:16,697 basehttp 3908 27596 "GET /customer/ HTTP/1.1" 200 51508
+INFO 2025-10-03 12:48:49,799 basehttp 3908 27596 "GET /customer/ HTTP/1.1" 200 55825
+INFO 2025-10-03 12:48:58,620 basehttp 3908 27596 "GET /customer/demos/ HTTP/1.1" 200 66839
+INFO 2025-10-03 12:49:40,076 basehttp 3908 21696 "GET / HTTP/1.1" 302 0
+INFO 2025-10-03 12:49:40,226 basehttp 3908 21696 "GET /admin/dashboard/ HTTP/1.1" 200 83460
+INFO 2025-10-03 12:49:43,544 basehttp 3908 21696 "GET /admin/demo-requests/ HTTP/1.1" 200 77963
+INFO 2025-10-03 12:49:45,006 basehttp 3908 21696 "GET /admin/customers/ HTTP/1.1" 200 65558
+INFO 2025-10-03 12:49:47,829 basehttp 3908 21696 "GET /admin/dashboard/ HTTP/1.1" 200 83460
+INFO 2025-10-03 12:49:49,134 basehttp 3908 21696 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 12:49:50,241 basehttp 3908 21696 "GET /admin/demos/add/ HTTP/1.1" 200 62795
+INFO 2025-10-03 12:51:30,558 basehttp 3908 27596 "GET /customer/ HTTP/1.1" 200 55825
+INFO 2025-10-03 12:53:39,054 basehttp 3908 27596 "GET /customer/ HTTP/1.1" 200 55825
+INFO 2025-10-03 12:53:46,145 basehttp 3908 27596 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 70791
+ERROR 2025-10-03 12:53:56,628 log 3908 1028 Internal Server Error: /customer/demos/demo-consultation/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 880, in _resolve_lookup
+    current = current[bit]
+              ~~~~~~~^^^^^
+TypeError: 'FieldFile' object is not subscriptable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py", line 244, in demo_detail
+    return render(request, 'customers/demo_detail.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1064, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 715, in resolve
+    obj = self.var.resolve(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 847, in resolve
+    value = self._resolve_lookup(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 890, in _resolve_lookup
+    current = getattr(current, bit)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\files.py", line 66, in url
+    self._require_file()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\files.py", line 41, in _require_file
+    raise ValueError(
+        "The '%s' attribute has no file associated with it." % self.field.name
+    )
+ValueError: The 'video_file' attribute has no file associated with it.
+ERROR 2025-10-03 12:53:56,633 basehttp 3908 1028 "GET /customer/demos/demo-consultation/ HTTP/1.1" 500 209436
+INFO 2025-10-03 12:53:56,686 basehttp 3908 27596 - Broken pipe from ('127.0.0.1', 54323)
+ERROR 2025-10-03 12:54:12,371 log 3908 1028 Internal Server Error: /customer/demos/service-consultation/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 880, in _resolve_lookup
+    current = current[bit]
+              ~~~~~~~^^^^^
+TypeError: 'FieldFile' object is not subscriptable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py", line 244, in demo_detail
+    return render(request, 'customers/demo_detail.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1064, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 715, in resolve
+    obj = self.var.resolve(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 847, in resolve
+    value = self._resolve_lookup(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 890, in _resolve_lookup
+    current = getattr(current, bit)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\files.py", line 66, in url
+    self._require_file()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\files.py", line 41, in _require_file
+    raise ValueError(
+        "The '%s' attribute has no file associated with it." % self.field.name
+    )
+ValueError: The 'video_file' attribute has no file associated with it.
+ERROR 2025-10-03 12:54:12,375 basehttp 3908 1028 "GET /customer/demos/service-consultation/ HTTP/1.1" 500 209487
+ERROR 2025-10-03 12:54:25,396 log 3908 1028 Internal Server Error: /customer/demos/demo-consultation/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 880, in _resolve_lookup
+    current = current[bit]
+              ~~~~~~~^^^^^
+TypeError: 'FieldFile' object is not subscriptable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py", line 244, in demo_detail
+    return render(request, 'customers/demo_detail.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1064, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 715, in resolve
+    obj = self.var.resolve(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 847, in resolve
+    value = self._resolve_lookup(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 890, in _resolve_lookup
+    current = getattr(current, bit)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\files.py", line 66, in url
+    self._require_file()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\files.py", line 41, in _require_file
+    raise ValueError(
+        "The '%s' attribute has no file associated with it." % self.field.name
+    )
+ValueError: The 'video_file' attribute has no file associated with it.
+ERROR 2025-10-03 12:54:25,400 basehttp 3908 1028 "GET /customer/demos/demo-consultation/ HTTP/1.1" 500 209437
+INFO 2025-10-03 12:55:33,602 basehttp 3908 1028 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 70791
+INFO 2025-10-03 12:55:35,255 basehttp 3908 20992 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 12:55:35,282 basehttp 3908 1028 - Broken pipe from ('127.0.0.1', 57702)
+INFO 2025-10-03 12:55:39,602 basehttp 3908 20992 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 70791
+ERROR 2025-10-03 12:55:46,275 log 3908 21836 Internal Server Error: /customer/demos/demo-consultation/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 880, in _resolve_lookup
+    current = current[bit]
+              ~~~~~~~^^^^^
+TypeError: 'FieldFile' object is not subscriptable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py", line 244, in demo_detail
+    return render(request, 'customers/demo_detail.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 1064, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 715, in resolve
+    obj = self.var.resolve(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 847, in resolve
+    value = self._resolve_lookup(context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 890, in _resolve_lookup
+    current = getattr(current, bit)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\files.py", line 66, in url
+    self._require_file()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\db\models\fields\files.py", line 41, in _require_file
+    raise ValueError(
+        "The '%s' attribute has no file associated with it." % self.field.name
+    )
+ValueError: The 'video_file' attribute has no file associated with it.
+ERROR 2025-10-03 12:55:46,278 basehttp 3908 21836 "GET /customer/demos/demo-consultation/ HTTP/1.1" 500 209437
+INFO 2025-10-03 12:55:46,331 basehttp 3908 20992 - Broken pipe from ('127.0.0.1', 57711)
+INFO 2025-10-03 13:01:27,435 basehttp 3908 10268 "GET /admin/demo-requests/ HTTP/1.1" 200 77963
+INFO 2025-10-03 13:02:26,096 basehttp 3908 8504 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:02:31,637 basehttp 3908 8504 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:02:32,166 basehttp 3908 8504 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:02:34,257 basehttp 3908 8504 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:02:38,442 basehttp 3908 8504 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:02:41,068 basehttp 3908 8504 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:03:02,492 basehttp 3908 8504 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 13:03:03,560 basehttp 3908 8504 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:03:07,929 basehttp 3908 8504 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:03:15,081 basehttp 3908 8504 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:03:26,131 basehttp 3908 8504 "GET /customer/request-demo/?demo=12 HTTP/1.1" 200 50593
+INFO 2025-10-03 13:03:39,697 basehttp 3908 8504 "GET /customer/request-demo/?demo=12 HTTP/1.1" 200 50593
+INFO 2025-10-03 13:03:49,809 basehttp 3908 8504 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 71720
+WARNING 2025-10-03 13:03:54,008 log 3908 25176 Not Found: /favicon.ico
+WARNING 2025-10-03 13:03:54,009 basehttp 3908 25176 "GET /favicon.ico HTTP/1.1" 404 22586
+INFO 2025-10-03 13:04:22,419 basehttp 3908 25176 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:04:22,459 basehttp 3908 8504 - Broken pipe from ('127.0.0.1', 64688)
+INFO 2025-10-03 13:04:40,044 basehttp 3908 25176 "GET /customer/request-demo/?demo=12 HTTP/1.1" 200 50593
+INFO 2025-10-03 13:05:03,218 basehttp 3908 25176 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:05:04,902 basehttp 3908 25176 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 71720
+INFO 2025-10-03 13:05:06,811 basehttp 3908 25176 - Broken pipe from ('127.0.0.1', 50062)
+INFO 2025-10-03 13:05:09,464 basehttp 3908 18240 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:05:11,087 basehttp 3908 18240 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:05:16,184 basehttp 3908 18240 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:05:17,901 basehttp 3908 18240 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:05:19,821 basehttp 3908 18240 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 71720
+INFO 2025-10-03 13:05:24,044 basehttp 3908 18240 - Broken pipe from ('127.0.0.1', 50067)
+INFO 2025-10-03 13:05:25,232 basehttp 3908 6560 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:05:26,582 basehttp 3908 6560 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 71720
+INFO 2025-10-03 13:05:29,298 basehttp 3908 6560 - Broken pipe from ('127.0.0.1', 61849)
+INFO 2025-10-03 13:05:30,294 basehttp 3908 1288 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:05:31,921 basehttp 3908 1288 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:06:20,362 basehttp 3908 10268 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 13:06:21,601 basehttp 3908 10268 "GET /admin/demos/add/ HTTP/1.1" 200 62795
+INFO 2025-10-03 13:08:30,705 basehttp 3908 1288 "GET /admin/enquiries/ HTTP/1.1" 302 0
+WARNING 2025-10-03 13:08:30,740 log 3908 1288 Not Found: /accounts/login/
+WARNING 2025-10-03 13:08:30,741 basehttp 3908 1288 "GET /accounts/login/?next=/admin/enquiries/ HTTP/1.1" 404 22621
+INFO 2025-10-03 13:11:43,160 basehttp 3908 1288 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:11:46,656 basehttp 3908 1288 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:11:48,736 basehttp 3908 1288 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 71720
+INFO 2025-10-03 13:11:50,943 basehttp 3908 12676 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:11:50,975 basehttp 3908 1288 - Broken pipe from ('127.0.0.1', 61850)
+INFO 2025-10-03 13:11:52,774 basehttp 3908 12676 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:11:57,519 basehttp 3908 12676 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:11:59,058 basehttp 3908 12676 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 72745
+INFO 2025-10-03 13:12:00,980 basehttp 3908 12676 - Broken pipe from ('127.0.0.1', 63915)
+INFO 2025-10-03 13:12:01,903 basehttp 3908 19884 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 72745
+INFO 2025-10-03 13:12:03,860 basehttp 3908 19884 - Broken pipe from ('127.0.0.1', 63916)
+INFO 2025-10-03 13:12:08,463 basehttp 3908 2688 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 13:12:17,048 basehttp 3908 2688 "GET /customer/enquiries/ HTTP/1.1" 200 60608
+INFO 2025-10-03 13:12:24,013 basehttp 3908 2688 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:12:25,193 basehttp 3908 2688 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:12:25,904 basehttp 3908 2688 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:12:27,015 basehttp 3908 2688 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 13:12:28,660 basehttp 3908 2688 "GET /customer/send-enquiry/ HTTP/1.1" 200 59536
+INFO 2025-10-03 13:12:29,071 basehttp 3908 2688 "GET /customer/enquiries/ HTTP/1.1" 200 60608
+INFO 2025-10-03 13:12:30,044 basehttp 3908 2688 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:12:32,129 basehttp 3908 2688 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:12:33,863 basehttp 3908 2688 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:12:37,048 basehttp 3908 2688 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:12:39,180 basehttp 3908 2688 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:12:45,843 basehttp 3908 2688 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:13:39,300 basehttp 3908 2688 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:13:41,685 basehttp 3908 2688 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 71720
+INFO 2025-10-03 13:13:43,443 basehttp 3908 8600 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:13:43,479 basehttp 3908 2688 - Broken pipe from ('127.0.0.1', 63918)
+INFO 2025-10-03 13:15:18,351 autoreload 3908 28216 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py changed, reloading.
+INFO 2025-10-03 13:15:19,862 autoreload 21432 24316 Watching for file changes with StatReloader
+INFO 2025-10-03 13:15:22,695 basehttp 21432 25116 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:15:26,346 basehttp 21432 25116 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:15:27,871 basehttp 21432 25116 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:15:31,344 basehttp 21432 25116 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:15:35,003 basehttp 21432 25116 "GET /customer/request-demo/?demo=12 HTTP/1.1" 200 50593
+INFO 2025-10-03 13:15:39,678 basehttp 21432 25116 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:15:40,830 basehttp 21432 25116 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 72745
+INFO 2025-10-03 13:15:42,139 basehttp 21432 25116 - Broken pipe from ('127.0.0.1', 50106)
+INFO 2025-10-03 13:15:43,787 basehttp 21432 17044 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 72745
+INFO 2025-10-03 13:15:45,102 basehttp 21432 17044 - Broken pipe from ('127.0.0.1', 50107)
+INFO 2025-10-03 13:15:47,971 basehttp 21432 23848 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 72745
+INFO 2025-10-03 13:15:49,836 basehttp 21432 23848 - Broken pipe from ('127.0.0.1', 50109)
+INFO 2025-10-03 13:15:50,956 basehttp 21432 17004 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:15:53,032 basehttp 21432 17004 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:15:56,557 basehttp 21432 17004 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:16:21,033 basehttp 21432 17004 "GET /customer/demos/demo-consultation/ HTTP/1.1" 200 69650
+INFO 2025-10-03 13:17:04,570 basehttp 21432 17004 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:17:07,013 basehttp 21432 17004 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:17:08,513 basehttp 21432 17004 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 72745
+INFO 2025-10-03 13:17:27,468 basehttp 21432 17004 - Broken pipe from ('127.0.0.1', 50110)
+INFO 2025-10-03 13:21:59,240 basehttp 21432 4560 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 13:22:00,925 basehttp 21432 4560 "GET /customer/ HTTP/1.1" 200 55279
+INFO 2025-10-03 13:22:30,190 basehttp 21432 4560 "GET /customer/ HTTP/1.1" 200 50465
+INFO 2025-10-03 13:22:43,283 basehttp 21432 4560 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:22:48,522 basehttp 21432 4560 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 72745
+INFO 2025-10-03 13:22:49,857 basehttp 21432 22788 "GET /customer/demos/ HTTP/1.1" 200 67205
+INFO 2025-10-03 13:22:49,888 basehttp 21432 4560 - Broken pipe from ('127.0.0.1', 58345)
+INFO 2025-10-03 13:22:52,971 basehttp 21432 22788 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 13:23:40,187 basehttp 21432 22788 "GET /customer/my-requests/ HTTP/1.1" 200 69508
+INFO 2025-10-03 13:23:41,112 basehttp 21432 22788 "GET /customer/demos/ HTTP/1.1" 200 63462
+INFO 2025-10-03 13:23:53,380 basehttp 21432 22788 "GET /customer/request-demo/?demo=12 HTTP/1.1" 200 50593
+INFO 2025-10-03 13:24:01,028 basehttp 21432 22788 "GET /customer/demos/ HTTP/1.1" 200 63462
+INFO 2025-10-03 13:24:04,850 basehttp 21432 22788 "GET /customer/demos/demo-testing-on-1-october/ HTTP/1.1" 200 72745
+INFO 2025-10-03 13:24:06,444 basehttp 21432 22788 - Broken pipe from ('127.0.0.1', 58346)
+INFO 2025-10-03 13:24:13,976 basehttp 21432 22252 "GET /customer/request-demo/?demo=12 HTTP/1.1" 200 50593
+INFO 2025-10-03 13:24:29,643 basehttp 21432 22252 "GET /customer/request-demo/?demo=12 HTTP/1.1" 200 50593
+INFO 2025-10-03 13:24:59,919 basehttp 21432 22252 "GET /customer/request-demo/?demo=12 HTTP/1.1" 200 50593
+INFO 2025-10-03 13:27:01,995 basehttp 21432 1676 "GET /admin/demos/ HTTP/1.1" 200 49747
+INFO 2025-10-03 13:27:10,733 basehttp 21432 1676 "GET /admin/demos/12/ HTTP/1.1" 200 78408
+INFO 2025-10-03 13:27:33,021 basehttp 21432 1676 "POST /admin/demos/12/ HTTP/1.1" 302 0
+INFO 2025-10-03 13:27:33,055 basehttp 21432 1676 "GET /admin/demos/12/ HTTP/1.1" 200 80643
+INFO 2025-10-03 13:27:33,081 basehttp 21432 1676 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 200 65111
+INFO 2025-10-03 13:27:36,025 basehttp 21432 22252 "GET /customer/demos/ HTTP/1.1" 200 63928
+INFO 2025-10-03 13:27:36,037 basehttp 21432 22252 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 200 65111
+INFO 2025-10-03 13:27:49,368 basehttp 21432 1676 - Broken pipe from ('127.0.0.1', 63002)
+INFO 2025-10-03 13:28:04,790 basehttp 21432 22252 "GET /customer/demos/ HTTP/1.1" 200 63920
+INFO 2025-10-03 13:28:04,803 basehttp 21432 22252 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 13:28:12,093 basehttp 21432 22252 "GET /customer/ HTTP/1.1" 200 50465
+INFO 2025-10-03 13:28:12,778 basehttp 21432 22252 "GET /customer/demos/ HTTP/1.1" 200 63920
+INFO 2025-10-03 13:28:12,789 basehttp 21432 22252 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 13:28:14,012 basehttp 21432 22252 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:28:14,691 basehttp 21432 22252 "GET /customer/my-requests/ HTTP/1.1" 200 69754
+INFO 2025-10-03 13:29:28,434 basehttp 21432 10336 "GET /admin/demo-requests/ HTTP/1.1" 200 77963
+INFO 2025-10-03 13:29:29,997 basehttp 21432 10336 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 13:29:30,561 basehttp 21432 10336 "GET /admin/customers/ HTTP/1.1" 200 65545
+INFO 2025-10-03 13:34:50,344 autoreload 21432 24316 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\ajax_views.py changed, reloading.
+INFO 2025-10-03 13:34:51,143 autoreload 15352 10516 Watching for file changes with StatReloader
+INFO 2025-10-03 13:34:56,010 basehttp 15352 4456 "GET /customer/my-requests/ HTTP/1.1" 200 69819
+INFO 2025-10-03 13:34:56,021 basehttp 15352 4456 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 13:35:15,790 basehttp 15352 4456 "POST /customer/ajax/demo-request/14/cancel/ HTTP/1.1" 200 67
+INFO 2025-10-03 13:35:17,336 basehttp 15352 4456 "GET /customer/my-requests/ HTTP/1.1" 200 69842
+INFO 2025-10-03 13:35:19,492 basehttp 15352 4456 "GET /customer/ HTTP/1.1" 200 50465
+INFO 2025-10-03 13:35:20,115 basehttp 15352 4456 "GET /customer/demos/ HTTP/1.1" 200 63920
+INFO 2025-10-03 13:35:20,727 basehttp 15352 4456 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:35:21,431 basehttp 15352 4456 "GET /customer/my-requests/ HTTP/1.1" 200 69842
+INFO 2025-10-03 13:35:24,801 basehttp 15352 4456 "GET /customer/enquiries/ HTTP/1.1" 200 60608
+INFO 2025-10-03 13:35:29,352 basehttp 15352 4456 "GET /customer/my-requests/ HTTP/1.1" 200 69842
+INFO 2025-10-03 13:35:30,022 basehttp 15352 4456 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:35:30,740 basehttp 15352 4456 "GET /customer/demos/ HTTP/1.1" 200 63920
+INFO 2025-10-03 13:35:31,890 basehttp 15352 4456 "GET /customer/ HTTP/1.1" 200 50465
+INFO 2025-10-03 13:35:34,809 basehttp 15352 4456 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:35:35,218 basehttp 15352 4456 "GET /customer/demos/ HTTP/1.1" 200 63920
+INFO 2025-10-03 13:35:37,544 basehttp 15352 4456 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:35:38,151 basehttp 15352 4456 "GET /customer/my-requests/ HTTP/1.1" 200 69842
+INFO 2025-10-03 13:35:38,970 basehttp 15352 4456 "GET /customer/enquiries/ HTTP/1.1" 200 60608
+INFO 2025-10-03 13:35:43,644 basehttp 15352 4456 "GET /customer/send-enquiry/ HTTP/1.1" 200 59536
+INFO 2025-10-03 13:36:35,636 basehttp 15352 4456 "GET /customer/send-enquiry/ HTTP/1.1" 200 58850
+INFO 2025-10-03 13:36:56,847 basehttp 15352 4456 "GET /customer/send-enquiry/ HTTP/1.1" 200 58905
+INFO 2025-10-03 13:37:23,909 basehttp 15352 4456 "GET /customer/send-enquiry/ HTTP/1.1" 200 58617
+INFO 2025-10-03 13:37:56,209 basehttp 15352 4456 "GET /customer/enquiries/ HTTP/1.1" 200 60609
+INFO 2025-10-03 13:38:26,497 basehttp 15352 4456 "GET /customer/send-enquiry/ HTTP/1.1" 200 58617
+INFO 2025-10-03 13:38:50,946 basehttp 15352 4456 "GET /customer/ HTTP/1.1" 200 50465
+INFO 2025-10-03 13:38:55,014 basehttp 15352 4456 "GET /customer/demos/ HTTP/1.1" 200 63920
+INFO 2025-10-03 13:38:55,026 basehttp 15352 4456 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 13:38:59,009 basehttp 15352 4456 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:39:01,327 basehttp 15352 4456 "GET /customer/my-requests/ HTTP/1.1" 200 69842
+INFO 2025-10-03 13:39:03,357 basehttp 15352 4456 "GET /customer/enquiries/ HTTP/1.1" 200 60609
+INFO 2025-10-03 13:40:06,661 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 60609
+INFO 2025-10-03 13:41:00,013 basehttp 15352 27020 "GET /customer/demos/ HTTP/1.1" 200 63920
+INFO 2025-10-03 13:41:00,026 basehttp 15352 27020 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 13:41:00,614 basehttp 15352 27020 "GET /customer/ HTTP/1.1" 200 50465
+INFO 2025-10-03 13:41:02,497 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 60609
+INFO 2025-10-03 13:41:40,902 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:42:13,018 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:42:13,882 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 58617
+INFO 2025-10-03 13:42:14,950 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:42:17,140 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:42:20,019 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 58617
+INFO 2025-10-03 13:43:15,989 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 56800
+INFO 2025-10-03 13:43:21,026 basehttp 15352 27020 "GET /customer/ajax/subcategories/16/ HTTP/1.1" 200 136
+INFO 2025-10-03 13:44:06,684 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 56270
+INFO 2025-10-03 13:44:43,116 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 56270
+WARNING 2025-10-03 13:45:18,140 log 15352 27020 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 13:45:18,141 basehttp 15352 27020 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 13:46:04,369 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 56232
+WARNING 2025-10-03 13:46:04,420 log 15352 27020 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 13:46:04,420 basehttp 15352 27020 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 13:46:29,204 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 56191
+INFO 2025-10-03 13:47:09,990 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:47:25,906 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:50:21,253 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:50:23,019 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 51070
+INFO 2025-10-03 13:50:31,793 basehttp 15352 27020 "GET /customer/ajax/subcategories/16/ HTTP/1.1" 200 136
+INFO 2025-10-03 13:50:51,772 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:51:04,722 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 51070
+INFO 2025-10-03 13:51:08,288 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:52:35,149 basehttp 15352 27020 "GET /customer/ HTTP/1.1" 200 50465
+INFO 2025-10-03 13:52:35,161 basehttp 15352 27020 "GET /media/demos/thumbnails/thumb_testing-for-particular-customer_ebc456e4.png HTTP/1.1" 304 0
+INFO 2025-10-03 13:52:37,780 basehttp 15352 27020 "GET /customer/demos/ HTTP/1.1" 200 63920
+INFO 2025-10-03 13:52:37,793 basehttp 15352 5900 "GET /media/demos/thumbnails/thumb_demo-testing-on-1-october_033c0b6e.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 13:52:37,793 basehttp 15352 27020 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 13:52:48,414 basehttp 15352 27020 "GET /customer/liked-demos/ HTTP/1.1" 200 64648
+INFO 2025-10-03 13:52:50,884 basehttp 15352 27020 "GET /customer/my-requests/ HTTP/1.1" 200 69842
+INFO 2025-10-03 13:52:54,365 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 59672
+INFO 2025-10-03 13:52:56,025 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 51070
+INFO 2025-10-03 13:52:57,860 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 61878
+INFO 2025-10-03 13:53:21,487 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 51070
+INFO 2025-10-03 13:53:35,642 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 61878
+INFO 2025-10-03 13:54:50,290 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 56331
+INFO 2025-10-03 13:54:57,725 basehttp 15352 27020 "GET /customer/enquiries/?status=open HTTP/1.1" 200 43307
+INFO 2025-10-03 13:54:59,581 basehttp 15352 27020 "GET /customer/enquiries/?status=in_progress HTTP/1.1" 200 46571
+INFO 2025-10-03 13:55:01,881 basehttp 15352 27020 "GET /customer/enquiries/?status=answered HTTP/1.1" 200 52667
+INFO 2025-10-03 13:55:03,527 basehttp 15352 27020 "GET /customer/enquiries/?status=closed HTTP/1.1" 200 43309
+INFO 2025-10-03 13:55:06,670 basehttp 15352 27020 "GET /customer/enquiries/?status=open HTTP/1.1" 200 43307
+INFO 2025-10-03 13:55:07,832 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 56331
+INFO 2025-10-03 13:56:59,645 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 56331
+INFO 2025-10-03 13:57:01,712 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 51070
+INFO 2025-10-03 13:57:15,582 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 56331
+INFO 2025-10-03 13:57:19,845 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 56331
+INFO 2025-10-03 13:57:21,625 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 51070
+INFO 2025-10-03 13:57:23,593 basehttp 15352 27020 "GET /customer/ajax/subcategories/17/ HTTP/1.1" 200 98
+INFO 2025-10-03 13:57:41,753 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 61878
+INFO 2025-10-03 13:58:20,769 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 56331
+INFO 2025-10-03 13:58:22,642 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 51070
+INFO 2025-10-03 13:58:24,064 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 61878
+INFO 2025-10-03 13:59:28,312 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 56331
+ERROR 2025-10-03 14:01:14,571 log 15352 27020 Internal Server Error: /customer/enquiries/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 505, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'endblock'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\customers\views.py", line 516, in enquiries
+    return render(request, 'customers/enquiries.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 507, in parse
+    self.invalid_block_tag(token, command, parse_until)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 558, in invalid_block_tag
+    raise self.error(
+    ...<8 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 390: 'endblock', expected 'elif', 'else' or 'endif'. Did you forget to register or load this tag?
+ERROR 2025-10-03 14:01:14,579 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 500 223418
+INFO 2025-10-03 14:03:35,930 basehttp 15352 12040 "GET /admin/dashboard/ HTTP/1.1" 200 83481
+INFO 2025-10-03 14:03:37,295 basehttp 15352 12040 "GET /admin/customers/ HTTP/1.1" 200 65548
+INFO 2025-10-03 14:03:39,773 basehttp 15352 12040 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-03 14:03:40,465 basehttp 15352 12040 "GET /admin/demos/ HTTP/1.1" 200 49716
+INFO 2025-10-03 14:03:40,483 basehttp 15352 12040 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 14:03:40,962 basehttp 15352 12040 "GET /admin/demo-requests/ HTTP/1.1" 200 77162
+INFO 2025-10-03 14:03:41,530 basehttp 15352 12040 "GET /admin/enquiries/ HTTP/1.1" 200 49228
+INFO 2025-10-03 14:03:43,418 basehttp 15352 12040 "GET /admin/settings/ HTTP/1.1" 200 39158
+INFO 2025-10-03 14:03:50,405 basehttp 15352 12040 "GET / HTTP/1.1" 302 0
+INFO 2025-10-03 14:03:50,472 basehttp 15352 12040 "GET /admin/dashboard/ HTTP/1.1" 200 83481
+INFO 2025-10-03 14:04:34,528 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 52324
+INFO 2025-10-03 14:04:44,249 basehttp 15352 27020 "GET /customer/enquiries/?status=in_progress HTTP/1.1" 200 45318
+INFO 2025-10-03 14:04:46,332 basehttp 15352 27020 "GET /customer/enquiries/?status=closed HTTP/1.1" 200 43433
+INFO 2025-10-03 14:04:48,216 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 52324
+INFO 2025-10-03 14:05:33,816 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 52324
+WARNING 2025-10-03 14:05:40,688 log 15352 27020 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 14:05:40,689 basehttp 15352 27020 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 14:06:07,657 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 61878
+INFO 2025-10-03 14:06:21,229 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 51070
+INFO 2025-10-03 14:06:23,912 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 52324
+INFO 2025-10-03 14:06:25,979 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 52324
+INFO 2025-10-03 14:07:02,481 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 51971
+INFO 2025-10-03 14:07:03,454 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 51971
+INFO 2025-10-03 14:07:05,122 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 50711
+INFO 2025-10-03 14:07:10,858 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 51971
+INFO 2025-10-03 14:07:15,153 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 50711
+INFO 2025-10-03 14:07:23,562 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 61525
+INFO 2025-10-03 14:07:26,818 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 51971
+INFO 2025-10-03 14:07:30,129 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 51971
+INFO 2025-10-03 14:07:32,566 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 50711
+INFO 2025-10-03 14:07:35,423 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 51971
+INFO 2025-10-03 14:07:38,781 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 51971
+INFO 2025-10-03 14:07:41,650 basehttp 15352 27020 "GET /customer/send-enquiry/ HTTP/1.1" 200 50711
+INFO 2025-10-03 14:07:43,634 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 61525
+INFO 2025-10-03 14:12:33,366 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 61525
+INFO 2025-10-03 14:12:37,170 basehttp 15352 27020 "GET /auth/profile/ HTTP/1.1" 200 70219
+INFO 2025-10-03 14:13:02,636 basehttp 15352 27020 "GET /customer/notifications/ HTTP/1.1" 200 53174
+INFO 2025-10-03 14:14:09,313 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 47478
+INFO 2025-10-03 14:17:44,850 basehttp 15352 27020 "GET /auth/profile/ HTTP/1.1" 200 70209
+INFO 2025-10-03 14:17:58,000 basehttp 15352 27020 "GET /customer/demos/ HTTP/1.1" 200 63567
+INFO 2025-10-03 14:17:58,010 basehttp 15352 27020 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 14:18:01,394 basehttp 15352 27020 "GET /customer/liked-demos/ HTTP/1.1" 200 64295
+INFO 2025-10-03 14:18:03,292 basehttp 15352 27020 "GET /customer/my-requests/ HTTP/1.1" 200 69489
+INFO 2025-10-03 14:18:05,330 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 51961
+INFO 2025-10-03 14:18:08,234 basehttp 15352 27020 "GET /customer/liked-demos/ HTTP/1.1" 200 64295
+INFO 2025-10-03 14:18:08,721 basehttp 15352 27020 "GET /customer/my-requests/ HTTP/1.1" 200 69489
+INFO 2025-10-03 14:18:09,971 basehttp 15352 27020 "GET /customer/request-demo/ HTTP/1.1" 200 53512
+INFO 2025-10-03 14:18:13,520 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 47478
+INFO 2025-10-03 14:18:16,852 basehttp 15352 27020 "GET /auth/profile/ HTTP/1.1" 200 70209
+INFO 2025-10-03 14:18:19,900 basehttp 15352 27020 "GET /customer/notifications/ HTTP/1.1" 200 53174
+INFO 2025-10-03 14:19:06,415 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 49028
+INFO 2025-10-03 14:20:59,021 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 48224
+WARNING 2025-10-03 14:22:55,578 log 15352 27020 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 14:22:55,579 basehttp 15352 27020 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 14:26:14,571 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 50014
+WARNING 2025-10-03 14:26:46,111 log 15352 27020 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-03 14:26:46,112 basehttp 15352 27020 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 22697
+INFO 2025-10-03 14:27:21,245 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 49210
+INFO 2025-10-03 14:27:36,635 basehttp 15352 27020 "GET /customer/demos/ HTTP/1.1" 200 63567
+INFO 2025-10-03 14:27:36,647 basehttp 15352 27020 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 14:27:38,155 basehttp 15352 27020 "GET /customer/liked-demos/ HTTP/1.1" 200 64295
+INFO 2025-10-03 14:27:39,661 basehttp 15352 27020 "GET /customer/my-requests/ HTTP/1.1" 200 69489
+INFO 2025-10-03 14:27:40,808 basehttp 15352 27020 "GET /customer/enquiries/ HTTP/1.1" 200 51959
+INFO 2025-10-03 14:27:42,344 basehttp 15352 27020 "GET /customer/contact-sales/ HTTP/1.1" 200 49210
+INFO 2025-10-03 14:27:44,991 basehttp 15352 27020 "GET /auth/profile/ HTTP/1.1" 200 70207
+INFO 2025-10-03 14:30:59,124 basehttp 15352 27020 "GET /auth/profile/ HTTP/1.1" 200 62170
+INFO 2025-10-03 14:38:50,670 basehttp 15352 11276 "GET /ajax/system-health/ HTTP/1.1" 200 137
+INFO 2025-10-03 14:46:25,844 basehttp 15352 12300 "GET /auth/profile/ HTTP/1.1" 200 62608
+INFO 2025-10-03 14:48:19,879 basehttp 15352 12300 "GET /auth/profile/ HTTP/1.1" 200 62608
+INFO 2025-10-03 14:48:39,731 basehttp 15352 12300 "GET /customer/ HTTP/1.1" 200 50112
+INFO 2025-10-03 14:48:41,282 basehttp 15352 12300 "GET /customer/demos/ HTTP/1.1" 200 63567
+INFO 2025-10-03 14:48:41,294 basehttp 15352 12300 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 14:48:41,948 basehttp 15352 12300 "GET /customer/liked-demos/ HTTP/1.1" 200 64295
+INFO 2025-10-03 14:48:42,486 basehttp 15352 12300 "GET /customer/my-requests/ HTTP/1.1" 200 69489
+INFO 2025-10-03 14:48:43,821 basehttp 15352 12300 "GET /customer/enquiries/ HTTP/1.1" 200 51951
+INFO 2025-10-03 14:48:45,646 basehttp 15352 12300 "GET /customer/contact-sales/ HTTP/1.1" 200 49210
+INFO 2025-10-03 14:59:05,853 basehttp 15352 24016 "GET /auth/profile/ HTTP/1.1" 200 63981
+INFO 2025-10-03 14:59:19,531 basehttp 15352 24016 "GET /customer/ HTTP/1.1" 200 50112
+INFO 2025-10-03 14:59:20,952 basehttp 15352 24016 "GET /customer/demos/ HTTP/1.1" 200 63567
+INFO 2025-10-03 14:59:20,962 basehttp 15352 24016 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 14:59:21,601 basehttp 15352 24016 "GET /customer/liked-demos/ HTTP/1.1" 200 64295
+INFO 2025-10-03 14:59:22,138 basehttp 15352 24016 "GET /customer/my-requests/ HTTP/1.1" 200 69489
+INFO 2025-10-03 14:59:23,142 basehttp 15352 24016 "GET /customer/enquiries/ HTTP/1.1" 200 51951
+INFO 2025-10-03 14:59:28,975 basehttp 15352 3896 "GET /admin/customers/ HTTP/1.1" 200 65548
+INFO 2025-10-03 14:59:30,566 basehttp 15352 3896 "GET /admin/customers/create/ HTTP/1.1" 200 72488
+INFO 2025-10-03 14:59:42,953 basehttp 15352 3896 "GET /admin/customers/ HTTP/1.1" 200 65548
+INFO 2025-10-03 14:59:44,664 basehttp 15352 3896 "GET /admin/customers/create/ HTTP/1.1" 200 72488
+INFO 2025-10-03 14:59:47,537 basehttp 15352 3896 "GET /admin/customers/ HTTP/1.1" 200 65548
+INFO 2025-10-03 14:59:49,782 basehttp 15352 3896 "GET /admin/customers/15/edit/ HTTP/1.1" 200 71223

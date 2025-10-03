@@ -1,4 +1,4 @@
-<!-- templates/customers/send_enquiry.html - Complete Updated Version -->
+<!-- templates/customers/send_enquiry.html - Compact Version -->
 {% extends 'customers/base.html' %}
 {% load static %}
 
@@ -7,7 +7,6 @@
 
 {% block customer_extra_css %}
 <style>
-    /* Send enquiry specific styles */
     .enquiry-form-container {
         max-width: 800px;
         margin: 0 auto;
@@ -24,42 +23,29 @@
     .form-header {
         background: var(--gradient-primary);
         color: white;
-        padding: var(--spacing-xl);
+        padding: var(--spacing-lg);
         text-align: center;
     }
 
     .form-header h2 {
-        margin: 0 0 var(--spacing-sm) 0;
-        font-size: 1.75rem;
+        margin: 0;
+        font-size: 1.5rem;
         font-weight: 700;
     }
 
-    .form-header p {
-        margin: 0;
-        opacity: 0.9;
-        font-size: 1.1rem;
-    }
-
     .form-body {
-        padding: var(--spacing-xl);
+        padding: var(--spacing-lg);
     }
 
     .form-section {
-        margin-bottom: var(--spacing-xl);
-        padding-bottom: var(--spacing-xl);
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .form-section:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
+        margin-bottom: var(--spacing-lg);
     }
 
     .section-title {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
         font-weight: 600;
         color: var(--dark-color);
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--spacing-md);
         display: flex;
         align-items: center;
         gap: var(--spacing-sm);
@@ -70,14 +56,15 @@
     }
 
     .form-group {
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--spacing-md);
     }
 
     .form-label {
         font-weight: 600;
         color: var(--gray-700);
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--spacing-xs);
         display: block;
+        font-size: 0.875rem;
     }
 
     .required-field::after {
@@ -86,47 +73,35 @@
         font-weight: bold;
     }
 
-    .form-control {
+    .form-control, .form-select {
         border: 2px solid var(--gray-300);
         border-radius: var(--radius-lg);
-        padding: var(--spacing-md);
-        font-size: 1rem;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.95rem;
         transition: all 0.3s ease;
         width: 100%;
     }
 
-    .form-control:focus {
+    .form-control:focus, .form-select:focus {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
         outline: none;
     }
 
     .form-select {
-        border: 2px solid var(--gray-300);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-md);
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        width: 100%;
         background-color: white;
         cursor: pointer;
     }
 
-    .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
-        outline: none;
-    }
-
     .form-text {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         color: var(--gray-500);
         margin-top: var(--spacing-xs);
     }
 
     .character-counter {
         text-align: right;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         color: var(--gray-500);
         margin-top: var(--spacing-xs);
     }
@@ -139,59 +114,27 @@
         color: var(--danger-color);
     }
 
-    /* Contact info display */
-    .contact-info-card {
-        background: var(--gray-50);
-        border: 1px solid var(--gray-200);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-lg);
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .contact-info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-md);
-    }
-
-    .contact-info-item {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .contact-info-item i {
-        width: 20px;
-        color: var(--primary-color);
-    }
-
-    .contact-info-value {
-        font-weight: 500;
-        color: var(--gray-700);
-    }
-
-    /* Submit section */
     .submit-section {
         background: var(--gray-50);
-        padding: var(--spacing-xl);
-        border-top: 1px solid var(--gray-200);
+        padding: var(--spacing-lg);
         text-align: center;
+        margin: 0 calc(-1 * var(--spacing-lg));
     }
 
     .submit-btn {
         background: var(--gradient-primary);
         color: white;
         border: none;
-        padding: var(--spacing-md) var(--spacing-xl);
+        padding: var(--spacing-sm) var(--spacing-xl);
         border-radius: var(--radius-lg);
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: var(--spacing-sm);
-        min-width: 200px;
+        min-width: 180px;
         justify-content: center;
     }
 
@@ -206,67 +149,6 @@
         transform: none;
     }
 
-    /* Guidelines section */
-    .guidelines-card {
-        background: #f0f9ff;
-        border: 1px solid #bae6fd;
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-lg);
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .guidelines-title {
-        color: #0369a1;
-        font-weight: 600;
-        margin-bottom: var(--spacing-md);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .guidelines-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .guidelines-list li {
-        padding: var(--spacing-xs) 0;
-        color: #0369a1;
-        display: flex;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
-    }
-
-    .guidelines-list li::before {
-        content: "✓";
-        color: var(--success-color);
-        font-weight: bold;
-        margin-top: 2px;
-    }
-
-    /* Response time info */
-    .response-info {
-        background: #ecfdf5;
-        border: 1px solid #bbf7d0;
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-lg);
-        margin-bottom: var(--spacing-lg);
-        text-align: center;
-    }
-
-    .response-info h6 {
-        color: #166534;
-        margin-bottom: var(--spacing-sm);
-        font-weight: 600;
-    }
-
-    .response-info p {
-        color: #166534;
-        margin: 0;
-    }
-
-    /* Validation styles */
     .form-control.is-invalid, .form-select.is-invalid {
         border-color: var(--danger-color);
         box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
@@ -274,7 +156,7 @@
 
     .invalid-feedback {
         color: var(--danger-color);
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         margin-top: var(--spacing-xs);
         display: block;
     }
@@ -284,118 +166,46 @@
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
         .form-header {
-            padding: var(--spacing-lg);
+            padding: var(--spacing-md);
         }
 
         .form-header h2 {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
         }
 
         .form-body {
-            padding: var(--spacing-lg);
-        }
-
-        .contact-info-grid {
-            grid-template-columns: 1fr;
+            padding: var(--spacing-md);
         }
 
         .submit-section {
-            padding: var(--spacing-lg);
+            padding: var(--spacing-md);
+            margin: 0 calc(-1 * var(--spacing-md));
         }
     }
 </style>
 {% endblock %}
 
 {% block customer_content %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="mb-4">
+<nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{% url 'customers:dashboard' %}">Dashboard</a>
-        </li>
-        <li class="breadcrumb-item">
-            <a href="{% url 'customers:enquiries' %}">Enquiries</a>
-        </li>
+        <li class="breadcrumb-item"><a href="{% url 'customers:dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'customers:enquiries' %}">Enquiries</a></li>
         <li class="breadcrumb-item active">Send Enquiry</li>
     </ol>
 </nav>
 
 <div class="enquiry-form-container">
-    <!-- Form Card -->
     <div class="form-card">
-        <!-- Header -->
         <div class="form-header">
-            <h2><i class="fas fa-envelope me-3"></i>Send Business Enquiry</h2>
-            <p>Let us know how we can help your business grow</p>
+            <h2><i class="fas fa-envelope me-2"></i>Send Business Enquiry</h2>
         </div>
         
-        <!-- Form Body -->
         <div class="form-body">
-            <!-- Guidelines -->
-            <div class="guidelines-card">
-                <h6 class="guidelines-title">
-                    <i class="fas fa-lightbulb"></i>
-                    Enquiry Guidelines
-                </h6>
-                <ul class="guidelines-list">
-                    <li>Be specific about your business needs and requirements</li>
-                    <li>Include relevant details like budget, timeline, and scope</li>
-                    <li>Mention any specific features or integrations you need</li>
-                    <li>Our team will respond within 24 hours during business days</li>
-                </ul>
-            </div>
-            
-            <!-- Response Time Info -->
-            <div class="response-info">
-                <h6><i class="fas fa-clock me-2"></i>Expected Response Time</h6>
-                <p>Our business development team typically responds within <strong>24 hours</strong> during business days (Monday - Friday, 9 AM - 6 PM IST)</p>
-            </div>
-            
-            <!-- Contact Information Display -->
-            <div class="form-section">
-                <h3 class="section-title">
-                    <i class="fas fa-user"></i>
-                    Your Contact Information
-                </h3>
-                <div class="contact-info-card">
-                    <div class="contact-info-grid">
-                        <div class="contact-info-item">
-                            <i class="fas fa-user"></i>
-                            <span class="contact-info-value">{{ user.first_name }} {{ user.last_name }}</span>
-                        </div>
-                        <div class="contact-info-item">
-                            <i class="fas fa-envelope"></i>
-                            <span class="contact-info-value">{{ user.email }}</span>
-                        </div>
-                        <div class="contact-info-item">
-                            <i class="fas fa-phone"></i>
-                            <span class="contact-info-value">{{ user.full_mobile }}</span>
-                        </div>
-                        <div class="contact-info-item">
-                            <i class="fas fa-briefcase"></i>
-                            <span class="contact-info-value">{{ user.job_title }}</span>
-                        </div>
-                        <div class="contact-info-item">
-                            <i class="fas fa-building"></i>
-                            <span class="contact-info-value">{{ user.organization }}</span>
-                        </div>
-                    </div>
-                    <div class="form-text mt-2">
-                        <i class="fas fa-info-circle me-1"></i>
-                        This information will be used for your enquiry. 
-                        <a href="{% url 'accounts:profile' %}">Update your profile</a> if any details are incorrect.
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Enquiry Form -->
             <form id="enquiryForm" method="post">
                 {% csrf_token %}
                 
-                <!-- Business Category Section -->
                 <div class="form-section">
                     <h3 class="section-title">
                         <i class="fas fa-building"></i>
@@ -405,7 +215,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="business_category" class="form-label required-field">Your Business Category</label>
+                                <label for="business_category" class="form-label required-field">Business Category</label>
                                 <select class="form-select" id="business_category" name="business_category" required>
                                     <option value="">-- Select Category --</option>
                                     {% for category in business_categories %}
@@ -414,24 +224,23 @@
                                         </option>
                                     {% endfor %}
                                 </select>
-                                <div class="form-text">Choose the category that best describes your business</div>
+                                <div class="form-text">Choose your business category</div>
                                 <div class="invalid-feedback" id="categoryError"></div>
                             </div>
                         </div>
                         
                         <div class="col-md-6" id="subcategoryWrapper" style="display: none;">
                             <div class="form-group">
-                                <label for="business_subcategory" class="form-label">Subcategory (Optional)</label>
+                                <label for="business_subcategory" class="form-label">Subcategory</label>
                                 <select class="form-select" id="business_subcategory" name="business_subcategory">
                                     <option value="">-- All Subcategories --</option>
                                 </select>
-                                <div class="form-text">Narrow down to a specific subcategory if needed</div>
+                                <div class="form-text">Optional subcategory</div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Enquiry Details Section -->
                 <div class="form-section">
                     <h3 class="section-title">
                         <i class="fas fa-clipboard-list"></i>
@@ -439,69 +248,48 @@
                     </h3>
                     
                     <div class="form-group">
-                        <label for="subject" class="form-label">Subject (Optional)</label>
+                        <label for="subject" class="form-label">Subject</label>
                         <input type="text" class="form-control" id="subject" name="subject" 
                                placeholder="Brief subject of your enquiry" maxlength="200">
-                        <div class="form-text">A brief subject line for your enquiry (will be auto-generated if left empty)</div>
+                        <div class="form-text">Optional - auto-generated if empty</div>
                     </div>
-                </div>
-                
-                <!-- Message Section -->
-                <div class="form-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-comment-dots"></i>
-                        Your Message
-                    </h3>
                     
                     <div class="form-group">
                         <label for="message" class="form-label required-field">Message</label>
-                        <textarea class="form-control" id="message" name="message" rows="8" 
-                                  placeholder="Please describe your business requirements, questions, or any specific information you need..."
+                        <textarea class="form-control" id="message" name="message" rows="6" 
+                                  placeholder="Describe your requirements, questions, or information needed..."
                                   required maxlength="2000"></textarea>
                         <div class="character-counter" id="messageCounter">0 / 2000 characters</div>
                         <div class="invalid-feedback" id="messageError"></div>
                     </div>
-                    
-                    <div class="form-text">
-                        <strong>Tips for a better response:</strong>
-                        <ul class="mt-2 mb-0">
-                            <li>Describe your business size and industry</li>
-                            <li>Mention specific features or integrations you need</li>
-                            <li>Include your timeline and budget range if possible</li>
-                            <li>Ask specific questions about our solutions</li>
-                        </ul>
-                    </div>
                 </div>
                 
-                <!-- Submit Section -->
                 <div class="submit-section">
                     <button type="submit" class="submit-btn" id="submitBtn">
                         <i class="fas fa-paper-plane"></i>
                         Send Enquiry
                     </button>
-                    <div class="form-text mt-3">
-                        By sending this enquiry, you agree to be contacted by our business development team regarding your requirements.
+                    <div class="form-text mt-2">
+                        Our team will respond within 24 hours
                     </div>
                 </div>
             </form>
         </div>
     </div>
     
-    <!-- Quick Contact Info -->
-    <div class="mt-4">
-        <div class="row">
+    <div class="mt-3">
+        <div class="row g-3">
             <div class="col-md-6">
                 <div class="customer-card h-100">
                     <div class="customer-card-header">
-                        <h6 class="mb-0"><i class="fas fa-headset me-2"></i>Need Immediate Help?</h6>
+                        <h6 class="mb-0"><i class="fas fa-headset me-2"></i>Need Help?</h6>
                     </div>
                     <div class="customer-card-body">
-                        <p class="mb-3">For urgent inquiries or immediate assistance:</p>
-                        <div class="d-flex align-items-center mb-2">
+                        <div class="mb-2">
                             <i class="fas fa-phone text-primary me-2"></i>
                             <strong>+91-1234567890</strong>
                         </div>
-                        <div class="d-flex align-items-center">
+                        <div>
                             <i class="fas fa-envelope text-primary me-2"></i>
                             <strong>support@chrp-india.com</strong>
                         </div>
@@ -514,18 +302,9 @@
                         <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Business Hours</h6>
                     </div>
                     <div class="customer-card-body">
-                        <div class="mb-2">
-                            <strong>Monday - Friday:</strong> 9:00 AM - 6:00 PM IST
-                        </div>
-                        <div class="mb-2">
-                            <strong>Saturday:</strong> 10:00 AM - 4:00 PM IST
-                        </div>
-                        <div>
-                            <strong>Sunday:</strong> Closed
-                        </div>
-                        <div class="form-text mt-2">
-                            Response times may be longer during weekends and holidays.
-                        </div>
+                        <div class="mb-1"><strong>Mon-Fri:</strong> 9:00 AM - 6:00 PM</div>
+                        <div class="mb-1"><strong>Saturday:</strong> 10:00 AM - 4:00 PM</div>
+                        <div><strong>Sunday:</strong> Closed</div>
                     </div>
                 </div>
             </div>
@@ -546,7 +325,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageCounter = document.getElementById('messageCounter');
     const submitBtn = document.getElementById('submitBtn');
     
-    // Business category change handler
     categorySelect.addEventListener('change', function() {
         const categoryId = this.value;
         
@@ -561,7 +339,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Load subcategories dynamically
     function loadSubcategories(categoryId) {
         fetch(`${BASE_URL}ajax/subcategories/${categoryId}/`)
             .then(response => response.json())
@@ -580,7 +357,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error loading subcategories:', error));
     }
     
-    // Character counter for message
     function updateCharacterCounter() {
         const currentLength = messageTextarea.value.length;
         const maxLength = 2000;
@@ -599,17 +375,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     messageTextarea.addEventListener('input', updateCharacterCounter);
     
-    // Form validation
     function validateForm() {
         let isValid = true;
         
-        // Clear previous errors
         categorySelect.classList.remove('is-invalid', 'is-valid');
         messageTextarea.classList.remove('is-invalid', 'is-valid');
         document.getElementById('categoryError').textContent = '';
         document.getElementById('messageError').textContent = '';
         
-        // Validate category
         if (!categorySelect.value) {
             categorySelect.classList.add('is-invalid');
             document.getElementById('categoryError').textContent = 'Please select a business category.';
@@ -618,7 +391,6 @@ document.addEventListener('DOMContentLoaded', function() {
             categorySelect.classList.add('is-valid');
         }
         
-        // Validate message
         const message = messageTextarea.value.trim();
         if (!message) {
             messageTextarea.classList.add('is-invalid');
@@ -639,11 +411,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return isValid;
     }
     
-    // Real-time validation
     messageTextarea.addEventListener('blur', validateForm);
     categorySelect.addEventListener('blur', validateForm);
     
-    // Form submission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -651,27 +421,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Show loading state
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
         
-        // Submit form normally (not AJAX)
         this.submit();
     });
     
-    // Initialize character counter
     updateCharacterCounter();
-    
-    // Add fade-in animation
-    const formCard = document.querySelector('.form-card');
-    formCard.style.opacity = '0';
-    formCard.style.transform = 'translateY(20px)';
-    formCard.style.transition = 'all 0.6s ease';
-    
-    setTimeout(() => {
-        formCard.style.opacity = '1';
-        formCard.style.transform = 'translateY(0)';
-    }, 100);
 });
 </script>
 {% endblock %}

@@ -57,6 +57,8 @@ def get_customer_context(user):
     }
     return context
 
+from django.db.models import Count, Q
+
 @login_required
 def customer_dashboard(request):
     """Customer main dashboard"""
@@ -65,25 +67,27 @@ def customer_dashboard(request):
     
     context = get_customer_context(request.user)
     
-    # Additional dashboard stats
+    # Get featured demos - REMOVED select_related
+    featured_demos = Demo.objects.filter(
+        is_active=True,
+        is_featured=True
+    ).annotate(
+        customer_count=Count('target_customers')
+    ).filter(
+        Q(customer_count=0) | Q(target_customers=request.user)
+    ).distinct()[:12]
+    
     context.update({
         'recent_demo_requests': DemoRequest.objects.filter(
             user=request.user
-        ).order_by('-created_at')[:3],
+        ).select_related('demo').order_by('-created_at')[:3],
         
         'recent_enquiries': BusinessEnquiry.objects.filter(
             user=request.user
         ).order_by('-created_at')[:3],
         
-        # Featured demos
-        'featured_demos': Demo.objects.filter(
-            is_active=True,
-            is_featured=True
-        ).filter(
-            Q(target_customers=request.user) | Q(target_customers__isnull=True)
-        )[:4],
+        'featured_demos': featured_demos,
         
-        # Quick stats for dashboard cards
         'stats': {
             'demos_watched': context['total_demos_watched'],
             'demo_requests': context['total_demo_requests'],
@@ -93,8 +97,6 @@ def customer_dashboard(request):
     })
     
     return render(request, 'customers/dashboard.html', context)
-
-from django.db.models import Count
 
 @login_required
 def browse_demos(request):
@@ -109,27 +111,20 @@ def browse_demos(request):
     sort_by = request.GET.get('sort', 'newest')
     
     # Base queryset with customer access control
-    # Show demos where: no customers selected (available to all) OR user is in the selected customers
     demos = Demo.objects.filter(is_active=True).annotate(
         customer_count=Count('target_customers')
     ).filter(
-        Q(customer_count=0) |  # No customers selected = available to all
-        Q(target_customers=request.user)  # OR user is specifically selected
+        Q(customer_count=0) |  # Available to all
+        Q(target_customers=request.user)  # OR assigned to this user
     ).distinct()
     
     # Apply business category filter if selected
     if business_category_id:
-        demos = demos.filter(
-            Q(target_business_categories__id=business_category_id) |
-            Q(target_business_categories__isnull=True)
-        ).distinct()
+        demos = demos.filter(business_category_id=business_category_id)
     
     # Apply business subcategory filter if selected
     if business_subcategory_id:
-        demos = demos.filter(
-            Q(target_business_subcategories__id=business_subcategory_id) |
-            Q(target_business_subcategories__isnull=True)
-        ).distinct()
+        demos = demos.filter(business_subcategory_id=business_subcategory_id)
     
     # Apply search filter
     if search_query:
@@ -155,19 +150,15 @@ def browse_demos(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Get business categories for filter
+    # Get ALL business categories for filter dropdown
     business_categories = BusinessCategory.objects.filter(
         is_active=True
-    ).distinct().order_by('sort_order', 'name')
+    ).order_by('sort_order', 'name')
     
-    # Get subcategories for selected category
-    if business_category_id:
-        business_subcategories = BusinessSubCategory.objects.filter(
-            category_id=business_category_id,
-            is_active=True
-        ).distinct().order_by('sort_order', 'name')
-    else:
-        business_subcategories = BusinessSubCategory.objects.none()
+    # Get ALL subcategories for dynamic JavaScript filtering
+    business_subcategories = BusinessSubCategory.objects.filter(
+        is_active=True
+    ).select_related('category').order_by('category__sort_order', 'sort_order', 'name')
     
     # Add user interaction data
     user_views = DemoView.objects.filter(user=request.user).values_list('demo_id', flat=True)
@@ -187,7 +178,6 @@ def browse_demos(request):
     })
     
     return render(request, 'customers/browse_demos.html', context)
-
 
 @login_required
 def demo_detail(request, slug):
@@ -283,7 +273,6 @@ def toggle_demo_like(request, demo_id):
     })
 
 # customers/views.py - Fixed demo_requests view with status filtering
-
 @login_required
 def demo_requests(request):
     """Customer's demo requests list with status filtering"""
@@ -293,16 +282,16 @@ def demo_requests(request):
     # Get filter parameters
     status_filter = request.GET.get('status', '').strip()
     
-    # Base queryset - Get user's demo requests
+    # Base queryset
     requests = DemoRequest.objects.filter(
         user=request.user
     ).select_related('demo', 'requested_time_slot', 'confirmed_time_slot')
     
-    # Apply status filter if provided
+    # Apply status filter
     if status_filter and status_filter in dict(DemoRequest.STATUS_CHOICES):
         requests = requests.filter(status=status_filter)
     
-    # Order by creation date (newest first)
+    # Order by newest first
     requests = requests.order_by('-created_at')
     
     # Pagination
@@ -313,16 +302,13 @@ def demo_requests(request):
     # Get context
     context = get_customer_context(request.user)
     
-    # Add status counts for better UX
+    # Status counts
     status_counts = {}
     all_requests = DemoRequest.objects.filter(user=request.user)
     
-    # Calculate counts for each status
     for status_key, status_label in DemoRequest.STATUS_CHOICES:
-        count = all_requests.filter(status=status_key).count()
-        status_counts[status_key] = count
+        status_counts[status_key] = all_requests.filter(status=status_key).count()
     
-    # Total count
     status_counts['all'] = all_requests.count()
     
     context.update({
@@ -334,7 +320,7 @@ def demo_requests(request):
     })
     
     return render(request, 'customers/demo_requests.html', context)
-
+from django.db.models import Count
 
 from django.db.models import Count
 
@@ -348,15 +334,15 @@ def request_demo(request):
     
     if demo_id:
         try:
-            # Check customer access control - same logic as browse_demos
+            # Check customer access control
             selected_demo = Demo.objects.filter(
                 id=demo_id,
                 is_active=True
             ).annotate(
                 customer_count=Count('target_customers')
             ).filter(
-                Q(customer_count=0) |  # Available to all
-                Q(target_customers=request.user)  # OR user is selected
+                Q(customer_count=0) |
+                Q(target_customers=request.user)
             ).distinct().first()
             
             if not selected_demo:
@@ -404,7 +390,7 @@ def request_demo(request):
             messages.error(request, 'An error occurred. Please try again.')
             return redirect('customers:browse_demos')
     
-    # General service request form
+    # General service request form - CREATE DEMOREQUEST
     if request.method == 'POST':
         business_category_id = request.POST.get('business_category')
         business_subcategory_id = request.POST.get('business_subcategory', '')
@@ -416,45 +402,49 @@ def request_demo(request):
             time_slot = TimeSlot.objects.get(id=time_slot_id, is_active=True)
             category = BusinessCategory.objects.get(id=business_category_id)
             
-            enquiry_subject = f"Service Consultation Request - {category.name}"
-            if business_subcategory_id:
-                subcategory = BusinessSubCategory.objects.get(id=business_subcategory_id)
-                enquiry_subject += f" ({subcategory.name})"
-            
-            enquiry_message = f"""Service Consultation Request
-
-Business Category: {category.name}
-"""
-            if business_subcategory_id:
-                enquiry_message += f"Subcategory: {subcategory.name}\n"
-            
-            enquiry_message += f"""
-Preferred Date: {requested_date}
-Preferred Time: {time_slot}
-
-Customer Requirements:
-{notes}
-"""
-            
-            BusinessEnquiry.objects.create(
-                user=request.user,
-                first_name=request.user.first_name,
-                last_name=request.user.last_name,
-                business_email=request.user.email,
-                mobile=request.user.mobile,
-                country_code=request.user.country_code,
-                job_title=request.user.job_title,
-                organization=request.user.organization,
-                subject=enquiry_subject,
-                message=enquiry_message
+            # Get or create a generic "Service Consultation" demo
+            generic_demo, created = Demo.objects.get_or_create(
+                slug='demo-consultation',
+                defaults={
+                    'title': 'Demo Consultation',
+                    'description': 'General service consultation and business requirements discussion',
+                    'is_active': True,
+                    'demo_type': 'overview',
+                    'views_count': 0,
+                    'likes_count': 0,
+                    'is_featured': False,
+                }
             )
             
-            messages.success(request, 'Service request submitted successfully! Our team will contact you within 24 hours.')
-            return redirect('customers:enquiries')
+            # Build detailed notes with category info
+            consultation_notes = f"""Business Category: {category.name}"""
+            
+            if business_subcategory_id:
+                try:
+                    subcategory = BusinessSubCategory.objects.get(id=business_subcategory_id)
+                    consultation_notes += f"\nSubcategory: {subcategory.name}"
+                except BusinessSubCategory.DoesNotExist:
+                    pass
+            
+            if notes:
+                consultation_notes += f"\n\nCustomer Requirements:\n{notes}"
+            
+            # Create DemoRequest
+            demo_request = DemoRequest.objects.create(
+                user=request.user,
+                demo=generic_demo,
+                requested_date=requested_date,
+                requested_time_slot=time_slot,
+                notes=consultation_notes
+            )
+            
+            messages.success(request, f'Demo request submitted successfully! Reference: #{demo_request.id}')
+            return redirect('customers:demo_requests')
             
         except (TimeSlot.DoesNotExist, BusinessCategory.DoesNotExist):
             messages.error(request, 'Invalid request. Please try again.')
     
+    # GET request - show form
     business_categories = BusinessCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
     time_slots = TimeSlot.objects.filter(is_active=True).order_by('start_time')
     

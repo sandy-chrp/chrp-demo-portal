@@ -1,4 +1,4 @@
-<!-- templates/customers/browse_demos.html - Browse Demos with Fixed Navigation -->
+<!-- templates/customers/browse_demos.html - Browse Demos with Video Check -->
 {% extends 'customers/base.html' %}
 
 {% block customer_title %}Browse Demos - Customer Portal{% endblock %}
@@ -16,7 +16,6 @@
         -webkit-tap-highlight-color: transparent;
     }
 
-    /* Disable selection for text content only */
     .demo-card-content, .demo-title, .demo-description {
         -webkit-user-select: none;
         -khtml-user-select: none;
@@ -25,7 +24,6 @@
         user-select: none;
     }
 
-    /* Allow buttons and links to work */
     a, button, .btn {
         pointer-events: auto !important;
         cursor: pointer !important;
@@ -49,60 +47,31 @@
         border: 1px solid var(--gray-200);
     }
 
-    .filter-group {
-        margin-bottom: var(--spacing-md);
-    }
-
-    .filter-group:last-child {
-        margin-bottom: 0;
-    }
-
     .filter-label {
         font-weight: 600;
         color: var(--dark-color);
         margin-bottom: var(--spacing-sm);
         display: block;
+        font-size: 0.875rem;
     }
 
-    .filter-pills {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--spacing-sm);
-    }
-
-    .filter-pill {
-        padding: var(--spacing-sm) var(--spacing-md);
+    .form-select {
         border: 2px solid var(--gray-300);
         border-radius: var(--radius-lg);
-        background: white;
-        color: var(--gray-700);
-        text-decoration: none;
+        padding: 0.625rem 1rem;
         font-size: 0.875rem;
-        font-weight: 500;
         transition: all 0.3s ease;
-        cursor: pointer;
+        background-color: white;
     }
 
-    .filter-pill:hover {
+    .form-select:focus {
         border-color: var(--primary-color);
-        color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        outline: none;
     }
 
-    .filter-pill.active {
-        border-color: var(--primary-color);
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .sort-dropdown {
-        min-width: 150px;
-    }
-
-    /* Search Section */
     .search-section {
         position: relative;
-        max-width: 400px;
     }
 
     .search-input {
@@ -199,6 +168,7 @@
         color: var(--primary-color);
         transform: scale(0.8);
         transition: all 0.3s ease;
+        pointer-events: auto;
     }
 
     .demo-card:hover .play-button {
@@ -294,6 +264,27 @@
         transform: translateY(-2px);
     }
 
+    .btn-consultation {
+        background: var(--info-color);
+        color: white;
+        border: none;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-consultation:hover {
+        background: #0891b2;
+        color: white;
+        transform: translateY(-2px);
+    }
+
     .btn-request {
         background: transparent;
         color: var(--primary-color);
@@ -313,7 +304,6 @@
         color: white;
     }
 
-    /* Status Indicators */
     .status-watched {
         background: var(--success-color);
     }
@@ -326,7 +316,6 @@
         background: var(--info-color);
     }
 
-    /* Empty State */
     .empty-state {
         text-align: center;
         padding: var(--spacing-xl) var(--spacing-lg);
@@ -339,7 +328,6 @@
         opacity: 0.5;
     }
 
-    /* Pagination */
     .pagination-wrapper {
         margin-top: var(--spacing-xl);
         display: flex;
@@ -366,28 +354,21 @@
         border-color: var(--primary-color);
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
         .demos-grid {
             grid-template-columns: 1fr;
             gap: var(--spacing-lg);
         }
         
-        .filter-pills {
-            justify-content: center;
-        }
-        
-        .filters-section .row {
-            text-align: center;
-        }
-        
-        .search-section {
-            max-width: 100%;
+        .filters-section .row > div {
             margin-bottom: var(--spacing-md);
+        }
+        
+        .filters-section .row > div:last-child {
+            margin-bottom: 0;
         }
     }
 
-    /* Watermark */
     .demo-watermark {
         position: absolute;
         top: 50%;
@@ -404,15 +385,13 @@
 {% endblock %}
 
 {% block customer_content %}
-<!-- Page Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h2 mb-1">Browse Demo Library</h1>
         <p class="text-muted mb-0">Explore our comprehensive collection of business solutions</p>
     </div>
     <div class="d-flex gap-2">
         <a href="{% url 'customers:request_demo' %}" class="btn btn-primary">
-            <i class="fas fa-calendar-plus me-2"></i>Scheduled Demo
+            <i class="fas fa-calendar-plus me-2"></i>Schedule Demo
         </a>
     </div>
 </div>
@@ -420,9 +399,8 @@
 <!-- Filters Section -->
 <div class="filters-section">
     <form method="GET" id="filterForm">
-        <div class="row g-4 align-items-end">
-            <!-- Search -->
-            <div class="col-lg-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6">
                 <label class="filter-label">Search Demos</label>
                 <div class="search-section">
                     <i class="fas fa-search search-icon"></i>
@@ -434,8 +412,34 @@
                 </div>
             </div>
             
-            <!-- Sort -->
-            <div class="col-lg-3">
+            <div class="col-lg-2 col-md-6">
+                <label class="filter-label">Business Category</label>
+                <select name="business_category" id="categorySelect" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for category in business_categories %}
+                        <option value="{{ category.id }}" 
+                                {% if current_business_category == category.id %}selected{% endif %}>
+                            {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-lg-2 col-md-6">
+                <label class="filter-label">Subcategory</label>
+                <select name="business_subcategory" id="subcategorySelect" class="form-select">
+                    <option value="">All Subcategories</option>
+                    {% for subcategory in business_subcategories %}
+                        <option value="{{ subcategory.id }}" 
+                                data-category="{{ subcategory.category.id }}"
+                                {% if current_business_subcategory == subcategory.id %}selected{% endif %}>
+                            {{ subcategory.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-lg-2 col-md-6">
                 <label class="filter-label">Sort By</label>
                 <select name="sort" class="form-select sort-dropdown">
                     <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
@@ -446,56 +450,17 @@
                 </select>
             </div>
             
-            <!-- Actions -->
-            <div class="col-lg-5">
-                <div class="d-flex gap-2 justify-content-end">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter me-2"></i>Apply Filters
+            <div class="col-lg-3 col-md-12">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="fas fa-search me-2"></i>Search
                     </button>
-                    <a href="{% url 'customers:browse_demos' %}" class="btn btn-outline-secondary">
+                    <a href="{% url 'customers:browse_demos' %}" class="btn btn-outline-secondary" title="Clear All Filters">
                         <i class="fas fa-times me-2"></i>Clear
                     </a>
                 </div>
             </div>
         </div>
-        
-        <!-- Business Category Filter -->
-        {% if business_categories %}
-        <div class="filter-group mt-4">
-            <label class="filter-label">Business Categories</label>
-            <div class="filter-pills">
-                <a href="?search={{ search_query }}&sort={{ sort_by }}" 
-                   class="filter-pill {% if not current_business_category %}active{% endif %}">
-                    All Categories
-                </a>
-                {% for category in business_categories %}
-                    <a href="?business_category={{ category.id }}&search={{ search_query }}&sort={{ sort_by }}" 
-                       class="filter-pill {% if current_business_category == category.id %}active{% endif %}">
-                        {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
-                    </a>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-        
-        <!-- Business Subcategory Filter -->
-        {% if business_subcategories %}
-        <div class="filter-group mt-3">
-            <label class="filter-label">Subcategories</label>
-            <div class="filter-pills">
-                <a href="?business_category={{ current_business_category }}&search={{ search_query }}&sort={{ sort_by }}" 
-                   class="filter-pill {% if not current_business_subcategory %}active{% endif %}">
-                    All Subcategories
-                </a>
-                {% for subcategory in business_subcategories %}
-                    <a href="?business_category={{ current_business_category }}&business_subcategory={{ subcategory.id }}&search={{ search_query }}&sort={{ sort_by }}" 
-                       class="filter-pill {% if current_business_subcategory == subcategory.id %}active{% endif %}">
-                        {{ subcategory.name }}
-                    </a>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
     </form>
 </div>
 
@@ -508,19 +473,8 @@
                 {% if search_query %}
                     for "<strong>{{ search_query }}</strong>"
                 {% endif %}
-                {% if current_business_category %}
-                    {% for cat in business_categories %}
-                        {% if cat.id == current_business_category %}
-                            in <strong>{{ cat.name }}</strong>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
             </p>
         {% endif %}
-    </div>
-    <div class="d-flex align-items-center gap-2 text-muted">
-        <i class="fas fa-shield-alt"></i>
-        <small>Content Protected</small>
     </div>
 </div>
 
@@ -529,10 +483,8 @@
     <div class="demos-grid">
         {% for demo in page_obj.object_list %}
             <div class="demo-card">
-                <!-- Watermark -->
                 <div class="demo-watermark">{{ user.email }}</div>
                 
-                <!-- Thumbnail -->
                 <div class="demo-thumbnail-container">
                     {% if demo.thumbnail %}
                         <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-thumbnail">
@@ -542,14 +494,16 @@
                         </div>
                     {% endif %}
                     
-                    <!-- Play Overlay -->
+                    {% if demo.video_file %}
                     <div class="demo-overlay">
-                        <div class="play-button">
-                            <i class="fas fa-play"></i>
-                        </div>
+                        <a href="{% url 'customers:demo_detail' demo.slug %}">                       
+                            <div class="play-button">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </a>
                     </div>
+                    {% endif %}
                     
-                    <!-- Status Badges -->
                     {% if demo.id in user_views %}
                         <div class="demo-badge status-watched">
                             <i class="fas fa-eye me-1"></i>Watched
@@ -561,11 +515,10 @@
                     {% endif %}
                 </div>
                 
-                <!-- Content -->
                 <div class="demo-card-content">
                     <div class="demo-category">
-                        {% if demo.primary_business_category %}
-                            {{ demo.primary_business_category.name }}
+                        {% if demo.business_category %}
+                            {{ demo.business_category.name }}
                         {% else %}
                             {{ demo.get_demo_type_display }}
                         {% endif %}
@@ -573,31 +526,33 @@
                     <h3 class="demo-title">{{ demo.title }}</h3>
                     <p class="demo-description">{{ demo.description|truncatewords:20 }}</p>
                     
-                    <!-- Meta Info -->
                     <div class="demo-meta">
                         <div class="demo-stats">
                             <span><i class="fas fa-eye me-1"></i>{{ demo.views_count }}</span>
                             <span><i class="fas fa-heart me-1"></i>{{ demo.likes_count }}</span>
                             {% if demo.duration %}
-                                <span><i class="fas fa-clock me-1"></i>{{ demo.formatted_duration }}</span>
+                                <span><i class="fas fa-clock me-1"></i>{{ demo.duration }} min</span>
                             {% endif %}
                         </div>
-                        {% comment %} <div class="demo-date">
-                            {{ demo.created_at|date:"M d" }}
-                        </div> {% endcomment %}
                     </div>
                     
-                    <!-- Actions -->
                     <div class="demo-actions">
-                        <a href="{% url 'customers:demo_detail' demo.slug %}" class="btn btn-watch">
-                            <i class="fas fa-play me-2"></i>Watch Demo
-                        </a>
-                    <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
-                        class="btn btn-request" 
-                        title="Request Live Demo Session">
-                            <i class="fas fa-calendar"></i>
-                        </a>
-                                            </div>
+                        {% if demo.video_file %}
+                            <a href="{% url 'customers:demo_detail' demo.slug %}" class="btn-watch">
+                                <i class="fas fa-play me-2"></i>Watch Demo
+                            </a>
+                            <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
+                               class="btn-request" 
+                               title="Request Live Demo Session">
+                                <i class="fas fa-calendar"></i>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
+                               class="btn-consultation">
+                                <i class="fas fa-calendar-plus me-2"></i>Request Demo
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         {% endfor %}
@@ -606,14 +561,9 @@
     <!-- Pagination -->
     {% if page_obj.has_other_pages %}
         <div class="pagination-wrapper">
-            <nav aria-label="Demo pagination">
+            <nav>
                 <ul class="pagination">
                     {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page=1&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
-                                <i class="fas fa-angle-double-left"></i>
-                            </a>
-                        </li>
                         <li class="page-item">
                             <a class="page-link" href="?page={{ page_obj.previous_page_number }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
                                 <i class="fas fa-angle-left"></i>
@@ -639,11 +589,6 @@
                                 <i class="fas fa-angle-right"></i>
                             </a>
                         </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
-                                <i class="fas fa-angle-double-right"></i>
-                            </a>
-                        </li>
                     {% endif %}
                 </ul>
             </nav>
@@ -651,7 +596,6 @@
     {% endif %}
     
 {% else %}
-    <!-- Empty State -->
     <div class="empty-state">
         <div class="empty-icon">
             <i class="fas fa-search"></i>
@@ -664,9 +608,6 @@
             </a>
         {% else %}
             <p>No demo videos are currently available. Please check back later.</p>
-            <a href="{% url 'customers:contact_sales' %}" class="btn btn-primary mt-3">
-                <i class="fas fa-envelope me-2"></i>Contact Sales Team
-            </a>
         {% endif %}
     </div>
 {% endif %}
@@ -675,28 +616,76 @@
 {% block customer_extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('categorySelect');
+    const subcategorySelect = document.getElementById('subcategorySelect');
     
-    // TEST: Check if buttons are clickable
-    document.querySelectorAll('.btn-request').forEach(btn => {
-        console.log('Found button:', btn.href);
-        
-        btn.addEventListener('click', function(e) {
-            console.log('Button clicked!');
-            console.log('Going to:', this.href);
-            // Don't prevent default - let it navigate
+    const allSubcategories = [];
+    const subcategoryOptions = subcategorySelect.querySelectorAll('option[data-category]');
+    
+    subcategoryOptions.forEach(option => {
+        allSubcategories.push({
+            value: option.value,
+            text: option.textContent.trim(),
+            categoryId: option.getAttribute('data-category')
         });
     });
     
-    // Disable right-click on images and text only
+    function updateSubcategories() {
+        const selectedCategory = categorySelect.value;
+        const currentSubcategory = '{{ current_business_subcategory }}';
+        
+        subcategorySelect.innerHTML = '<option value="">All Subcategories</option>';
+        
+        let filteredSubs = [];
+        
+        if (!selectedCategory || selectedCategory === '') {
+            filteredSubs = allSubcategories;
+        } else {
+            filteredSubs = allSubcategories.filter(sub => sub.categoryId === selectedCategory);
+        }
+        
+        filteredSubs.forEach(sub => {
+            const option = document.createElement('option');
+            option.value = sub.value;
+            option.textContent = sub.text;
+            option.setAttribute('data-category', sub.categoryId);
+            
+            if (currentSubcategory && sub.value === currentSubcategory) {
+                option.selected = true;
+            }
+            
+            subcategorySelect.appendChild(option);
+        });
+        
+        if (filteredSubs.length === 0 && selectedCategory) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No subcategories available';
+            option.disabled = true;
+            subcategorySelect.appendChild(option);
+        }
+    }
+    
+    if (categorySelect) {
+        categorySelect.addEventListener('change', updateSubcategories);
+        updateSubcategories();
+    }
+    
+    const sortSelect = document.querySelector('select[name="sort"]');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+    
     document.addEventListener('contextmenu', function(e) {
-        if (e.target.closest('a') || e.target.closest('button')) {
+        if (e.target.closest('a') || e.target.closest('button') || e.target.closest('select')) {
             return true;
         }
         e.preventDefault();
         return false;
     });
     
-    // Disable specific keyboard shortcuts only
     document.addEventListener('keydown', function(e) {
         if (e.keyCode === 123 || 
             (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
@@ -708,44 +697,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Auto-submit filters on sort change
-    const sortSelect = document.querySelector('select[name="sort"]');
-    if (sortSelect) {
-        sortSelect.addEventListener('change', function() {
-            this.form.submit();
-        });
-    }
-    
-    // Protect thumbnails from drag
     document.querySelectorAll('.demo-thumbnail').forEach(thumbnail => {
         thumbnail.addEventListener('dragstart', function(e) {
             e.preventDefault();
             return false;
         });
-    });
-    
-    // Animate demo cards on scroll
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-    
-    const demoCards = document.querySelectorAll('.demo-card');
-    demoCards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = 'all 0.6s ease';
-        card.style.transitionDelay = `${index * 100}ms`;
-        observer.observe(card);
     });
 });
 </script>

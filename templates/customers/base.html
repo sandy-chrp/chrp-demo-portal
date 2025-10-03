@@ -738,14 +738,14 @@
                         {% endif %}
                     </a>
                 </div>
-                <div class="nav-item">
+                {% comment %} <div class="nav-item">
                     <a href="{% url 'customers:send_enquiry' %}" 
                        class="nav-link {% if 'send_enquiry' in request.resolver_match.url_name %}active{% endif %}"
                        data-tooltip="Send Business Enquiry">
                         <i class="fas fa-paper-plane"></i>
                         <span class="nav-text">Send Enquiry</span>
                     </a>
-                </div>
+                </div> {% endcomment %}
                 <div class="nav-item">
                     <a href="{% url 'customers:contact_sales' %}" 
                        class="nav-link {% if 'contact_sales' in request.resolver_match.url_name %}active{% endif %}"

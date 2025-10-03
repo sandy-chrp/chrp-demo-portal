@@ -7,7 +7,6 @@
 
 {% block customer_extra_css %}
 <style>
-    /* Enquiries specific styles */
     .enquiry-card {
         background: white;
         border-radius: var(--radius-xl);
@@ -52,7 +51,7 @@
     .enquiry-meta {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-lg);
+        gap: var(--spacing-md);
         margin-bottom: var(--spacing-lg);
         padding-bottom: var(--spacing-lg);
         border-bottom: 1px solid var(--gray-200);
@@ -99,7 +98,6 @@
         white-space: pre-wrap;
     }
 
-    /* Status badges */
     .status-badge {
         padding: var(--spacing-xs) var(--spacing-md);
         border-radius: var(--radius-lg);
@@ -133,7 +131,6 @@
         border: 1px solid #d1d5db;
     }
 
-    /* Priority badges */
     .priority-badge {
         padding: var(--spacing-xs) var(--spacing-md);
         border-radius: var(--radius-lg);
@@ -167,56 +164,29 @@
         border: 1px solid #991b1b;
     }
 
-    /* Filter section */
     .filter-section {
         background: white;
         padding: var(--spacing-lg);
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow-md);
-        margin-bottom: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
         border: 1px solid var(--gray-200);
     }
 
-    .filter-pills {
-        display: flex;
-        gap: var(--spacing-sm);
-        flex-wrap: wrap;
-        margin-top: var(--spacing-md);
-    }
-
-    .filter-pill {
-        padding: var(--spacing-sm) var(--spacing-md);
+    .form-select {
         border: 2px solid var(--gray-300);
         border-radius: var(--radius-lg);
-        background: white;
-        color: var(--gray-700);
-        text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 500;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.95rem;
         transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
+        max-width: 250px;
     }
 
-    .filter-pill:hover {
+    .form-select:focus {
         border-color: var(--primary-color);
-        color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
-        text-decoration: none;
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
     }
 
-    .filter-pill.active {
-        border-color: var(--primary-color);
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .filter-pill.active:hover {
-        color: white;
-    }
-
-    /* Response section */
     .response-section {
         margin-top: var(--spacing-lg);
         padding-top: var(--spacing-lg);
@@ -254,10 +224,9 @@
         margin: 0;
     }
 
-    /* Empty state */
     .empty-state {
         text-align: center;
-        padding: var(--spacing-xl) * 2;
+        padding: 60px 20px;
         color: var(--gray-500);
     }
 
@@ -268,62 +237,12 @@
         color: var(--primary-color);
     }
 
-    /* Stats section */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-lg);
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: var(--radius-xl);
-        padding: var(--spacing-lg);
-        box-shadow: var(--shadow-md);
-        border-left: 4px solid;
-        transition: all 0.3s ease;
-        text-align: center;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .stat-card.primary { border-left-color: var(--primary-color); }
-    .stat-card.warning { border-left-color: var(--warning-color); }
-    .stat-card.success { border-left-color: var(--success-color); }
-    .stat-card.info { border-left-color: var(--info-color); }
-
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: var(--spacing-sm);
-        color: var(--dark-color);
-    }
-
-    .stat-label {
-        color: var(--gray-600);
-        font-size: 0.95rem;
-        font-weight: 500;
-    }
-
-    .stat-icon {
-        float: right;
-        font-size: 2rem;
-        opacity: 0.3;
-        margin-top: -10px;
-    }
-
-    /* Pagination */
     .pagination-wrapper {
         margin-top: var(--spacing-xl);
         display: flex;
         justify-content: center;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
         .enquiry-header {
             flex-direction: column;
@@ -336,94 +255,45 @@
             gap: var(--spacing-md);
         }
 
-        .filter-pills {
-            justify-content: center;
+        .filter-section .d-flex {
+            flex-direction: column;
+            align-items: stretch !important;
         }
 
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
+        .form-select {
+            max-width: 100%;
         }
     }
 </style>
 {% endblock %}
 
 {% block customer_content %}
-<!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h2 mb-1">My Business Enquiries</h1>
-        <p class="text-muted mb-0">Track and manage your business enquiries and responses</p>
-    </div>
-    <div>
-        <a href="{% url 'customers:send_enquiry' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Send New Enquiry
-        </a>
-    </div>
-</div>
-
-<!-- Stats Overview -->
-{% if total_enquiries > 0 %}
-<div class="stats-grid">
-    <div class="stat-card primary">
-        <div class="stat-number">{{ total_enquiries }}</div>
-        <div class="stat-label">Total Enquiries</div>
-        <i class="fas fa-envelope stat-icon"></i>
-    </div>
-    <div class="stat-card warning">
-        <div class="stat-number">{{ open_enquiries }}</div>
-        <div class="stat-label">Open</div>
-        <i class="fas fa-clock stat-icon"></i>
-    </div>
-    <div class="stat-card info">
-        <div class="stat-number">{{ in_progress_enquiries|default:0 }}</div>
-        <div class="stat-label">In Progress</div>
-        <i class="fas fa-cog stat-icon"></i>
-    </div>
-    <div class="stat-card success">
-        <div class="stat-number">{{ answered_enquiries|default:0 }}</div>
-        <div class="stat-label">Answered</div>
-        <i class="fas fa-check-circle stat-icon"></i>
-    </div>
-</div>
-{% endif %}
-
 <!-- Filter Section -->
 <div class="filter-section">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="mb-0">Filter by Status</h6>
-        <small class="text-muted">
-            Showing {{ page_obj.paginator.count }} enquir{{ page_obj.paginator.count|pluralize:"y,ies" }}
-        </small>
-    </div>
-    <div class="filter-pills">
-        <a href="{% url 'customers:enquiries' %}" 
-           class="filter-pill {% if not request.GET.status %}active{% endif %}">
-            <i class="fas fa-list"></i>
-            All Enquiries
-        </a>
+    <div class="d-flex justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <label for="statusFilter" class="mb-0 fw-semibold">Search:</label>
+            <select class="form-select" id="statusFilter" onchange="filterEnquiries(this.value)">
+                <option value="" {% if not request.GET.status %}selected{% endif %}>
+                    All Enquiries ({{ page_obj.paginator.count }})
+                </option>
+                <option value="open" {% if request.GET.status == 'open' %}selected{% endif %}>
+                    Open ({{ status_counts.open|default:0 }})
+                </option>
+                <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>
+                    In Progress ({{ status_counts.in_progress|default:0 }})
+                </option>
+                <option value="answered" {% if request.GET.status == 'answered' %}selected{% endif %}>
+                    Answered ({{ status_counts.answered|default:0 }})
+                </option>
+                <option value="closed" {% if request.GET.status == 'closed' %}selected{% endif %}>
+                    Closed ({{ status_counts.closed|default:0 }})
+                </option>
+            </select>
+        </div>
         
-        <a href="?status=open" 
-           class="filter-pill {% if request.GET.status == 'open' %}active{% endif %}">
-            <i class="fas fa-clock"></i>
-            Open
-        </a>
-        
-        <a href="?status=in_progress" 
-           class="filter-pill {% if request.GET.status == 'in_progress' %}active{% endif %}">
-            <i class="fas fa-cog"></i>
-            In Progress
-        </a>
-        
-        <a href="?status=answered" 
-           class="filter-pill {% if request.GET.status == 'answered' %}active{% endif %}">
-            <i class="fas fa-check-circle"></i>
-            Answered
-        </a>
-        
-        <a href="?status=closed" 
-           class="filter-pill {% if request.GET.status == 'closed' %}active{% endif %}">
-            <i class="fas fa-archive"></i>
-            Closed
+        <a href="{% url 'customers:send_enquiry' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Send New Enquiry
         </a>
     </div>
 </div>
@@ -456,32 +326,11 @@
             </div>
             
             <div class="enquiry-body">
-                <!-- Enquiry Meta Information -->
                 <div class="enquiry-meta">
                     <div class="meta-item">
                         <i class="fas fa-folder meta-icon"></i>
                         <span class="meta-label">Category:</span>
                         <span class="meta-value">{{ enquiry.category.name|default:"General" }}</span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-building meta-icon"></i>
-                        <span class="meta-label">Organization:</span>
-                        <span class="meta-value">{{ enquiry.organization }}</span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-briefcase meta-icon"></i>
-                        <span class="meta-label">Job Title:</span>
-                        <span class="meta-value">{{ enquiry.job_title }}</span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-envelope meta-icon"></i>
-                        <span class="meta-label">Email:</span>
-                        <span class="meta-value">{{ enquiry.business_email }}</span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-phone meta-icon"></i>
-                        <span class="meta-label">Mobile:</span>
-                        <span class="meta-value">{{ enquiry.full_mobile }}</span>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-clock meta-icon"></i>
@@ -490,13 +339,11 @@
                     </div>
                 </div>
                 
-                <!-- Enquiry Message -->
                 <div class="enquiry-message">
                     <h6><i class="fas fa-comment-dots me-2"></i>Your Enquiry:</h6>
                     <p>{{ enquiry.message }}</p>
                 </div>
                 
-                <!-- Admin Notes (if any) -->
                 {% if enquiry.admin_notes %}
                 <div class="enquiry-message" style="border-left-color: var(--warning-color);">
                     <h6><i class="fas fa-sticky-note me-2"></i>Admin Notes:</h6>
@@ -504,7 +351,6 @@
                 </div>
                 {% endif %}
                 
-                <!-- Responses Section -->
                 {% if enquiry.responses.exists %}
                 <div class="response-section">
                     <h6><i class="fas fa-reply me-2"></i>Responses from our team:</h6>
@@ -525,7 +371,6 @@
                 </div>
                 {% endif %}
                 
-                <!-- Action Buttons -->
                 <div class="d-flex gap-2 mt-3">
                     {% if enquiry.status == 'open' or enquiry.status == 'in_progress' %}
                         <a href="{% url 'customers:contact_sales' %}" class="btn btn-outline-primary btn-sm">
@@ -538,27 +383,16 @@
                             <i class="fas fa-check me-1"></i>Response Received
                         </span>
                     {% endif %}
-                    
-                    <a href="mailto:{{ enquiry.business_email }}?subject=Re: {{ enquiry.enquiry_id }}" 
-                       class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-envelope me-1"></i>Email Reference
-                    </a>
                 </div>
             </div>
         </div>
     {% endfor %}
     
-    <!-- Pagination -->
     {% if page_obj.has_other_pages %}
         <div class="pagination-wrapper">
-            <nav aria-label="Enquiries pagination">
+            <nav>
                 <ul class="pagination">
                     {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
-                                <i class="fas fa-angle-double-left"></i>
-                            </a>
-                        </li>
                         <li class="page-item">
                             <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
                                 <i class="fas fa-angle-left"></i>
@@ -584,11 +418,6 @@
                                 <i class="fas fa-angle-right"></i>
                             </a>
                         </li>
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
-                                <i class="fas fa-angle-double-right"></i>
-                            </a>
-                        </li>
                     {% endif %}
                 </ul>
             </nav>
@@ -596,7 +425,6 @@
     {% endif %}
     
 {% else %}
-    <!-- Empty State -->
     <div class="empty-state">
         <div class="empty-icon">
             <i class="fas fa-envelope-open-text"></i>
@@ -619,8 +447,15 @@
 
 {% block customer_extra_js %}
 <script>
+function filterEnquiries(status) {
+    if (status) {
+        window.location.href = '?status=' + status;
+    } else {
+        window.location.href = '{% url "customers:enquiries" %}';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Add fade-in animation for cards
     const cards = document.querySelectorAll('.enquiry-card');
     cards.forEach((card, index) => {
         card.style.opacity = '0';
@@ -631,17 +466,6 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
         }, index * 100);
-    });
-    
-    // Add click animation to stat cards
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach(card => {
-        card.addEventListener('click', function() {
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = 'translateY(-3px)';
-            }, 150);
-        });
     });
 });
 </script>

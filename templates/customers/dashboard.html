@@ -1,5 +1,6 @@
-<!-- templates/customers/dashboard.html - Customer Dashboard with Security -->
+<!-- templates/customers/dashboard.html - Only Product Demo Filter -->
 {% extends 'customers/base.html' %}
+{% load static %}
 
 {% block customer_title %}Dashboard - Customer Portal{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
@@ -12,12 +13,10 @@
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
-        
         -webkit-touch-callout: none;
         -webkit-tap-highlight-color: transparent;
     }
 
-    /* Disable right-click context menu */
     * {
         -webkit-user-select: none;
         -khtml-user-select: none;
@@ -26,7 +25,6 @@
         user-select: none;
     }
 
-    /* Prevent drag and drop */
     img, video {
         -webkit-user-drag: none;
         -khtml-user-drag: none;
@@ -36,7 +34,6 @@
         pointer-events: none;
     }
 
-    /* Content protection overlay */
     .content-protection {
         position: relative;
         overflow: hidden;
@@ -54,7 +51,6 @@
         pointer-events: none;
     }
 
-    /* Disable text selection on sensitive content */
     .no-select {
         -webkit-user-select: none;
         -moz-user-select: none;
@@ -100,31 +96,172 @@
     .welcome-subtitle {
         font-size: 1.125rem;
         opacity: 0.9;
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: 0;
     }
 
-    .quick-actions {
+    /* Featured Demos Filter Section */
+    .featured-filters {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-btn {
+        padding: 8px 16px;
+        border: 2px solid var(--gray-300);
+        border-radius: 20px;
+        background: white;
+        color: var(--gray-700);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .filter-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .filter-btn.active {
+        background: var(--gradient-primary);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    /* Demo Cards Grid */
+    .demos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    .demo-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        border: 1px solid var(--gray-200);
+    }
+
+    .demo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .demo-card-thumbnail {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        background: var(--gray-200);
+    }
+
+    .demo-card-body {
+        padding: var(--spacing-md);
+    }
+
+    .demo-category-badge {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .demo-card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-xs);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .demo-card-description {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-md);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .demo-card-meta {
         display: flex;
         gap: var(--spacing-md);
-        flex-wrap: wrap;
+        margin-bottom: var(--spacing-md);
+        font-size: 0.75rem;
+        color: var(--gray-500);
     }
 
-    .quick-action-btn {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: var(--spacing-sm) var(--spacing-lg);
-        border-radius: var(--radius-lg);
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
+    .demo-card-meta span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
     }
 
-    .quick-action-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
+    .demo-card-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    .demo-card-actions .btn {
+        flex: 1;
+        font-size: 0.875rem;
+        padding: 8px 12px;
+    }
+
+    .demo-type-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
         color: white;
-        transform: translateY(-2px);
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .demo-card-thumbnail-wrapper {
+        position: relative;
+    }
+
+    /* Empty State */
+    .featured-empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--gray-500);
+    }
+
+    .featured-empty i {
+        font-size: 4rem;
+        margin-bottom: var(--spacing-lg);
+        opacity: 0.3;
+    }
+
+    /* Loading State */
+    .demos-loading {
+        display: none;
+        text-align: center;
+        padding: 40px;
+        color: var(--gray-500);
+    }
+
+    .demos-loading.active {
+        display: block;
     }
 
     /* Activity Feed */
@@ -158,7 +295,6 @@
 
     .activity-icon.demo { background: var(--gradient-primary); color: white; }
     .activity-icon.enquiry { background: var(--gradient-success); color: white; }
-    .activity-icon.notification { background: var(--info-color); color: white; }
 
     .activity-content {
         flex: 1;
@@ -175,55 +311,17 @@
         color: var(--gray-500);
     }
 
-    /* Demo Grid */
-    .demo-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--spacing-lg);
-        margin-top: var(--spacing-lg);
-    }
-
-    /* Progress Indicators */
-    .progress-circle {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: conic-gradient(var(--primary-color) var(--progress, 0%), var(--gray-200) 0%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-    }
-
-    .progress-circle::before {
-        content: '';
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        background: white;
-        position: absolute;
-    }
-
-    .progress-value {
-        position: relative;
-        z-index: 1;
-        font-weight: 700;
-        font-size: 0.875rem;
-        color: var(--dark-color);
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
         .welcome-title {
             font-size: 1.5rem;
         }
-        
-        .quick-actions {
-            justify-content: center;
-        }
-        
-        .demo-grid {
+
+        .demos-grid {
             grid-template-columns: 1fr;
+        }
+
+        .featured-filters {
+            justify-content: center;
         }
     }
 </style>
@@ -237,62 +335,10 @@
         <p class="welcome-subtitle">Explore our demo library and grow your business with CHRP India solutions.</p>
     </div>
 </div>
-{% comment %} 
-<div class="stats-grid">
-    <div class="stat-card primary">
-        <div class="stat-icon">
-            <i class="fas fa-video"></i>
-        </div>
-        <div class="stat-number">{{ stats.demos_watched }}</div>
-        <div class="stat-label">Demos Watched</div>
-        <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            <span>View More</span>
-        </div>
-    </div>
-    
-    <div class="stat-card success">
-        <div class="stat-icon">
-            <i class="fas fa-calendar-check"></i>
-        </div>
-        <div class="stat-number">{{ stats.demo_requests }}</div>
-        <div class="stat-label">Demo Requests</div>
-        <div class="stat-change positive">
-            <i class="fas fa-plus"></i>
-            <span>Request New</span>
-        </div>
-    </div>
-    
-    <div class="stat-card info">
-        <div class="stat-icon">
-            <i class="fas fa-envelope"></i>
-        </div>
-        <div class="stat-number">{{ stats.enquiries_sent }}</div>
-        <div class="stat-label">Enquiries Sent</div>
-        <div class="stat-change positive">
-            <i class="fas fa-paper-plane"></i>
-            <span>Send New</span>
-        </div>
-    </div>
-    
-    <div class="stat-card warning">
-        <div class="stat-icon">
-            <i class="fas fa-bell"></i>
-        </div>
-        <div class="stat-number">{{ stats.notifications }}</div>
-        <div class="stat-label">Notifications</div>
-        {% if stats.notifications > 0 %}
-        <div class="stat-change positive">
-            <i class="fas fa-eye"></i>
-            <span>View All</span>
-        </div>
-        {% endif %}
-    </div>
-</div> {% endcomment %}
 
 <div class="row">
-    <!-- Featured Demos -->
-    <div class="col-lg-8">
+    <!-- Featured Demos with Filters -->
+    <div class="col-lg-12">
         <div class="customer-card">
             <div class="customer-card-header">
                 <h2 class="customer-card-title">
@@ -304,26 +350,79 @@
                 </a>
             </div>
             <div class="customer-card-body">
+                <!-- Filters - Only All and Product Demo -->
+                <div class="featured-filters">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-th"></i>
+                        All
+                    </button>
+                    <button class="filter-btn" data-filter="product">
+                        <i class="fas fa-box"></i>
+                        Product Demo
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div class="demos-loading">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p class="mt-2">Loading demos...</p>
+                </div>
+
+                <!-- Demos Grid -->
                 {% if featured_demos %}
-                    <div class="demo-grid">
+                    <div class="demos-grid" id="demosGrid">
                         {% for demo in featured_demos %}
-                            <div class="demo-card no-select content-protection">
-                                <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-thumbnail no-select">
+                            <div class="demo-card" data-demo-type="{{ demo.demo_type }}">
+                                <div class="demo-card-thumbnail-wrapper">
+                                    {% if demo.thumbnail %}
+                                        <img src="{{ demo.thumbnail.url }}" 
+                                             alt="{{ demo.title }}" 
+                                             class="demo-card-thumbnail no-select">
+                                    {% else %}
+                                        <div class="demo-card-thumbnail d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-video fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="demo-type-badge">{{ demo.get_demo_type_display }}</span>
+                                </div>
+                                
                                 <div class="demo-card-body">
-                                    <div class="demo-category">{{ demo.category.name }}</div>
-                                    <h3 class="demo-title">{{ demo.title }}</h3>
-                                    <div class="demo-meta">
-                                        <span><i class="fas fa-eye me-1"></i>{{ demo.views_count }} views</span>
-                                        <span><i class="fas fa-heart me-1"></i>{{ demo.likes_count }} likes</span>
+                                    {% if demo.business_category %}
+                                        <span class="demo-category-badge">
+                                            {{ demo.business_category.name }}
+                                        </span>
+                                    {% endif %}
+                                    
+                                    <h3 class="demo-card-title">{{ demo.title }}</h3>
+                                    
+                                    {% if demo.description %}
+                                        <p class="demo-card-description">{{ demo.description|truncatewords:15 }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="demo-card-meta">
+                                        <span>
+                                            <i class="fas fa-eye"></i>
+                                            {{ demo.views_count }}
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-heart"></i>
+                                            {{ demo.likes_count }}
+                                        </span>
                                         {% if demo.duration %}
-                                            <span><i class="fas fa-clock me-1"></i>{{ demo.formatted_duration }}</span>
+                                            <span>
+                                                <i class="fas fa-clock"></i>
+                                                {{ demo.duration }} min
+                                            </span>
                                         {% endif %}
                                     </div>
-                                    <div class="demo-actions">
-                                        <a href="{% url 'customers:demo_detail' demo.slug %}" class="btn btn-primary btn-sm">
+                                    
+                                    <div class="demo-card-actions">
+                                        <a href="{% url 'customers:demo_detail' demo.slug %}" 
+                                           class="btn btn-primary btn-sm">
                                             <i class="fas fa-play me-1"></i>Watch
                                         </a>
-                                        <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" class="btn btn-outline-primary btn-sm">
+                                        <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
+                                           class="btn btn-outline-primary btn-sm">
                                             <i class="fas fa-calendar me-1"></i>Request
                                         </a>
                                     </div>
@@ -332,10 +431,10 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-video text-muted" style="font-size: 4rem;"></i>
-                        <h4 class="mt-3 text-muted">No Featured Demos</h4>
-                        <p class="text-muted">Check back later for featured content.</p>
+                    <div class="featured-empty">
+                        <i class="fas fa-video"></i>
+                        <h4 class="mt-3">No Featured Demos</h4>
+                        <p>Check back later for featured content.</p>
                         <a href="{% url 'customers:browse_demos' %}" class="btn btn-primary mt-2">
                             <i class="fas fa-search me-2"></i>Browse All Demos
                         </a>
@@ -345,43 +444,8 @@
         </div>
     </div>
 
-    <div class="col-lg-4">
-        {% comment %} <div class="customer-card">
-            <div class="customer-card-header">
-                <h3 class="customer-card-title">
-                    <i class="fas fa-bell"></i>
-                    Recent Notifications
-                </h3>
-                {% if recent_notifications %}
-                    <a href="{% url 'customers:notifications' %}" class="btn btn-outline-primary btn-sm">
-                        View All
-                    </a>
-                {% endif %}
-            </div>
-            <div class="customer-card-body p-0">
-                {% if recent_notifications %}
-                    <div class="activity-feed">
-                        {% for notification in recent_notifications %}
-                            <div class="activity-item {% if not notification.is_read %}unread{% endif %}">
-                                <div class="activity-icon notification">
-                                    <i class="fas fa-bell"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">{{ notification.title }}</div>
-                                    <div class="activity-meta">{{ notification.created_at|timesince }} ago</div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-bell-slash text-muted" style="font-size: 2.5rem;"></i>
-                        <p class="mt-2 mb-0 text-muted">No notifications yet</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div> {% endcomment %}
-
+    <!-- Recent Activity -->
+    {% comment %} <div class="col-lg-12 mt-4">
         <div class="customer-card">
             <div class="customer-card-header">
                 <h3 class="customer-card-title">
@@ -432,175 +496,40 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> {% endcomment %}
 </div>
-{% comment %} 
-<div class="customer-card">
-    <div class="customer-card-header">
-        <h2 class="customer-card-title">
-            <i class="fas fa-rocket"></i>
-            Quick Actions
-        </h2>
-    </div>
-    <div class="customer-card-body">
-        <div class="row">
-            <div class="col-md-3 mb-3">
-                <a href="{% url 'customers:browse_demos' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
-                    <i class="fas fa-video fa-2x mb-2"></i>
-                    <strong>Browse Demos</strong>
-                    <small class="text-muted">Watch product demonstrations</small>
-                </a>
-            </div>
-            <div class="col-md-3 mb-3">
-                <a href="{% url 'customers:request_demo' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
-                    <i class="fas fa-calendar-plus fa-2x mb-2"></i>
-                    <strong>Request Demo</strong>
-                    <small class="text-muted">Schedule live session</small>
-                </a>
-            </div>
-            <div class="col-md-3 mb-3">
-                <a href="{% url 'customers:send_enquiry' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
-                    <i class="fas fa-envelope fa-2x mb-2"></i>
-                    <strong>Send Enquiry</strong>
-                    <small class="text-muted">Business questions</small>
-                </a>
-            </div>
-            <div class="col-md-3 mb-3">
-                <a href="{% url 'customers:contact_sales' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
-                    <i class="fas fa-handshake fa-2x mb-2"></i>
-                    <strong>Contact Sales</strong>
-                    <small class="text-muted">Speak with experts</small>
-                </a>
-            </div>
-        </div>
-    </div>
-</div> {% endcomment %}
-{% comment %} 
-<div class="customer-card">
-    <div class="customer-card-header">
-        <h2 class="customer-card-title">
-            <i class="fas fa-chart-pie"></i>
-            Your Progress
-        </h2>
-    </div>
-    <div class="customer-card-body">
-        <div class="row text-center">
-            <div class="col-md-3 mb-4">
-                <div class="progress-circle" style="--progress: {% widthratio stats.demos_watched 1 10 %}%">
-                    <span class="progress-value">{{ stats.demos_watched }}</span>
-                </div>
-                <h6 class="mt-3">Demos Watched</h6>
-                <small class="text-muted">Keep exploring our solutions</small>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="progress-circle" style="--progress: {% widthratio stats.demo_requests 1 20 %}%">
-                    <span class="progress-value">{{ stats.demo_requests }}</span>
-                </div>
-                <h6 class="mt-3">Demo Requests</h6>
-                <small class="text-muted">Live sessions scheduled</small>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="progress-circle" style="--progress: {% widthratio stats.enquiries_sent 1 15 %}%">
-                    <span class="progress-value">{{ stats.enquiries_sent }}</span>
-                </div>
-                <h6 class="mt-3">Enquiries Sent</h6>
-                <small class="text-muted">Business questions asked</small>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="progress-circle" style="--progress: 85%">
-                    <span class="progress-value">85%</span>
-                </div>
-                <h6 class="mt-3">Profile Complete</h6>
-                <small class="text-muted">
-                    <a href="{% url 'accounts:profile' %}" class="text-decoration-none">Complete now</a>
-                </small>
-            </div>
-        </div>
-    </div>
-</div> {% endcomment %}
 {% endblock %}
 
 {% block customer_extra_js %}
 <script>
-// Enhanced Security Protection
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Disable right-click context menu
+    // Security Protection
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
         return false;
     });
     
-    // Disable F12, Ctrl+Shift+I, Ctrl+U, etc.
     document.addEventListener('keydown', function(e) {
-        // F12
-        if (e.keyCode === 123) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Ctrl+Shift+I (Developer Tools)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Ctrl+Shift+J (Console)
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Ctrl+U (View Source)
-        if (e.ctrlKey && e.keyCode === 85) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Ctrl+S (Save Page)
-        if (e.ctrlKey && e.keyCode === 83) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Ctrl+A (Select All)
-        if (e.ctrlKey && e.keyCode === 65) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Ctrl+P (Print)
-        if (e.ctrlKey && e.keyCode === 80) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Ctrl+C (Copy)
-        if (e.ctrlKey && e.keyCode === 67) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Print Screen
-        if (e.keyCode === 44) {
+        if (e.keyCode === 123 || 
+            (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
+            (e.ctrlKey && e.shiftKey && e.keyCode === 74) ||
+            (e.ctrlKey && e.keyCode === 85) ||
+            (e.ctrlKey && e.keyCode === 83) ||
+            (e.ctrlKey && e.keyCode === 65) ||
+            (e.ctrlKey && e.keyCode === 80) ||
+            (e.ctrlKey && e.keyCode === 67) ||
+            e.keyCode === 44) {
             e.preventDefault();
             return false;
         }
     });
     
-    // Disable drag and drop
     document.addEventListener('dragstart', function(e) {
         e.preventDefault();
         return false;
     });
     
-    // Disable image saving
-    document.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    // Disable selection for sensitive content
     document.addEventListener('selectstart', function(e) {
         if (e.target.closest('.no-select, .content-protection')) {
             e.preventDefault();
@@ -608,85 +537,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Disable print screen detection (attempt)
-    let printScreenPressed = false;
-    document.addEventListener('keyup', function(e) {
-        if (e.keyCode === 44) {
-            printScreenPressed = true;
-            alert('Screenshots are not allowed for security reasons.');
-        }
-    });
-    
-    // Detect developer tools (basic detection)
-    let devtools = {open: false, orientation: null};
-    const threshold = 160;
-    setInterval(function() {
-        if (window.outerHeight - window.innerHeight > threshold || 
-            window.outerWidth - window.innerWidth > threshold) {
-            if (!devtools.open) {
-                devtools.open = true;
-                alert('Developer tools detected. Please close them for security reasons.');
-                // Optional: Redirect to logout or block content
-                // window.location.href = '{% url "accounts:signout" %}';
-            }
-        } else {
-            devtools.open = false;
-        }
-    }, 500);
-    
-    // Disable console access
-    Object.defineProperty(window, 'console', {
-        value: console,
-        writable: false,
-        configurable: false
-    });
-    
-    // Clear console periodically
-    setInterval(function() {
-        if (typeof console !== 'undefined' && console.clear) {
-            console.clear();
-        }
-    }, 3000);
-    
-    // Watermark overlay for screenshots
-    function addWatermark() {
-        const watermark = document.createElement('div');
-        watermark.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 6rem;
-            color: rgba(0, 0, 0, 0.02);
-            pointer-events: none;
-            z-index: 9999;
-            user-select: none;
-            font-weight: bold;
-            white-space: nowrap;
-        `;
-        watermark.textContent = '{{ user.email }} - CONFIDENTIAL';
-        document.body.appendChild(watermark);
-    }
-    
-    addWatermark();
-    
-    // Disable clipboard access
     document.addEventListener('copy', function(e) {
         e.preventDefault();
         e.clipboardData.setData('text/plain', 'Copying is not allowed');
         return false;
     });
     
-    // Monitor for screen recording apps (basic detection)
-    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-        const originalGetDisplayMedia = navigator.mediaDevices.getDisplayMedia;
-        navigator.mediaDevices.getDisplayMedia = function() {
-            alert('Screen recording is not allowed for security reasons.');
-            return Promise.reject(new Error('Screen recording blocked'));
-        };
-    }
-    
-    // Blur content when window loses focus (basic protection)
     window.addEventListener('blur', function() {
         document.body.style.filter = 'blur(5px)';
     });
@@ -694,46 +550,57 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('focus', function() {
         document.body.style.filter = 'none';
     });
-    
-    // Animation for statistics cards
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach((card, index) => {
-        setTimeout(() => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = 'all 0.6s ease';
+
+    // Featured Demos Filter - Only All and Product Demo
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const demoCards = document.querySelectorAll('.demo-card');
+    const loadingState = document.querySelector('.demos-loading');
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filterType = this.getAttribute('data-filter');
             
+            // Update active button
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show loading
+            if (loadingState) {
+                loadingState.classList.add('active');
+            }
+            
+            // Filter demos with animation
             setTimeout(() => {
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, 100);
-        }, index * 150);
+                demoCards.forEach(card => {
+                    const cardType = card.getAttribute('data-demo-type');
+                    
+                    if (filterType === 'all' || cardType === filterType) {
+                        card.style.display = 'block';
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'scale(1)';
+                        }, 50);
+                    } else {
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            card.style.display = 'none';
+                        }, 300);
+                    }
+                });
+                
+                // Hide loading
+                if (loadingState) {
+                    loadingState.classList.remove('active');
+                }
+            }, 300);
+        });
     });
-    
-    // Progress circle animation
-    const progressCircles = document.querySelectorAll('.progress-circle');
-    progressCircles.forEach(circle => {
-        const value = circle.style.getPropertyValue('--progress');
-        circle.style.setProperty('--progress', '0%');
-        
-        setTimeout(() => {
-            circle.style.transition = 'all 2s ease';
-            circle.style.setProperty('--progress', value);
-        }, 1000);
+
+    // Initialize card animations
+    demoCards.forEach(card => {
+        card.style.transition = 'all 0.3s ease';
     });
 });
-
-// Additional protection: Override common screenshot methods
-if (typeof html2canvas !== 'undefined') {
-    html2canvas = function() {
-        alert('Screenshot functionality is disabled.');
-        return Promise.reject(new Error('Screenshots not allowed'));
-    };
-}
-
-// Disable common screenshot libraries
-window.html2canvas = undefined;
-window.domtoimage = undefined;
-window.rasterizeHTML = undefined;
 </script>
 {% endblock %}

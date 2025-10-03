@@ -13,22 +13,23 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, F, Count
 from django.core.paginator import Paginator
 from django.utils import timezone
-
+from accounts.models import BusinessCategory, BusinessSubCategory
 from demos.models import Demo, DemoLike, DemoView
 from .views import get_customer_context
-
 
 @login_required
 def liked_demos(request):
     """
     Display all demos liked by the customer
-    Features: Search, Sort, Pagination, Access Control
+    Features: Search, Sort, Category Filter, Pagination, Access Control
     """
     # Check if user is approved
     if not request.user.is_approved:
         return redirect('accounts:pending_approval')
     
     # Get filter parameters
+    business_category_id = request.GET.get('business_category')
+    business_subcategory_id = request.GET.get('business_subcategory')
     search_query = request.GET.get('search', '').strip()
     sort_by = request.GET.get('sort', 'recently_liked')
     
@@ -48,6 +49,20 @@ def liked_demos(request):
         Q(target_customers=request.user)  # OR user is selected
     ).distinct().select_related('created_by')
     
+    # Apply business category filter if selected
+    if business_category_id:
+        demos = demos.filter(
+            Q(target_business_categories__id=business_category_id) |
+            Q(target_business_categories__isnull=True)
+        ).distinct()
+    
+    # Apply business subcategory filter if selected
+    if business_subcategory_id:
+        demos = demos.filter(
+            Q(target_business_subcategories__id=business_subcategory_id) |
+            Q(target_business_subcategories__isnull=True)
+        ).distinct()
+    
     # Apply search filter
     if search_query:
         demos = demos.filter(
@@ -58,7 +73,6 @@ def liked_demos(request):
     # Apply sorting
     if sort_by == 'recently_liked':
         # Sort by when user liked it (most recent first)
-        # Get the like timestamps
         like_dates = {
             like.demo_id: like.liked_at 
             for like in DemoLike.objects.filter(
@@ -66,7 +80,6 @@ def liked_demos(request):
                 demo_id__in=demos.values_list('id', flat=True)
             )
         }
-        # Convert to list and sort by like date
         demos_list = list(demos)
         demos_list.sort(key=lambda x: like_dates.get(x.id, timezone.now()), reverse=True)
         demos = demos_list
@@ -107,6 +120,16 @@ def liked_demos(request):
     liked_demo_ids_list = list(liked_demo_ids)
     total_watched = len([vid for vid in user_views if vid in liked_demo_ids_list])
     
+    # Get ALL business categories for filter dropdown
+    business_categories = BusinessCategory.objects.filter(
+        is_active=True
+    ).order_by('sort_order', 'name')
+    
+    # Get ALL subcategories for dynamic filtering
+    business_subcategories = BusinessSubCategory.objects.filter(
+        is_active=True
+    ).select_related('category').order_by('category__sort_order', 'sort_order', 'name')
+    
     # Get common customer context
     context = get_customer_context(request.user)
     
@@ -114,6 +137,10 @@ def liked_demos(request):
     context.update({
         'page_obj': page_obj,
         'total_liked': total_liked,
+        'business_categories': business_categories,
+        'business_subcategories': business_subcategories,
+        'current_business_category': int(business_category_id) if business_category_id else None,
+        'current_business_subcategory': int(business_subcategory_id) if business_subcategory_id else None,
         'search_query': search_query,
         'sort_by': sort_by,
         'user_views': list(user_views),
@@ -129,7 +156,6 @@ def liked_demos(request):
     })
     
     return render(request, 'customers/liked_demos.html', context)
-
 
 @login_required
 @csrf_exempt

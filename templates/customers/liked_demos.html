@@ -1,4 +1,4 @@
-<!-- templates/customers/liked_demos.html - UPDATED WITH STAR ICONS -->
+<!-- templates/customers/liked_demos.html - COMPLETE WITH DYNAMIC FILTERS -->
 {% extends 'customers/base.html' %}
 
 {% block customer_title %}My Liked Videos{% endblock %}
@@ -24,6 +24,13 @@
         -webkit-user-drag: none;
         user-drag: none;
         pointer-events: none;
+    }
+
+    /* Allow form controls to work */
+    input, select, button, a {
+        -webkit-user-select: auto;
+        user-select: auto;
+        pointer-events: auto;
     }
 
     /* Stats Header */
@@ -86,6 +93,23 @@
         color: var(--dark-color);
         margin-bottom: var(--spacing-sm);
         display: block;
+        font-size: 0.875rem;
+    }
+
+    /* Dropdown Styles */
+    .form-select {
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-lg);
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        background-color: white;
+    }
+
+    .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        outline: none;
     }
 
     .search-section {
@@ -128,8 +152,6 @@
         transition: all 0.3s ease;
         border: 1px solid var(--gray-200);
         position: relative;
-        -webkit-user-select: none;
-        user-select: none;
     }
 
     .demo-card:hover {
@@ -177,6 +199,7 @@
         height: 200px;
         overflow: hidden;
         background: var(--gray-100);
+        cursor: pointer;
     }
 
     .demo-thumbnail {
@@ -184,9 +207,6 @@
         height: 100%;
         object-fit: cover;
         transition: all 0.3s ease;
-        -webkit-user-drag: none;
-        user-drag: none;
-        pointer-events: none;
     }
 
     .demo-card:hover .demo-thumbnail {
@@ -205,6 +225,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        pointer-events: none;
     }
 
     .demo-card:hover .demo-overlay {
@@ -445,6 +466,10 @@
         .stat-number {
             font-size: 2rem;
         }
+
+        .filters-section .row > div {
+            margin-bottom: var(--spacing-md);
+        }
     }
 
     /* Fade-in animation */
@@ -468,29 +493,30 @@
 {% block customer_content %}
 
 <!-- Page Header -->
-{% comment %} <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    {% comment %} <div>
+        <h1 class="h2 mb-1">My Liked Videos</h1>
         <p class="text-muted mb-0">Your favorite demo videos in one place</p>
-    </div>
-    <div class="d-flex gap-2">
+    </div> {% endcomment %}
+    {% comment %} <div class="d-flex gap-2">
         <a href="{% url 'customers:browse_demos' %}" class="btn btn-outline-primary">
             <i class="fas fa-play-circle me-2"></i>Browse All Videos
         </a>
-    </div>
-</div> {% endcomment %}
+    </div> {% endcomment %}
+</div>
 
 <!-- Stats Header -->
 {% comment %} <div class="stats-header fade-in">
     <div class="stats-row">
         <div class="stat-item">
-            <span class="stat-number">{{ total_liked }}</span>
+            <span class="stat-number">{{ total_liked|default:0 }}</span>
             <span class="stat-label">Videos Liked</span>
         </div>
         <div class="stat-item">
             <i class="fas fa-star stat-icon"></i>
         </div>
         <div class="stat-item">
-            <span class="stat-number">{{ total_watched }}</span>
+            <span class="stat-number">{{ total_watched|default:0 }}</span>
             <span class="stat-label">Already Watched</span>
         </div>
     </div>
@@ -499,9 +525,9 @@
 <!-- Filters Section -->
 <div class="filters-section fade-in">
     <form method="GET" id="filterForm">
-        <div class="row g-4 align-items-end">
+        <div class="row g-3 align-items-end">
             <!-- Search -->
-            <div class="col-lg-6">
+            <div class="col-lg-3 col-md-6">
                 <label class="filter-label">
                     <i class="fas fa-search me-2"></i>Search Videos
                 </label>
@@ -515,8 +541,41 @@
                 </div>
             </div>
             
+            <!-- Business Category Dropdown -->
+            <div class="col-lg-2 col-md-6">
+                <label class="filter-label">
+                    <i class="fas fa-briefcase me-2"></i>Category
+                </label>
+                <select name="business_category" id="categorySelect" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for category in business_categories %}
+                        <option value="{{ category.id }}" 
+                                {% if current_business_category == category.id %}selected{% endif %}>
+                            {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- Business Subcategory Dropdown -->
+            <div class="col-lg-2 col-md-6">
+                <label class="filter-label">
+                    <i class="fas fa-tags me-2"></i>Subcategory
+                </label>
+                <select name="business_subcategory" id="subcategorySelect" class="form-select">
+                    <option value="">All Subcategories</option>
+                    {% for subcategory in business_subcategories %}
+                        <option value="{{ subcategory.id }}" 
+                                data-category="{{ subcategory.category.id }}"
+                                {% if current_business_subcategory == subcategory.id %}selected{% endif %}>
+                            {{ subcategory.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
             <!-- Sort -->
-            <div class="col-lg-4">
+            <div class="col-lg-2 col-md-6">
                 <label class="filter-label">
                     <i class="fas fa-sort me-2"></i>Sort By
                 </label>
@@ -530,10 +589,15 @@
             </div>
             
             <!-- Actions -->
-            <div class="col-lg-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-check me-2"></i>Apply
-                </button>
+            <div class="col-lg-3 col-md-12">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                    <a href="{% url 'customers:liked_demos' %}" class="btn btn-outline-secondary" title="Clear All Filters">
+                        <i class="fas fa-times me-2"></i>Clear
+                    </a>
+                </div>
             </div>
         </div>
     </form>
@@ -548,18 +612,25 @@
             {% if search_query %}
                 for "<strong>{{ search_query }}</strong>"
             {% endif %}
+            {% if current_business_category %}
+                {% for cat in business_categories %}
+                    {% if cat.id == current_business_category %}
+                        in <strong>{{ cat.name }}</strong>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
         </p>
     </div>
-    <div class="d-flex align-items-center gap-2 text-muted">
+    {% comment %} <div class="d-flex align-items-center gap-2 text-muted">
         <i class="fas fa-shield-alt"></i>
         <small>Content Protected</small>
-    </div>
+    </div> {% endcomment %}
 </div>
 
 <!-- Demos Grid -->
 <div class="demos-grid">
     {% for demo in page_obj.object_list %}
-    <div class="demo-card content-protection fade-in" data-demo-id="{{ demo.id }}">
+    <div class="demo-card fade-in" data-demo-id="{{ demo.id }}">
         <!-- Watermark -->
         <div class="demo-watermark">{{ user.email }}</div>
         
@@ -579,25 +650,24 @@
 
         <!-- Thumbnail -->
         <div class="demo-thumbnail-container">
-            {% if demo.thumbnail %}
-                <img src="{{ demo.thumbnail.url }}" 
-                     alt="{{ demo.title }}" 
-                     class="demo-thumbnail"
-                     loading="lazy">
-            {% else %}
-                <div class="demo-thumbnail" style="background: var(--gray-200); display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-video text-muted" style="font-size: 3rem;"></i>
+            <a href="{% url 'customers:demo_detail' demo.slug %}" style="display: block; height: 100%;">
+                {% if demo.thumbnail %}
+                    <img src="{{ demo.thumbnail.url }}" 
+                         alt="{{ demo.title }}" 
+                         class="demo-thumbnail"
+                         loading="lazy">
+                {% else %}
+                    <div class="demo-thumbnail" style="background: var(--gray-200); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-video text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="demo-overlay">
+                    <div class="play-button">
+                        <i class="fas fa-play"></i>
+                    </div>
                 </div>
-            {% endif %}
-                                            <a href="{% url 'demos:watch' demo.slug %}">
-
-            <!-- Play Overlay -->
-            <div class="demo-overlay">
-                <div class="play-button">
-                    <i class="fas fa-play"></i>
-                </div>
-            </div>
-        </a>
+            </a>
         </div>
 
         <!-- Demo Content -->
@@ -630,9 +700,6 @@
                     </div>
                     {% endif %}
                 </div>
-                <div class="demo-date">
-                    {{ demo.created_at|date:"M d, Y" }}
-                </div>
             </div>
 
             <!-- Actions -->
@@ -660,12 +727,12 @@
         <ul class="pagination">
             {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                <a class="page-link" href="?page=1&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
                     <i class="fas fa-angle-double-left"></i>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
                     <i class="fas fa-angle-left"></i>
                 </a>
             </li>
@@ -678,19 +745,19 @@
                 </li>
                 {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">{{ num }}</a>
+                    <a class="page-link" href="?page={{ num }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">{{ num }}</a>
                 </li>
                 {% endif %}
             {% endfor %}
 
             {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
                     <i class="fas fa-angle-right"></i>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&business_category={{ current_business_category }}&business_subcategory={{ current_business_subcategory }}&search={{ search_query }}&sort={{ sort_by }}">
                     <i class="fas fa-angle-double-right"></i>
                 </a>
             </li>
@@ -706,11 +773,26 @@
     <div class="empty-icon">
         <i class="far fa-star"></i>
     </div>
-    <h2 class="empty-title">No Liked Videos Yet</h2>
+    <h2 class="empty-title">
+        {% if search_query or current_business_category or current_business_subcategory %}
+            No Liked Videos Found
+        {% else %}
+            No Liked Videos Yet
+        {% endif %}
+    </h2>
     <p class="empty-text">
-        Start exploring our demo library and star your favorite videos to see them here!
+        {% if search_query or current_business_category or current_business_subcategory %}
+            No videos match your current filters. Try adjusting your search criteria.
+        {% else %}
+            Start exploring our demo library and star your favorite videos to see them here!
+        {% endif %}
     </p>
-    <a href="{% url 'customers:browse_demos' %}" class="btn btn-primary btn-lg">
+    {% if search_query or current_business_category or current_business_subcategory %}
+        <a href="{% url 'customers:liked_demos' %}" class="btn btn-primary btn-lg me-2">
+            <i class="fas fa-times me-2"></i>Clear Filters
+        </a>
+    {% endif %}
+    <a href="{% url 'customers:browse_demos' %}" class="btn btn-{% if search_query or current_business_category %}outline-{% endif %}primary btn-lg">
         <i class="fas fa-play-circle me-2"></i>
         Explore All Videos
     </a>
@@ -729,10 +811,98 @@
 
 {% block customer_extra_js %}
 <script>
-// Enhanced Security Protection
 document.addEventListener('DOMContentLoaded', function() {
-    // Disable right-click
+    const categorySelect = document.getElementById('categorySelect');
+    const subcategorySelect = document.getElementById('subcategorySelect');
+    
+    // Store all subcategories with their parent category IDs
+    const allSubcategories = [];
+    const subcategoryOptions = subcategorySelect.querySelectorAll('option[data-category]');
+    
+    // Build subcategories array from template data
+    subcategoryOptions.forEach(option => {
+        allSubcategories.push({
+            value: option.value,
+            text: option.textContent.trim(),
+            categoryId: option.getAttribute('data-category')
+        });
+    });
+    
+    console.log('Total subcategories loaded:', allSubcategories.length);
+    
+    // Function to update subcategories based on selected category
+    function updateSubcategories() {
+        const selectedCategory = categorySelect.value;
+        const currentSubcategory = '{{ current_business_subcategory }}';
+        
+        console.log('Selected category:', selectedCategory);
+        console.log('Current subcategory:', currentSubcategory);
+        
+        // Clear current subcategories
+        subcategorySelect.innerHTML = '<option value="">All Subcategories</option>';
+        
+        let filteredSubs = [];
+        
+        // If no category selected, show all subcategories
+        if (!selectedCategory || selectedCategory === '') {
+            filteredSubs = allSubcategories;
+        } else {
+            // Show only subcategories for selected category
+            filteredSubs = allSubcategories.filter(sub => sub.categoryId === selectedCategory);
+        }
+        
+        console.log('Filtered subcategories:', filteredSubs.length);
+        
+        // Add filtered subcategories to dropdown
+        filteredSubs.forEach(sub => {
+            const option = document.createElement('option');
+            option.value = sub.value;
+            option.textContent = sub.text;
+            option.setAttribute('data-category', sub.categoryId);
+            
+            // Restore selected subcategory if it matches
+            if (currentSubcategory && sub.value === currentSubcategory) {
+                option.selected = true;
+            }
+            
+            subcategorySelect.appendChild(option);
+        });
+        
+        // Show message if no subcategories found
+        if (filteredSubs.length === 0 && selectedCategory) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No subcategories available';
+            option.disabled = true;
+            subcategorySelect.appendChild(option);
+        }
+    }
+    
+    // Update subcategories when category changes
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            console.log('Category changed to:', this.value);
+            updateSubcategories();
+        });
+        
+        // Initialize on page load
+        updateSubcategories();
+    }
+    
+    // Auto-submit on sort change
+    const sortSelect = document.querySelector('select[name="sort"]');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            console.log('Sort changed, submitting form');
+            this.form.submit();
+        });
+    }
+    
+    // Disable right-click on content only
     document.addEventListener('contextmenu', function(e) {
+        if (e.target.closest('a') || e.target.closest('button') || e.target.closest('select') || e.target.closest('input')) {
+            return true;
+        }
         e.preventDefault();
         return false;
     });
@@ -743,62 +913,69 @@ document.addEventListener('DOMContentLoaded', function() {
             (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
             (e.ctrlKey && e.keyCode === 85) ||
             (e.ctrlKey && e.keyCode === 83) ||
-            (e.ctrlKey && e.keyCode === 67) ||
             e.keyCode === 44) {
             e.preventDefault();
             return false;
         }
     });
     
-    // Disable drag
-    document.addEventListener('dragstart', function(e) {
-        e.preventDefault();
-        return false;
-    });
-    
-    // Auto-submit on sort change
-    const sortSelect = document.querySelector('select[name="sort"]');
-    if (sortSelect) {
-        sortSelect.addEventListener('change', function() {
-            document.getElementById('filterForm').submit();
-        });
-    }
-    
     // Animate cards
     const cards = document.querySelectorAll('.demo-card');
     cards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.05}s`;
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'all 0.6s ease';
+        card.style.transitionDelay = `${index * 50}ms`;
+        
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
     });
 });
 
 // CSRF token
 function getCsrfToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+    const token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    if (token) return token;
+    
+    // Fallback: get from cookie
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') return value;
+    }
+    return '{{ csrf_token }}';
 }
 
 // Show/hide loading
 function showLoading() {
-    document.getElementById('loadingOverlay').classList.add('show');
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.add('show');
 }
 
 function hideLoading() {
-    document.getElementById('loadingOverlay').classList.remove('show');
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.remove('show');
 }
 
 // Show alert
 function showAlert(message, type = 'success') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.style.cssText = 'position: fixed; top: 80px; right: 20px; z-index: 10000; min-width: 300px;';
     alertDiv.innerHTML = `
         <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     
-    const content = document.querySelector('.customer-content');
-    content.insertBefore(alertDiv, content.firstChild);
+    document.body.appendChild(alertDiv);
     
-    setTimeout(() => alertDiv.remove(), 4000);
+    setTimeout(() => {
+        alertDiv.classList.remove('show');
+        setTimeout(() => alertDiv.remove(), 150);
+    }, 4000);
 }
 
 // Unlike video
@@ -816,7 +993,12 @@ function unlikeVideo(demoId) {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         hideLoading();
         
@@ -832,12 +1014,15 @@ function unlikeVideo(demoId) {
                     
                     const demoGrid = document.querySelector('.demos-grid');
                     if (!demoGrid || demoGrid.children.length === 0) {
+                        // Reload to show empty state
                         location.reload();
                     } else {
                         showAlert('Video removed from your liked videos successfully!', 'success');
                     }
                 }, 300);
             }
+        } else {
+            showAlert('Failed to unlike video. Please try again.', 'danger');
         }
     })
     .catch(error => {

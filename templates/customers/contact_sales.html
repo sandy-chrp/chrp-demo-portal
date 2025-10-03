@@ -7,153 +7,27 @@
 
 {% block customer_extra_css %}
 <style>
-    /* Contact sales specific styles */
-    .contact-container {
-        max-width: 900px;
+    .contact-wrapper {
+        max-width: 1200px;
         margin: 0 auto;
     }
 
-    .contact-hero {
-        background: var(--gradient-primary);
-        color: white;
-        padding: var(--spacing-xl);
-        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .contact-hero::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: rotate 20s linear infinite;
-    }
-
-    @keyframes rotate {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    .hero-content {
-        position: relative;
-        z-index: 1;
-    }
-
-    .hero-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: var(--spacing-md);
-    }
-
-    .hero-subtitle {
-        font-size: 1.2rem;
-        opacity: 0.9;
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .hero-stats {
-        display: flex;
-        justify-content: center;
-        gap: var(--spacing-xl);
-        flex-wrap: wrap;
-    }
-
-    .hero-stat {
-        text-align: center;
-    }
-
-    .hero-stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        display: block;
-    }
-
-    .hero-stat-label {
-        font-size: 0.9rem;
-        opacity: 0.8;
-    }
-
-    .contact-body {
-        background: white;
-        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-        overflow: hidden;
-    }
-
-    .contact-options {
+    .contact-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--spacing-lg);
-        padding: var(--spacing-xl);
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .contact-option {
-        background: var(--gray-50);
-        padding: var(--spacing-lg);
-        border-radius: var(--radius-lg);
-        text-align: center;
-        border: 2px solid var(--gray-200);
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .contact-option:hover {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .contact-option.selected {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.1);
-    }
-
-    .option-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: var(--primary-color);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--spacing-md) auto;
-        font-size: 1.5rem;
-    }
-
-    .option-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--dark-color);
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .option-description {
-        color: var(--gray-600);
-        margin-bottom: var(--spacing-md);
-        line-height: 1.5;
-    }
-
-    .option-time {
-        font-size: 0.875rem;
-        color: var(--success-color);
-        font-weight: 600;
+        grid-template-columns: 1.2fr 1fr;
+        gap: var(--spacing-xl);
     }
 
     .contact-form-section {
+        background: white;
         padding: var(--spacing-xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
     }
 
     .form-header {
-        text-align: center;
-        margin-bottom: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
     }
 
     .form-header h3 {
@@ -165,12 +39,7 @@
 
     .form-header p {
         color: var(--gray-600);
-        font-size: 1.1rem;
-    }
-
-    .contact-form {
-        max-width: 600px;
-        margin: 0 auto;
+        font-size: 0.95rem;
     }
 
     .form-group {
@@ -182,19 +51,19 @@
         color: var(--gray-700);
         margin-bottom: var(--spacing-sm);
         display: block;
+        font-size: 0.9rem;
     }
 
-    .required-field::after {
+    .required::after {
         content: " *";
         color: var(--danger-color);
-        font-weight: bold;
     }
 
     .form-control, .form-select {
         border: 2px solid var(--gray-300);
         border-radius: var(--radius-lg);
-        padding: var(--spacing-md);
-        font-size: 1rem;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.95rem;
         transition: all 0.3s ease;
         width: 100%;
     }
@@ -205,73 +74,86 @@
         outline: none;
     }
 
-    .form-control:disabled {
-        background-color: var(--gray-100);
-        color: var(--gray-500);
-    }
-
-    .character-counter {
+    .char-count {
         text-align: right;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         color: var(--gray-500);
         margin-top: var(--spacing-xs);
     }
 
-    .priority-selector {
-        display: flex;
+    .priority-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
         gap: var(--spacing-sm);
-        flex-wrap: wrap;
     }
 
-    .priority-option {
-        flex: 1;
-        min-width: 120px;
+    .priority-btn {
         padding: var(--spacing-md);
         border: 2px solid var(--gray-300);
         border-radius: var(--radius-lg);
-        text-align: center;
+        background: white;
         cursor: pointer;
         transition: all 0.3s ease;
-        background: white;
+        text-align: center;
     }
 
-    .priority-option:hover {
+    .priority-btn:hover {
         border-color: var(--primary-color);
         background: rgba(30, 60, 114, 0.05);
     }
 
-    .priority-option.selected {
-        border-color: var(--primary-color);
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .priority-option input[type="radio"] {
+    .priority-btn input {
         display: none;
     }
 
-    .submit-section {
-        text-align: center;
-        padding-top: var(--spacing-lg);
-        border-top: 1px solid var(--gray-200);
-        margin-top: var(--spacing-lg);
+    .priority-btn:has(input:checked) {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.1);
+    }
+
+    .priority-btn:has(input:checked) .priority-content {
+        color: var(--primary-color);
+    }
+
+    .priority-icon {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .priority-icon i {
+        display: block;
+    }
+
+    .priority-btn:has(input:checked) .priority-icon {
+        transform: scale(1.1);
+    }
+
+    .priority-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+    }
+
+    .priority-time {
+        font-size: 0.75rem;
+        color: var(--gray-500);
     }
 
     .submit-btn {
         background: var(--gradient-primary);
         color: white;
         border: none;
-        padding: var(--spacing-lg) var(--spacing-xl);
+        padding: var(--spacing-md) var(--spacing-xl);
         border-radius: var(--radius-lg);
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        display: inline-flex;
+        width: 100%;
+        display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
-        min-width: 200px;
         justify-content: center;
+        gap: var(--spacing-sm);
     }
 
     .submit-btn:hover {
@@ -285,312 +167,291 @@
         transform: none;
     }
 
-    .submit-btn.loading::after {
-        content: '';
-        width: 20px;
-        height: 20px;
-        border: 2px solid currentColor;
-        border-radius: 50%;
-        border-right-color: transparent;
-        animation: spin 1s linear infinite;
-        margin-left: var(--spacing-sm);
-    }
-
-    .contact-info-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    .contact-info-section {
+        display: flex;
+        flex-direction: column;
         gap: var(--spacing-lg);
-        margin-top: var(--spacing-xl);
     }
 
     .info-card {
-        background: var(--gray-50);
+        background: white;
         padding: var(--spacing-lg);
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
         border: 1px solid var(--gray-200);
-        text-align: center;
     }
 
-    .info-card-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: var(--primary-color);
-        color: white;
+    .info-card h4 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-lg);
         display: flex;
         align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--spacing-md) auto;
-        font-size: 1.25rem;
+        gap: var(--spacing-sm);
     }
 
-    .info-card h6 {
+    .phone-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .phone-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--spacing-md);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        border-left: 3px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .phone-item:hover {
+        background: rgba(30, 60, 114, 0.05);
+        transform: translateX(3px);
+    }
+
+    .phone-label {
         font-weight: 600;
-        margin-bottom: var(--spacing-sm);
+        color: var(--gray-700);
+        font-size: 0.9rem;
+    }
+
+    .phone-number {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .phone-number:hover {
+        color: var(--secondary-color);
+        text-decoration: none;
+    }
+
+    .email-link {
+        color: var(--primary-color);
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .email-link:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+
+    .address-content {
+        background: var(--gray-50);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        line-height: 1.8;
+        color: var(--gray-700);
+    }
+
+    .address-content strong {
         color: var(--dark-color);
+        display: block;
+        margin-bottom: var(--spacing-xs);
     }
 
-    .info-card p {
+    .business-hours {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .hours-item {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+    }
+
+    .hours-day {
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+
+    .hours-time {
         color: var(--gray-600);
-        margin: 0;
-        line-height: 1.5;
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2rem;
-        }
+    .response-badge {
+        background: var(--gradient-primary);
+        color: white;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-lg);
+        text-align: center;
+        margin-top: var(--spacing-lg);
+    }
 
-        .hero-stats {
-            gap: var(--spacing-lg);
-        }
+    .response-badge strong {
+        font-size: 1.75rem;
+        display: block;
+        margin-bottom: var(--spacing-xs);
+    }
 
-        .contact-options {
+    @media (max-width: 992px) {
+        .contact-grid {
             grid-template-columns: 1fr;
-            padding: var(--spacing-lg);
         }
 
-        .contact-form-section {
-            padding: var(--spacing-lg);
+        .priority-grid {
+            grid-template-columns: 1fr;
         }
-
-        .priority-selector {
-            flex-direction: column;
-        }
-
-        .priority-option {
-            min-width: auto;
-        }
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
     }
 </style>
 {% endblock %}
 
 {% block customer_content %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="mb-4">
+<nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{% url 'customers:dashboard' %}">Dashboard</a>
-        </li>
+        <li class="breadcrumb-item"><a href="{% url 'customers:dashboard' %}">Dashboard</a></li>
         <li class="breadcrumb-item active">Contact Sales</li>
     </ol>
 </nav>
 
-<div class="contact-container">
-    <div class="customer-card">
-        <!-- Hero Section -->
-        <div class="contact-hero">
-            <div class="hero-content">
-                <h1 class="hero-title">Ready to Transform Your Business?</h1>
-                <p class="hero-subtitle">Connect with our expert sales team for personalized solutions</p>
-                <div class="hero-stats">
-                    <div class="hero-stat">
-                        <span class="hero-stat-number">24hrs</span>
-                        <span class="hero-stat-label">Response Time</span>
-                    </div>
-                    <div class="hero-stat">
-                        <span class="hero-stat-number">500+</span>
-                        <span class="hero-stat-label">Happy Clients</span>
-                    </div>
-                    <div class="hero-stat">
-                        <span class="hero-stat-number">98%</span>
-                        <span class="hero-stat-label">Satisfaction Rate</span>
-                    </div>
-                </div>
+<div class="contact-wrapper">
+    <div class="contact-grid">
+        <!-- Left: Contact Form -->
+        <div class="contact-form-section">
+            <div class="form-header">
+                <h3><i class="fas fa-envelope me-2"></i>Send Us a Message</h3>
+                <p>Our sales team will get back to you based on the priority level selected</p>
             </div>
-        </div>
-        
-        <!-- Contact Body -->
-        <div class="contact-body">
-            <!-- Contact Options -->
-            <div class="contact-options">
-                <div class="contact-option" data-type="urgent">
-                    <div class="option-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h4 class="option-title">Urgent Inquiry</h4>
-                    <p class="option-description">Need immediate assistance or have a time-sensitive request</p>
-                    <div class="option-time">Response within 2-4 hours</div>
+
+            <form method="post" id="contactForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="subject" class="form-label required">Subject</label>
+                    <input type="text" class="form-control" id="subject" name="subject" 
+                           placeholder="What can we help you with?" required maxlength="200">
                 </div>
-                
-                <div class="contact-option selected" data-type="general">
-                    <div class="option-icon">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                    <h4 class="option-title">General Sales Inquiry</h4>
-                    <p class="option-description">Learn about our solutions, pricing, and how we can help your business</p>
-                    <div class="option-time">Response within 24 hours</div>
+
+                <div class="form-group">
+                    <label for="message" class="form-label required">Message</label>
+                    <textarea class="form-control" id="message" name="message" rows="7" 
+                              placeholder="Tell us about your business needs, requirements, budget, timeline..."
+                              required maxlength="1000"></textarea>
+                    <div class="char-count" id="charCount">0 / 1000</div>
                 </div>
-                
-                <div class="contact-option" data-type="demo">
-                    <div class="option-icon">
-                        <i class="fas fa-presentation"></i>
-                    </div>
-                    <h4 class="option-title">Request Custom Demo</h4>
-                    <p class="option-description">Schedule a personalized demonstration tailored to your needs</p>
-                    <div class="option-time">Demo scheduled within 48 hours</div>
-                </div>
-            </div>
-            
-            <!-- Contact Form -->
-            <div class="contact-form-section">
-                <div class="form-header">
-                    <h3>Get in Touch</h3>
-                    <p>Tell us about your business needs and we'll connect you with the right specialist</p>
-                </div>
-                
-                <form class="contact-form" id="contactForm" method="post">
-                    {% csrf_token %}
-                    
-                    <!-- Contact Information (Pre-filled from profile) -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="name" name="name" 
-                                       value="{{ user.first_name }} {{ user.last_name }}" disabled>
+
+                <div class="form-group">
+                    <label class="form-label">Priority Level</label>
+                    <div class="priority-grid">
+                        <label class="priority-btn">
+                            <input type="radio" name="priority" value="normal" checked>
+                            <div class="priority-content">
+                                <div class="priority-icon"><i class="fas fa-clock text-primary"></i></div>
+                                <div class="priority-label">Normal</div>
+                                <div class="priority-time">24-48 hrs</div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="email" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="email" name="email" 
-                                       value="{{ user.email }}" disabled>
+                        </label>
+
+                        <label class="priority-btn">
+                            <input type="radio" name="priority" value="high">
+                            <div class="priority-content">
+                                <div class="priority-icon"><i class="fas fa-exclamation-circle text-warning"></i></div>
+                                <div class="priority-label">High</div>
+                                <div class="priority-time">4-8 hrs</div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="text" class="form-control" id="phone" name="phone" 
-                                       value="{{ user.full_mobile }}" disabled>
+                        </label>
+
+                        <label class="priority-btn">
+                            <input type="radio" name="priority" value="urgent">
+                            <div class="priority-content">
+                                <div class="priority-icon"><i class="fas fa-exclamation-triangle text-danger"></i></div>
+                                <div class="priority-label">Urgent</div>
+                                <div class="priority-time">2-4 hrs</div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="company" class="form-label">Company</label>
-                                <input type="text" class="form-control" id="company" name="company" 
-                                       value="{{ user.organization }}" disabled>
-                            </div>
-                        </div>
+                        </label>
                     </div>
-                    
-                    <!-- Message Details -->
-                    <div class="form-group">
-                        <label for="subject" class="form-label required-field">Subject</label>
-                        <input type="text" class="form-control" id="subject" name="subject" 
-                               placeholder="Brief subject of your message" required maxlength="200">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="message" class="form-label required-field">Message</label>
-                        <textarea class="form-control" id="message" name="message" rows="6" 
-                                  placeholder="Tell us about your business needs, budget, timeline, or any specific requirements..."
-                                  required maxlength="1000"></textarea>
-                        <div class="character-counter" id="messageCounter">0 / 1000 characters</div>
-                    </div>
-                    
-                    <!-- Priority Selection -->
-                    <div class="form-group">
-                        <label class="form-label">Priority Level</label>
-                        <div class="priority-selector">
-                            <label class="priority-option">
-                                <input type="radio" name="priority" value="normal" checked>
-                                <div>
-                                    <i class="fas fa-clock mb-2"></i>
-                                    <div><strong>Normal</strong></div>
-                                    <small>24-48 hours</small>
-                                </div>
-                            </label>
-                            <label class="priority-option">
-                                <input type="radio" name="priority" value="high">
-                                <div>
-                                    <i class="fas fa-exclamation mb-2"></i>
-                                    <div><strong>High</strong></div>
-                                    <small>4-8 hours</small>
-                                </div>
-                            </label>
-                            <label class="priority-option">
-                                <input type="radio" name="priority" value="urgent">
-                                <div>
-                                    <i class="fas fa-bolt mb-2"></i>
-                                    <div><strong>Urgent</strong></div>
-                                    <small>2-4 hours</small>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <!-- Submit Section -->
-                    <div class="submit-section">
-                        <button type="submit" class="submit-btn" id="submitBtn">
-                            <i class="fas fa-paper-plane"></i>
-                            Send Message
-                        </button>
-                        <div class="form-text mt-3">
-                            Our sales team will review your message and respond based on the priority level selected.
-                        </div>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Message
+                </button>
+            </form>
         </div>
-    </div>
-    
-    <!-- Additional Contact Information -->
-    <div class="contact-info-cards">
-        <div class="info-card">
-            <div class="info-card-icon">
-                <i class="fas fa-phone"></i>
+
+        <!-- Right: Contact Information -->
+        <div class="contact-info-section">
+            <!-- Call Us -->
+            <div class="info-card">
+                <h4><i class="fas fa-phone-alt"></i> Call Us</h4>
+                <div class="phone-list">
+                    <div class="phone-item">
+                        <span class="phone-label">Sales Inquiries</span>
+                        <a href="tel:+918008987948" class="phone-number">+91 8008 987 948</a>
+                    </div>
+                    <div class="phone-item">
+                        <span class="phone-label">HR Inquiries</span>
+                        <a href="tel:+919704344092" class="phone-number">+91 9704 344 092</a>
+                    </div>
+                    <div class="phone-item">
+                        <span class="phone-label">Customer Support</span>
+                        <a href="tel:+919145967635" class="phone-number">+91 9145 967 635</a>
+                    </div>
+                    <div class="phone-item">
+                        <span class="phone-label">General Info</span>
+                        <a href="tel:+917569031694" class="phone-number">+91 7569 031 694</a>
+                    </div>
+                </div>
             </div>
-            <h6>Direct Phone</h6>
-            <p>
-                <strong>+91-1234567890</strong><br>
-                Monday - Friday: 9 AM - 6 PM IST<br>
-                Saturday: 10 AM - 4 PM IST
-            </p>
-        </div>
-        
-        <div class="info-card">
-            <div class="info-card-icon">
-                <i class="fas fa-envelope"></i>
+
+            <!-- Email -->
+            <div class="info-card">
+                <h4><i class="fas fa-envelope"></i> Email Us</h4>
+                <div class="address-content">
+                    <a href="mailto:sales@chrp-india.com" class="email-link">sales@chrp-india.com</a><br><br>
+                    We respond to all emails within 24 hours during business days
+                </div>
             </div>
-            <h6>Email Support</h6>
-            <p>
-                <strong>sales@chrp-india.com</strong><br>
-                We respond to all emails within<br>
-                24 hours during business days
-            </p>
-        </div>
-        
-        <div class="info-card">
-            <div class="info-card-icon">
-                <i class="fas fa-calendar"></i>
+
+            <!-- Business Hours -->
+            {% comment %} <div class="info-card">
+                <h4><i class="fas fa-clock"></i> Business Hours</h4>
+                <div class="business-hours">
+                    <div class="hours-item">
+                        <span class="hours-day">Monday - Friday</span>
+                        <span class="hours-time">9:00 AM - 6:00 PM</span>
+                    </div>
+                    <div class="hours-item">
+                        <span class="hours-day">Saturday</span>
+                        <span class="hours-time">10:00 AM - 4:00 PM</span>
+                    </div>
+                    <div class="hours-item">
+                        <span class="hours-day">Sunday</span>
+                        <span class="hours-time">Closed</span>
+                    </div>
+                </div>
+            </div> {% endcomment %}
+
+            <!-- Office Address -->
+            <div class="info-card">
+                <h4><i class="fas fa-map-marker-alt"></i> Visit Our Office</h4>
+                <div class="address-content">
+                    <strong>CHRP-INDIA PVT. LTD.</strong>
+                    #302, 3rd Floor, Elite Plaza<br>
+                    Building no. #6-3-679/303<br>
+                    Durga Nagar, Somajiguda<br>
+                    Hyderabad - 500082<br>
+                    Telangana, India
+                </div>
             </div>
-            <h6>Schedule a Call</h6>
-            <p>
-                Book a convenient time for a<br>
-                detailed discussion about your<br>
-                business requirements
-            </p>
-        </div>
-        
-        <div class="info-card">
-            <div class="info-card-icon">
-                <i class="fas fa-map-marker-alt"></i>
+
+            <!-- Response Time Badge -->
+            <div class="response-badge">
+                <strong>24 Hours</strong>
+                <div>Average Response Time</div>
             </div>
-            <h6>Visit Our Office</h6>
-            <p>
-                Schedule an in-person meeting<br>
-                at our office for detailed<br>
-                product demonstrations
-            </p>
         </div>
     </div>
 </div>
@@ -600,201 +461,39 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('contactForm');
-    const messageTextarea = document.getElementById('message');
-    const messageCounter = document.getElementById('messageCounter');
+    const message = document.getElementById('message');
+    const charCount = document.getElementById('charCount');
     const submitBtn = document.getElementById('submitBtn');
-    const contactOptions = document.querySelectorAll('.contact-option');
-    const priorityOptions = document.querySelectorAll('.priority-option');
-    
-    // Contact type selection
-    contactOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            contactOptions.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            
-            const type = this.dataset.type;
-            updateFormForContactType(type);
-        });
+
+    message.addEventListener('input', function() {
+        const count = this.value.length;
+        charCount.textContent = `${count} / 1000`;
+        if (count > 900) charCount.style.color = 'var(--danger-color)';
+        else if (count > 700) charCount.style.color = 'var(--warning-color)';
+        else charCount.style.color = 'var(--gray-500)';
     });
-    
-    // Priority selection
-    priorityOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            priorityOptions.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            
-            const radio = this.querySelector('input[type="radio"]');
-            radio.checked = true;
-        });
-    });
-    
-    // Character counter
-    function updateCharacterCounter() {
-        const currentLength = messageTextarea.value.length;
-        const maxLength = 1000;
-        
-        messageCounter.textContent = `${currentLength} / ${maxLength} characters`;
-        
-        if (currentLength > maxLength * 0.9) {
-            messageCounter.style.color = 'var(--danger-color)';
-        } else if (currentLength > maxLength * 0.7) {
-            messageCounter.style.color = 'var(--warning-color)';
-        } else {
-            messageCounter.style.color = 'var(--gray-500)';
-        }
-    }
-    
-    messageTextarea.addEventListener('input', updateCharacterCounter);
-    
-    function updateFormForContactType(type) {
-        const subjectInput = document.getElementById('subject');
-        const messageTextarea = document.getElementById('message');
-        
-        switch(type) {
-            case 'urgent':
-                subjectInput.placeholder = 'Urgent: Brief description of your immediate need';
-                messageTextarea.placeholder = 'Please describe your urgent requirement, timeline, and why immediate attention is needed...';
-                // Auto-select urgent priority
-                document.querySelector('input[name="priority"][value="urgent"]').checked = true;
-                updatePrioritySelection('urgent');
-                break;
-            case 'demo':
-                subjectInput.placeholder = 'Custom Demo Request: [Your Industry/Use Case]';
-                messageTextarea.placeholder = 'Please describe your specific demo requirements, preferred date/time, number of attendees, and particular features you want to see...';
-                break;
-            default:
-                subjectInput.placeholder = 'Brief subject of your message';
-                messageTextarea.placeholder = 'Tell us about your business needs, budget, timeline, or any specific requirements...';
-        }
-    }
-    
-    function updatePrioritySelection(priority) {
-        priorityOptions.forEach(opt => opt.classList.remove('selected'));
-        const selectedOption = document.querySelector(`input[name="priority"][value="${priority}"]`).closest('.priority-option');
-        selectedOption.classList.add('selected');
-    }
-    
-    // Form validation
-    function validateForm() {
-        const subject = document.getElementById('subject').value.trim();
-        const message = messageTextarea.value.trim();
-        
-        if (!subject) {
-            showToast('Please enter a subject for your message.', 'error');
-            return false;
-        }
-        
-        if (subject.length < 5) {
-            showToast('Subject must be at least 5 characters long.', 'error');
-            return false;
-        }
-        
-        if (!message) {
-            showToast('Please enter your message.', 'error');
-            return false;
-        }
-        
-        if (message.length < 20) {
-            showToast('Message must be at least 20 characters long.', 'error');
-            return false;
-        }
-        
-        return true;
-    }
-    
-    // Form submission
+
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        if (!validateForm()) {
+        const subject = document.getElementById('subject').value.trim();
+        const msg = message.value.trim();
+
+        if (subject.length < 5) {
+            alert('Subject must be at least 5 characters');
             return;
         }
-        
-        // Show loading state
-        submitBtn.classList.add('loading');
+
+        if (msg.length < 20) {
+            alert('Message must be at least 20 characters');
+            return;
+        }
+
         submitBtn.disabled = true;
-        
-        const formData = new FormData(form);
-        
-        fetch('{% url "customers:contact_sales" %}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                showToast('Message sent successfully! Our sales team will contact you soon.', 'success');
-                
-                // Reset form
-                document.getElementById('subject').value = '';
-                messageTextarea.value = '';
-                updateCharacterCounter();
-                
-                // Reset to normal priority
-                document.querySelector('input[name="priority"][value="normal"]').checked = true;
-                updatePrioritySelection('normal');
-                
-                // Redirect after success
-                setTimeout(() => {
-                    window.location.href = '{% url "customers:dashboard" %}';
-                }, 3000);
-            } else {
-                throw new Error('Failed to send message');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Error sending message. Please try again or contact us directly.', 'error');
-        })
-        .finally(() => {
-            submitBtn.classList.remove('loading');
-            submitBtn.disabled = false;
-        });
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+
+        this.submit();
     });
-    
-    function showToast(message, type = 'info') {
-        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-        const toastId = 'toast-' + Date.now();
-        
-        const alertClass = type === 'error' ? 'danger' : type;
-        const icon = type === 'success' ? 'check-circle' : 
-                   type === 'error' ? 'exclamation-triangle' : 
-                   'info-circle';
-        
-        const toastHtml = `
-            <div class="toast show" id="${toastId}" role="alert">
-                <div class="toast-header bg-${alertClass} text-white">
-                    <i class="fas fa-${icon} me-2"></i>
-                    <strong class="me-auto">Sales Contact</strong>
-                    <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${toastId}').remove()"></button>
-                </div>
-                <div class="toast-body">
-                    ${message}
-                </div>
-            </div>
-        `;
-        
-        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-        
-        setTimeout(() => {
-            const toast = document.getElementById(toastId);
-            if (toast) toast.remove();
-        }, 5000);
-    }
-    
-    function createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '11000';
-        document.body.appendChild(container);
-        return container;
-    }
-    
-    // Initialize
-    updateCharacterCounter();
 });
 </script>
 {% endblock %}

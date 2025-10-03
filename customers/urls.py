@@ -2,6 +2,7 @@
 from django.urls import path
 from . import views
 from . import liked_demos_views  # ✅ ADD THIS IMPORT
+from . import views, ajax_views
 
 
 app_name = 'customers'
@@ -28,7 +29,6 @@ urlpatterns = [
     # AJAX Endpoints - FIXED PATHS
     path('ajax/demo/<int:demo_id>/like/', views.toggle_demo_like, name='toggle_demo_like'),
     path('ajax/demo/<int:demo_id>/feedback/', views.submit_demo_feedback, name='submit_demo_feedback'),
-    path('ajax/demo-request/<int:request_id>/cancel/', views.cancel_demo_request, name='cancel_demo_request'),
     path('ajax/notification/<int:notification_id>/mark-read/', views.mark_notification_read, name='mark_notification_read'),
     path('ajax/notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
     
@@ -36,4 +36,6 @@ urlpatterns = [
     path('ajax/subcategories/<int:category_id>/', views.ajax_subcategories, name='ajax_subcategories'),
     path('ajax/demos/', views.ajax_demos_by_category, name='ajax_demos_by_category'),
     path('ajax/demo/<int:demo_id>/', views.ajax_demo_detail, name='ajax_demo_detail'),
+    path('ajax/demo-request/<int:request_id>/cancel/', ajax_views.cancel_demo_request, name='cancel_demo_request'),
+
 ]

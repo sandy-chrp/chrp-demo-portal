@@ -7,147 +7,137 @@
 
 {% block customer_extra_css %}
 <style>
-    /* Profile specific styles */
-    .profile-container {
-        max-width: 900px;
+    .profile-wrapper {
+        max-width: 1200px;
         margin: 0 auto;
     }
 
-    .profile-header {
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    /* Left Sidebar */
+    .profile-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .profile-card {
+        background: white;
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-200);
+        text-align: center;
+    }
+
+    .avatar-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
         background: var(--gradient-primary);
         color: white;
-        padding: var(--spacing-xl);
-        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .profile-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 200px;
-        height: 200px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        transform: translate(50px, -50px);
-    }
-
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto var(--spacing-lg) auto;
-        font-size: 3rem;
+        margin: 0 auto var(--spacing-md);
+        font-size: 2.5rem;
         font-weight: 700;
-        border: 4px solid rgba(255, 255, 255, 0.3);
-        position: relative;
-        z-index: 1;
+        border: 4px solid rgba(30, 60, 114, 0.1);
     }
 
     .profile-name {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: var(--spacing-sm);
-        position: relative;
-        z-index: 1;
-    }
-
-    .profile-email {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-bottom: var(--spacing-md);
-        position: relative;
-        z-index: 1;
-    }
-
-    .profile-status {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        background: rgba(255, 255, 255, 0.2);
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-lg);
-        font-size: 0.95rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .profile-body {
-        background: white;
-        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-        box-shadow: var(--shadow-lg);
-        overflow: hidden;
-    }
-
-    .profile-nav {
-        display: flex;
-        border-bottom: 1px solid var(--gray-200);
-        background: var(--gray-50);
-    }
-
-    .profile-nav-item {
-        flex: 1;
-        padding: var(--spacing-lg);
-        text-align: center;
-        border: none;
-        background: none;
-        color: var(--gray-600);
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .profile-nav-item:hover {
-        color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
-    }
-
-    .profile-nav-item.active {
-        color: var(--primary-color);
-        background: white;
-    }
-
-    .profile-nav-item.active::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background: var(--primary-color);
-    }
-
-    .profile-content {
-        padding: var(--spacing-xl);
-    }
-
-    .profile-section {
-        display: none;
-    }
-
-    .profile-section.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .section-title {
         font-size: 1.5rem;
         font-weight: 700;
         color: var(--dark-color);
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .profile-email {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .verify-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: var(--radius-lg);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-verified {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-unverified {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    /* Navigation Menu */
+    .nav-menu {
+        background: white;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        color: var(--gray-700);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .nav-item:hover {
+        background: var(--gray-50);
+        color: var(--primary-color);
+    }
+
+    .nav-item.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .nav-item i {
+        width: 20px;
+    }
+
+    /* Right Content Area */
+    .profile-content {
+        background: white;
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--gray-200);
+        min-height: 600px;
+    }
+
+    .section-header {
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark-color);
         display: flex;
         align-items: center;
         gap: var(--spacing-sm);
@@ -157,6 +147,84 @@
         color: var(--primary-color);
     }
 
+    .content-section {
+        display: none;
+    }
+
+    .content-section.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Quick Actions in Overview */
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .action-card {
+        padding: var(--spacing-lg);
+        background: var(--gray-50);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        color: var(--gray-700);
+    }
+
+    .action-card:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        text-decoration: none;
+    }
+
+    .action-card i {
+        font-size: 1.75rem;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 50%;
+        color: var(--primary-color);
+        flex-shrink: 0;
+    }
+
+    .action-card:hover i {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .action-text {
+        flex: 1;
+    }
+
+    .action-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 2px;
+    }
+
+    .action-desc {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    /* Form Styles */
     .form-group {
         margin-bottom: var(--spacing-lg);
     }
@@ -166,13 +234,14 @@
         color: var(--gray-700);
         margin-bottom: var(--spacing-sm);
         display: block;
+        font-size: 0.9rem;
     }
 
     .form-control, .form-select {
         border: 2px solid var(--gray-300);
         border-radius: var(--radius-lg);
-        padding: var(--spacing-md);
-        font-size: 1rem;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.95rem;
         transition: all 0.3s ease;
         width: 100%;
     }
@@ -184,91 +253,14 @@
     }
 
     .form-control:disabled {
-        background-color: var(--gray-100);
+        background: var(--gray-100);
         color: var(--gray-500);
     }
 
-    .profile-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-lg);
-        margin-bottom: var(--spacing-xl);
-    }
-
-    .stat-card {
-        background: var(--gray-50);
-        padding: var(--spacing-lg);
-        border-radius: var(--radius-lg);
-        text-align: center;
-        border: 2px solid var(--gray-200);
-        transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
-    }
-
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .stat-label {
-        color: var(--gray-600);
-        font-weight: 500;
-    }
-
-    .info-card {
-        background: var(--gray-50);
-        border: 1px solid var(--gray-200);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-lg);
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .info-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: var(--spacing-md);
-        padding-bottom: var(--spacing-md);
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .info-item:last-child {
-        margin-bottom: 0;
-        padding-bottom: 0;
-        border-bottom: none;
-    }
-
-    .info-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: var(--primary-color);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: var(--spacing-md);
-        flex-shrink: 0;
-    }
-
-    .info-content {
-        flex: 1;
-    }
-
-    .info-label {
-        font-size: 0.875rem;
+    .form-text {
+        font-size: 0.8rem;
         color: var(--gray-500);
-        margin-bottom: var(--spacing-xs);
-    }
-
-    .info-value {
-        font-weight: 600;
-        color: var(--dark-color);
+        margin-top: var(--spacing-xs);
     }
 
     .btn-update {
@@ -296,13 +288,42 @@
         transform: none;
     }
 
+    /* Info Display */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .info-box {
+        padding: var(--spacing-lg);
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--gray-500);
+        margin-bottom: var(--spacing-xs);
+        font-weight: 600;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+
+    /* Password Strength */
     .password-strength {
         margin-top: var(--spacing-sm);
     }
 
     .strength-bar {
         height: 4px;
-        background: var(--gray-300);
+        background: var(--gray-200);
         border-radius: 2px;
         overflow: hidden;
         margin-bottom: var(--spacing-xs);
@@ -311,49 +332,44 @@
     .strength-fill {
         height: 100%;
         transition: all 0.3s ease;
-        border-radius: 2px;
     }
 
-    .strength-weak { background: var(--danger-color); width: 25%; }
-    .strength-fair { background: var(--warning-color); width: 50%; }
-    .strength-good { background: var(--info-color); width: 75%; }
-    .strength-strong { background: var(--success-color); width: 100%; }
-
     .strength-text {
-        font-size: 0.875rem;
-        font-weight: 500;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Activity Items */
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
     }
 
     .activity-item {
         display: flex;
         align-items: center;
+        gap: var(--spacing-md);
         padding: var(--spacing-md);
-        border-bottom: 1px solid var(--gray-200);
-        transition: all 0.3s ease;
-    }
-
-    .activity-item:hover {
         background: var(--gray-50);
-    }
-
-    .activity-item:last-child {
-        border-bottom: none;
+        border-radius: var(--radius-md);
+        border-left: 3px solid var(--primary-color);
     }
 
     .activity-icon {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: var(--spacing-md);
-        font-size: 0.875rem;
+        font-size: 1rem;
+        flex-shrink: 0;
     }
 
-    .activity-login { background: var(--success-color); color: white; }
-    .activity-demo { background: var(--info-color); color: white; }
-    .activity-enquiry { background: var(--warning-color); color: white; }
+    .activity-login { background: #d1fae5; color: #065f46; }
+    .activity-demo { background: #dbeafe; color: #1e40af; }
+    .activity-enquiry { background: #fef3c7; color: #92400e; }
 
     .activity-content {
         flex: 1;
@@ -362,393 +378,313 @@
     .activity-title {
         font-weight: 600;
         color: var(--dark-color);
-        margin-bottom: var(--spacing-xs);
+        font-size: 0.95rem;
     }
 
     .activity-time {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         color: var(--gray-500);
+        margin-top: 2px;
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-        .profile-nav {
-            flex-direction: column;
+    @media (max-width: 992px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
         }
 
-        .profile-nav-item {
-            text-align: left;
-        }
-
-        .profile-nav-item.active::after {
-            width: 4px;
-            height: 100%;
-            top: 0;
-            left: 0;
-            bottom: auto;
-        }
-
-        .profile-content {
-            padding: var(--spacing-lg);
-        }
-
-        .profile-stats {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .info-item {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .info-icon {
-            margin-right: 0;
-            margin-bottom: var(--spacing-sm);
+        .info-grid, .quick-actions-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
 {% endblock %}
 
 {% block customer_content %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="mb-4">
+<nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{% url 'customers:dashboard' %}">Dashboard</a>
-        </li>
+        <li class="breadcrumb-item"><a href="{% url 'customers:dashboard' %}">Dashboard</a></li>
         <li class="breadcrumb-item active">My Profile</li>
     </ol>
 </nav>
 
-<div class="profile-container">
-    <div class="customer-card">
-        <!-- Profile Header -->
-        <div class="profile-header">
-            <div class="profile-avatar">
-                {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+<div class="profile-wrapper">
+    <div class="profile-grid">
+        <!-- Left Sidebar -->
+        <div class="profile-sidebar">
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="avatar-circle">
+                    {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+                </div>
+                <h3 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h3>
+                <div class="profile-email">{{ user.email }}</div>
+                <span class="verify-badge {% if user.is_email_verified %}badge-verified{% else %}badge-unverified{% endif %}">
+                    <i class="fas {% if user.is_email_verified %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
+                    {% if user.is_email_verified %}Verified{% else %}Unverified{% endif %}
+                </span>
             </div>
-            <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
-            <div class="profile-email">{{ user.email }}</div>
-            <div class="profile-status">
-                {% if user.is_email_verified %}
-                    <i class="fas fa-check-circle"></i>
-                    <span>Verified Account</span>
-                {% else %}
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Email Not Verified</span>
-                {% endif %}
+
+            <!-- Navigation Menu -->
+            <div class="nav-menu">
+                <div class="nav-item active" data-section="overview">
+                    <i class="fas fa-user"></i>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item" data-section="edit">
+                    <i class="fas fa-edit"></i>
+                    <span>Edit Profile</span>
+                </div>
+                <div class="nav-item" data-section="security">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Security</span>
+                </div>
+                <div class="nav-item" data-section="activity">
+                    <i class="fas fa-history"></i>
+                    <span>Activity</span>
+                </div>
             </div>
         </div>
-        
-        <!-- Profile Body -->
-        <div class="profile-body">
-            <!-- Navigation Tabs -->
-            <div class="profile-nav">
-                <button class="profile-nav-item active" data-tab="overview">
-                    <i class="fas fa-user me-2"></i>Overview
-                </button>
-                <button class="profile-nav-item" data-tab="edit">
-                    <i class="fas fa-edit me-2"></i>Edit Profile
-                </button>
-                <button class="profile-nav-item" data-tab="security">
-                    <i class="fas fa-shield-alt me-2"></i>Security
-                </button>
-                <button class="profile-nav-item" data-tab="activity">
-                    <i class="fas fa-history me-2"></i>Activity
-                </button>
-            </div>
-            
-            <!-- Profile Content -->
-            <div class="profile-content">
-                <!-- Overview Section -->
-                <div class="profile-section active" id="overview">
+
+        <!-- Right Content -->
+        <div class="profile-content">
+            <!-- Overview Section -->
+            <div class="content-section active" id="overview">
+                <div class="section-header">
                     <h2 class="section-title">
                         <i class="fas fa-user"></i>
                         Profile Overview
                     </h2>
-                    
-                    <!-- Stats -->
-                    <div class="profile-stats">
-                        <div class="stat-card">
-                            <div class="stat-number">{{ total_demos_watched }}</div>
-                            <div class="stat-label">Demos Watched</div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions-grid">
+                    <a href="{% url 'customers:browse_demos' %}" class="action-card">
+                        <i class="fas fa-play-circle"></i>
+                        <div class="action-text">
+                            <div class="action-title">Browse Demos</div>
+                            <div class="action-desc">Explore our demo library</div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-number">{{ total_demo_requests }}</div>
-                            <div class="stat-label">Demo Requests</div>
+                    </a>
+                    <a href="{% url 'customers:request_demo' %}" class="action-card">
+                        <i class="fas fa-calendar-plus"></i>
+                        <div class="action-text">
+                            <div class="action-title">Request Demo</div>
+                            <div class="action-desc">Schedule a live session</div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-number">{{ total_enquiries }}</div>
-                            <div class="stat-label">Enquiries Sent</div>
+                    </a>
+                    <a href="{% url 'customers:send_enquiry' %}" class="action-card">
+                        <i class="fas fa-envelope"></i>
+                        <div class="action-text">
+                            <div class="action-title">Send Enquiry</div>
+                            <div class="action-desc">Ask us anything</div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-number">{{ user.date_joined|timesince }}</div>
-                            <div class="stat-label">Member Since</div>
+                    </a>
+                    <a href="{% url 'customers:contact_sales' %}" class="action-card">
+                        <i class="fas fa-headset"></i>
+                        <div class="action-text">
+                            <div class="action-title">Contact Sales</div>
+                            <div class="action-desc">Talk to our team</div>
                         </div>
+                    </a>
+                </div>
+
+                <!-- Profile Info -->
+                <div class="info-grid">
+                    <div class="info-box">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value">{{ user.first_name }} {{ user.last_name }}</div>
                     </div>
-                    
-                    <!-- Profile Information -->
-                    <div class="info-card">
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="info-content">
-                                <div class="info-label">Full Name</div>
-                                <div class="info-value">{{ user.first_name }} {{ user.last_name }}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            <div class="info-content">
-                                <div class="info-label">Email Address</div>
-                                <div class="info-value">{{ user.email }}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-phone"></i>
-                            </div>
-                            <div class="info-content">
-                                <div class="info-label">Mobile Number</div>
-                                <div class="info-value">{{ user.full_mobile }}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-briefcase"></i>
-                            </div>
-                            <div class="info-content">
-                                <div class="info-label">Job Title</div>
-                                <div class="info-value">{{ user.job_title|default:"Not specified" }}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-building"></i>
-                            </div>
-                            <div class="info-content">
-                                <div class="info-label">Organization</div>
-                                <div class="info-value">{{ user.organization|default:"Not specified" }}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-calendar"></i>
-                            </div>
-                            <div class="info-content">
-                                <div class="info-label">Member Since</div>
-                                <div class="info-value">{{ user.date_joined|date:"F d, Y" }}</div>
-                            </div>
-                        </div>
+                    <div class="info-box">
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value">{{ user.email }}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Mobile Number</div>
+                        <div class="info-value">{{ user.full_mobile }}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Job Title</div>
+                        <div class="info-value">{{ user.job_title|default:"Not specified" }}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Organization</div>
+                        <div class="info-value">{{ user.organization|default:"Not specified" }}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Member Since</div>
+                        <div class="info-value">{{ user.date_joined|date:"F d, Y" }}</div>
                     </div>
                 </div>
-                
-                <!-- Edit Profile Section -->
-                <div class="profile-section" id="edit">
+            </div>
+
+            <!-- Edit Profile Section -->
+            <div class="content-section" id="edit">
+                <div class="section-header">
                     <h2 class="section-title">
                         <i class="fas fa-edit"></i>
                         Edit Profile
                     </h2>
-                    
-                    <form id="profileForm" method="post">
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="first_name" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="first_name" name="first_name" 
-                                           value="{{ user.first_name }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="last_name" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="last_name" name="last_name" 
-                                           value="{{ user.last_name }}" required>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="email" name="email" 
-                                   value="{{ user.email }}" disabled>
-                            <div class="form-text">Email address cannot be changed. Contact support if needed.</div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="country_code" class="form-label">Country Code</label>
-                                    <select class="form-select" id="country_code" name="country_code">
-                                        <option value="+91" {% if user.country_code == "+91" %}selected{% endif %}>🇮🇳 India (+91)</option>
-                                        <option value="+1" {% if user.country_code == "+1" %}selected{% endif %}>🇺🇸 USA (+1)</option>
-                                        <option value="+44" {% if user.country_code == "+44" %}selected{% endif %}>🇬🇧 UK (+44)</option>
-                                        <option value="+86" {% if user.country_code == "+86" %}selected{% endif %}>🇨🇳 China (+86)</option>
-                                        <option value="+49" {% if user.country_code == "+49" %}selected{% endif %}>🇩🇪 Germany (+49)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <div class="form-group">
-                                    <label for="mobile" class="form-label">Mobile Number</label>
-                                    <input type="text" class="form-control" id="mobile" name="mobile" 
-                                           value="{{ user.mobile }}" pattern="[0-9]{10}" required>
-                                    <div class="form-text">Enter 10-digit mobile number without country code</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="job_title" class="form-label">Job Title</label>
-                                    <input type="text" class="form-control" id="job_title" name="job_title" 
-                                           value="{{ user.job_title }}" placeholder="e.g., Software Engineer">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="organization" class="form-label">Organization</label>
-                                    <input type="text" class="form-control" id="organization" name="organization" 
-                                           value="{{ user.organization }}" placeholder="e.g., ABC Company Ltd.">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="btn-update">
-                            <i class="fas fa-save"></i>
-                            Update Profile
-                        </button>
-                    </form>
                 </div>
-                
-                <!-- Security Section -->
-                <div class="profile-section" id="security">
+
+                <form id="profileForm" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" 
+                                       value="{{ user.first_name }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       value="{{ user.last_name }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+                        <div class="form-text">Email cannot be changed. Contact support if needed.</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="country_code" class="form-label">Country Code</label>
+                                <select class="form-select" id="country_code" name="country_code">
+                                    <option value="+91" {% if user.country_code == "+91" %}selected{% endif %}>🇮🇳 +91</option>
+                                    <option value="+1" {% if user.country_code == "+1" %}selected{% endif %}>🇺🇸 +1</option>
+                                    <option value="+44" {% if user.country_code == "+44" %}selected{% endif %}>🇬🇧 +44</option>
+                                    <option value="+86" {% if user.country_code == "+86" %}selected{% endif %}>🇨🇳 +86</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="mobile" class="form-label">Mobile Number</label>
+                                <input type="text" class="form-control" id="mobile" name="mobile" 
+                                       value="{{ user.mobile }}" pattern="[0-9]{10}" required>
+                                <div class="form-text">10-digit mobile number</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="job_title" class="form-label">Job Title</label>
+                                <input type="text" class="form-control" id="job_title" name="job_title" 
+                                       value="{{ user.job_title }}" placeholder="e.g., Software Engineer">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="organization" class="form-label">Organization</label>
+                                <input type="text" class="form-control" id="organization" name="organization" 
+                                       value="{{ user.organization }}" placeholder="e.g., ABC Company">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-update">
+                        <i class="fas fa-save"></i>
+                        Update Profile
+                    </button>
+                </form>
+            </div>
+
+            <!-- Security Section -->
+            <div class="content-section" id="security">
+                <div class="section-header">
                     <h2 class="section-title">
                         <i class="fas fa-shield-alt"></i>
                         Security Settings
                     </h2>
-                    
-                    <div class="info-card">
-                        <h5>Change Password</h5>
-                        <form id="passwordForm" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="form_type" value="password">
-                            
-                            <div class="form-group">
-                                <label for="current_password" class="form-label">Current Password</label>
-                                <input type="password" class="form-control" id="current_password" name="current_password" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="new_password" class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="new_password" name="new_password" required>
-                                <div class="password-strength">
-                                    <div class="strength-bar">
-                                        <div class="strength-fill" id="strengthFill"></div>
-                                    </div>
-                                    <div class="strength-text" id="strengthText">Enter a password</div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="confirm_password" class="form-label">Confirm New Password</label>
-                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                            </div>
-                            
-                            <button type="submit" class="btn-update">
-                                <i class="fas fa-key"></i>
-                                Change Password
-                            </button>
-                        </form>
-                    </div>
-                    
-                    <div class="info-card">
-                        <h5>Account Security</h5>
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            <div class="info-content">
-                                <div class="info-label">Email Verification</div>
-                                <div class="info-value">
-                                    {% if user.is_email_verified %}
-                                        <span class="text-success">✓ Verified</span>
-                                    {% else %}
-                                        <span class="text-warning">⚠ Not Verified</span>
-                                        <a href="#" class="btn btn-sm btn-outline-primary ms-2">Verify Now</a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="info-item">
-                            <div class="info-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="info-content">
-                                <div class="info-label">Last Password Change</div>
-                                <div class="info-value">{{ user.last_login|date:"F d, Y" }}</div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-                
-                <!-- Activity Section -->
-                <div class="profile-section" id="activity">
+
+                <form id="passwordForm" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="password">
+
+                    <div class="form-group">
+                        <label for="current_password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_password" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password" required>
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <div class="strength-text" id="strengthText">Enter a password</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                    </div>
+
+                    <button type="submit" class="btn-update">
+                        <i class="fas fa-key"></i>
+                        Change Password
+                    </button>
+                </form>
+            </div>
+
+            <!-- Activity Section -->
+            <div class="content-section" id="activity">
+                <div class="section-header">
                     <h2 class="section-title">
                         <i class="fas fa-history"></i>
                         Recent Activity
                     </h2>
-                    
-                    <div class="info-card">
+                </div>
+
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon activity-login">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Logged in</div>
+                            <div class="activity-time">{{ user.last_login|timesince }} ago</div>
+                        </div>
+                    </div>
+
+                    {% if recent_demos %}
+                        {% for demo in recent_demos %}
                         <div class="activity-item">
-                            <div class="activity-icon activity-login">
-                                <i class="fas fa-sign-in-alt"></i>
+                            <div class="activity-icon activity-demo">
+                                <i class="fas fa-play"></i>
                             </div>
                             <div class="activity-content">
-                                <div class="activity-title">Logged in</div>
-                                <div class="activity-time">{{ user.last_login|timesince }} ago</div>
+                                <div class="activity-title">Watched: {{ demo.title }}</div>
+                                <div class="activity-time">Recently</div>
                             </div>
                         </div>
-                        
-                        {% if recent_demos %}
-                            {% for demo in recent_demos %}
-                            <div class="activity-item">
-                                <div class="activity-icon activity-demo">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Watched demo: {{ demo.title }}</div>
-                                    <div class="activity-time">Recently</div>
-                                </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if recent_enquiries %}
+                        {% for enquiry in recent_enquiries %}
+                        <div class="activity-item">
+                            <div class="activity-icon activity-enquiry">
+                                <i class="fas fa-envelope"></i>
                             </div>
-                            {% endfor %}
-                        {% endif %}
-                        
-                        {% if recent_enquiries %}
-                            {% for enquiry in recent_enquiries %}
-                            <div class="activity-item">
-                                <div class="activity-icon activity-enquiry">
-                                    <i class="fas fa-envelope"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Sent enquiry: {{ enquiry.subject|default:"Business Enquiry" }}</div>
-                                    <div class="activity-time">{{ enquiry.created_at|timesince }} ago</div>
-                                </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Enquiry: {{ enquiry.subject|default:"Business Enquiry" }}</div>
+                                <div class="activity-time">{{ enquiry.created_at|timesince }} ago</div>
                             </div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -759,106 +695,98 @@
 {% block customer_extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Tab switching
-    const navItems = document.querySelectorAll('.profile-nav-item');
-    const sections = document.querySelectorAll('.profile-section');
-    
+    const navItems = document.querySelectorAll('.nav-item');
+    const sections = document.querySelectorAll('.content-section');
+
     navItems.forEach(item => {
         item.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
+            const sectionId = this.dataset.section;
             
-            // Update nav items
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
             
-            // Update sections
             sections.forEach(section => section.classList.remove('active'));
-            document.getElementById(tabName).classList.add('active');
+            document.getElementById(sectionId).classList.add('active');
         });
     });
-    
-    // Password strength checker
-    const newPasswordInput = document.getElementById('new_password');
+
+    const newPassword = document.getElementById('new_password');
     const strengthFill = document.getElementById('strengthFill');
     const strengthText = document.getElementById('strengthText');
-    
-    if (newPasswordInput) {
-        newPasswordInput.addEventListener('input', function() {
-            const password = this.value;
-            const strength = calculatePasswordStrength(password);
-            updatePasswordStrength(strength);
+
+    if (newPassword) {
+        newPassword.addEventListener('input', function() {
+            const score = calculateStrength(this.value);
+            updateStrength(score);
         });
     }
-    
-    function calculatePasswordStrength(password) {
+
+    function calculateStrength(pwd) {
         let score = 0;
-        if (password.length >= 8) score++;
-        if (password.match(/[a-z]/)) score++;
-        if (password.match(/[A-Z]/)) score++;
-        if (password.match(/[0-9]/)) score++;
-        if (password.match(/[^a-zA-Z0-9]/)) score++;
+        if (pwd.length >= 8) score++;
+        if (pwd.match(/[a-z]/)) score++;
+        if (pwd.match(/[A-Z]/)) score++;
+        if (pwd.match(/[0-9]/)) score++;
+        if (pwd.match(/[^a-zA-Z0-9]/)) score++;
         return score;
     }
-    
-    function updatePasswordStrength(strength) {
-        const classes = ['strength-weak', 'strength-fair', 'strength-good', 'strength-strong'];
-        const texts = ['Weak', 'Fair', 'Good', 'Strong'];
+
+    function updateStrength(score) {
         const colors = ['#ef4444', '#f59e0b', '#06b6d4', '#10b981'];
-        
-        strengthFill.className = 'strength-fill';
-        
-        if (strength === 0) {
+        const texts = ['Weak', 'Fair', 'Good', 'Strong'];
+        const widths = ['25%', '50%', '75%', '100%'];
+
+        if (score === 0) {
             strengthFill.style.width = '0%';
             strengthText.textContent = 'Enter a password';
             strengthText.style.color = '#6b7280';
         } else {
-            const index = Math.min(strength - 1, 3);
-            strengthFill.classList.add(classes[index]);
-            strengthText.textContent = texts[index];
-            strengthText.style.color = colors[index];
+            const idx = Math.min(score - 1, 3);
+            strengthFill.style.width = widths[idx];
+            strengthFill.style.background = colors[idx];
+            strengthText.textContent = texts[idx];
+            strengthText.style.color = colors[idx];
         }
     }
-    
-    // Form submissions
+
     const profileForm = document.getElementById('profileForm');
     const passwordForm = document.getElementById('passwordForm');
-    
+
     if (profileForm) {
         profileForm.addEventListener('submit', function(e) {
             e.preventDefault();
             submitForm(this, 'Profile updated successfully!');
         });
     }
-    
+
     if (passwordForm) {
         passwordForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const newPassword = document.getElementById('new_password').value;
-            const confirmPassword = document.getElementById('confirm_password').value;
-            
-            if (newPassword !== confirmPassword) {
-                showToast('Passwords do not match!', 'error');
+            const newPwd = document.getElementById('new_password').value;
+            const confirmPwd = document.getElementById('confirm_password').value;
+
+            if (newPwd !== confirmPwd) {
+                alert('Passwords do not match!');
                 return;
             }
-            
-            if (calculatePasswordStrength(newPassword) < 2) {
-                showToast('Password is too weak. Please choose a stronger password.', 'error');
+
+            if (calculateStrength(newPwd) < 2) {
+                alert('Password is too weak!');
                 return;
             }
-            
+
             submitForm(this, 'Password changed successfully!');
         });
     }
-    
-    function submitForm(form, successMessage) {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
+
+    function submitForm(form, successMsg) {
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
         
-        // Show loading
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
-        submitBtn.disabled = true;
-        
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+        btn.disabled = true;
+
         const formData = new FormData(form);
         
         fetch('{% url "accounts:profile" %}', {
@@ -870,62 +798,24 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (response.ok) {
-                showToast(successMessage, 'success');
+                alert(successMsg);
                 if (form.id === 'passwordForm') {
                     form.reset();
-                    updatePasswordStrength(0);
+                    updateStrength(0);
+                } else {
+                    location.reload();
                 }
             } else {
                 throw new Error('Update failed');
             }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Error updating profile. Please try again.', 'error');
+        .catch(() => {
+            alert('Error updating. Please try again.');
         })
         .finally(() => {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         });
-    }
-    
-    function showToast(message, type = 'info') {
-        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-        const toastId = 'toast-' + Date.now();
-        
-        const alertClass = type === 'error' ? 'danger' : type;
-        const icon = type === 'success' ? 'check-circle' : 
-                   type === 'error' ? 'exclamation-triangle' : 
-                   'info-circle';
-        
-        const toastHtml = `
-            <div class="toast show" id="${toastId}" role="alert">
-                <div class="toast-header bg-${alertClass} text-white">
-                    <i class="fas fa-${icon} me-2"></i>
-                    <strong class="me-auto">Profile</strong>
-                    <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${toastId}').remove()"></button>
-                </div>
-                <div class="toast-body">
-                    ${message}
-                </div>
-            </div>
-        `;
-        
-        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-        
-        setTimeout(() => {
-            const toast = document.getElementById(toastId);
-            if (toast) toast.remove();
-        }, 5000);
-    }
-    
-    function createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '11000';
-        document.body.appendChild(container);
-        return container;
     }
 });
 </script>
