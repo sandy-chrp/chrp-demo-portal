@@ -700,7 +700,7 @@
                     <a href="{% url 'customers:liked_demos' %}" 
                     class="nav-link {% if 'liked_demos' in request.resolver_match.url_name %}active{% endif %}"
                     data-tooltip="My Liked Videos">
-<i class="fas fa-star"></i>                        <span class="nav-text">Liked Videos</span>
+<i class="fas fa-star"></i>                        <span class="nav-text">Liked Demo</span>
                         {% if total_demos_liked %}
                             <span class="badge bg-danger">{{ total_demos_liked }}</span>
                         {% endif %}

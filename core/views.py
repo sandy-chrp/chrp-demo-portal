@@ -527,7 +527,7 @@ def admin_user_detail_view(request, user_id):
 @login_required
 @user_passes_test(is_admin)
 def admin_demos_view(request):
-    """Admin demos management - FIXED"""
+    """Admin demos management - UPDATED WITH WEBGL SUPPORT"""
     
     # Query demos with proper prefetch for ManyToMany
     demos_list = Demo.objects.prefetch_related(
@@ -540,6 +540,7 @@ def admin_demos_view(request):
     
     # Filtering
     search = request.GET.get('search')
+    file_type_filter = request.GET.get('file_type')  # NEW: File type filter
     demo_type_filter = request.GET.get('demo_type')
     business_category_filter = request.GET.get('business_category')
     status_filter = request.GET.get('status')
@@ -551,12 +552,17 @@ def admin_demos_view(request):
             Q(description__icontains=search)
         )
     
+    # NEW: File type filtering
+    if file_type_filter:
+        demos_list = demos_list.filter(file_type=file_type_filter)
+    
     if demo_type_filter:
         demos_list = demos_list.filter(demo_type=demo_type_filter)
     
     if business_category_filter:
         demos_list = demos_list.filter(
-            target_business_categories__id=business_category_filter
+            Q(target_business_categories__id=business_category_filter) |
+            Q(target_business_subcategories__category__id=business_category_filter)
         ).distinct()
     
     if status_filter:
@@ -577,13 +583,15 @@ def admin_demos_view(request):
     from accounts.models import BusinessCategory
     business_categories = BusinessCategory.objects.filter(is_active=True).order_by('name')
     
-    # Statistics
+    # Statistics - UPDATED
     stats = {
         'total': Demo.objects.count(),
         'active': Demo.objects.filter(is_active=True).count(),
         'inactive': Demo.objects.filter(is_active=False).count(),
         'featured': Demo.objects.filter(is_featured=True).count(),
         'total_views': Demo.objects.aggregate(total=Sum('views_count'))['total'] or 0,
+        'video_count': Demo.objects.filter(file_type='video').count(),  # NEW
+        'webgl_count': Demo.objects.filter(file_type='webgl').count(),  # NEW
     }
     
     # Context for sidebar
@@ -596,8 +604,10 @@ def admin_demos_view(request):
         'demos': demos,
         'business_categories': business_categories,
         'demo_types': Demo.DEMO_TYPE_CHOICES,
+        'file_types': Demo.FILE_TYPE_CHOICES,  # NEW
         'stats': stats,
         'search': search,
+        'file_type_filter': file_type_filter,  # NEW
         'demo_type_filter': demo_type_filter,
         'business_category_filter': business_category_filter,
         'status_filter': status_filter,
@@ -612,18 +622,24 @@ def admin_demos_view(request):
 @login_required
 @user_passes_test(is_admin)
 def admin_add_demo_view(request):
-    """Admin add new demo - UPDATED WITH CUSTOMER SELECTION"""
+    """Admin add new demo - WITH MANDATORY CATEGORY SELECTION"""
     if request.method == 'POST':
-        title = request.POST.get('title')
-        description = request.POST.get('description')
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
         demo_type = request.POST.get('demo_type', 'product')
+        file_type = request.POST.get('file_type', 'video')
+        
         video_file = request.FILES.get('video_file')
+        webgl_file = request.FILES.get('webgl_file')
         thumbnail = request.FILES.get('thumbnail')
-        duration = request.POST.get('duration')
+        duration = request.POST.get('duration', '').strip()
+        
         is_featured = request.POST.get('is_featured') == 'on'
         is_active = request.POST.get('is_active', 'on') == 'on'
+        sort_order = request.POST.get('sort_order', '0')
         
         # Get business categories
+        all_business_categories = request.POST.get('allBusinessCategoriesCheckbox') == 'on'
         business_category_ids = request.POST.getlist('target_business_categories')
         business_subcategory_ids = request.POST.getlist('target_business_subcategories')
         
@@ -632,24 +648,93 @@ def admin_add_demo_view(request):
         
         try:
             # Validate required fields
-            if not title or not video_file or not thumbnail:
-                messages.error(request, 'Title, video file, and thumbnail are required.')
+            if not title:
+                messages.error(request, 'Title is required.')
                 return redirect('core:admin_add_demo')
+            
+            if not description:
+                messages.error(request, 'Description is required.')
+                return redirect('core:admin_add_demo')
+            
+            if not thumbnail:
+                messages.error(request, 'Thumbnail image is required.')
+                return redirect('core:admin_add_demo')
+            
+            # Validate business category selection
+            if not all_business_categories and not business_category_ids:
+                messages.error(request, 'Please select at least one business category or enable "Available to All Business Categories".')
+                return redirect('core:admin_add_demo')
+            
+            # Validate file based on file_type
+            if file_type == 'video':
+                if not video_file:
+                    messages.error(request, 'Video file is required when file type is Video.')
+                    return redirect('core:admin_add_demo')
+                
+                # Validate video file size
+                if video_file.size > 100 * 1024 * 1024:  # 100MB
+                    messages.error(request, 'Video file size cannot exceed 100MB.')
+                    return redirect('core:admin_add_demo')
+                
+                # Validate video file extension
+                video_ext = video_file.name.split('.')[-1].lower()
+                if video_ext not in ['mp4', 'avi', 'mov', 'wmv']:
+                    messages.error(request, 'Invalid video format. Allowed: MP4, AVI, MOV, WMV')
+                    return redirect('core:admin_add_demo')
+            
+            elif file_type == 'webgl':
+                if not webgl_file:
+                    messages.error(request, 'WebGL file is required when file type is WebGL.')
+                    return redirect('core:admin_add_demo')
+                
+                # Validate webgl file size
+                if webgl_file.size > 100 * 1024 * 1024:  # 100MB
+                    messages.error(request, 'WebGL file size cannot exceed 100MB.')
+                    return redirect('core:admin_add_demo')
+                
+                # Validate webgl file extension
+                webgl_ext = webgl_file.name.split('.')[-1].lower()
+                if webgl_ext not in ['html', 'zip', 'gltf', 'glb']:
+                    messages.error(request, 'Invalid WebGL format. Allowed: HTML, ZIP, GLTF, GLB')
+                    return redirect('core:admin_add_demo')
+            
+            else:
+                messages.error(request, 'Invalid file type selected.')
+                return redirect('core:admin_add_demo')
+            
+            # Validate thumbnail
+            if thumbnail.size > 5 * 1024 * 1024:  # 5MB
+                messages.error(request, 'Thumbnail size cannot exceed 5MB.')
+                return redirect('core:admin_add_demo')
+            
+            thumbnail_ext = thumbnail.name.split('.')[-1].lower()
+            if thumbnail_ext not in ['jpg', 'jpeg', 'png', 'webp']:
+                messages.error(request, 'Invalid thumbnail format. Allowed: JPG, PNG, WebP')
+                return redirect('core:admin_add_demo')
+            
+            # Convert sort_order to integer
+            try:
+                sort_order = int(sort_order)
+            except ValueError:
+                sort_order = 0
             
             # Create demo
             demo = Demo.objects.create(
                 title=title,
                 description=description,
                 demo_type=demo_type,
-                video_file=video_file,
+                file_type=file_type,
+                video_file=video_file if file_type == 'video' else None,
+                webgl_file=webgl_file if file_type == 'webgl' else None,
                 thumbnail=thumbnail,
                 is_featured=is_featured,
                 is_active=is_active,
+                sort_order=sort_order,
                 created_by=request.user
             )
             
-            # Set duration if provided
-            if duration:
+            # Set duration if provided (only for videos)
+            if file_type == 'video' and duration:
                 from datetime import timedelta
                 try:
                     parts = duration.split(':')
@@ -660,20 +745,25 @@ def admin_add_demo_view(request):
                         minutes, seconds = map(int, parts)
                         demo.duration = timedelta(minutes=minutes, seconds=seconds)
                     demo.save()
-                except:
-                    pass
+                except (ValueError, TypeError):
+                    pass  # Invalid duration format, skip
             
-            # Set business categories
-            if business_category_ids:
-                from accounts.models import BusinessCategory
-                categories = BusinessCategory.objects.filter(id__in=business_category_ids)
-                demo.target_business_categories.set(categories)
-            
-            # Set business subcategories
-            if business_subcategory_ids:
-                from accounts.models import BusinessSubCategory
-                subcategories = BusinessSubCategory.objects.filter(id__in=business_subcategory_ids)
-                demo.target_business_subcategories.set(subcategories)
+            # Set business categories - ONLY if NOT all categories
+            if not all_business_categories:
+                if business_category_ids:
+                    from accounts.models import BusinessCategory
+                    categories = BusinessCategory.objects.filter(id__in=business_category_ids)
+                    demo.target_business_categories.set(categories)
+                
+                # Set business subcategories
+                if business_subcategory_ids:
+                    from accounts.models import BusinessSubCategory
+                    subcategories = BusinessSubCategory.objects.filter(id__in=business_subcategory_ids)
+                    demo.target_business_subcategories.set(subcategories)
+                
+                messages.info(request, f'Demo will be available to {len(business_category_ids)} selected business categories.')
+            else:
+                messages.info(request, 'Demo will be available to all business categories.')
             
             # Set target customers
             if customer_ids:
@@ -684,7 +774,7 @@ def admin_add_demo_view(request):
             else:
                 messages.info(request, 'Demo will be available to all approved customers.')
             
-            messages.success(request, f'Demo "{demo.title}" created successfully!')
+            messages.success(request, f'Demo "{demo.title}" ({demo.get_file_type_display()}) created successfully!')
             return redirect('core:admin_demo_detail', demo_id=demo.id)
             
         except Exception as e:
@@ -693,8 +783,7 @@ def admin_add_demo_view(request):
     
     # GET request - show form
     from accounts.models import BusinessCategory, BusinessSubCategory, CustomUser
-    business_categories = BusinessCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
-    business_subcategories = BusinessSubCategory.objects.filter(is_active=True).select_related('category').order_by('sort_order', 'name')
+    business_categories = BusinessCategory.objects.filter(is_active=True).prefetch_related('subcategories').order_by('sort_order', 'name')
     
     # Get all approved customers for selection
     customers = CustomUser.objects.filter(
@@ -709,8 +798,7 @@ def admin_add_demo_view(request):
     
     context = {
         'business_categories': business_categories,
-        'business_subcategories': business_subcategories,
-        'customers': customers,  # NEW: Added customers to context
+        'customers': customers,
         'demo_types': Demo.DEMO_TYPE_CHOICES,
         'pending_approvals': pending_approvals,
         'open_enquiries': open_enquiries,
@@ -718,11 +806,10 @@ def admin_add_demo_view(request):
     }
     
     return render(request, 'admin/demos/add.html', context)
-
 @login_required
 @user_passes_test(is_admin)
 def admin_demo_detail_view(request, demo_id):
-    """View and edit demo details - UPDATED WITH CUSTOMER SELECTION"""
+    """View and edit demo details - UPDATED WITH WEBGL & CUSTOMER SELECTION"""
     
     demo = get_object_or_404(
         Demo.objects.prefetch_related(
@@ -734,73 +821,180 @@ def admin_demo_detail_view(request, demo_id):
     )
     
     if request.method == 'POST':
-        # Handle form submission for editing
-        demo.title = request.POST.get('title', demo.title)
-        demo.description = request.POST.get('description', demo.description)
-        demo.demo_type = request.POST.get('demo_type', demo.demo_type)
-        demo.is_featured = request.POST.get('is_featured') == 'on'
-        demo.is_active = request.POST.get('is_active') == 'on'
-        
-        # Update video file if provided
-        if 'video_file' in request.FILES:
-            if demo.video_file:
-                demo.video_file.delete()
-            demo.video_file = request.FILES['video_file']
-        
-        # Update thumbnail if provided
-        if 'thumbnail' in request.FILES:
-            if demo.thumbnail:
-                demo.thumbnail.delete()
-            demo.thumbnail = request.FILES['thumbnail']
-        
-        # Update duration
-        duration = request.POST.get('duration')
-        if duration:
-            from datetime import timedelta
+        try:
+            # Handle form submission for editing
+            demo.title = request.POST.get('title', demo.title).strip()
+            demo.description = request.POST.get('description', demo.description).strip()
+            demo.demo_type = request.POST.get('demo_type', demo.demo_type)
+            
+            # NEW: Handle file type changes
+            file_type = request.POST.get('file_type', demo.file_type)
+            
+            # Validate title and description
+            if not demo.title:
+                messages.error(request, 'Title is required.')
+                return redirect('core:admin_demo_detail', demo_id=demo.id)
+            
+            if not demo.description:
+                messages.error(request, 'Description is required.')
+                return redirect('core:admin_demo_detail', demo_id=demo.id)
+            
+            # Update boolean fields
+            demo.is_featured = request.POST.get('is_featured') == 'on'
+            demo.is_active = request.POST.get('is_active') == 'on'
+            
+            # Update sort order
+            sort_order = request.POST.get('sort_order', '0')
             try:
-                parts = duration.split(':')
-                if len(parts) == 3:
-                    hours, minutes, seconds = map(int, parts)
-                    demo.duration = timedelta(hours=hours, minutes=minutes, seconds=seconds)
-                elif len(parts) == 2:
-                    minutes, seconds = map(int, parts)
-                    demo.duration = timedelta(minutes=minutes, seconds=seconds)
-            except:
-                pass
-        
-        demo.save()
-        
-        # Update business categories
-        business_category_ids = request.POST.getlist('target_business_categories')
-        if business_category_ids:
-            from accounts.models import BusinessCategory
-            categories = BusinessCategory.objects.filter(id__in=business_category_ids)
-            demo.target_business_categories.set(categories)
-        else:
-            demo.target_business_categories.clear()
-        
-        # Update business subcategories
-        business_subcategory_ids = request.POST.getlist('target_business_subcategories')
-        if business_subcategory_ids:
-            from accounts.models import BusinessSubCategory
-            subcategories = BusinessSubCategory.objects.filter(id__in=business_subcategory_ids)
-            demo.target_business_subcategories.set(subcategories)
-        else:
-            demo.target_business_subcategories.clear()
-        
-        # NEW: Update target customers
-        customer_ids = request.POST.getlist('target_customers')
-        if customer_ids:
-            from accounts.models import CustomUser
-            customers = CustomUser.objects.filter(id__in=customer_ids, is_approved=True)
-            demo.target_customers.set(customers)
-            messages.info(request, f'Demo access updated for {customers.count()} specific customers.')
-        else:
-            demo.target_customers.clear()
-            messages.info(request, 'Demo is now available to all approved customers.')
-        
-        messages.success(request, f'Demo "{demo.title}" has been updated successfully!')
-        return redirect('core:admin_demo_detail', demo_id=demo.id)
+                demo.sort_order = int(sort_order)
+            except ValueError:
+                demo.sort_order = 0
+            
+            # NEW: Handle file type and file uploads
+            if file_type != demo.file_type:
+                # File type is changing
+                demo.file_type = file_type
+                
+                if file_type == 'video':
+                    # Switching to video - clear WebGL file
+                    if demo.webgl_file:
+                        demo.webgl_file.delete()
+                        demo.webgl_file = None
+                elif file_type == 'webgl':
+                    # Switching to WebGL - clear video file and duration
+                    if demo.video_file:
+                        demo.video_file.delete()
+                        demo.video_file = None
+                    demo.duration = None
+            
+            # Update video file if provided
+            if 'video_file' in request.FILES:
+                video_file = request.FILES['video_file']
+                
+                # Validate video file
+                if video_file.size > 100 * 1024 * 1024:  # 100MB
+                    messages.error(request, 'Video file size cannot exceed 100MB.')
+                    return redirect('core:admin_demo_detail', demo_id=demo.id)
+                
+                video_ext = video_file.name.split('.')[-1].lower()
+                if video_ext not in ['mp4', 'avi', 'mov', 'wmv']:
+                    messages.error(request, 'Invalid video format. Allowed: MP4, AVI, MOV, WMV')
+                    return redirect('core:admin_demo_detail', demo_id=demo.id)
+                
+                # Delete old video file
+                if demo.video_file:
+                    demo.video_file.delete()
+                
+                demo.video_file = video_file
+                demo.file_type = 'video'
+            
+            # NEW: Update WebGL file if provided
+            if 'webgl_file' in request.FILES:
+                webgl_file = request.FILES['webgl_file']
+                
+                # Validate WebGL file
+                if webgl_file.size > 100 * 1024 * 1024:  # 100MB
+                    messages.error(request, 'WebGL file size cannot exceed 100MB.')
+                    return redirect('core:admin_demo_detail', demo_id=demo.id)
+                
+                webgl_ext = webgl_file.name.split('.')[-1].lower()
+                if webgl_ext not in ['html', 'zip', 'gltf', 'glb']:
+                    messages.error(request, 'Invalid WebGL format. Allowed: HTML, ZIP, GLTF, GLB')
+                    return redirect('core:admin_demo_detail', demo_id=demo.id)
+                
+                # Delete old WebGL file
+                if demo.webgl_file:
+                    demo.webgl_file.delete()
+                
+                demo.webgl_file = webgl_file
+                demo.file_type = 'webgl'
+            
+            # Update thumbnail if provided
+            if 'thumbnail' in request.FILES:
+                thumbnail = request.FILES['thumbnail']
+                
+                # Validate thumbnail
+                if thumbnail.size > 5 * 1024 * 1024:  # 5MB
+                    messages.error(request, 'Thumbnail size cannot exceed 5MB.')
+                    return redirect('core:admin_demo_detail', demo_id=demo.id)
+                
+                thumbnail_ext = thumbnail.name.split('.')[-1].lower()
+                if thumbnail_ext not in ['jpg', 'jpeg', 'png', 'webp']:
+                    messages.error(request, 'Invalid thumbnail format. Allowed: JPG, PNG, WebP')
+                    return redirect('core:admin_demo_detail', demo_id=demo.id)
+                
+                # Delete old thumbnail
+                if demo.thumbnail:
+                    demo.thumbnail.delete()
+                
+                demo.thumbnail = thumbnail
+            
+            # Update duration (only for video type)
+            if demo.file_type == 'video':
+                duration = request.POST.get('duration', '').strip()
+                if duration:
+                    from datetime import timedelta
+                    try:
+                        parts = duration.split(':')
+                        if len(parts) == 3:
+                            hours, minutes, seconds = map(int, parts)
+                            demo.duration = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+                        elif len(parts) == 2:
+                            minutes, seconds = map(int, parts)
+                            demo.duration = timedelta(minutes=minutes, seconds=seconds)
+                    except (ValueError, TypeError):
+                        pass  # Invalid duration format, skip
+            else:
+                # Clear duration for non-video types
+                demo.duration = None
+            
+            demo.save()
+            
+            # Handle "All Business Categories" checkbox
+            all_business_categories = request.POST.get('allBusinessCategoriesCheckbox') == 'on'
+            
+            if all_business_categories:
+                # Clear all category selections
+                demo.target_business_categories.clear()
+                demo.target_business_subcategories.clear()
+                messages.info(request, 'Demo is now available to all business categories.')
+            else:
+                # Update business categories
+                business_category_ids = request.POST.getlist('target_business_categories')
+                if business_category_ids:
+                    from accounts.models import BusinessCategory
+                    categories = BusinessCategory.objects.filter(id__in=business_category_ids)
+                    demo.target_business_categories.set(categories)
+                    messages.info(request, f'Demo targeted to {categories.count()} business categories.')
+                else:
+                    demo.target_business_categories.clear()
+                
+                # Update business subcategories
+                business_subcategory_ids = request.POST.getlist('target_business_subcategories')
+                if business_subcategory_ids:
+                    from accounts.models import BusinessSubCategory
+                    subcategories = BusinessSubCategory.objects.filter(id__in=business_subcategory_ids)
+                    demo.target_business_subcategories.set(subcategories)
+                else:
+                    demo.target_business_subcategories.clear()
+            
+            # Update target customers
+            customer_ids = request.POST.getlist('target_customers')
+            if customer_ids:
+                from accounts.models import CustomUser
+                customers = CustomUser.objects.filter(id__in=customer_ids, is_approved=True)
+                demo.target_customers.set(customers)
+                messages.info(request, f'Demo access updated for {customers.count()} specific customers.')
+            else:
+                demo.target_customers.clear()
+                messages.info(request, 'Demo is now available to all approved customers.')
+            
+            messages.success(request, f'Demo "{demo.title}" ({demo.get_file_type_display()}) has been updated successfully!')
+            return redirect('core:admin_demo_detail', demo_id=demo.id)
+            
+        except Exception as e:
+            messages.error(request, f'Error updating demo: {str(e)}')
+            return redirect('core:admin_demo_detail', demo_id=demo.id)
     
     # Demo statistics
     total_views = DemoView.objects.filter(demo=demo).count()
@@ -824,10 +1018,9 @@ def admin_demo_detail_view(request, demo_id):
     
     # Get business categories for edit form
     from accounts.models import BusinessCategory, BusinessSubCategory
-    business_categories = BusinessCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
-    business_subcategories = BusinessSubCategory.objects.filter(is_active=True).select_related('category').order_by('sort_order', 'name')
+    business_categories = BusinessCategory.objects.filter(is_active=True).prefetch_related('subcategories').order_by('sort_order', 'name')
     
-    # NEW: Get all approved customers for selection
+    # Get all approved customers for selection
     customers = CustomUser.objects.filter(
         is_approved=True,
         is_active=True
@@ -841,15 +1034,16 @@ def admin_demo_detail_view(request, demo_id):
     context = {
         'demo': demo,
         'demo_types': Demo.DEMO_TYPE_CHOICES,
+        'file_types': Demo.FILE_TYPE_CHOICES,  # NEW
         'business_categories': business_categories,
-        'business_subcategories': business_subcategories,
-        'customers': customers,  # NEW: Added customers list
+        'customers': customers,
         'total_views': total_views,
         'total_likes': total_likes,
         'total_requests': total_requests,
         'target_customers': target_customers,
         'total_accessible_customers': total_accessible_customers,
         'is_for_all_customers': demo.is_for_all_customers,
+        'is_for_all_business_categories': demo.is_for_all_business_categories,  # NEW
         'recent_views': recent_views,
         'recent_requests': recent_requests,
         'pending_approvals': pending_approvals,
@@ -859,26 +1053,30 @@ def admin_demo_detail_view(request, demo_id):
     
     return render(request, 'admin/demos/detail.html', context)
 
-
 @login_required
 @user_passes_test(is_admin)
 @require_http_methods(["POST"])
 def admin_delete_demo_view(request, demo_id):
-    """Delete demo - UPDATED WITH REDIRECT"""
+    """Delete demo - UPDATED WITH WEBGL SUPPORT"""
     demo = get_object_or_404(Demo, id=demo_id)
     demo_title = demo.title
+    demo_type = demo.get_file_type_display()
     
     try:
-        # Delete associated files
+        # Delete associated files based on file type
         if demo.video_file:
-            demo.video_file.delete()
-        if demo.thumbnail:
-            demo.thumbnail.delete()
+            demo.video_file.delete(save=False)
         
-        # Delete demo (CASCADE will handle related objects)
+        if demo.webgl_file:
+            demo.webgl_file.delete(save=False)
+        
+        if demo.thumbnail:
+            demo.thumbnail.delete(save=False)
+        
+        # Delete demo (CASCADE will handle related objects like views, likes, requests)
         demo.delete()
         
-        messages.success(request, f'Demo "{demo_title}" has been deleted successfully.')
+        messages.success(request, f'{demo_type} demo "{demo_title}" has been deleted successfully.')
         return redirect('core:admin_demos')
         
     except Exception as e:

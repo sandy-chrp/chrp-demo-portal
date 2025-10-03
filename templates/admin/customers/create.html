@@ -152,6 +152,7 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
+    color: white !important;
 }
 
 .admin-card-body {
@@ -187,16 +188,17 @@
 </style>
 
 <div class="admin-card">
-    <div class="admin-card-header">
-        <div class="d-flex justify-content-between align-items-center">
-            <h2 class="admin-card-title">
-                <i class="fas fa-user-plus me-2"></i>Create New Customer
-            </h2>
-            <a href="{% url 'core:admin_users' %}" class="btn btn-light">
-                <i class="fas fa-arrow-left me-2"></i>Back
-            </a>
-        </div>
+<div class="admin-card-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="admin-card-title">
+            <i class="fas fa-user-plus me-2"></i>Create New Customer
+        </h2>
+        <a href="{% url 'core:admin_users' %}" class="btn btn-light">
+            <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
     </div>
+</div>
+</div>
     
     <div class="admin-card-body">
         <form method="post" id="customerForm" novalidate>

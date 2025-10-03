@@ -1,4 +1,3 @@
-<!-- templates/customers/dashboard.html - Only Product Demo Filter -->
 {% extends 'customers/base.html' %}
 {% load static %}
 
@@ -233,6 +232,17 @@
         border-radius: 12px;
         font-size: 0.7rem;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .demo-type-badge i {
+        font-size: 0.75rem;
+    }
+
+    .demo-type-badge.webgl {
+        background: rgba(6, 182, 212, 0.9);
     }
 
     .demo-card-thumbnail-wrapper {
@@ -380,16 +390,30 @@
                                              class="demo-card-thumbnail no-select">
                                     {% else %}
                                         <div class="demo-card-thumbnail d-flex align-items-center justify-content-center">
-                                            <i class="fas fa-video fa-3x text-muted"></i>
+                                            {% if demo.file_type == 'webgl' %}
+                                                <i class="fas fa-cube fa-3x text-muted"></i>
+                                            {% else %}
+                                                <i class="fas fa-video fa-3x text-muted"></i>
+                                            {% endif %}
                                         </div>
                                     {% endif %}
-                                    <span class="demo-type-badge">{{ demo.get_demo_type_display }}</span>
+                                    
+                                    <!-- File Type Badge -->
+                                    {% if demo.file_type == 'webgl' %}
+                                        <span class="demo-type-badge webgl">
+                                            <i class="fas fa-cube"></i>WebGL
+                                        </span>
+                                    {% else %}
+                                        <span class="demo-type-badge">
+                                            <i class="fas fa-video"></i>Video
+                                        </span>
+                                    {% endif %}
                                 </div>
                                 
                                 <div class="demo-card-body">
-                                    {% if demo.business_category %}
+                                    {% if demo.primary_business_category %}
                                         <span class="demo-category-badge">
-                                            {{ demo.business_category.name }}
+                                            {{ demo.primary_business_category.name }}
                                         </span>
                                     {% endif %}
                                     
@@ -408,10 +432,15 @@
                                             <i class="fas fa-heart"></i>
                                             {{ demo.likes_count }}
                                         </span>
-                                        {% if demo.duration %}
+                                        {% if demo.file_type == 'video' and demo.duration %}
                                             <span>
                                                 <i class="fas fa-clock"></i>
-                                                {{ demo.duration }} min
+                                                {{ demo.formatted_duration }}
+                                            </span>
+                                        {% elif demo.file_type == 'webgl' %}
+                                            <span>
+                                                <i class="fas fa-cube"></i>
+                                                Interactive
                                             </span>
                                         {% endif %}
                                     </div>
@@ -419,7 +448,11 @@
                                     <div class="demo-card-actions">
                                         <a href="{% url 'customers:demo_detail' demo.slug %}" 
                                            class="btn btn-primary btn-sm">
-                                            <i class="fas fa-play me-1"></i>Watch
+                                            {% if demo.file_type == 'webgl' %}
+                                                <i class="fas fa-play me-1"></i>Launch
+                                            {% else %}
+                                                <i class="fas fa-play me-1"></i>Watch
+                                            {% endif %}
                                         </a>
                                         <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
                                            class="btn btn-outline-primary btn-sm">
@@ -432,9 +465,15 @@
                     </div>
                 {% else %}
                     <div class="featured-empty">
-                        <i class="fas fa-video"></i>
-                        <h4 class="mt-3">No Featured Demos</h4>
-                        <p>Check back later for featured content.</p>
+                        {% if user.business_category %}
+                            <i class="fas fa-video"></i>
+                            <h4 class="mt-3">No Featured Demos for Your Category</h4>
+                            <p>No featured demos available for {{ user.business_category.name }} at the moment.</p>
+                        {% else %}
+                            <i class="fas fa-video"></i>
+                            <h4 class="mt-3">No Featured Demos</h4>
+                            <p>Check back later for featured content.</p>
+                        {% endif %}
                         <a href="{% url 'customers:browse_demos' %}" class="btn btn-primary mt-2">
                             <i class="fas fa-search me-2"></i>Browse All Demos
                         </a>
@@ -555,6 +594,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterBtns = document.querySelectorAll('.filter-btn');
     const demoCards = document.querySelectorAll('.demo-card');
     const loadingState = document.querySelector('.demos-loading');
+    const emptyState = document.querySelector('.featured-empty');
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -571,6 +611,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Filter demos with animation
             setTimeout(() => {
+                let visibleCount = 0;
+                
                 demoCards.forEach(card => {
                     const cardType = card.getAttribute('data-demo-type');
                     
@@ -580,6 +622,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             card.style.opacity = '1';
                             card.style.transform = 'scale(1)';
                         }, 50);
+                        visibleCount++;
                     } else {
                         card.style.opacity = '0';
                         card.style.transform = 'scale(0.9)';
@@ -592,6 +635,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Hide loading
                 if (loadingState) {
                     loadingState.classList.remove('active');
+                }
+                
+                // Show/hide empty state based on visible cards
+                if (emptyState) {
+                    if (visibleCount === 0) {
+                        emptyState.style.display = 'block';
+                    } else {
+                        emptyState.style.display = 'none';
+                    }
                 }
             }, 300);
         });

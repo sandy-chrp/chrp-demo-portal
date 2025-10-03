@@ -1,4 +1,4 @@
-# customers/liked_demos_views.py - CORRECTED VERSION
+# customers/liked_demos_views.py - UPDATED WITH WEBGL SUPPORT
 """
 Views for Liked Demos functionality
 Handles all operations related to customer's liked/favorite videos
@@ -20,12 +20,16 @@ from .views import get_customer_context
 @login_required
 def liked_demos(request):
     """
-    Display all demos liked by the customer
+    Display all demos liked by the customer - WITH WEBGL SUPPORT
     Features: Search, Sort, Category Filter, Pagination, Access Control
     """
     # Check if user is approved
     if not request.user.is_approved:
         return redirect('accounts:pending_approval')
+    
+    # Get user's business category and subcategory
+    user_business_category = request.user.business_category
+    user_business_subcategory = request.user.business_subcategory
     
     # Get filter parameters
     business_category_id = request.GET.get('business_category')
@@ -38,25 +42,35 @@ def liked_demos(request):
         user=request.user
     ).values_list('demo_id', flat=True)
     
-    # Base queryset - Get liked demos with access control
-    demos = Demo.objects.filter(
+    # Get all liked demos with proper prefetch
+    demos_query = Demo.objects.filter(
         id__in=liked_demo_ids,
         is_active=True
-    ).annotate(
-        customer_count=Count('target_customers')
-    ).filter(
-        Q(customer_count=0) |  # Available to all
-        Q(target_customers=request.user)  # OR user is selected
-    ).distinct().select_related('created_by')
+    ).prefetch_related(
+        'target_business_categories',
+        'target_business_subcategories',
+        'target_customers'
+    ).select_related('created_by')
     
-    # Apply business category filter if selected
+    # Filter by business category access and customer access
+    accessible_demos = []
+    for demo in demos_query:
+        # Check business category access
+        if demo.is_available_for_business(user_business_category, user_business_subcategory):
+            # Check customer access
+            if demo.can_customer_access(request.user):
+                accessible_demos.append(demo.id)
+    
+    # Filter by accessible demo IDs
+    demos = Demo.objects.filter(id__in=accessible_demos)
+    
+    # Apply additional filters
     if business_category_id:
         demos = demos.filter(
             Q(target_business_categories__id=business_category_id) |
             Q(target_business_categories__isnull=True)
         ).distinct()
     
-    # Apply business subcategory filter if selected
     if business_subcategory_id:
         demos = demos.filter(
             Q(target_business_subcategories__id=business_subcategory_id) |
@@ -163,7 +177,6 @@ def liked_demos(request):
 def unlike_demo(request, demo_id):
     """
     AJAX endpoint to unlike/remove a demo from liked videos
-    This uses the existing toggle_demo_like endpoint
     Returns JSON response
     """
     if not request.user.is_approved:

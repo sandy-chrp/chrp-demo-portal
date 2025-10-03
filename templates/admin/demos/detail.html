@@ -1,402 +1,328 @@
-<!-- templates/admin/demos/detail.html - WITH CUSTOMER SELECTION -->
 {% extends 'admin/base.html' %}
 
-{% block admin_title %}{{ demo.title }}{% endblock %}
-{% block page_title %}{{ demo.title }}{% endblock %}
+{% block admin_title %}{{ demo.title }} - Demo Details{% endblock %}
+{% block page_title %}Demo Details{% endblock %}
 
 {% block breadcrumb %}
 <div class="admin-breadcrumb">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item">
-                <a href="{% url 'core:admin_dashboard' %}"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{% url 'core:admin_demos' %}">Demos</a>
+                <a href="{% url 'core:admin_demos' %}">Demo Content</a>
             </li>
-            <li class="breadcrumb-item active">{{ demo.title|truncatechars:30 }}</li>
+            <li class="breadcrumb-item active">{{ demo.title }}</li>
         </ol>
     </nav>
 </div>
 {% endblock %}
 
 {% block header_actions %}
-<div class="action-buttons">
-    <a href="{% url 'core:admin_demos' %}" class="btn btn-light">
-        <i class="fas fa-arrow-left"></i> Back
+<div class="d-flex align-items-center gap-2">
+    <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back
     </a>
-    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-        <i class="fas fa-trash"></i> Delete Demo
+    <button type="submit" form="editDemoForm" class="btn btn-primary">
+        <i class="fas fa-save me-1"></i>Save Changes
+    </button>
+    <button type="button" class="btn btn-danger" onclick="deleteDemo({{ demo.id }}, '{{ demo.title|escapejs }}')">
+        <i class="fas fa-trash me-1"></i>Delete
     </button>
 </div>
 {% endblock %}
 
 {% block admin_extra_css %}
 <style>
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        background: #f8fafc;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    /* Stats Cards */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1.25rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
+    .demo-preview-card {
         background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        transition: all 0.2s ease;
-        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
     }
 
-    .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-
-    .stat-header {
+    .demo-preview-header {
         display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 0.75rem;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 2px solid var(--gray-200);
     }
 
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 10px;
+    .demo-preview-thumbnail {
+        width: 200px;
+        height: 130px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        border: 2px solid var(--gray-200);
+    }
+
+    .demo-placeholder-large {
+        width: 200px;
+        height: 130px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.25rem;
+        color: white;
+        font-size: 3rem;
     }
 
-    .stat-icon.blue { background: #eff6ff; color: #2563eb; }
-    .stat-icon.green { background: #f0fdf4; color: #16a34a; }
-    .stat-icon.orange { background: #fff7ed; color: #ea580c; }
-    .stat-icon.purple { background: #faf5ff; color: #9333ea; }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
 
-    .stat-number {
+    .stat-box {
+        background: var(--gray-50);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        border-left: 4px solid;
+        text-align: center;
+    }
+
+    .stat-box.primary { border-left-color: var(--primary-color); }
+    .stat-box.success { border-left-color: #16a34a; }
+    .stat-box.info { border-left-color: #0ea5e9; }
+    .stat-box.warning { border-left-color: #f59e0b; }
+
+    .stat-value {
         font-size: 2rem;
         font-weight: 700;
-        color: #0f172a;
-        line-height: 1;
+        margin-bottom: 0.25rem;
     }
 
     .stat-label {
-        color: #64748b;
         font-size: 0.875rem;
-        margin-top: 0.25rem;
+        color: var(--gray-600);
     }
 
-    /* Main Content Card */
-    .content-card {
+    .form-container {
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
         overflow: hidden;
-        border: 1px solid #e2e8f0;
+        margin-bottom: var(--spacing-lg);
     }
 
-    /* Simple Tabs */
-    .tabs {
-        display: flex;
-        border-bottom: 2px solid #f1f5f9;
-        background: #fafbfc;
-        padding: 0 1.5rem;
-    }
-
-    .tab {
-        padding: 1rem 1.5rem;
-        background: none;
+    .accordion-item {
         border: none;
-        color: #64748b;
-        font-weight: 500;
-        cursor: pointer;
-        border-bottom: 3px solid transparent;
-        margin-bottom: -2px;
-        transition: all 0.2s;
-        font-size: 0.9375rem;
+        border-bottom: 1px solid var(--gray-200);
     }
 
-    .tab:hover {
-        color: #1e293b;
-        background: #f8fafc;
+    .accordion-item:last-child {
+        border-bottom: none;
     }
 
-    .tab.active {
-        color: #1e3c72;
-        border-bottom-color: #1e3c72;
+    .accordion-button {
         background: white;
+        color: var(--dark-color);
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding: var(--spacing-lg) var(--spacing-xl);
+        border: none;
+        box-shadow: none !important;
     }
 
-    .tab i {
-        margin-right: 0.5rem;
+    .accordion-button:not(.collapsed) {
+        background: var(--gray-50);
+        color: var(--primary-color);
     }
 
-    /* Tab Content */
-    .tab-content {
-        padding: 2rem;
+    .accordion-button .section-icon {
+        font-size: 1.5rem;
+        margin-right: var(--spacing-md);
+        color: var(--primary-color);
     }
 
-    .tab-pane {
-        display: none;
-    }
-
-    .tab-pane.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    /* Form Elements */
-    .form-row {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
+    .accordion-body {
+        padding: var(--spacing-xl);
     }
 
     .form-label {
-        display: block;
         font-weight: 500;
-        color: #334155;
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
+        color: var(--dark-color);
+        margin-bottom: var(--spacing-sm);
     }
 
     .form-label.required::after {
         content: '*';
-        color: #ef4444;
-        margin-left: 0.25rem;
+        color: var(--danger-color);
+        margin-left: 4px;
     }
 
     .form-control, .form-select {
-        width: 100%;
-        padding: 0.625rem 0.875rem;
-        border: 1.5px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 0.9375rem;
-        transition: all 0.2s;
-        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        transition: all 0.3s ease;
     }
 
     .form-control:focus, .form-select:focus {
-        outline: none;
-        border-color: #1e3c72;
-        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.1);
     }
 
-    textarea.form-control {
-        resize: vertical;
-        min-height: 100px;
-        font-family: inherit;
-    }
-
-    /* Settings Panel */
-    .settings-panel {
-        background: #f8fafc;
-        border-radius: 10px;
-        padding: 1.25rem;
-        border: 1px solid #e2e8f0;
-    }
-
-    .panel-title {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    /* Switch Toggle */
-    .switch-group {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem;
-        background: white;
-        border-radius: 8px;
-        margin-bottom: 0.75rem;
-        border: 1px solid #e2e8f0;
-    }
-
-    .switch {
-        position: relative;
-        width: 44px;
-        height: 24px;
-        margin-right: 0.75rem;
-    }
-
-    .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #cbd5e1;
-        transition: 0.3s;
-        border-radius: 24px;
-    }
-
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background-color: white;
-        transition: 0.3s;
-        border-radius: 50%;
-    }
-
-    input:checked + .slider {
-        background-color: #16a34a;
-    }
-
-    input:checked + .slider:before {
-        transform: translateX(20px);
-    }
-
-    .switch-label {
-        flex: 1;
-        font-size: 0.9375rem;
-        color: #334155;
-        font-weight: 500;
-    }
-
-    /* Category & Customer Selection */
-    .category-grid {
+    .file-type-selector {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
     }
 
-    .category-section {
-        background: #f8fafc;
-        border-radius: 10px;
-        padding: 1.25rem;
-        border: 1px solid #e2e8f0;
-    }
-
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-        color: #1e293b;
-        font-weight: 600;
-        font-size: 0.9375rem;
-    }
-
-    .section-header i {
-        color: #1e3c72;
-    }
-
-    .checkbox-list {
+    .file-type-option {
+        padding: var(--spacing-lg);
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
         background: white;
-        border-radius: 8px;
-        max-height: 300px;
-        overflow-y: auto;
-        border: 1px solid #e2e8f0;
     }
 
-    .checkbox-list.disabled {
+    .file-type-option:hover {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+    }
+
+    .file-type-option.active {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.1);
+    }
+
+    .file-type-option input[type="radio"] {
+        display: none;
+    }
+
+    .file-type-icon {
+        font-size: 2.5rem;
+        margin-bottom: var(--spacing-sm);
+        color: var(--gray-400);
+    }
+
+    .file-type-option.active .file-type-icon {
+        color: var(--primary-color);
+    }
+
+    .file-upload-area {
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        text-align: center;
+        background: var(--gray-50);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--primary-color);
+        background: rgba(30, 60, 114, 0.05);
+    }
+
+    .file-upload-area.error {
+        border-color: var(--danger-color);
+        background: rgba(220, 53, 69, 0.05);
+    }
+
+    .current-file {
+        background: #dcfce7;
+        border: 1px solid #16a34a;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .file-section {
+        display: none;
+    }
+
+    .file-section.active {
+        display: block;
+    }
+
+    .category-selection-area, .customer-selection-area {
+        padding: var(--spacing-md);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    .category-selection-area.disabled, .customer-selection-area.disabled {
         opacity: 0.5;
         pointer-events: none;
     }
 
-    .checkbox-item {
-        padding: 0.875rem 1rem;
-        border-bottom: 1px solid #f1f5f9;
-        transition: background 0.15s;
+    .category-item, .customer-item {
+        margin-bottom: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: white;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+        transition: all 0.2s ease;
     }
 
-    .checkbox-item:last-child {
-        border-bottom: none;
+    .category-item:hover, .customer-item:hover {
+        border-color: var(--primary-color);
     }
 
-    .checkbox-item:hover {
-        background: #f8fafc;
-    }
-
-    .checkbox-wrapper {
+    .category-check, .customer-check {
         display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
+        align-items: center;
+        gap: var(--spacing-sm);
     }
 
-    .checkbox-wrapper input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        margin-top: 2px;
+    .category-check input[type="checkbox"], .customer-check input[type="checkbox"] {
+        width: 1.1rem;
+        height: 1.1rem;
         cursor: pointer;
-        accent-color: #1e3c72;
     }
 
-    .checkbox-label {
+    .category-check label, .customer-check label {
+        margin: 0;
+        font-weight: 500;
+        cursor: pointer;
         flex: 1;
-        cursor: pointer;
-        font-size: 0.9375rem;
-        color: #334155;
-        user-select: none;
+        font-size: 0.95rem;
     }
 
-    .checkbox-label strong {
-        display: block;
-        margin-bottom: 0.125rem;
+    .customer-details {
+        font-size: 0.8rem;
+        color: var(--gray-600);
+        margin-left: 1.6rem;
+        margin-top: 0.2rem;
     }
 
-    .checkbox-label small {
-        color: #64748b;
-        font-size: 0.8125rem;
-        display: block;
+    .subcategory-list {
+        margin-top: var(--spacing-xs);
+        margin-left: var(--spacing-lg);
+        padding-left: var(--spacing-sm);
+        border-left: 2px solid var(--gray-200);
     }
 
     .subcategory-item {
-        background: #fafbfc;
-        padding-left: 2.5rem;
-    }
-
-    .category-badge {
-        display: inline-block;
-        padding: 0.125rem 0.5rem;
-        background: #dbeafe;
-        color: #1e40af;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        margin-left: 0.5rem;
+        margin-bottom: var(--spacing-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        background: var(--gray-50);
+        border-radius: var(--radius-sm);
     }
 
     .search-box {
-        margin-bottom: 1rem;
+        margin-bottom: var(--spacing-md);
         position: relative;
     }
 
@@ -409,822 +335,789 @@
         left: 1rem;
         top: 50%;
         transform: translateY(-50%);
-        color: #64748b;
+        color: var(--gray-400);
     }
 
-    /* Media Upload */
-    .media-container {
-        background: #f8fafc;
-        border-radius: 10px;
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid #e2e8f0;
-    }
-
-    .media-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-        color: #1e293b;
-        font-weight: 600;
-    }
-
-    .media-header i {
-        color: #1e3c72;
-    }
-
-    .media-preview-box {
+    .activity-card {
         background: white;
-        border-radius: 8px;
-        padding: 1rem;
-        border: 2px solid #e2e8f0;
-        margin-bottom: 1rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
     }
 
-    .media-display {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
-
-    .media-thumbnail {
-        width: 140px;
-        height: 90px;
-        border-radius: 6px;
-        object-fit: cover;
-        border: 1px solid #e2e8f0;
-    }
-
-    .media-details {
-        flex: 1;
-    }
-
-    .media-name {
-        font-weight: 500;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
-    }
-
-    .media-meta {
-        color: #64748b;
-        font-size: 0.875rem;
-    }
-
-    .upload-input {
-        margin-top: 1rem;
-    }
-
-    .file-hint {
-        display: block;
-        margin-top: 0.5rem;
-        color: #64748b;
-        font-size: 0.8125rem;
-    }
-
-    /* Activity Feed */
-    .activity-container {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-    }
-
-    .activity-section {
-        background: #f8fafc;
-        border-radius: 10px;
-        padding: 1.25rem;
-        border: 1px solid #e2e8f0;
-    }
-
-    .activity-list {
-        background: white;
-        border-radius: 8px;
-        max-height: 400px;
-        overflow-y: auto;
-        border: 1px solid #e2e8f0;
-    }
-
-    .activity-row {
-        padding: 1rem;
-        border-bottom: 1px solid #f1f5f9;
-        display: flex;
-        gap: 0.875rem;
-    }
-
-    .activity-row:last-child {
-        border-bottom: none;
-    }
-
-    .activity-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .activity-header {
+        font-size: 1.1rem;
         font-weight: 600;
-        font-size: 0.875rem;
-        flex-shrink: 0;
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--gray-200);
     }
 
-    .activity-info {
-        flex: 1;
+    .activity-item {
+        padding: var(--spacing-md);
+        border-left: 3px solid var(--primary-color);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
     }
 
-    .activity-name {
-        font-weight: 500;
-        color: #1e293b;
-        font-size: 0.9375rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .activity-desc {
-        color: #64748b;
-        font-size: 0.8125rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .activity-time {
-        color: #94a3b8;
-        font-size: 0.75rem;
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 0.125rem 0.5rem;
+    .badge-file-type {
+        padding: 0.25rem 0.625rem;
         border-radius: 4px;
         font-size: 0.75rem;
-        font-weight: 500;
-        margin-left: 0.5rem;
+        font-weight: 600;
     }
 
-    .status-badge.success {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .status-badge.warning {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .status-badge.info {
+    .badge-video {
         background: #dbeafe;
         color: #1e40af;
     }
 
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 3rem 1rem;
-        color: #94a3b8;
-    }
-
-    .empty-state i {
-        font-size: 2.5rem;
-        margin-bottom: 0.75rem;
-        opacity: 0.5;
-    }
-
-    .empty-state p {
-        margin: 0;
-        font-size: 0.9375rem;
-    }
-
-    /* Info Box */
-    .info-box {
-        background: #eff6ff;
-        border-left: 3px solid #2563eb;
-        padding: 1rem;
-        border-radius: 6px;
-        margin-bottom: 1.5rem;
-        font-size: 0.875rem;
-        color: #1e40af;
-    }
-
-    .info-box i {
-        margin-right: 0.5rem;
-    }
-
-    /* Action Bar */
-    .action-bar {
-        display: flex;
-        justify-content: flex-end;
-        padding-top: 1.5rem;
-        margin-top: 1.5rem;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .btn {
-        padding: 0.625rem 1.25rem;
-        border-radius: 8px;
-        font-weight: 500;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 0.9375rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .btn-primary {
-        background: #1e3c72;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: #152b54;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
-    }
-
-    .btn-primary:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .btn-light {
-        background: #f1f5f9;
-        color: #475569;
-    }
-
-    .btn-light:hover {
-        background: #e2e8f0;
-    }
-
-    .btn-danger {
-        background: #ef4444;
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background: #dc2626;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 0.75rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 1024px) {
-        .form-row,
-        .category-grid,
-        .activity-container {
-            grid-template-columns: 1fr;
-        }
+    .badge-webgl {
+        background: #cffafe;
+        color: #0e7490;
     }
 
     @media (max-width: 768px) {
-        .stats-grid {
+        .file-type-selector {
             grid-template-columns: 1fr;
         }
 
-        .tabs {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .tab {
-            white-space: nowrap;
-        }
-
-        .tab-content {
-            padding: 1.25rem;
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
     }
 </style>
 {% endblock %}
 
 {% block admin_content %}
-<!-- Statistics -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon blue">
-                <i class="fas fa-eye"></i>
+{% csrf_token %}
+
+<!-- Demo Preview Card -->
+<div class="demo-preview-card">
+    <div class="demo-preview-header">
+        <div>
+            <h2 class="mb-2">{{ demo.title }}</h2>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                {% if demo.file_type == 'video' %}
+                    <span class="badge-file-type badge-video">
+                        <i class="fas fa-video me-1"></i>Video Demo
+                    </span>
+                {% else %}
+                    <span class="badge-file-type badge-webgl">
+                        <i class="fas fa-cube me-1"></i>WebGL Demo
+                    </span>
+                {% endif %}
+                
+                <span class="badge bg-secondary">{{ demo.get_demo_type_display }}</span>
+                
+                {% if demo.is_featured %}
+                    <span class="badge bg-warning">
+                        <i class="fas fa-star me-1"></i>Featured
+                    </span>
+                {% endif %}
+                
+                {% if demo.is_active %}
+                    <span class="badge bg-success">Active</span>
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
             </div>
-            <div>
-                <div class="stat-number">{{ total_views|default:"0" }}</div>
-                <div class="stat-label">Total Views</div>
-            </div>
+            <p class="text-muted mb-0">{{ demo.description }}</p>
         </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon green">
-                <i class="fas fa-heart"></i>
-            </div>
-            <div>
-                <div class="stat-number">{{ total_likes|default:"0" }}</div>
-                <div class="stat-label">Total Likes</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon orange">
-                <i class="fas fa-calendar-check"></i>
-            </div>
-            <div>
-                <div class="stat-number">{{ total_requests|default:"0" }}</div>
-                <div class="stat-label">Demo Requests</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon purple">
-                <i class="fas fa-users"></i>
-            </div>
-            <div>
-                <div class="stat-number">
-                    {% if is_for_all_customers %}
-                        All
+        <div>
+            {% if demo.thumbnail %}
+                <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-preview-thumbnail">
+            {% else %}
+                <div class="demo-placeholder-large">
+                    {% if demo.file_type == 'webgl' %}
+                        <i class="fas fa-cube"></i>
                     {% else %}
-                        {{ target_customers.count }}
+                        <i class="fas fa-video"></i>
                     {% endif %}
                 </div>
-                <div class="stat-label">Can Access</div>
-            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-box primary">
+            <div class="stat-value text-primary">{{ total_views }}</div>
+            <div class="stat-label">Total Views</div>
+        </div>
+        <div class="stat-box success">
+            <div class="stat-value text-success">{{ total_likes }}</div>
+            <div class="stat-label">Total Likes</div>
+        </div>
+        <div class="stat-box info">
+            <div class="stat-value text-info">{{ total_requests }}</div>
+            <div class="stat-label">Demo Requests</div>
+        </div>
+        <div class="stat-box warning">
+            <div class="stat-value text-warning">{{ total_accessible_customers }}</div>
+            <div class="stat-label">Accessible Customers</div>
         </div>
     </div>
 </div>
 
-<!-- Main Content -->
-<div class="content-card">
-    <div class="tabs">
-        <button class="tab active" onclick="switchTab(event, 'basic')">
-            <i class="fas fa-info-circle"></i> Basic Info
-        </button>
-        <button class="tab" onclick="switchTab(event, 'targeting')">
-            <i class="fas fa-bullseye"></i> Targeting
-        </button>
-        <button class="tab" onclick="switchTab(event, 'customers')">
-            <i class="fas fa-users"></i> Customers
-        </button>
-        <button class="tab" onclick="switchTab(event, 'media')">
-            <i class="fas fa-photo-video"></i> Media
-        </button>
-        <button class="tab" onclick="switchTab(event, 'activity')">
-            <i class="fas fa-chart-line"></i> Activity
-        </button>
-    </div>
-    
-    <form method="post" enctype="multipart/form-data" id="updateForm">
-        {% csrf_token %}
-        
-        <!-- Basic Info Tab -->
-        <div class="tab-content">
-            <div class="tab-pane active" id="basic-pane">
-                <div class="form-row">
-                    <div>
-                        <div class="form-group">
-                            <label class="form-label required">Demo Title</label>
-                            <input type="text" name="title" class="form-control" 
-                                   value="{{ demo.title }}" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label required">Description</label>
-                            <textarea name="description" class="form-control" rows="5" required>{{ demo.description }}</textarea>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <div class="settings-panel">
-                            <div class="panel-title">Settings</div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Demo Type</label>
-                                <select name="demo_type" class="form-select">
-                                    {% for value, label in demo_types %}
-                                    <option value="{{ value }}" {% if demo.demo_type == value %}selected{% endif %}>
-                                        {{ label }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Duration</label>
-                                <input type="text" name="duration" class="form-control" 
-                                       placeholder="00:15:30" value="{{ demo.formatted_duration }}">
-                            </div>
-                            
-                            <div class="switch-group">
-                                <label class="switch">
-                                    <input type="checkbox" name="is_featured" {% if demo.is_featured %}checked{% endif %}>
-                                    <span class="slider"></span>
-                                </label>
-                                <span class="switch-label">Featured Demo</span>
-                            </div>
-                            
-                            <div class="switch-group">
-                                <label class="switch">
-                                    <input type="checkbox" name="is_active" {% if demo.is_active %}checked{% endif %}>
-                                    <span class="slider"></span>
-                                </label>
-                                <span class="switch-label">Active Status</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="action-bar">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
+<!-- Edit Form -->
+<form method="post" enctype="multipart/form-data" id="editDemoForm" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <div class="form-container">
+        <div class="accordion" id="editDemoAccordion">
+            
+            <!-- 1. Basic Information -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#basicInfo">
+                        <i class="fas fa-info-circle section-icon"></i>
+                        Basic Information
                     </button>
+                </h2>
+                <div id="basicInfo" class="accordion-collapse collapse show" data-bs-parent="#editDemoAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="mb-3">
+                                    <label for="id_title" class="form-label required">Demo Title</label>
+                                    <input type="text" name="title" id="id_title" class="form-control" value="{{ demo.title }}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="id_description" class="form-label required">Description</label>
+                                    <textarea name="description" id="id_description" class="form-control" rows="4" required>{{ demo.description }}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="mb-3">
+                                    <label for="id_demo_type" class="form-label">Demo Type</label>
+                                    <select name="demo_type" id="id_demo_type" class="form-select">
+                                        {% for value, label in demo_types %}
+                                        <option value="{{ value }}" {% if demo.demo_type == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="mb-3" id="durationField" {% if demo.file_type == 'webgl' %}style="display: none;"{% endif %}>
+                                    <label for="id_duration" class="form-label">Duration</label>
+                                    <input type="text" name="duration" id="id_duration" class="form-control" placeholder="MM:SS or HH:MM:SS" value="{{ demo.formatted_duration }}">
+                                    <small class="text-muted">e.g., 5:30</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Targeting Tab -->
-            <div class="tab-pane" id="targeting-pane">
-                <div class="info-box">
-                    <i class="fas fa-lightbulb"></i>
-                    <strong>Tip:</strong> Select business categories to show this demo only to specific customer types. Leave all unchecked to show it to everyone.
-                </div>
 
-                <div class="category-grid">
-                    <div class="category-section">
-                        <div class="section-header">
-                            <i class="fas fa-building"></i> Business Categories
+            <!-- 2. File Management -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fileManagement">
+                        <i class="fas fa-file-upload section-icon"></i>
+                        File Management
+                    </button>
+                </h2>
+                <div id="fileManagement" class="accordion-collapse collapse" data-bs-parent="#editDemoAccordion">
+                    <div class="accordion-body">
+                        <!-- File Type Selection -->
+                        <div class="file-type-selector">
+                            <label class="file-type-option {% if demo.file_type == 'video' %}active{% endif %}" for="fileTypeVideo">
+                                <input type="radio" name="file_type" id="fileTypeVideo" value="video" {% if demo.file_type == 'video' %}checked{% endif %}>
+                                <div class="file-type-icon"><i class="fas fa-video"></i></div>
+                                <div class="file-type-title">Video Demo</div>
+                            </label>
+
+                            <label class="file-type-option {% if demo.file_type == 'webgl' %}active{% endif %}" for="fileTypeWebGL">
+                                <input type="radio" name="file_type" id="fileTypeWebGL" value="webgl" {% if demo.file_type == 'webgl' %}checked{% endif %}>
+                                <div class="file-type-icon"><i class="fas fa-cube"></i></div>
+                                <div class="file-type-title">WebGL Interactive</div>
+                            </label>
                         </div>
-                        
-                        <div class="checkbox-list">
+
+                        <div class="row">
+                            <!-- Video File -->
+                            <div class="col-md-6 file-section {% if demo.file_type == 'video' %}active{% endif %}" id="videoSection">
+                                <div class="mb-3">
+                                    <label class="form-label">Demo Video</label>
+                                    
+                                    {% if demo.video_file %}
+                                    <div class="current-file">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="fas fa-video text-success me-2"></i>
+                                                <strong>Current video file uploaded</strong>
+                                            </div>
+                                            <a href="{{ demo.video_file.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="file-upload-area" id="videoUploadArea">
+                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="file-upload-text">
+                                            {% if demo.video_file %}Replace video file{% else %}Upload video file{% endif %}
+                                        </div>
+                                        <div class="file-upload-hint">Max 100MB</div>
+                                        <input type="file" name="video_file" id="id_video_file" accept="video/mp4,video/avi,video/mov,video/wmv" style="display: none;">
+                                    </div>
+                                    <div id="videoPreview" class="mt-2" style="display: none;"></div>
+                                    <div id="videoError" class="alert alert-danger mt-2" style="display: none;"></div>
+                                </div>
+                            </div>
+
+                            <!-- WebGL File -->
+                            <div class="col-md-6 file-section {% if demo.file_type == 'webgl' %}active{% endif %}" id="webglSection">
+                                <div class="mb-3">
+                                    <label class="form-label">WebGL File</label>
+                                    
+                                 {% if demo.webgl_file %}
+                                    <div class="current-file">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="fas fa-cube text-info me-2"></i>
+                                                <strong>Current WebGL file uploaded</strong>
+                                            </div>
+                                            <a href="{{ demo.webgl_file.url }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="file-upload-area" id="webglUploadArea">
+                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="file-upload-text">
+                                            {% if demo.webgl_file %}Replace WebGL file{% else %}Upload WebGL file{% endif %}
+                                        </div>
+                                        <div class="file-upload-hint">Max 100MB</div>
+                                        <input type="file" name="webgl_file" id="id_webgl_file" accept=".html,.zip,.gltf,.glb" style="display: none;">
+                                    </div>
+                                    <div id="webglPreview" class="mt-2" style="display: none;"></div>
+                                    <div id="webglError" class="alert alert-danger mt-2" style="display: none;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Thumbnail -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Thumbnail Image</label>
+                                    
+                                   {% if demo.thumbnail %}
+                                    <div class="current-file">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="fas fa-image text-primary me-2"></i>
+                                                <strong>Current thumbnail uploaded</strong>
+                                            </div>
+                                            <a href="{{ demo.thumbnail.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="file-upload-area" id="thumbnailUploadArea">
+                                        <div class="file-upload-icon"><i class="fas fa-image"></i></div>
+                                        <div class="file-upload-text">
+                                            {% if demo.thumbnail %}Replace thumbnail{% else %}Upload thumbnail{% endif %}
+                                        </div>
+                                        <div class="file-upload-hint">Max 5MB</div>
+                                        <input type="file" name="thumbnail" id="id_thumbnail" accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
+                                    </div>
+                                    <div id="thumbnailPreview" class="mt-2" style="display: none;"></div>
+                                    <div id="thumbnailError" class="alert alert-danger mt-2" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Business Categories -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#categories">
+                        <i class="fas fa-bullseye section-icon"></i>
+                        Target Business Categories
+                    </button>
+                </h2>
+                <div id="categories" class="accordion-collapse collapse" data-bs-parent="#editDemoAccordion">
+                    <div class="accordion-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Select at least one category or enable "All Categories"
+                        </div>
+
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="allBusinessCategoriesCheckbox" {% if demo.is_for_all_business_categories %}checked{% endif %}>
+                            <label class="form-check-label" for="allBusinessCategoriesCheckbox">
+                                <strong>Available to All Business Categories</strong>
+                            </label>
+                        </div>
+
+                        <div id="categorySelectionArea" class="category-selection-area {% if demo.is_for_all_business_categories %}disabled{% endif %}">
                             {% if business_categories %}
                                 {% for category in business_categories %}
-                                <div class="checkbox-item">
-                                    <div class="checkbox-wrapper">
-                                        <input type="checkbox" name="target_business_categories" 
+                                <div class="category-item">
+                                    <div class="category-check">
+                                        <input type="checkbox" 
+                                               name="target_business_categories" 
                                                value="{{ category.id }}" 
-                                               id="cat_{{ category.id }}"
-                                               data-category="{{ category.id }}"
+                                               id="cat_{{ category.id }}" 
+                                               class="category-checkbox"
                                                {% if category in demo.target_business_categories.all %}checked{% endif %}>
-                                        <label class="checkbox-label" for="cat_{{ category.id }}">
-                                            <strong>{{ category.name }}</strong>
-                                            {% if category.description %}
-                                            <small>{{ category.description|truncatechars:60 }}</small>
-                                            {% endif %}
+                                        <label for="cat_{{ category.id }}">
+                                            {% if category.icon %}{{ category.icon }}{% endif %} {{ category.name }}
                                         </label>
                                     </div>
+                                    
+                                    {% if category.subcategories.all %}
+                                    <div class="subcategory-list" id="subcat_list_{{ category.id }}" {% if category not in demo.target_business_categories.all %}style="display: none;"{% endif %}>
+                                        {% for subcategory in category.subcategories.all %}
+                                        <div class="subcategory-item">
+                                            <div class="category-check">
+                                                <input type="checkbox" 
+                                                       name="target_business_subcategories" 
+                                                       value="{{ subcategory.id }}" 
+                                                       id="subcat_{{ subcategory.id }}" 
+                                                       class="subcategory-checkbox" 
+                                                       data-parent="{{ category.id }}"
+                                                       {% if subcategory in demo.target_business_subcategories.all %}checked{% endif %}>
+                                                <label for="subcat_{{ subcategory.id }}">{{ subcategory.name }}</label>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
                                 </div>
                                 {% endfor %}
                             {% else %}
-                                <div class="empty-state">
-                                    <i class="fas fa-folder-open"></i>
-                                    <p>No categories available</p>
-                                </div>
+                            <div class="text-center py-4 text-muted">
+                                <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                <p>No categories available</p>
+                            </div>
                             {% endif %}
                         </div>
                     </div>
-                    
-                    <div class="category-section">
-                        <div class="section-header">
-                            <i class="fas fa-sitemap"></i> Subcategories
-                        </div>
-                        
-                        <div class="checkbox-list" id="subcategoryList">
-                            {% if business_subcategories %}
-                                {% for subcategory in business_subcategories %}
-                                <div class="checkbox-item subcategory-item" data-parent="{{ subcategory.category.id }}">
-                                    <div class="checkbox-wrapper">
-                                        <input type="checkbox" name="target_business_subcategories" 
-                                               value="{{ subcategory.id }}" 
-                                               id="subcat_{{ subcategory.id }}"
-                                               {% if subcategory in demo.target_business_subcategories.all %}checked{% endif %}>
-                                        <label class="checkbox-label" for="subcat_{{ subcategory.id }}">
-                                            {{ subcategory.name }}
-                                            <span class="category-badge">{{ subcategory.category.name }}</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="empty-state">
-                                    <i class="fas fa-sitemap"></i>
-                                    <p>No subcategories available</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="action-bar">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
                 </div>
             </div>
-            
-            <!-- NEW: Customers Tab -->
-            <div class="tab-pane" id="customers-pane">
-                <div class="info-box">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Customer Access Control:</strong> By default, all approved customers can access this demo. Select specific customers below to restrict access.
+
+            <!-- 4. Customer Access -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#customerAccess">
+                        <i class="fas fa-users section-icon"></i>
+                        Customer Access Control
+                    </button>
+                </h2>
+                <div id="customerAccess" class="accordion-collapse collapse" data-bs-parent="#editDemoAccordion">
+                    <div class="accordion-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="allCustomersCheckbox" {% if demo.is_for_all_customers %}checked{% endif %}>
+                            <label class="form-check-label" for="allCustomersCheckbox">
+                                <strong>Available to All Customers</strong>
+                            </label>
+                        </div>
+
+                        <div id="customerSelectionArea" class="customer-selection-area {% if demo.is_for_all_customers %}disabled{% endif %}">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="customerSearch" class="form-control form-control-sm" placeholder="Search customers...">
+                            </div>
+
+                            <div id="customerList">
+                                {% if customers %}
+                                    {% for customer in customers %}
+                                    <div class="customer-item" data-search="{{ customer.full_name|lower }} {{ customer.email|lower }} {{ customer.organization|lower }}">
+                                        <div class="customer-check">
+                                            <input type="checkbox" 
+                                                   name="target_customers" 
+                                                   value="{{ customer.id }}" 
+                                                   id="cust_{{ customer.id }}" 
+                                                   class="customer-checkbox"
+                                                   {% if customer in demo.target_customers.all %}checked{% endif %}>
+                                            <label for="cust_{{ customer.id }}">{{ customer.full_name }}</label>
+                                        </div>
+                                        <div class="customer-details">
+                                            {{ customer.email }}{% if customer.organization %} | {{ customer.organization }}{% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-user-slash fa-2x mb-2"></i>
+                                    <p>No customers available</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="category-section">
-                    <!-- All Customers Toggle -->
-                    <div class="switch-group" style="margin-bottom: 1.5rem;">
-                        <label class="switch">
-                            <input type="checkbox" id="allCustomersToggle" 
-                                   {% if is_for_all_customers %}checked{% endif %}>
-                            <span class="slider"></span>
-                        </label>
-                        <span class="switch-label">
-                            <strong>Available to All Customers</strong>
-                            <small style="display: block; color: #64748b; font-weight: normal; margin-top: 0.25rem;">
-                                When enabled, all approved customers can access this demo
-                            </small>
-                        </span>
-                    </div>
+            <!-- 5. Settings -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#settings">
+                        <i class="fas fa-cogs section-icon"></i>
+                        Settings
+                    </button>
+                </h2>
+                <div id="settings" class="accordion-collapse collapse" data-bs-parent="#editDemoAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured" {% if demo.is_featured %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_is_featured">
+                                        <strong>Feature this demo</strong>
+                                    </label>
+                                </div>
 
-                    <div class="section-header">
-                        <i class="fas fa-users"></i> Select Specific Customers
-                    </div>
-
-                    <!-- Search Box -->
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="customerSearchInput" class="form-control" 
-                               placeholder="Search by name, email, or organization...">
-                    </div>
-                    
-                    <div class="checkbox-list" id="customerCheckboxList">
-                        {% if customers %}
-                            {% for customer in customers %}
-                            <div class="checkbox-item customer-item" 
-                                 data-search="{{ customer.full_name|lower }} {{ customer.email|lower }} {{ customer.organization|lower }}">
-                                <div class="checkbox-wrapper">
-                                    <input type="checkbox" name="target_customers" 
-                                           value="{{ customer.id }}" 
-                                           id="cust_{{ customer.id }}"
-                                           class="customer-checkbox"
-                                           {% if customer in target_customers %}checked{% endif %}>
-                                    <label class="checkbox-label" for="cust_{{ customer.id }}">
-                                        <strong>{{ customer.full_name }}</strong>
-                                        <small>
-                                            <i class="fas fa-envelope"></i> {{ customer.email }}
-                                            {% if customer.organization %}
-                                            | <i class="fas fa-building"></i> {{ customer.organization }}
-                                            {% endif %}
-                                        </small>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" {% if demo.is_active %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_is_active">
+                                        <strong>Make demo active</strong>
                                     </label>
                                 </div>
                             </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="empty-state">
-                                <i class="fas fa-user-slash"></i>
-                                <p>No approved customers available</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="action-bar">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Media Tab -->
-            <div class="tab-pane" id="media-pane">
-                <div class="media-container">
-                    <div class="media-header">
-                        <i class="fas fa-video"></i> Video File
-                    </div>
-                    
-                    {% if demo.video_file %}
-                    <div class="media-preview-box">
-                        <div class="media-display">
-                            <video class="media-thumbnail" controls>
-                                <source src="{{ demo.video_file.url }}" type="video/mp4">
-                            </video>
-                            <div class="media-details">
-                                <div class="media-name">{{ demo.video_file.name|default:"Video File" }}</div>
-                                <div class="media-meta">Duration: {{ demo.formatted_duration|default:"Unknown" }}</div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_sort_order" class="form-label">Sort Order</label>
+                                    <input type="number" name="sort_order" id="id_sort_order" class="form-control" min="0" value="{{ demo.sort_order }}">
+                                    <small class="text-muted">Lower numbers appear first</small>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="upload-input">
-                        <input type="file" name="video_file" class="form-control" accept="video/*">
-                        <span class="file-hint">MP4, AVI, MOV, WMV (Max 100MB)</span>
-                    </div>
-                </div>
-                
-                <div class="media-container">
-                    <div class="media-header">
-                        <i class="fas fa-image"></i> Thumbnail Image
-                    </div>
-                    
-                    {% if demo.thumbnail %}
-                    <div class="media-preview-box">
-                        <div class="media-display">
-                            <img src="{{ demo.thumbnail.url }}" alt="Thumbnail" class="media-thumbnail">
-                            <div class="media-details">
-                                <div class="media-name">Thumbnail Image</div>
-                                <div class="media-meta">Preview image for this demo</div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="upload-input">
-                        <input type="file" name="thumbnail" class="form-control" accept="image/*">
-                        <span class="file-hint">JPG, PNG, WebP (Max 5MB)</span>
-                    </div>
-                </div>
-                
-                <div class="action-bar">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Activity Tab -->
-            <div class="tab-pane" id="activity-pane">
-                <div class="activity-container">
-                    <div class="activity-section">
-                        <div class="section-header">
-                            <i class="fas fa-eye"></i> Recent Views
-                        </div>
-                        
-                        <div class="activity-list">
-                            {% if recent_views %}
-                                {% for view in recent_views %}
-                                <div class="activity-row">
-                                    <div class="activity-avatar">
-                                        {{ view.user.first_name|first|upper }}{{ view.user.last_name|first|upper }}
-                                    </div>
-                                    <div class="activity-info">
-                                        <div class="activity-name">{{ view.user.full_name }}</div>
-                                        <div class="activity-desc">Watched this demo</div>
-                                        <div class="activity-time">{{ view.viewed_at|timesince }} ago</div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="empty-state">
-                                    <i class="fas fa-eye-slash"></i>
-                                    <p>No views yet</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="activity-section">
-                        <div class="section-header">
-                            <i class="fas fa-calendar-alt"></i> Demo Requests
-                        </div>
-                        
-                        <div class="activity-list">
-                            {% if recent_requests %}
-                                {% for request in recent_requests %}
-                                <div class="activity-row">
-                                    <div class="activity-avatar" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                                        <i class="fas fa-calendar"></i>
-                                    </div>
-                                    <div class="activity-info">
-                                        <div class="activity-name">{{ request.user.full_name }}</div>
-                                        <div class="activity-desc">
-                                            Requested for {{ request.requested_date|date:"M d, Y" }}
-                                            {% if request.status == 'confirmed' %}
-                                            <span class="status-badge success">Confirmed</span>
-                                            {% elif request.status == 'pending' %}
-                                            <span class="status-badge warning">Pending</span>
-                                            {% else %}
-                                            <span class="status-badge info">{{ request.get_status_display }}</span>
-                                            {% endif %}
-                                        </div>
-                                        <div class="activity-time">{{ request.created_at|timesince }} ago</div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="empty-state">
-                                    <i class="fas fa-calendar-times"></i>
-                                    <p>No requests yet</p>
-                                </div>
-                            {% endif %}
+
+                        <div class="alert alert-secondary">
+                            <strong>Created:</strong> {{ demo.created_at|date:"M d, Y g:i A" }}
+                            {% if demo.created_by %}by {{ demo.created_by.full_name }}{% endif %}
+                            <br>
+                            <strong>Last Updated:</strong> {{ demo.updated_at|date:"M d, Y g:i A" }}
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
-    </form>
+    </div>
+</form>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="activity-card">
+            <h3 class="activity-header">
+                <i class="fas fa-eye me-2"></i>Recent Views
+            </h3>
+            {% if recent_views %}
+                {% for view in recent_views %}
+                <div class="activity-item">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>{{ view.user.full_name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ view.user.email }}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ view.viewed_at|timesince }} ago</small>
+                            {% if view.completed %}
+                                <br><span class="badge bg-success">Completed</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted text-center py-4">No views yet</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="activity-card">
+            <h3 class="activity-header">
+                <i class="fas fa-calendar-check me-2"></i>Recent Demo Requests
+            </h3>
+            {% if recent_requests %}
+                {% for request in recent_requests %}
+                <div class="activity-item">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <strong>{{ request.user.full_name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ request.requested_date|date:"M d, Y" }} - {{ request.requested_time_slot }}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">{{ request.created_at|timesince }} ago</small>
+                            <br>
+                            <span class="badge bg-{% if request.status == 'confirmed' %}success{% elif request.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                {{ request.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted text-center py-4">No demo requests yet</p>
+            {% endif %}
+        </div>
+    </div>
 </div>
+
 {% endblock %}
 
 {% block admin_extra_js %}
 <script>
-function switchTab(event, tabName) {
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+document.addEventListener('DOMContentLoaded', function() {
+    setupFileTypeSelection();
+    setupFileUpload();
+    setupCategorySelection();
+    setupCustomerSelection();
+    setupFormValidation();
+});
+
+function setupFileTypeSelection() {
+    const fileTypeOptions = document.querySelectorAll('.file-type-option');
+    const videoSection = document.getElementById('videoSection');
+    const webglSection = document.getElementById('webglSection');
+    const durationField = document.getElementById('durationField');
     
-    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-    document.getElementById(tabName + '-pane').classList.add('active');
+    fileTypeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            fileTypeOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            
+            const fileType = this.querySelector('input').value;
+            
+            if (fileType === 'video') {
+                videoSection.classList.add('active');
+                webglSection.classList.remove('active');
+                durationField.style.display = 'block';
+            } else {
+                videoSection.classList.remove('active');
+                webglSection.classList.add('active');
+                durationField.style.display = 'none';
+            }
+            
+            clearFileErrors();
+        });
+    });
 }
 
-// Smart subcategory filtering
-document.addEventListener('DOMContentLoaded', function() {
-    const categoryCheckboxes = document.querySelectorAll('[data-category]');
-    const subcategoryItems = document.querySelectorAll('[data-parent]');
+function setupFileUpload() {
+    setupFileInput('id_video_file', 'videoUploadArea', 'videoPreview', 'videoError', {
+        maxSize: 100 * 1024 * 1024,
+        allowedExtensions: ['mp4', 'avi', 'mov', 'wmv'],
+        fileType: 'video'
+    });
     
-    function updateSubcategories() {
-        const selectedCategories = Array.from(categoryCheckboxes)
-            .filter(cb => cb.checked)
-            .map(cb => cb.dataset.category);
-        
-        subcategoryItems.forEach(item => {
-            if (selectedCategories.length === 0 || selectedCategories.includes(item.dataset.parent)) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-                item.querySelector('input').checked = false;
+    setupFileInput('id_webgl_file', 'webglUploadArea', 'webglPreview', 'webglError', {
+        maxSize: 100 * 1024 * 1024,
+        allowedExtensions: ['html', 'zip', 'gltf', 'glb'],
+        fileType: 'webgl'
+    });
+    
+    setupFileInput('id_thumbnail', 'thumbnailUploadArea', 'thumbnailPreview', 'thumbnailError', {
+        maxSize: 5 * 1024 * 1024,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+        fileType: 'image'
+    });
+}
+
+function setupFileInput(inputId, areaId, previewId, errorId, options) {
+    const input = document.getElementById(inputId);
+    const area = document.getElementById(areaId);
+    const preview = document.getElementById(previewId);
+    const errorDiv = document.getElementById(errorId);
+    
+    area.addEventListener('click', () => input.click());
+    
+    area.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        area.style.borderColor = 'var(--primary-color)';
+    });
+    
+    area.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        area.style.borderColor = 'var(--gray-300)';
+    });
+    
+    area.addEventListener('drop', (e) => {
+        e.preventDefault();
+        area.style.borderColor = 'var(--gray-300)';
+        if (e.dataTransfer.files.length) {
+            input.files = e.dataTransfer.files;
+            validateAndPreviewFile(input, preview, errorDiv, area, options);
+        }
+    });
+    
+    input.addEventListener('change', () => {
+        validateAndPreviewFile(input, preview, errorDiv, area, options);
+    });
+}
+
+function validateAndPreviewFile(input, preview, errorDiv, area, options) {
+    const file = input.files[0];
+    
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    area.classList.remove('error');
+    preview.style.display = 'none';
+    
+    if (!file) return;
+    
+    if (file.size > options.maxSize) {
+        const maxSizeMB = (options.maxSize / 1024 / 1024).toFixed(0);
+        showFileError(errorDiv, area, `File exceeds ${maxSizeMB}MB limit`);
+        input.value = '';
+        return;
+    }
+    
+    const fileExt = file.name.split('.').pop().toLowerCase();
+    if (!options.allowedExtensions.includes(fileExt)) {
+        showFileError(errorDiv, area, `Invalid format. Allowed: ${options.allowedExtensions.join(', ').toUpperCase()}`);
+        input.value = '';
+        return;
+    }
+    
+    showFilePreview(file, preview, options.fileType);
+}
+
+function showFileError(errorDiv, area, message) {
+    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${message}`;
+    errorDiv.style.display = 'block';
+    area.classList.add('error');
+}
+
+function clearFileErrors() {
+    ['videoError', 'webglError', 'thumbnailError'].forEach(id => {
+        const div = document.getElementById(id);
+        if (div) {
+            div.style.display = 'none';
+            div.textContent = '';
+        }
+    });
+    
+    document.querySelectorAll('.file-upload-area').forEach(area => {
+        area.classList.remove('error');
+    });
+}
+
+function showFilePreview(file, preview, fileType) {
+    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+    const icon = fileType === 'video' ? 'fa-video' : fileType === 'webgl' ? 'fa-cube' : 'fa-image';
+    
+    preview.innerHTML = `
+        <div class="alert alert-success mb-0">
+            <i class="fas ${icon} me-2"></i>
+            <strong>${file.name}</strong> (${fileSizeMB} MB)
+        </div>
+    `;
+    preview.style.display = 'block';
+}
+
+function setupCategorySelection() {
+    const allCategoriesCheckbox = document.getElementById('allBusinessCategoriesCheckbox');
+    const categorySelectionArea = document.getElementById('categorySelectionArea');
+    const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+    
+    allCategoriesCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            categorySelectionArea.classList.add('disabled');
+            categoryCheckboxes.forEach(cb => {
+                cb.checked = false;
+                const subcategoryList = document.getElementById(`subcat_list_${cb.value}`);
+                if (subcategoryList) {
+                    subcategoryList.style.display = 'none';
+                    subcategoryList.querySelectorAll('input').forEach(sub => sub.checked = false);
+                }
+            });
+        } else {
+            categorySelectionArea.classList.remove('disabled');
+        }
+    });
+    
+    categoryCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const subcategoryList = document.getElementById(`subcat_list_${this.value}`);
+            if (subcategoryList) {
+                subcategoryList.style.display = this.checked ? 'block' : 'none';
+                if (!this.checked) {
+                    subcategoryList.querySelectorAll('input').forEach(sub => sub.checked = false);
+                }
+            }
+            
+            if (this.checked) {
+                allCategoriesCheckbox.checked = false;
             }
         });
-    }
-    
-    categoryCheckboxes.forEach(cb => cb.addEventListener('change', updateSubcategories));
-    updateSubcategories();
+    });
+}
 
-    // Customer Selection Controls
-    const allCustomersToggle = document.getElementById('allCustomersToggle');
-    const customerCheckboxList = document.getElementById('customerCheckboxList');
+function setupCustomerSelection() {
+    const allCustomersCheckbox = document.getElementById('allCustomersCheckbox');
+    const customerSelectionArea = document.getElementById('customerSelectionArea');
     const customerCheckboxes = document.querySelectorAll('.customer-checkbox');
-    const customerSearchInput = document.getElementById('customerSearchInput');
+    const customerSearch = document.getElementById('customerSearch');
     
-    // Toggle customer selection
-    if (allCustomersToggle && customerCheckboxList) {
-        function updateCustomerSelection() {
-            if (allCustomersToggle.checked) {
-                customerCheckboxList.classList.add('disabled');
-                customerCheckboxes.forEach(cb => cb.checked = false);
-            } else {
-                customerCheckboxList.classList.remove('disabled');
-            }
+    allCustomersCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            customerSelectionArea.classList.add('disabled');
+            customerCheckboxes.forEach(cb => cb.checked = false);
+        } else {
+            customerSelectionArea.classList.remove('disabled');
         }
-        
-        allCustomersToggle.addEventListener('change', updateCustomerSelection);
-        updateCustomerSelection();
-    }
+    });
     
-    // Customer search
-    if (customerSearchInput) {
-        customerSearchInput.addEventListener('input', function() {
+    if (customerSearch) {
+        customerSearch.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
-            const customerItems = document.querySelectorAll('.customer-item');
-            
-            customerItems.forEach(item => {
+            document.querySelectorAll('.customer-item').forEach(item => {
                 const searchData = item.getAttribute('data-search');
-                if (searchData.includes(searchTerm)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
+                item.style.display = searchData.includes(searchTerm) ? 'block' : 'none';
             });
         });
     }
-});
+}
 
-// Delete confirmation
-function confirmDelete() {
-    if (confirm('Are you sure you want to delete this demo? This cannot be undone.')) {
+function setupFormValidation() {
+    const form = document.getElementById('editDemoForm');
+    
+    form.addEventListener('submit', function(e) {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    });
+}
+
+function deleteDemo(demoId, title) {
+    if (confirm(`Delete "${title}"?\n\nThis will permanently delete the demo and all associated data.\n\nThis action cannot be undone.`)) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = window.location.pathname.replace('/detail/', '/delete/');
+        form.action = `/admin/demos/${demoId}/delete/`;
         
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = 'csrfmiddlewaretoken';
-        csrf.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
         
-        form.appendChild(csrf);
         document.body.appendChild(form);
         form.submit();
     }
 }
-
-// Form submission feedback
-document.getElementById('updateForm').addEventListener('submit', function() {
-    const buttons = document.querySelectorAll('.btn-primary');
-    buttons.forEach(btn => {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        btn.disabled = true;
-    });
-});
 </script>
 {% endblock %}

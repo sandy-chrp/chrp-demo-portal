@@ -20,6 +20,12 @@ def demo_thumbnail_path(instance, filename):
     filename = f"thumb_{instance.slug}_{uuid.uuid4().hex[:8]}.{ext}"
     return f'demos/thumbnails/{filename}'
 
+def demo_webgl_path(instance, filename):
+    """Generate path for WebGL file uploads"""
+    ext = filename.split('.')[-1]
+    filename = f"webgl_{instance.slug}_{uuid.uuid4().hex[:8]}.{ext}"
+    return f'demos/webgl/{filename}'
+
 class DemoCategory(models.Model):
     """Categories for organizing demos"""
     
@@ -50,17 +56,26 @@ class DemoCategory(models.Model):
     def __str__(self):
         return self.name
 
-# demos/models.py - Updated Demo model without DemoCategory
-
 class Demo(models.Model):
-    """Demo videos/presentations"""
+    """Demo videos/presentations/WebGL content"""
     
     # Basic Information
     title = models.CharField(max_length=200, verbose_name="Demo Title")
     description = models.TextField(verbose_name="Description")
     slug = models.SlugField(unique=True, blank=True, max_length=250)
     
-    # REMOVED: category ForeignKey field
+    # File Type Selection
+    FILE_TYPE_CHOICES = [
+        ('video', 'Video'),
+        ('webgl', 'WebGL'),
+    ]
+    file_type = models.CharField(
+        max_length=10,
+        choices=FILE_TYPE_CHOICES,
+        default='video',
+        verbose_name="File Type",
+        help_text="Select whether this is a video demo or WebGL interactive demo"
+    )
     
     # Business Category Targeting (MAIN CATEGORIZATION)
     target_business_categories = models.ManyToManyField(
@@ -95,12 +110,27 @@ class Demo(models.Model):
         verbose_name="Demo Type"
     )
     
-    # Media Files
+    # Media Files - Video
     video_file = models.FileField(
         upload_to=demo_video_path,
+        blank=True,
+        null=True,
         validators=[FileExtensionValidator(allowed_extensions=['mp4', 'avi', 'mov', 'wmv'])],
-        verbose_name="Video File"
+        verbose_name="Video File",
+        help_text="Upload video file (required if file type is Video)"
     )
+    
+    # Media Files - WebGL
+    webgl_file = models.FileField(
+        upload_to=demo_webgl_path,
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['html', 'zip', 'gltf', 'glb'])],
+        verbose_name="WebGL File",
+        help_text="Upload WebGL file - HTML, ZIP archive, or 3D model (required if file type is WebGL)"
+    )
+    
+    # Thumbnail (Common for both)
     thumbnail = models.ImageField(
         upload_to=demo_thumbnail_path,
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'webp'])],
@@ -111,7 +141,7 @@ class Demo(models.Model):
     duration = models.DurationField(
         null=True, 
         blank=True, 
-        help_text="Duration in HH:MM:SS format",
+        help_text="Duration in HH:MM:SS format (applicable for videos only)",
         verbose_name="Duration"
     )
     
@@ -130,7 +160,11 @@ class Demo(models.Model):
     
     # Status & Visibility
     is_active = models.BooleanField(default=True, verbose_name="Active")
-    is_featured = models.BooleanField(default=False, verbose_name="Featured")
+    is_featured = models.BooleanField(
+        default=False, 
+        verbose_name="Featured/Suggested",
+        help_text="Mark as suggested demo to highlight for customers"
+    )
     sort_order = models.PositiveIntegerField(default=0, verbose_name="Sort Order")
     
     # Timestamps
@@ -152,6 +186,14 @@ class Demo(models.Model):
         verbose_name_plural = 'Demos'
         ordering = ['-is_featured', 'sort_order', '-created_at']
     
+    def clean(self):
+        """Validate that appropriate file is uploaded based on file_type"""
+        if self.file_type == 'video' and not self.video_file:
+            raise ValidationError({'video_file': 'Video file is required when file type is Video'})
+        
+        if self.file_type == 'webgl' and not self.webgl_file:
+            raise ValidationError({'webgl_file': 'WebGL file is required when file type is WebGL'})
+    
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.title)
@@ -160,7 +202,7 @@ class Demo(models.Model):
             
             unique_slug = base_slug
             counter = 1
-            while Demo.objects.filter(slug=unique_slug).exists():
+            while Demo.objects.filter(slug=unique_slug).exclude(pk=self.pk).exists():
                 unique_slug = f"{base_slug}-{counter}"
                 counter += 1
             
@@ -169,7 +211,16 @@ class Demo(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.get_file_type_display()})"
+    
+    @property
+    def file_url(self):
+        """Get the appropriate file URL based on file type"""
+        if self.file_type == 'video' and self.video_file:
+            return self.video_file.url
+        elif self.file_type == 'webgl' and self.webgl_file:
+            return self.webgl_file.url
+        return None
     
     @property
     def formatted_duration(self):
@@ -212,17 +263,12 @@ class Demo(models.Model):
     
     def is_available_for_business(self, category=None, subcategory=None):
         """Check if demo is available for given business category/subcategory combination"""
-        # If demo has no restrictions, it's available for all
         if self.is_for_all_business_categories and self.is_for_all_business_subcategories:
             return True
         
-        # Check category availability
         category_match = self.is_available_for_business_category(category)
-        
-        # Check subcategory availability
         subcategory_match = self.is_available_for_business_subcategory(subcategory)
         
-        # Demo is available if it matches either category or subcategory (or both)
         return category_match or subcategory_match
     
     # Customer Access Control Methods
@@ -235,7 +281,6 @@ class Demo(models.Model):
             return True
         return self.target_customers.filter(id=customer.id).exists()
     
-    # Helper property to get primary business category for display
     @property
     def primary_business_category(self):
         """Get the first business category for display purposes"""
@@ -248,7 +293,6 @@ class Demo(models.Model):
         if categories:
             return ", ".join([cat.name for cat in categories])
         return "All Categories"
-
 class DemoView(models.Model):
     """Track demo views by users"""
     

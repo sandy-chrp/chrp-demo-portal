@@ -61,21 +61,37 @@ from django.db.models import Count, Q
 
 @login_required
 def customer_dashboard(request):
-    """Customer main dashboard"""
+    """Customer main dashboard - WITH WEBGL SUPPORT"""
     if not request.user.is_approved:
         return redirect('accounts:pending_approval')
     
     context = get_customer_context(request.user)
     
-    # Get featured demos - REMOVED select_related
-    featured_demos = Demo.objects.filter(
+    # Get user's business category and subcategory
+    user_business_category = request.user.business_category
+    user_business_subcategory = request.user.business_subcategory
+    
+    # Get featured demos with business category filtering
+    featured_demos_query = Demo.objects.filter(
         is_active=True,
         is_featured=True
-    ).annotate(
-        customer_count=Count('target_customers')
-    ).filter(
-        Q(customer_count=0) | Q(target_customers=request.user)
-    ).distinct()[:12]
+    ).prefetch_related(
+        'target_business_categories',
+        'target_business_subcategories',
+        'target_customers'
+    )
+    
+    # Filter by business categories
+    featured_demos = []
+    for demo in featured_demos_query:
+        # Check business category access
+        if demo.is_available_for_business(user_business_category, user_business_subcategory):
+            # Check customer access
+            if demo.can_customer_access(request.user):
+                featured_demos.append(demo)
+    
+    # Limit to 12 demos
+    featured_demos = featured_demos[:12]
     
     context.update({
         'recent_demo_requests': DemoRequest.objects.filter(
@@ -100,9 +116,13 @@ def customer_dashboard(request):
 
 @login_required
 def browse_demos(request):
-    """Browse available demo videos with customer access control"""
+    """Browse available demo videos with customer access control - WITH WEBGL SUPPORT"""
     if not request.user.is_approved:
         return redirect('accounts:pending_approval')
+    
+    # Get user's business category and subcategory
+    user_business_category = request.user.business_category
+    user_business_subcategory = request.user.business_subcategory
     
     # Get filter parameters
     business_category_id = request.GET.get('business_category')
@@ -110,21 +130,37 @@ def browse_demos(request):
     search_query = request.GET.get('search', '').strip()
     sort_by = request.GET.get('sort', 'newest')
     
-    # Base queryset with customer access control
-    demos = Demo.objects.filter(is_active=True).annotate(
-        customer_count=Count('target_customers')
-    ).filter(
-        Q(customer_count=0) |  # Available to all
-        Q(target_customers=request.user)  # OR assigned to this user
-    ).distinct()
+    # Base queryset - get all active demos
+    demos_query = Demo.objects.filter(is_active=True).prefetch_related(
+        'target_business_categories',
+        'target_business_subcategories',
+        'target_customers'
+    )
     
-    # Apply business category filter if selected
+    # Filter demos based on business category access and customer access
+    accessible_demos = []
+    for demo in demos_query:
+        # Check business category access
+        if demo.is_available_for_business(user_business_category, user_business_subcategory):
+            # Check customer access
+            if demo.can_customer_access(request.user):
+                accessible_demos.append(demo.id)
+    
+    # Filter by accessible demo IDs
+    demos = Demo.objects.filter(id__in=accessible_demos)
+    
+    # Apply additional filters
     if business_category_id:
-        demos = demos.filter(business_category_id=business_category_id)
+        demos = demos.filter(
+            Q(target_business_categories__id=business_category_id) |
+            Q(target_business_categories__isnull=True)
+        ).distinct()
     
-    # Apply business subcategory filter if selected
     if business_subcategory_id:
-        demos = demos.filter(business_subcategory_id=business_subcategory_id)
+        demos = demos.filter(
+            Q(target_business_subcategories__id=business_subcategory_id) |
+            Q(target_business_subcategories__isnull=True)
+        ).distinct()
     
     # Apply search filter
     if search_query:
@@ -144,6 +180,8 @@ def browse_demos(request):
         demos = demos.order_by('-likes_count')
     elif sort_by == 'title':
         demos = demos.order_by('title')
+    else:
+        demos = demos.order_by('-created_at')
     
     # Pagination
     paginator = Paginator(demos, 12)
