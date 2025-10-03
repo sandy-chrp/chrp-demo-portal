@@ -19,6 +19,7 @@
     cursor: pointer;
     color: #6c757d;
     z-index: 10;
+    transition: color 0.3s ease;
 }
 .password-toggle-icon:hover {
     color: #0d6efd;
@@ -27,6 +28,7 @@
     font-size: 0.875rem;
     margin-top: 0.25rem;
     display: none;
+    font-weight: 500;
 }
 .validation-msg.show {
     display: block;
@@ -41,7 +43,8 @@
     margin-top: 0.5rem;
 }
 .password-strength .progress {
-    height: 5px;
+    height: 4px;
+    border-radius: 2px;
 }
 .password-strength .progress-bar {
     transition: width 0.3s ease, background-color 0.3s ease;
@@ -53,27 +56,155 @@
     font-size: 1.2rem;
     letter-spacing: 0.3rem;
     text-align: center;
+    font-weight: 600;
+}
+
+.section-header {
+    padding: var(--spacing-md) 0;
+    margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.section-header h5 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e3c72;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.section-header h5 i {
+    font-size: 1.25rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-control, .form-select {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #1e3c72;
+    box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+}
+
+.form-control.is-valid {
+    border-color: #198754;
+    background-image: none;
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: none;
+}
+
+.btn {
+    padding: 0.625rem 1.25rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-outline-primary {
+    border-width: 2px;
+}
+
+#otpSection {
+    background: #f8f9fa;
+    padding: var(--spacing-lg);
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+    margin-bottom: var(--spacing-md);
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.admin-card-header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: var(--spacing-xl);
+    border-radius: 12px 12px 0 0;
+}
+
+.admin-card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.admin-card-body {
+    background: white;
+    padding: var(--spacing-xl);
+    border-radius: 0 0 12px 12px;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+    font-weight: 700;
+}
+
+.input-group .btn {
+    border-radius: 0 8px 8px 0;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+@media (max-width: 768px) {
+    .admin-card-body {
+        padding: var(--spacing-md);
+    }
+    
+    #otpSection {
+        padding: var(--spacing-md);
+    }
 }
 </style>
 
 <div class="admin-card">
     <div class="admin-card-header">
-        <h2 class="admin-card-title">
-            <i class="fas fa-user-plus"></i>Create New Customer
-        </h2>
-        <div>
-            <a href="{% url 'core:admin_users' %}" class="btn btn-secondary">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="admin-card-title">
+                <i class="fas fa-user-plus me-2"></i>Create New Customer
+            </h2>
+            <a href="{% url 'core:admin_users' %}" class="btn btn-light">
                 <i class="fas fa-arrow-left me-2"></i>Back
             </a>
         </div>
     </div>
+    
     <div class="admin-card-body">
         <form method="post" id="customerForm" novalidate>
             {% csrf_token %}
             
             {% if form.errors %}
                 <div class="alert alert-danger alert-dismissible fade show">
-                    <strong><i class="fas fa-exclamation-triangle me-2"></i>Please correct errors:</strong>
+                    <strong><i class="fas fa-exclamation-triangle me-2"></i>Please correct the following errors:</strong>
                     <ul class="mb-0 mt-2">
                         {% for field, errors in form.errors.items %}
                             {% for error in errors %}
@@ -85,10 +216,10 @@
                 </div>
             {% endif %}
 
-            <!-- Personal Info -->
-            <h5 class="mb-3 text-primary">
-                <i class="fas fa-user me-2"></i>Personal Information
-            </h5>
+            <!-- Personal Information -->
+            <div class="section-header">
+                <h5><i class="fas fa-user"></i>Personal Information</h5>
+            </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">First Name <span class="text-danger">*</span></label>
@@ -102,10 +233,10 @@
                 </div>
             </div>
 
-            <!-- Contact -->
-            <h5 class="mb-3 mt-4 text-primary">
-                <i class="fas fa-envelope me-2"></i>Contact Information
-            </h5>
+            <!-- Contact Information -->
+            <div class="section-header">
+                <h5><i class="fas fa-envelope"></i>Contact Information</h5>
+            </div>
             <div class="row">
                 <div class="col-md-8 mb-3">
                     <label class="form-label">Business Email <span class="text-danger">*</span></label>
@@ -115,40 +246,40 @@
                             <i class="fas fa-paper-plane me-1"></i>Send OTP
                         </button>
                     </div>
-                    <small class="text-muted d-block">Business email required</small>
+                    <small class="text-muted d-block mt-1">Business email required for verification</small>
                     <div class="validation-msg" id="emailMsg"></div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">&nbsp;</label>
-                    <div class="form-check mt-2">
+                    <label class="form-label">Options</label>
+                    <div class="form-check form-switch">
                         {{ form.skip_email_validation }}
                         <label class="form-check-label">Skip email validation</label>
                     </div>
-                    <small class="text-muted">Skip OTP verification</small>
+                    <small class="text-muted d-block">Bypass OTP verification</small>
                 </div>
             </div>
 
             <!-- OTP Verification Section -->
             <div class="row" id="otpSection" style="display:none;">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Enter OTP <span class="text-danger">*</span></label>
+                    <label class="form-label">Enter OTP Code <span class="text-danger">*</span></label>
                     <div class="input-group">
-                        <input type="text" class="form-control" id="otpInput" maxlength="6">
+                        <input type="text" class="form-control" id="otpInput" maxlength="6" placeholder="000000">
                         <button type="button" class="btn btn-success" id="verifyOtpBtn">
                             <i class="fas fa-check me-1"></i>Verify
                         </button>
                     </div>
-                    <small class="text-muted d-block">Check your email for 6-digit OTP</small>
+                    <small class="text-muted d-block mt-1">Check email for 6-digit verification code</small>
                     <div class="validation-msg" id="otpMsg"></div>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">&nbsp;</label>
-                    <div class="mt-2">
+                    <label class="form-label">Actions</label>
+                    <div>
                         <button type="button" class="btn btn-link p-0" id="resendOtpBtn">
                             <i class="fas fa-redo me-1"></i>Resend OTP
                         </button>
                         <div class="mt-2">
-                            <small class="text-muted d-block" id="otpTimer"></small>
+                            <small class="text-muted fw-bold d-block" id="otpTimer"></small>
                         </div>
                     </div>
                 </div>
@@ -160,25 +291,27 @@
                     {{ form.country_code }}
                 </div>
                 <div class="col-md-8 mb-3">
-                    <label class="form-label">Mobile <span class="text-danger">*</span></label>
+                    <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
                     {{ form.mobile }}
-                    <small class="text-muted d-block">10-digit number</small>
+                    <small class="text-muted d-block mt-1">10-digit mobile number</small>
                     <div class="validation-msg" id="mobileMsg"></div>
                 </div>
             </div>
 
-            <!-- Professional -->
-            <h5 class="mb-3 mt-4 text-primary">
-                <i class="fas fa-briefcase me-2"></i>Professional Information
-            </h5>
+            <!-- Professional Information -->
+            <div class="section-header">
+                <h5><i class="fas fa-briefcase"></i>Professional Information</h5>
+            </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Job Title</label>
                     {{ form.job_title }}
+                    <small class="text-muted d-block mt-1">e.g., Software Engineer, Manager</small>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Organization</label>
                     {{ form.organization }}
+                    <small class="text-muted d-block mt-1">Company or organization name</small>
                 </div>
             </div>
 
@@ -189,20 +322,20 @@
                     {{ form.business_category }}
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Subcategory</label>
+                    <label class="form-label">Business Subcategory</label>
                     {{ form.business_subcategory }}
                     <div id="subcategoryLoader" style="display:none;">
                         <small class="text-muted">
-                            <span class="spinner-border spinner-border-sm me-1"></span>Loading...
+                            <span class="spinner-border spinner-border-sm me-1"></span>Loading subcategories...
                         </small>
                     </div>
                 </div>
             </div>
 
-            <!-- Password -->
-            <h5 class="mb-3 mt-4 text-primary">
-                <i class="fas fa-key me-2"></i>Account Password
-            </h5>
+            <!-- Account Password -->
+            <div class="section-header">
+                <h5><i class="fas fa-key"></i>Account Password</h5>
+            </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Password <span class="text-danger">*</span></label>
@@ -210,13 +343,13 @@
                         {{ form.password }}
                         <i class="fas fa-eye password-toggle-icon" data-target="password"></i>
                     </div>
-                    <small class="text-muted d-block">Min 8 characters, mix of letters & numbers</small>
+                    <small class="text-muted d-block mt-1">Minimum 8 characters with letters & numbers</small>
                     
                     <div class="password-strength" id="passwordStrength" style="display:none;">
                         <div class="progress">
                             <div class="progress-bar" id="strengthBar" style="width: 0%"></div>
                         </div>
-                        <small class="text-muted" id="strengthText"></small>
+                        <small class="text-muted mt-1 d-block" id="strengthText"></small>
                     </div>
                     
                     <div class="validation-msg" id="pass1Msg"></div>
@@ -227,44 +360,46 @@
                         {{ form.confirm_password }}
                         <i class="fas fa-eye password-toggle-icon" data-target="confirm_password"></i>
                     </div>
-                    <small class="text-muted d-block">Re-enter password</small>
+                    <small class="text-muted d-block mt-1">Re-enter password to confirm</small>
                     <div class="validation-msg" id="pass2Msg"></div>
                 </div>
             </div>
 
-            <!-- Additional Info -->
-            <h5 class="mb-3 mt-4 text-primary">
-                <i class="fas fa-info-circle me-2"></i>Additional Information
-            </h5>
+            <!-- Additional Information -->
+            <div class="section-header">
+                <h5><i class="fas fa-info-circle"></i>Additional Information</h5>
+            </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Referral Source</label>
                     {{ form.referral_source }}
+                    <small class="text-muted d-block mt-1">How did they hear about us?</small>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Notes</label>
                     {{ form.referral_message }}
+                    <small class="text-muted d-block mt-1">Additional comments or context</small>
                 </div>
             </div>
 
-            <!-- Settings -->
-            <h5 class="mb-3 mt-4 text-primary">
-                <i class="fas fa-cog me-2"></i>Account Settings
-            </h5>
+            <!-- Account Settings -->
+            <div class="section-header">
+                <h5><i class="fas fa-cog"></i>Account Settings</h5>
+            </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <div class="form-check form-switch">
                         {{ form.is_approved }}
-                        <label class="form-check-label fw-bold">Approve immediately</label>
-                        <small class="d-block text-muted">Customer can access portal</small>
+                        <label class="form-check-label fw-bold">Approve Account Immediately</label>
                     </div>
+                    <small class="text-muted d-block mt-1">Customer can access portal immediately</small>
                 </div>
                 <div class="col-md-6 mb-3">
                     <div class="form-check form-switch">
                         {{ form.send_welcome_email }}
-                        <label class="form-check-label fw-bold">Send welcome email</label>
-                        <small class="d-block text-muted">Email credentials to customer</small>
+                        <label class="form-check-label fw-bold">Send Welcome Email</label>
                     </div>
+                    <small class="text-muted d-block mt-1">Email login credentials to customer</small>
                 </div>
             </div>
 
@@ -272,7 +407,7 @@
 
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                    <i class="fas fa-save me-2"></i>Create Customer
+                    <i class="fas fa-save me-2"></i>Create Customer Account
                 </button>
                 <a href="{% url 'core:admin_users' %}" class="btn btn-secondary btn-lg">
                     <i class="fas fa-times me-2"></i>Cancel
@@ -285,6 +420,7 @@
 
 {% block admin_extra_js %}
 <script>
+// [Keep the exact same JavaScript code from your original template - no changes to functionality]
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('customerForm');
     const submitBtn = document.getElementById('submitBtn');
@@ -299,7 +435,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const category = document.querySelector('[name="business_category"]');
     const subcategory = document.querySelector('[name="business_subcategory"]');
     
-    // OTP Elements
     const sendOtpBtn = document.getElementById('sendOtpBtn');
     const verifyOtpBtn = document.getElementById('verifyOtpBtn');
     const resendOtpBtn = document.getElementById('resendOtpBtn');
@@ -311,13 +446,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let otpTimer = null;
     
     const blockedDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'ymail.com', 'aol.com', 'icloud.com', 'live.com'];
-    const commonPasswords = [
-        '12345678', '123456789', '1234567890', 'password', 'password1', 'password123',
-        'qwerty123', 'abc123456', '11111111', '00000000', '12341234', 'qwertyuiop',
-        'asdfghjkl', 'zxcvbnm123', 'admin123', 'welcome123', 'letmein123'
-    ];
+    const commonPasswords = ['12345678', '123456789', '1234567890', 'password', 'password1', 'password123', 'qwerty123', 'abc123456', '11111111', '00000000', '12341234', 'qwertyuiop', 'asdfghjkl', 'zxcvbnm123', 'admin123', 'welcome123', 'letmein123'];
     
-    // Helper Functions
     function showValidation(input, msgId, isValid, message) {
         const msg = document.getElementById(msgId);
         if (isValid) {
@@ -338,7 +468,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById(msgId).className = 'validation-msg';
     }
     
-    // Password Toggle
     document.querySelectorAll('.password-toggle-icon').forEach(icon => {
         icon.addEventListener('click', function() {
             const target = this.dataset.target;
@@ -349,7 +478,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // First/Last Name Validation
     [firstName, lastName].forEach(field => {
         const msgId = field.name === 'first_name' ? 'firstNameMsg' : 'lastNameMsg';
         field.addEventListener('blur', () => {
@@ -366,12 +494,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Email Validation
     email.addEventListener('blur', validateEmail);
     email.addEventListener('input', () => {
         if (email.classList.contains('is-invalid')) validateEmail();
         
-        // Enable/disable Send OTP button
         if (skipValidation.checked) {
             sendOtpBtn.disabled = true;
         } else {
@@ -404,7 +530,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
     
-    // Skip Validation Checkbox
     skipValidation.addEventListener('change', function() {
         if (this.checked) {
             otpSection.style.display = 'none';
@@ -419,7 +544,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Send OTP
     sendOtpBtn.addEventListener('click', function() {
         const emailValue = email.value.trim();
         
@@ -464,7 +588,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Verify OTP
     verifyOtpBtn.addEventListener('click', function() {
         const otpValue = otpInput.value.trim();
         const emailValue = email.value.trim();
@@ -511,12 +634,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Resend OTP
     resendOtpBtn.addEventListener('click', function() {
         sendOtpBtn.click();
     });
     
-    // OTP Timer
     function startOtpTimer(seconds) {
         let remaining = seconds;
         clearInterval(otpTimer);
@@ -534,7 +655,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     }
     
-    // Mobile Validation
     mobile.addEventListener('input', function() {
         this.value = this.value.replace(/\D/g, '').slice(0, 10);
     });
@@ -549,7 +669,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Password Validation with Strength Meter
     password1.addEventListener('input', function() {
         const value = this.value;
         const strengthDiv = document.getElementById('passwordStrength');
@@ -576,13 +695,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (strength < 50) {
             strengthBar.className = 'progress-bar strength-weak';
-            strengthText.textContent = 'Weak';
+            strengthText.textContent = 'Weak password';
         } else if (strength < 75) {
             strengthBar.className = 'progress-bar strength-medium';
-            strengthText.textContent = 'Medium';
+            strengthText.textContent = 'Medium strength';
         } else {
             strengthBar.className = 'progress-bar strength-strong';
-            strengthText.textContent = 'Strong';
+            strengthText.textContent = 'Strong password';
         }
         
         if (this.classList.contains('is-invalid') || value.length >= 8) validatePass1();
@@ -626,7 +745,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
     
-    // Confirm Password
     password2.addEventListener('input', validatePass2);
     password2.addEventListener('blur', validatePass2);
     
@@ -650,7 +768,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
     
-    // Category AJAX
     if (category && subcategory) {
         category.addEventListener('change', function() {
             const categoryId = this.value;
@@ -685,7 +802,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Form Submission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -703,7 +819,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!validateEmail()) isValid = false;
         
-        // Check email verification
         if (!skipValidation.checked && !emailVerified) {
             showValidation(email, 'emailMsg', false, '⚠ Please verify email with OTP');
             isValid = false;

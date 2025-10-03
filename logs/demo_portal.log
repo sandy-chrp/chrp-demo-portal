@@ -18698,3 +18698,7 @@ INFO 2025-10-03 14:59:42,953 basehttp 15352 3896 "GET /admin/customers/ HTTP/1.1
 INFO 2025-10-03 14:59:44,664 basehttp 15352 3896 "GET /admin/customers/create/ HTTP/1.1" 200 72488
 INFO 2025-10-03 14:59:47,537 basehttp 15352 3896 "GET /admin/customers/ HTTP/1.1" 200 65548
 INFO 2025-10-03 14:59:49,782 basehttp 15352 3896 "GET /admin/customers/15/edit/ HTTP/1.1" 200 71223
+INFO 2025-10-03 15:11:26,198 autoreload 23728 26724 Watching for file changes with StatReloader
+INFO 2025-10-03 15:11:29,835 basehttp 23728 23836 "GET /admin/customers/15/edit/ HTTP/1.1" 200 71223
+INFO 2025-10-03 15:11:39,215 basehttp 23728 23836 "GET /admin/customers/ HTTP/1.1" 200 65547
+INFO 2025-10-03 15:11:42,040 basehttp 23728 23836 "GET /admin/customers/create/ HTTP/1.1" 200 75127
