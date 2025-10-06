@@ -1,0 +1,19 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Universal Preview - {{ demo.title }}{% endblock %}
+
+{% block admin_content %}
+<div class="preview-container">
+    <div class="preview-header">
+        <h3>{{ demo.title }}</h3>
+        <span class="badge bg-primary">{{ file_info.extension|upper }}</span>
+        <span class="badge bg-secondary">{{ file_info.type|title }}</span>
+    </div>
+    
+    <div class="preview-body">
+        <iframe src="/demos/{{ demo.id }}/content/" 
+                style="width: 100%; height: 70vh; border: none; background: #000;">
+        </iframe>
+    </div>
+</div>
+{% endblock %}

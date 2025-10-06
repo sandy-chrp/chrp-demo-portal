@@ -23,13 +23,30 @@
 
 {% block header_actions %}
 <div class="d-flex align-items-center gap-2">
-    <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary">
+    <!-- Universal Viewer - Handles ALL file types -->
+    {% if demo.webgl_file or demo.video_file %}
+        <a href="{% url 'core:universal_viewer' demo.id %}" 
+           class="btn btn-primary btn-sm" 
+           target="_blank"
+           title="View Demo - Universal Viewer">
+            <i class="fas fa-eye me-1"></i>View Demo
+        </a>
+        
+        <a href="{% url 'core:admin_universal_preview' demo.id %}" 
+           class="btn btn-outline-info btn-sm" 
+           target="_blank"
+           title="Admin Preview Mode">
+            <i class="fas fa-cog me-1"></i>Admin Preview
+        </a>
+    {% endif %}
+    
+    <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary btn-sm">
         <i class="fas fa-arrow-left me-1"></i>Back
     </a>
-    <button type="submit" form="editDemoForm" class="btn btn-primary">
+    <button type="submit" form="editDemoForm" class="btn btn-success btn-sm">
         <i class="fas fa-save me-1"></i>Save Changes
     </button>
-    <button type="button" class="btn btn-danger" onclick="deleteDemo({{ demo.id }}, '{{ demo.title|escapejs }}')">
+    <button type="button" class="btn btn-danger btn-sm" onclick="deleteDemo({{ demo.id }}, '{{ demo.title|escapejs }}')">
         <i class="fas fa-trash me-1"></i>Delete
     </button>
 </div>
@@ -37,55 +54,43 @@
 
 {% block admin_extra_css %}
 <style>
-    .demo-preview-card {
+    .compact-form {
         background: white;
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-md);
-        padding: var(--spacing-xl);
+        padding: var(--spacing-lg);
         margin-bottom: var(--spacing-lg);
     }
 
-    .demo-preview-header {
+    .demo-header {
         display: flex;
         justify-content: space-between;
         align-items: start;
-        margin-bottom: var(--spacing-lg);
-        padding-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
         border-bottom: 2px solid var(--gray-200);
+        margin-bottom: var(--spacing-md);
     }
 
-    .demo-preview-thumbnail {
-        width: 200px;
-        height: 130px;
+    .demo-thumbnail {
+        width: 120px;
+        height: 80px;
         object-fit: cover;
         border-radius: var(--radius-md);
         border: 2px solid var(--gray-200);
     }
 
-    .demo-placeholder-large {
-        width: 200px;
-        height: 130px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 3rem;
-    }
-
-    .stats-grid {
+    .stats-row {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: var(--spacing-md);
         margin-bottom: var(--spacing-lg);
     }
 
     .stat-box {
         background: var(--gray-50);
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
         border-radius: var(--radius-md);
-        border-left: 4px solid;
+        border-left: 3px solid;
         text-align: center;
     }
 
@@ -95,297 +100,183 @@
     .stat-box.warning { border-left-color: #f59e0b; }
 
     .stat-value {
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: 700;
         margin-bottom: 0.25rem;
     }
 
     .stat-label {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         color: var(--gray-600);
     }
 
-    .form-container {
-        background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
-        overflow: hidden;
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .accordion-item {
-        border: none;
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .accordion-item:last-child {
-        border-bottom: none;
-    }
-
-    .accordion-button {
-        background: white;
-        color: var(--dark-color);
+    .section-header {
+        font-size: 1rem;
         font-weight: 600;
-        font-size: 1.1rem;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border: none;
-        box-shadow: none !important;
-    }
-
-    .accordion-button:not(.collapsed) {
-        background: var(--gray-50);
         color: var(--primary-color);
-    }
-
-    .accordion-button .section-icon {
-        font-size: 1.5rem;
-        margin-right: var(--spacing-md);
-        color: var(--primary-color);
-    }
-
-    .accordion-body {
-        padding: var(--spacing-xl);
-    }
-
-    .form-label {
-        font-weight: 500;
-        color: var(--dark-color);
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .form-label.required::after {
-        content: '*';
-        color: var(--danger-color);
-        margin-left: 4px;
-    }
-
-    .form-control, .form-select {
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-md);
-        transition: all 0.3s ease;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.1);
-    }
-
-    .file-type-selector {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .file-type-option {
-        padding: var(--spacing-lg);
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-lg);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-align: center;
-        background: white;
-    }
-
-    .file-type-option:hover {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
-    }
-
-    .file-type-option.active {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.1);
-    }
-
-    .file-type-option input[type="radio"] {
-        display: none;
-    }
-
-    .file-type-icon {
-        font-size: 2.5rem;
-        margin-bottom: var(--spacing-sm);
-        color: var(--gray-400);
-    }
-
-    .file-type-option.active .file-type-icon {
-        color: var(--primary-color);
-    }
-
-    .file-upload-area {
-        border: 2px dashed var(--gray-300);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        text-align: center;
-        background: var(--gray-50);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .file-upload-area:hover {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
-    }
-
-    .file-upload-area.error {
-        border-color: var(--danger-color);
-        background: rgba(220, 53, 69, 0.05);
-    }
-
-    .current-file {
-        background: #dcfce7;
-        border: 1px solid #16a34a;
-        padding: var(--spacing-md);
-        border-radius: var(--radius-md);
         margin-bottom: var(--spacing-md);
-    }
-
-    .file-section {
-        display: none;
-    }
-
-    .file-section.active {
-        display: block;
-    }
-
-    .category-selection-area, .customer-selection-area {
-        padding: var(--spacing-md);
-        background: var(--gray-50);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--gray-200);
-        max-height: 350px;
-        overflow-y: auto;
-    }
-
-    .category-selection-area.disabled, .customer-selection-area.disabled {
-        opacity: 0.5;
-        pointer-events: none;
-    }
-
-    .category-item, .customer-item {
-        margin-bottom: var(--spacing-sm);
-        padding: var(--spacing-sm) var(--spacing-md);
-        background: white;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--gray-200);
-        transition: all 0.2s ease;
-    }
-
-    .category-item:hover, .customer-item:hover {
-        border-color: var(--primary-color);
-    }
-
-    .category-check, .customer-check {
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 2px solid var(--gray-200);
         display: flex;
         align-items: center;
         gap: var(--spacing-sm);
     }
 
-    .category-check input[type="checkbox"], .customer-check input[type="checkbox"] {
-        width: 1.1rem;
-        height: 1.1rem;
-        cursor: pointer;
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
     }
 
-    .category-check label, .customer-check label {
+    .form-grid.three-col {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-grid .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .current-file {
+        background: #dcfce7;
+        border: 1px solid #16a34a;
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-sm);
+        font-size: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .current-file .file-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .selection-box {
+        padding: var(--spacing-md);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-200);
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .selection-box.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .checkbox-item {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        margin-bottom: var(--spacing-xs);
+        background: white;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .checkbox-item:hover {
+        background: var(--gray-100);
+    }
+
+    .checkbox-item input {
         margin: 0;
-        font-weight: 500;
+    }
+
+    .checkbox-item label {
+        margin: 0;
+        font-size: 0.9rem;
         cursor: pointer;
         flex: 1;
-        font-size: 0.95rem;
-    }
-
-    .customer-details {
-        font-size: 0.8rem;
-        color: var(--gray-600);
-        margin-left: 1.6rem;
-        margin-top: 0.2rem;
     }
 
     .subcategory-list {
-        margin-top: var(--spacing-xs);
         margin-left: var(--spacing-lg);
+        margin-top: var(--spacing-xs);
         padding-left: var(--spacing-sm);
         border-left: 2px solid var(--gray-200);
     }
 
-    .subcategory-item {
-        margin-bottom: var(--spacing-xs);
-        padding: var(--spacing-xs) var(--spacing-sm);
-        background: var(--gray-50);
-        border-radius: var(--radius-sm);
-    }
-
     .search-box {
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--spacing-sm);
         position: relative;
     }
 
     .search-box input {
-        padding-left: 2.5rem;
+        padding-left: 2rem;
+        font-size: 0.9rem;
     }
 
     .search-box i {
         position: absolute;
-        left: 1rem;
+        left: 0.75rem;
         top: 50%;
         transform: translateY(-50%);
         color: var(--gray-400);
     }
 
-    .activity-card {
+    .activity-section {
         background: white;
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-md);
-        padding: var(--spacing-xl);
+        padding: var(--spacing-lg);
         margin-bottom: var(--spacing-lg);
-    }
-
-    .activity-header {
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: var(--spacing-lg);
-        padding-bottom: var(--spacing-md);
-        border-bottom: 2px solid var(--gray-200);
     }
 
     .activity-item {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
         border-left: 3px solid var(--primary-color);
         background: var(--gray-50);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--spacing-md);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-sm);
+        font-size: 0.9rem;
     }
 
-    .badge-file-type {
-        padding: 0.25rem 0.625rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
+    .form-actions {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: var(--spacing-md);
+        border-top: 1px solid var(--gray-200);
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--spacing-md);
+        margin: var(--spacing-lg) calc(-1 * var(--spacing-lg)) calc(-1 * var(--spacing-lg));
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    .file-type-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
         font-weight: 600;
     }
 
-    .badge-video {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .badge-webgl {
-        background: #cffafe;
-        color: #0e7490;
+    .file-type-universal {
+        background: #e0f2fe;
+        color: #0277bd;
+        border: 1px solid #81d4fa;
     }
 
     @media (max-width: 768px) {
-        .file-type-selector {
+        .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .form-grid {
             grid-template-columns: 1fr;
         }
-
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
+        .form-grid.three-col {
+            grid-template-columns: 1fr;
+        }
+        .current-file .file-actions {
+            flex-direction: column;
+            gap: 0.25rem;
         }
     }
 </style>
@@ -394,70 +285,53 @@
 {% block admin_content %}
 {% csrf_token %}
 
-<!-- Demo Preview Card -->
-<div class="demo-preview-card">
-    <div class="demo-preview-header">
+<!-- Demo Preview & Stats -->
+<div class="compact-form">
+    <div class="demo-header">
         <div>
-            <h2 class="mb-2">{{ demo.title }}</h2>
+            <h2 class="mb-2" style="font-size: 1.5rem;">{{ demo.title }}</h2>
             <div class="d-flex align-items-center gap-2 mb-2">
                 {% if demo.file_type == 'video' %}
-                    <span class="badge-file-type badge-video">
-                        <i class="fas fa-video me-1"></i>Video Demo
-                    </span>
+                    <span class="badge bg-primary"><i class="fas fa-video me-1"></i>Video</span>
                 {% else %}
-                    <span class="badge-file-type badge-webgl">
-                        <i class="fas fa-cube me-1"></i>WebGL Demo
-                    </span>
+                    <span class="badge bg-info"><i class="fas fa-cube me-1"></i>WebGL</span>
                 {% endif %}
-                
                 <span class="badge bg-secondary">{{ demo.get_demo_type_display }}</span>
-                
-                {% if demo.is_featured %}
-                    <span class="badge bg-warning">
-                        <i class="fas fa-star me-1"></i>Featured
-                    </span>
-                {% endif %}
-                
+                <span class="file-type-indicator file-type-universal">
+                    <i class="fas fa-eye"></i>Universal Viewer Ready
+                </span>
+                {% if demo.is_featured %}<span class="badge bg-warning">Featured</span>{% endif %}
                 {% if demo.is_active %}
                     <span class="badge bg-success">Active</span>
                 {% else %}
                     <span class="badge bg-secondary">Inactive</span>
                 {% endif %}
             </div>
-            <p class="text-muted mb-0">{{ demo.description }}</p>
+            <p class="text-muted mb-0" style="font-size: 0.9rem;">{{ demo.description }}</p>
         </div>
         <div>
             {% if demo.thumbnail %}
-                <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-preview-thumbnail">
-            {% else %}
-                <div class="demo-placeholder-large">
-                    {% if demo.file_type == 'webgl' %}
-                        <i class="fas fa-cube"></i>
-                    {% else %}
-                        <i class="fas fa-video"></i>
-                    {% endif %}
-                </div>
+                <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-thumbnail">
             {% endif %}
         </div>
     </div>
 
-    <!-- Statistics -->
-    <div class="stats-grid">
+    <div class="stats-row">
         <div class="stat-box primary">
             <div class="stat-value text-primary">{{ total_views }}</div>
-            <div class="stat-label">Total Views</div>
+            <div class="stat-label">Views</div>
         </div>
         <div class="stat-box success">
             <div class="stat-value text-success">{{ total_likes }}</div>
-            <div class="stat-label">Total Likes</div>
+            <div class="stat-label">Likes</div>
         </div>
         <div class="stat-box info">
             <div class="stat-value text-info">{{ total_requests }}</div>
-            <div class="stat-label">Demo Requests</div>
+            <div class="stat-label">Requests</div>
         </div>
         <div class="stat-box warning">
             <div class="stat-value text-warning">{{ total_accessible_customers }}</div>
-            <div class="stat-label">Accessible Customers</div>
+            <div class="stat-label">Customers</div>
         </div>
     </div>
 </div>
@@ -466,347 +340,189 @@
 <form method="post" enctype="multipart/form-data" id="editDemoForm" class="needs-validation" novalidate>
     {% csrf_token %}
 
-    <div class="form-container">
-        <div class="accordion" id="editDemoAccordion">
-            
-            <!-- 1. Basic Information -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#basicInfo">
-                        <i class="fas fa-info-circle section-icon"></i>
-                        Basic Information
-                    </button>
-                </h2>
-                <div id="basicInfo" class="accordion-collapse collapse show" data-bs-parent="#editDemoAccordion">
-                    <div class="accordion-body">
-                        <div class="row">
-                            <div class="col-lg-8">
-                                <div class="mb-3">
-                                    <label for="id_title" class="form-label required">Demo Title</label>
-                                    <input type="text" name="title" id="id_title" class="form-control" value="{{ demo.title }}" required>
-                                </div>
+    <div class="compact-form">
+        <!-- Basic Information -->
+        <div class="section-header">
+            <i class="fas fa-info-circle"></i> Basic Information
+        </div>
+        <div class="form-grid">
+            <div class="full-width">
+                <label for="id_title" class="form-label">Demo Title <span class="text-danger">*</span></label>
+                <input type="text" name="title" id="id_title" class="form-control" value="{{ demo.title }}" required>
+            </div>
+            <div class="full-width">
+                <label for="id_description" class="form-label">Description <span class="text-danger">*</span></label>
+                <textarea name="description" id="id_description" class="form-control" rows="2" required>{{ demo.description }}</textarea>
+            </div>
+            <div>
+                <label for="id_demo_type" class="form-label">Demo Type</label>
+                <select name="demo_type" id="id_demo_type" class="form-select">
+                    {% for value, label in demo_types %}
+                    <option value="{{ value }}" {% if demo.demo_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="durationField" {% if demo.file_type == 'webgl' %}style="display: none;"{% endif %}>
+                <label for="id_duration" class="form-label">Duration</label>
+                <input type="text" name="duration" id="id_duration" class="form-control" placeholder="MM:SS" value="{{ demo.formatted_duration }}">
+            </div>
+        </div>
 
-                                <div class="mb-3">
-                                    <label for="id_description" class="form-label required">Description</label>
-                                    <textarea name="description" id="id_description" class="form-control" rows="4" required>{{ demo.description }}</textarea>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-4">
-                                <div class="mb-3">
-                                    <label for="id_demo_type" class="form-label">Demo Type</label>
-                                    <select name="demo_type" id="id_demo_type" class="form-select">
-                                        {% for value, label in demo_types %}
-                                        <option value="{{ value }}" {% if demo.demo_type == value %}selected{% endif %}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-
-                                <div class="mb-3" id="durationField" {% if demo.file_type == 'webgl' %}style="display: none;"{% endif %}>
-                                    <label for="id_duration" class="form-label">Duration</label>
-                                    <input type="text" name="duration" id="id_duration" class="form-control" placeholder="MM:SS or HH:MM:SS" value="{{ demo.formatted_duration }}">
-                                    <small class="text-muted">e.g., 5:30</small>
-                                </div>
-                            </div>
-                        </div>
+        <!-- File Management -->
+        <div class="section-header mt-4">
+            <i class="fas fa-file-upload"></i> File Management
+            <span class="badge bg-info ms-2">Universal Viewer Supported</span>
+        </div>
+        
+        <div class="form-grid">
+            <div>
+                <label for="id_file_type" class="form-label">File Type</label>
+                <select name="file_type" id="id_file_type" class="form-select">
+                    <option value="video" {% if demo.file_type == 'video' %}selected{% endif %}>Video Demo (MP4, AVI, MOV, WMV)</option>
+                    <option value="webgl" {% if demo.file_type == 'webgl' %}selected{% endif %}>WebGL Interactive (HTML, ZIP, GLTF, GLB)</option>
+                </select>
+            </div>
+            <div id="demoFileField">
+                <label class="form-label">Demo File</label>
+                {% if demo.video_file %}
+                <div class="current-file">
+                    <span><i class="fas fa-video text-success me-1"></i>Current video uploaded</span>
+                    <div class="file-actions">
+                        <a href="{% url 'core:universal_viewer' demo.id %}" target="_blank" class="btn btn-sm btn-primary" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-eye"></i> Universal View
+                        </a>
+                        <a href="{% url 'core:admin_demo_watch' demo.id %}" target="_blank" class="btn btn-sm btn-outline-success" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-play"></i> Legacy
+                        </a>
                     </div>
+                </div>
+                {% endif %}
+                {% if demo.webgl_file %}
+                <div class="current-file" id="webglCurrentFile" {% if demo.file_type == 'video' %}style="display: none;"{% endif %}>
+                    <span><i class="fas fa-cube text-info me-1"></i>Current WebGL uploaded</span>
+                    <div class="file-actions">
+                        <a href="{% url 'core:universal_viewer' demo.id %}" target="_blank" class="btn btn-sm btn-primary" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-eye"></i> Universal View
+                        </a>
+                        <a href="{% url 'core:admin_webgl_preview' demo.id %}" target="_blank" class="btn btn-sm btn-outline-info" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-cog"></i> Legacy
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+                <input type="file" name="video_file" id="id_video_file" class="form-control" accept="video/*" {% if demo.file_type != 'video' %}style="display: none;"{% endif %}>
+                <input type="file" name="webgl_file" id="id_webgl_file" class="form-control" accept=".html,.zip,.gltf,.glb" {% if demo.file_type != 'webgl' %}style="display: none;"{% endif %}>
+                <div class="form-text" id="fileHelp">{% if demo.file_type == 'video' %}Max 100MB (MP4, AVI, MOV, WMV){% else %}Max 100MB (HTML, ZIP, GLTF, GLB){% endif %}</div>
+                <div id="demoFilePreview" style="display: none; margin-top: 0.5rem;"></div>
+                <div id="demoFileError" class="alert alert-danger mt-2" style="display: none; padding: 0.5rem; font-size: 0.85rem;"></div>
+            </div>
+            <div>
+                <label for="id_thumbnail" class="form-label">Thumbnail</label>
+                {% if demo.thumbnail %}
+                <div class="current-file">
+                    <span><i class="fas fa-image text-primary me-1"></i>Current thumbnail</span>
+                    <a href="{{ demo.thumbnail.url }}" target="_blank" class="btn btn-sm btn-outline-primary" style="padding: 0.25rem 0.5rem;">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </div>
+                {% endif %}
+                <input type="file" name="thumbnail" id="id_thumbnail" class="form-control" accept="image/*">
+                <div class="form-text">Max 5MB (JPG, PNG, WebP)</div>
+                <div id="thumbnailPreview" style="display: none; margin-top: 0.5rem;"></div>
+                <div id="thumbnailError" class="alert alert-danger mt-2" style="display: none; padding: 0.5rem; font-size: 0.85rem;"></div>
+            </div>
+        </div>
+
+        <!-- Target Audience -->
+        <div class="section-header mt-4">
+            <i class="fas fa-bullseye"></i> Target Audience
+        </div>
+        <div class="form-grid">
+            <div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="allBusinessCategoriesCheckbox" {% if demo.is_for_all_business_categories %}checked{% endif %}>
+                    <label class="form-check-label" for="allBusinessCategoriesCheckbox">
+                        <strong>All Business Categories</strong>
+                    </label>
+                </div>
+                <div id="categorySelectionArea" class="selection-box {% if demo.is_for_all_business_categories %}disabled{% endif %}">
+                    {% for category in business_categories %}
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="target_business_categories" value="{{ category.id }}" id="cat_{{ category.id }}" class="category-checkbox" {% if category in demo.target_business_categories.all %}checked{% endif %}>
+                        <label for="cat_{{ category.id }}">{{ category.name }}</label>
+                    </div>
+                    {% if category.subcategories.all %}
+                    <div class="subcategory-list" id="subcat_list_{{ category.id }}" {% if category not in demo.target_business_categories.all %}style="display: none;"{% endif %}>
+                        {% for subcategory in category.subcategories.all %}
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="target_business_subcategories" value="{{ subcategory.id }}" id="subcat_{{ subcategory.id }}" class="subcategory-checkbox" data-parent="{{ category.id }}" {% if subcategory in demo.target_business_subcategories.all %}checked{% endif %}>
+                            <label for="subcat_{{ subcategory.id }}">{{ subcategory.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
                 </div>
             </div>
 
-            <!-- 2. File Management -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fileManagement">
-                        <i class="fas fa-file-upload section-icon"></i>
-                        File Management
-                    </button>
-                </h2>
-                <div id="fileManagement" class="accordion-collapse collapse" data-bs-parent="#editDemoAccordion">
-                    <div class="accordion-body">
-                        <!-- File Type Selection -->
-                        <div class="file-type-selector">
-                            <label class="file-type-option {% if demo.file_type == 'video' %}active{% endif %}" for="fileTypeVideo">
-                                <input type="radio" name="file_type" id="fileTypeVideo" value="video" {% if demo.file_type == 'video' %}checked{% endif %}>
-                                <div class="file-type-icon"><i class="fas fa-video"></i></div>
-                                <div class="file-type-title">Video Demo</div>
-                            </label>
-
-                            <label class="file-type-option {% if demo.file_type == 'webgl' %}active{% endif %}" for="fileTypeWebGL">
-                                <input type="radio" name="file_type" id="fileTypeWebGL" value="webgl" {% if demo.file_type == 'webgl' %}checked{% endif %}>
-                                <div class="file-type-icon"><i class="fas fa-cube"></i></div>
-                                <div class="file-type-title">WebGL Interactive</div>
-                            </label>
+            <div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="allCustomersCheckbox" {% if demo.is_for_all_customers %}checked{% endif %}>
+                    <label class="form-check-label" for="allCustomersCheckbox">
+                        <strong>All Customers</strong>
+                    </label>
+                </div>
+                <div id="customerSelectionArea" class="selection-box {% if demo.is_for_all_customers %}disabled{% endif %}">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="customerSearch" class="form-control form-control-sm" placeholder="Search...">
+                    </div>
+                    <div id="customerList">
+                        {% for customer in customers %}
+                        <div class="checkbox-item" data-search="{{ customer.full_name|lower }} {{ customer.email|lower }}">
+                            <input type="checkbox" name="target_customers" value="{{ customer.id }}" id="cust_{{ customer.id }}" {% if customer in demo.target_customers.all %}checked{% endif %}>
+                            <label for="cust_{{ customer.id }}">{{ customer.full_name }}</label>
                         </div>
-
-                        <div class="row">
-                            <!-- Video File -->
-                            <div class="col-md-6 file-section {% if demo.file_type == 'video' %}active{% endif %}" id="videoSection">
-                                <div class="mb-3">
-                                    <label class="form-label">Demo Video</label>
-                                    
-                                    {% if demo.video_file %}
-                                    <div class="current-file">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <i class="fas fa-video text-success me-2"></i>
-                                                <strong>Current video file uploaded</strong>
-                                            </div>
-                                            <a href="{{ demo.video_file.url }}" target="_blank" class="btn btn-sm btn-outline-success">
-                                                <i class="fas fa-eye"></i> View
-                                            </a>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                    
-                                    <div class="file-upload-area" id="videoUploadArea">
-                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                                        <div class="file-upload-text">
-                                            {% if demo.video_file %}Replace video file{% else %}Upload video file{% endif %}
-                                        </div>
-                                        <div class="file-upload-hint">Max 100MB</div>
-                                        <input type="file" name="video_file" id="id_video_file" accept="video/mp4,video/avi,video/mov,video/wmv" style="display: none;">
-                                    </div>
-                                    <div id="videoPreview" class="mt-2" style="display: none;"></div>
-                                    <div id="videoError" class="alert alert-danger mt-2" style="display: none;"></div>
-                                </div>
-                            </div>
-
-                            <!-- WebGL File -->
-                            <div class="col-md-6 file-section {% if demo.file_type == 'webgl' %}active{% endif %}" id="webglSection">
-                                <div class="mb-3">
-                                    <label class="form-label">WebGL File</label>
-                                    
-                                 {% if demo.webgl_file %}
-                                    <div class="current-file">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <i class="fas fa-cube text-info me-2"></i>
-                                                <strong>Current WebGL file uploaded</strong>
-                                            </div>
-                                            <a href="{{ demo.webgl_file.url }}" target="_blank" class="btn btn-sm btn-outline-info">
-                                                <i class="fas fa-eye"></i> View
-                                            </a>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                    
-                                    <div class="file-upload-area" id="webglUploadArea">
-                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                                        <div class="file-upload-text">
-                                            {% if demo.webgl_file %}Replace WebGL file{% else %}Upload WebGL file{% endif %}
-                                        </div>
-                                        <div class="file-upload-hint">Max 100MB</div>
-                                        <input type="file" name="webgl_file" id="id_webgl_file" accept=".html,.zip,.gltf,.glb" style="display: none;">
-                                    </div>
-                                    <div id="webglPreview" class="mt-2" style="display: none;"></div>
-                                    <div id="webglError" class="alert alert-danger mt-2" style="display: none;"></div>
-                                </div>
-                            </div>
-
-                            <!-- Thumbnail -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Thumbnail Image</label>
-                                    
-                                   {% if demo.thumbnail %}
-                                    <div class="current-file">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <i class="fas fa-image text-primary me-2"></i>
-                                                <strong>Current thumbnail uploaded</strong>
-                                            </div>
-                                            <a href="{{ demo.thumbnail.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i> View
-                                            </a>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                    
-                                    <div class="file-upload-area" id="thumbnailUploadArea">
-                                        <div class="file-upload-icon"><i class="fas fa-image"></i></div>
-                                        <div class="file-upload-text">
-                                            {% if demo.thumbnail %}Replace thumbnail{% else %}Upload thumbnail{% endif %}
-                                        </div>
-                                        <div class="file-upload-hint">Max 5MB</div>
-                                        <input type="file" name="thumbnail" id="id_thumbnail" accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
-                                    </div>
-                                    <div id="thumbnailPreview" class="mt-2" style="display: none;"></div>
-                                    <div id="thumbnailError" class="alert alert-danger mt-2" style="display: none;"></div>
-                                </div>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 3. Business Categories -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#categories">
-                        <i class="fas fa-bullseye section-icon"></i>
-                        Target Business Categories
-                    </button>
-                </h2>
-                <div id="categories" class="accordion-collapse collapse" data-bs-parent="#editDemoAccordion">
-                    <div class="accordion-body">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Select at least one category or enable "All Categories"
-                        </div>
-
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="allBusinessCategoriesCheckbox" {% if demo.is_for_all_business_categories %}checked{% endif %}>
-                            <label class="form-check-label" for="allBusinessCategoriesCheckbox">
-                                <strong>Available to All Business Categories</strong>
-                            </label>
-                        </div>
-
-                        <div id="categorySelectionArea" class="category-selection-area {% if demo.is_for_all_business_categories %}disabled{% endif %}">
-                            {% if business_categories %}
-                                {% for category in business_categories %}
-                                <div class="category-item">
-                                    <div class="category-check">
-                                        <input type="checkbox" 
-                                               name="target_business_categories" 
-                                               value="{{ category.id }}" 
-                                               id="cat_{{ category.id }}" 
-                                               class="category-checkbox"
-                                               {% if category in demo.target_business_categories.all %}checked{% endif %}>
-                                        <label for="cat_{{ category.id }}">
-                                            {% if category.icon %}{{ category.icon }}{% endif %} {{ category.name }}
-                                        </label>
-                                    </div>
-                                    
-                                    {% if category.subcategories.all %}
-                                    <div class="subcategory-list" id="subcat_list_{{ category.id }}" {% if category not in demo.target_business_categories.all %}style="display: none;"{% endif %}>
-                                        {% for subcategory in category.subcategories.all %}
-                                        <div class="subcategory-item">
-                                            <div class="category-check">
-                                                <input type="checkbox" 
-                                                       name="target_business_subcategories" 
-                                                       value="{{ subcategory.id }}" 
-                                                       id="subcat_{{ subcategory.id }}" 
-                                                       class="subcategory-checkbox" 
-                                                       data-parent="{{ category.id }}"
-                                                       {% if subcategory in demo.target_business_subcategories.all %}checked{% endif %}>
-                                                <label for="subcat_{{ subcategory.id }}">{{ subcategory.name }}</label>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                            <div class="text-center py-4 text-muted">
-                                <i class="fas fa-folder-open fa-2x mb-2"></i>
-                                <p>No categories available</p>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
+        <!-- Settings -->
+        <div class="section-header mt-4">
+            <i class="fas fa-cogs"></i> Settings
+        </div>
+        <div class="form-grid three-col">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured" {% if demo.is_featured %}checked{% endif %}>
+                <label class="form-check-label" for="id_is_featured">Featured</label>
             </div>
-
-            <!-- 4. Customer Access -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#customerAccess">
-                        <i class="fas fa-users section-icon"></i>
-                        Customer Access Control
-                    </button>
-                </h2>
-                <div id="customerAccess" class="accordion-collapse collapse" data-bs-parent="#editDemoAccordion">
-                    <div class="accordion-body">
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="allCustomersCheckbox" {% if demo.is_for_all_customers %}checked{% endif %}>
-                            <label class="form-check-label" for="allCustomersCheckbox">
-                                <strong>Available to All Customers</strong>
-                            </label>
-                        </div>
-
-                        <div id="customerSelectionArea" class="customer-selection-area {% if demo.is_for_all_customers %}disabled{% endif %}">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="customerSearch" class="form-control form-control-sm" placeholder="Search customers...">
-                            </div>
-
-                            <div id="customerList">
-                                {% if customers %}
-                                    {% for customer in customers %}
-                                    <div class="customer-item" data-search="{{ customer.full_name|lower }} {{ customer.email|lower }} {{ customer.organization|lower }}">
-                                        <div class="customer-check">
-                                            <input type="checkbox" 
-                                                   name="target_customers" 
-                                                   value="{{ customer.id }}" 
-                                                   id="cust_{{ customer.id }}" 
-                                                   class="customer-checkbox"
-                                                   {% if customer in demo.target_customers.all %}checked{% endif %}>
-                                            <label for="cust_{{ customer.id }}">{{ customer.full_name }}</label>
-                                        </div>
-                                        <div class="customer-details">
-                                            {{ customer.email }}{% if customer.organization %} | {{ customer.organization }}{% endif %}
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="fas fa-user-slash fa-2x mb-2"></i>
-                                    <p>No customers available</p>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" {% if demo.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="id_is_active">Active</label>
             </div>
-
-            <!-- 5. Settings -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#settings">
-                        <i class="fas fa-cogs section-icon"></i>
-                        Settings
-                    </button>
-                </h2>
-                <div id="settings" class="accordion-collapse collapse" data-bs-parent="#editDemoAccordion">
-                    <div class="accordion-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured" {% if demo.is_featured %}checked{% endif %}>
-                                    <label class="form-check-label" for="id_is_featured">
-                                        <strong>Feature this demo</strong>
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" {% if demo.is_active %}checked{% endif %}>
-                                    <label class="form-check-label" for="id_is_active">
-                                        <strong>Make demo active</strong>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="id_sort_order" class="form-label">Sort Order</label>
-                                    <input type="number" name="sort_order" id="id_sort_order" class="form-control" min="0" value="{{ demo.sort_order }}">
-                                    <small class="text-muted">Lower numbers appear first</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="alert alert-secondary">
-                            <strong>Created:</strong> {{ demo.created_at|date:"M d, Y g:i A" }}
-                            {% if demo.created_by %}by {{ demo.created_by.full_name }}{% endif %}
-                            <br>
-                            <strong>Last Updated:</strong> {{ demo.updated_at|date:"M d, Y g:i A" }}
-                        </div>
-                    </div>
-                </div>
+            <div>
+                <label for="id_sort_order" class="form-label">Sort Order</label>
+                <input type="number" name="sort_order" id="id_sort_order" class="form-control" value="{{ demo.sort_order }}">
             </div>
+        </div>
 
+        <div class="alert alert-secondary mt-3" style="padding: 0.75rem; font-size: 0.85rem;">
+            <strong>Created:</strong> {{ demo.created_at|date:"M d, Y g:i A" }}
+            {% if demo.created_by %}by {{ demo.created_by.full_name }}{% endif %}
+            <br>
+            <strong>Last Updated:</strong> {{ demo.updated_at|date:"M d, Y g:i A" }}
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times me-1"></i>Cancel
+            </a>
+            <button type="submit" class="btn btn-success btn-sm">
+                <i class="fas fa-save me-1"></i>Save Changes
+            </button>
         </div>
     </div>
 </form>
@@ -814,52 +530,48 @@
 <!-- Recent Activity -->
 <div class="row">
     <div class="col-lg-6">
-        <div class="activity-card">
-            <h3 class="activity-header">
-                <i class="fas fa-eye me-2"></i>Recent Views
-            </h3>
+        <div class="activity-section">
+            <div class="section-header">
+                <i class="fas fa-eye"></i> Recent Views ({{ recent_views|length }})
+            </div>
             {% if recent_views %}
                 {% for view in recent_views %}
                 <div class="activity-item">
                     <div class="d-flex justify-content-between">
                         <div>
                             <strong>{{ view.user.full_name }}</strong>
-                            <br>
-                            <small class="text-muted">{{ view.user.email }}</small>
+                            <div style="font-size: 0.8rem; color: var(--gray-600);">{{ view.user.email }}</div>
                         </div>
                         <div class="text-end">
                             <small class="text-muted">{{ view.viewed_at|timesince }} ago</small>
-                            {% if view.completed %}
-                                <br><span class="badge bg-success">Completed</span>
-                            {% endif %}
+                            {% if view.completed %}<br><span class="badge bg-success" style="font-size: 0.7rem;">Completed</span>{% endif %}
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
-                <p class="text-muted text-center py-4">No views yet</p>
+                <p class="text-muted text-center py-3" style="font-size: 0.9rem;">No views yet</p>
             {% endif %}
         </div>
     </div>
 
     <div class="col-lg-6">
-        <div class="activity-card">
-            <h3 class="activity-header">
-                <i class="fas fa-calendar-check me-2"></i>Recent Demo Requests
-            </h3>
+        <div class="activity-section">
+            <div class="section-header">
+                <i class="fas fa-calendar-check"></i> Recent Requests ({{ recent_requests|length }})
+            </div>
             {% if recent_requests %}
                 {% for request in recent_requests %}
                 <div class="activity-item">
                     <div class="d-flex justify-content-between">
                         <div>
                             <strong>{{ request.user.full_name }}</strong>
-                            <br>
-                            <small class="text-muted">{{ request.requested_date|date:"M d, Y" }} - {{ request.requested_time_slot }}</small>
+                            <div style="font-size: 0.8rem; color: var(--gray-600);">{{ request.requested_date|date:"M d, Y" }} - {{ request.requested_time_slot }}</div>
                         </div>
                         <div class="text-end">
                             <small class="text-muted">{{ request.created_at|timesince }} ago</small>
                             <br>
-                            <span class="badge bg-{% if request.status == 'confirmed' %}success{% elif request.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                            <span class="badge bg-{% if request.status == 'confirmed' %}success{% elif request.status == 'pending' %}warning{% else %}secondary{% endif %}" style="font-size: 0.7rem;">
                                 {{ request.get_status_display }}
                             </span>
                         </div>
@@ -867,7 +579,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <p class="text-muted text-center py-4">No demo requests yet</p>
+                <p class="text-muted text-center py-3" style="font-size: 0.9rem;">No requests yet</p>
             {% endif %}
         </div>
     </div>
@@ -886,143 +598,92 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupFileTypeSelection() {
-    const fileTypeOptions = document.querySelectorAll('.file-type-option');
-    const videoSection = document.getElementById('videoSection');
-    const webglSection = document.getElementById('webglSection');
+    const fileTypeSelect = document.getElementById('id_file_type');
+    const videoFileInput = document.getElementById('id_video_file');
+    const webglFileInput = document.getElementById('id_webgl_file');
     const durationField = document.getElementById('durationField');
+    const fileHelp = document.getElementById('fileHelp');
+    const webglCurrentFile = document.getElementById('webglCurrentFile');
     
-    fileTypeOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            fileTypeOptions.forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
-            
-            const fileType = this.querySelector('input').value;
-            
-            if (fileType === 'video') {
-                videoSection.classList.add('active');
-                webglSection.classList.remove('active');
-                durationField.style.display = 'block';
-            } else {
-                videoSection.classList.remove('active');
-                webglSection.classList.add('active');
-                durationField.style.display = 'none';
-            }
-            
-            clearFileErrors();
-        });
+    fileTypeSelect.addEventListener('change', function() {
+        const fileType = this.value;
+        
+        if (fileType === 'video') {
+            videoFileInput.style.display = 'block';
+            webglFileInput.style.display = 'none';
+            durationField.style.display = 'block';
+            fileHelp.textContent = 'Max 100MB (MP4, AVI, MOV, WMV)';
+            if (webglCurrentFile) webglCurrentFile.style.display = 'none';
+        } else {
+            videoFileInput.style.display = 'none';
+            webglFileInput.style.display = 'block';
+            durationField.style.display = 'none';
+            fileHelp.textContent = 'Max 100MB (HTML, ZIP, GLTF, GLB)';
+            if (webglCurrentFile) webglCurrentFile.style.display = 'flex';
+        }
+        
+        videoFileInput.value = '';
+        webglFileInput.value = '';
+        document.getElementById('demoFilePreview').style.display = 'none';
+        document.getElementById('demoFileError').style.display = 'none';
     });
 }
 
 function setupFileUpload() {
-    setupFileInput('id_video_file', 'videoUploadArea', 'videoPreview', 'videoError', {
-        maxSize: 100 * 1024 * 1024,
-        allowedExtensions: ['mp4', 'avi', 'mov', 'wmv'],
-        fileType: 'video'
-    });
+    setupDemoFileInput('id_video_file', 100);
+    setupDemoFileInput('id_webgl_file', 100);
     
-    setupFileInput('id_webgl_file', 'webglUploadArea', 'webglPreview', 'webglError', {
-        maxSize: 100 * 1024 * 1024,
-        allowedExtensions: ['html', 'zip', 'gltf', 'glb'],
-        fileType: 'webgl'
-    });
+    const thumbnailInput = document.getElementById('id_thumbnail');
+    const thumbnailPreview = document.getElementById('thumbnailPreview');
+    const thumbnailError = document.getElementById('thumbnailError');
     
-    setupFileInput('id_thumbnail', 'thumbnailUploadArea', 'thumbnailPreview', 'thumbnailError', {
-        maxSize: 5 * 1024 * 1024,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
-        fileType: 'image'
+    thumbnailInput.addEventListener('change', () => {
+        const file = thumbnailInput.files[0];
+        thumbnailError.style.display = 'none';
+        thumbnailPreview.style.display = 'none';
+        
+        if (!file) return;
+        
+        if (file.size > 5 * 1024 * 1024) {
+            thumbnailError.textContent = 'File exceeds 5MB limit';
+            thumbnailError.style.display = 'block';
+            thumbnailInput.value = '';
+            return;
+        }
+        
+        const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+        thumbnailPreview.innerHTML = `<div class="alert alert-success mb-0" style="padding: 0.5rem; font-size: 0.85rem;">
+            <i class="fas fa-check me-1"></i>${file.name} (${fileSizeMB} MB)
+        </div>`;
+        thumbnailPreview.style.display = 'block';
     });
 }
 
-function setupFileInput(inputId, areaId, previewId, errorId, options) {
+function setupDemoFileInput(inputId, maxSizeMB) {
     const input = document.getElementById(inputId);
-    const area = document.getElementById(areaId);
-    const preview = document.getElementById(previewId);
-    const errorDiv = document.getElementById(errorId);
-    
-    area.addEventListener('click', () => input.click());
-    
-    area.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        area.style.borderColor = 'var(--primary-color)';
-    });
-    
-    area.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        area.style.borderColor = 'var(--gray-300)';
-    });
-    
-    area.addEventListener('drop', (e) => {
-        e.preventDefault();
-        area.style.borderColor = 'var(--gray-300)';
-        if (e.dataTransfer.files.length) {
-            input.files = e.dataTransfer.files;
-            validateAndPreviewFile(input, preview, errorDiv, area, options);
-        }
-    });
+    const preview = document.getElementById('demoFilePreview');
+    const errorDiv = document.getElementById('demoFileError');
     
     input.addEventListener('change', () => {
-        validateAndPreviewFile(input, preview, errorDiv, area, options);
-    });
-}
-
-function validateAndPreviewFile(input, preview, errorDiv, area, options) {
-    const file = input.files[0];
-    
-    errorDiv.style.display = 'none';
-    errorDiv.textContent = '';
-    area.classList.remove('error');
-    preview.style.display = 'none';
-    
-    if (!file) return;
-    
-    if (file.size > options.maxSize) {
-        const maxSizeMB = (options.maxSize / 1024 / 1024).toFixed(0);
-        showFileError(errorDiv, area, `File exceeds ${maxSizeMB}MB limit`);
-        input.value = '';
-        return;
-    }
-    
-    const fileExt = file.name.split('.').pop().toLowerCase();
-    if (!options.allowedExtensions.includes(fileExt)) {
-        showFileError(errorDiv, area, `Invalid format. Allowed: ${options.allowedExtensions.join(', ').toUpperCase()}`);
-        input.value = '';
-        return;
-    }
-    
-    showFilePreview(file, preview, options.fileType);
-}
-
-function showFileError(errorDiv, area, message) {
-    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${message}`;
-    errorDiv.style.display = 'block';
-    area.classList.add('error');
-}
-
-function clearFileErrors() {
-    ['videoError', 'webglError', 'thumbnailError'].forEach(id => {
-        const div = document.getElementById(id);
-        if (div) {
-            div.style.display = 'none';
-            div.textContent = '';
+        const file = input.files[0];
+        errorDiv.style.display = 'none';
+        preview.style.display = 'none';
+        
+        if (!file) return;
+        
+        if (file.size > maxSizeMB * 1024 * 1024) {
+            errorDiv.textContent = `File exceeds ${maxSizeMB}MB limit`;
+            errorDiv.style.display = 'block';
+            input.value = '';
+            return;
         }
+        
+        const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+        preview.innerHTML = `<div class="alert alert-success mb-0" style="padding: 0.5rem; font-size: 0.85rem;">
+            <i class="fas fa-check me-1"></i>${file.name} (${fileSizeMB} MB)
+        </div>`;
+        preview.style.display = 'block';
     });
-    
-    document.querySelectorAll('.file-upload-area').forEach(area => {
-        area.classList.remove('error');
-    });
-}
-
-function showFilePreview(file, preview, fileType) {
-    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-    const icon = fileType === 'video' ? 'fa-video' : fileType === 'webgl' ? 'fa-cube' : 'fa-image';
-    
-    preview.innerHTML = `
-        <div class="alert alert-success mb-0">
-            <i class="fas ${icon} me-2"></i>
-            <strong>${file.name}</strong> (${fileSizeMB} MB)
-        </div>
-    `;
-    preview.style.display = 'block';
 }
 
 function setupCategorySelection() {
@@ -1055,7 +716,6 @@ function setupCategorySelection() {
                     subcategoryList.querySelectorAll('input').forEach(sub => sub.checked = false);
                 }
             }
-            
             if (this.checked) {
                 allCategoriesCheckbox.checked = false;
             }
@@ -1066,27 +726,24 @@ function setupCategorySelection() {
 function setupCustomerSelection() {
     const allCustomersCheckbox = document.getElementById('allCustomersCheckbox');
     const customerSelectionArea = document.getElementById('customerSelectionArea');
-    const customerCheckboxes = document.querySelectorAll('.customer-checkbox');
     const customerSearch = document.getElementById('customerSearch');
     
     allCustomersCheckbox.addEventListener('change', function() {
         if (this.checked) {
             customerSelectionArea.classList.add('disabled');
-            customerCheckboxes.forEach(cb => cb.checked = false);
+            document.querySelectorAll('[name="target_customers"]').forEach(cb => cb.checked = false);
         } else {
             customerSelectionArea.classList.remove('disabled');
         }
     });
     
-    if (customerSearch) {
-        customerSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            document.querySelectorAll('.customer-item').forEach(item => {
-                const searchData = item.getAttribute('data-search');
-                item.style.display = searchData.includes(searchTerm) ? 'block' : 'none';
-            });
+    customerSearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        document.querySelectorAll('#customerList .checkbox-item').forEach(item => {
+            const searchData = item.getAttribute('data-search');
+            item.style.display = searchData.includes(searchTerm) ? 'flex' : 'none';
         });
-    }
+    });
 }
 
 function setupFormValidation() {
@@ -1097,7 +754,6 @@ function setupFormValidation() {
             e.preventDefault();
             e.stopPropagation();
         }
-        
         form.classList.add('was-validated');
     });
 }

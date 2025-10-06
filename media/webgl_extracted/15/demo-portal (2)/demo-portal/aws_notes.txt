@@ -1,0 +1,100 @@
+MERN Stack Deployment on AWS EC2
+================================
+
+1. Launch EC2 Instance
+----------------------
+- Choose Ubuntu 22.04 LTS
+- Select instance type (t2.micro for free tier)
+- Allow inbound ports: 22 (SSH), 80 (HTTP), 443 (HTTPS), 5000 (API if needed)
+- Download PEM key for SSH.
+
+2. Connect & Setup Server
+-------------------------
+ssh -i your-key.pem ubuntu@your-ec2-public-ip
+
+sudo apt update && sudo apt upgrade -y
+sudo apt install git curl build-essential -y
+
+3. Install Node.js & NPM
+------------------------
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+node -v
+npm -v
+
+4. Install MongoDB
+------------------
+Option A: Use MongoDB Atlas (recommended).
+Option B: Local install:
+
+curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo tee /etc/apt/trusted.gpg.d/mongodb-server-6.0.asc
+echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+sudo apt update
+sudo apt install -y mongodb-org
+sudo systemctl start mongod
+sudo systemctl enable mongod
+
+5. Clone MERN App & Install
+---------------------------
+git clone https://github.com/your-repo/mern-app.git
+cd mern-app
+npm install
+
+Frontend (React in client/):
+cd client
+npm install
+npm run build
+
+6. Setup Environment Variables
+------------------------------
+Create .env file:
+
+MONGO_URI=mongodb://localhost:27017/your-db
+PORT=5000
+JWT_SECRET=your-secret
+
+7. Run Backend (API)
+--------------------
+cd server
+node server.js
+
+Use PM2 for production:
+sudo npm install -g pm2
+pm2 start server.js --name mern-api
+pm2 startup systemd
+pm2 save
+
+8. Serve React Build with Nginx
+-------------------------------
+sudo apt install nginx -y
+sudo nano /etc/nginx/sites-available/default
+
+Example config:
+server {
+    listen 80;
+    server_name your-ec2-public-ip;
+
+    root /home/ubuntu/mern-app/client/build;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    location /api {
+        proxy_pass http://localhost:5000;
+    }
+}
+
+sudo systemctl restart nginx
+
+9. Enable SSL with Let’s Encrypt (Optional)
+-------------------------------------------
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+10. Verify Deployment
+---------------------
+- Frontend: http://your-ec2-ip
+- Backend: http://your-ec2-ip/api
+- Domain: https://yourdomain.com

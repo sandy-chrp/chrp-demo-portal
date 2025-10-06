@@ -1,0 +1,239 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}{{ demo.title }} - Universal Preview{% endblock %}
+{% block page_title %}Universal Preview{% endblock %}
+
+{% block breadcrumb %}
+<div class="admin-breadcrumb">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_dashboard' %}">
+                    <i class="fas fa-home me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_demos' %}">Demo Content</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:admin_demo_detail' demo.id %}">{{ demo.title|truncatechars:30 }}</a>
+            </li>
+            <li class="breadcrumb-item active">Universal Preview</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex align-items-center gap-2">
+    <span class="badge bg-info">
+        <i class="fas fa-eye me-1"></i>{{ demo.get_file_type_display }} Preview
+    </span>
+    <a href="{% url 'core:admin_demo_detail' demo.id %}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Back to Details
+    </a>
+</div>
+{% endblock %}
+
+{% block admin_extra_css %}
+<style>
+    .universal-preview-container {
+        background: var(--gradient-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        min-height: calc(100vh - 250px);
+        display: flex;
+        flex-direction: column;
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    .preview-header {
+        background: rgba(255, 255, 255, 0.98);
+        padding: var(--spacing-lg) var(--spacing-xl);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .preview-frame-container {
+        flex: 1;
+        position: relative;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 600px;
+    }
+    
+    .preview-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: white;
+    }
+    
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+    
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid var(--gray-200);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .fullscreen-btn {
+        position: fixed;
+        bottom: var(--spacing-xl);
+        right: var(--spacing-xl);
+        background: var(--gradient-primary);
+        color: white;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--shadow-xl);
+        transition: all 0.3s ease;
+        z-index: 100;
+    }
+    
+    .fullscreen-btn:hover {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="universal-preview-container">
+    <div class="preview-header">
+        <div>
+            <h1 style="margin: 0; font-size: 1.5rem;">{{ demo.title }}</h1>
+            <div style="color: var(--gray-600); font-size: 0.875rem; margin-top: 0.5rem;">
+<i class="fas fa-{% if demo.file_type == 'video' %}video{% else %}cube{% endif %}"></i>
+                {{ demo.get_file_type_display }} | {{ demo.get_demo_type_display }}
+            </div>
+        </div>
+        <div>
+            {% if demo.file_type == 'video' and demo.video_file %}
+                <a href="{{ demo.video_file.url }}" class="btn btn-primary" download>
+                    <i class="fas fa-download me-1"></i>Download
+                </a>
+            {% elif demo.file_type == 'webgl' and demo.webgl_file %}
+                <a href="{{ demo.webgl_file.url }}" class="btn btn-primary" download>
+                    <i class="fas fa-download me-1"></i>Download
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="preview-frame-container">
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <div style="color: var(--gray-700); font-size: 1.125rem;">Loading {{ demo.get_file_type_display }}...</div>
+        </div>
+        
+        <iframe 
+            id="previewFrame"
+            class="preview-iframe"
+            src="{% url 'core:serve_webgl_content' demo.id %}"
+            onload="hideLoader()"
+            onerror="showError()"
+            allow="fullscreen; autoplay; xr-spatial-tracking"
+            allowfullscreen>
+        </iframe>
+    </div>
+</div>
+
+<button class="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+    <i class="fas fa-expand" id="fullscreenIcon"></i>
+</button>
+{% endblock %}
+
+{% block admin_extra_js %}
+<script>
+    let isFullscreen = false;
+    
+    function hideLoader() {
+        const loader = document.getElementById('loadingOverlay');
+        if (loader) {
+            loader.style.display = 'none';
+        }
+    }
+    
+    function showError() {
+        const iframe = document.getElementById('previewFrame');
+        const loader = document.getElementById('loadingOverlay');
+        
+        if (loader) loader.style.display = 'none';
+        if (iframe) {
+            iframe.style.display = 'none';
+            const container = iframe.parentElement;
+            container.innerHTML += `
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: var(--danger-color);"></i>
+                    <h3 style="margin-top: 20px;">Error Loading Content</h3>
+                    <p style="color: var(--gray-600);">Unable to load the file. Please check the file format.</p>
+                </div>
+            `;
+        }
+    }
+    
+    function toggleFullscreen() {
+        const iframe = document.getElementById('previewFrame');
+        const icon = document.getElementById('fullscreenIcon');
+        
+        if (!isFullscreen) {
+            if (iframe.requestFullscreen) {
+                iframe.requestFullscreen();
+            } else if (iframe.webkitRequestFullscreen) {
+                iframe.webkitRequestFullscreen();
+            }
+            icon.className = 'fas fa-compress';
+            isFullscreen = true;
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+            icon.className = 'fas fa-expand';
+            isFullscreen = false;
+        }
+    }
+    
+    document.addEventListener('fullscreenchange', function() {
+        const icon = document.getElementById('fullscreenIcon');
+        if (!document.fullscreenElement) {
+            icon.className = 'fas fa-expand';
+            isFullscreen = false;
+        }
+    });
+    
+    setTimeout(hideLoader, 10000);
+</script>
+{% endblock %}

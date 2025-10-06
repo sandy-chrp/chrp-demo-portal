@@ -19146,3 +19146,750 @@ INFO 2025-10-06 09:56:26,592 basehttp 19320 11784 "GET /admin/demos/ HTTP/1.1" 2
 INFO 2025-10-06 09:56:30,805 basehttp 19320 11784 "GET /admin/demos/add/ HTTP/1.1" 200 74094
 INFO 2025-10-06 10:03:27,693 basehttp 19320 25876 "GET /admin/demos/add/ HTTP/1.1" 200 54993
 INFO 2025-10-06 10:10:13,588 basehttp 19320 19056 "GET /admin/demos/add/ HTTP/1.1" 200 55233
+INFO 2025-10-06 10:25:27,807 autoreload 25212 26884 Watching for file changes with StatReloader
+INFO 2025-10-06 10:25:32,028 basehttp 25212 24692 "GET /admin/demos/15/ HTTP/1.1" 200 59258
+INFO 2025-10-06 10:25:44,678 basehttp 25212 24692 "GET /media/demos/webgl/webgl_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_1ed61ac7.zip HTTP/1.1" 200 2958791
+INFO 2025-10-06 10:40:22,779 autoreload 25212 26884 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 10:40:25,338 autoreload 8452 5428 Watching for file changes with StatReloader
+INFO 2025-10-06 10:44:03,956 basehttp 8452 27824 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 10:44:06,081 basehttp 8452 27824 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+ERROR 2025-10-06 10:44:11,492 log 8452 27824 Internal Server Error: /admin/demos/15/webgl-preview/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 308, in admin_webgl_preview
+    return render(request, 'admin/demos/webgl_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: admin/demos/webgl_preview.html
+ERROR 2025-10-06 10:44:11,495 basehttp 8452 27824 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 500 96615
+INFO 2025-10-06 10:45:21,042 autoreload 8452 5428 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\demo_portal\settings.py changed, reloading.
+INFO 2025-10-06 10:45:21,807 autoreload 8352 2160 Watching for file changes with StatReloader
+INFO 2025-10-06 10:45:27,219 basehttp 8352 14372 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 10:47:15,847 basehttp 8352 14372 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+ERROR 2025-10-06 10:47:18,263 log 8352 14372 Internal Server Error: /admin/demos/15/webgl-preview/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 308, in admin_webgl_preview
+    return render(request, 'admin/demos/webgl_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 484, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'split'
+ERROR 2025-10-06 10:47:18,269 basehttp 8352 14372 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 500 228427
+INFO 2025-10-06 10:49:01,314 basehttp 8352 14372 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 10:49:02,679 basehttp 8352 14372 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37855
+WARNING 2025-10-06 10:49:02,729 log 8352 14372 Forbidden: /demos/15/webgl-content/
+WARNING 2025-10-06 10:49:02,730 basehttp 8352 14372 "GET /demos/15/webgl-content/ HTTP/1.1" 403 13
+WARNING 2025-10-06 10:49:14,316 log 8352 14372 Forbidden: /demos/15/webgl-content/
+WARNING 2025-10-06 10:49:14,317 basehttp 8352 14372 "GET /demos/15/webgl-content/ HTTP/1.1" 403 13
+WARNING 2025-10-06 10:49:38,336 log 8352 14372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 10:49:38,336 basehttp 8352 14372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23770
+WARNING 2025-10-06 10:50:03,465 log 8352 14372 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 10:50:03,466 basehttp 8352 14372 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23770
+INFO 2025-10-06 10:50:29,505 basehttp 8352 27112 "GET / HTTP/1.1" 302 0
+INFO 2025-10-06 10:50:29,624 basehttp 8352 27112 "GET /admin/dashboard/ HTTP/1.1" 200 84453
+WARNING 2025-10-06 10:50:29,850 log 8352 27112 Not Found: /favicon.ico
+WARNING 2025-10-06 10:50:29,851 basehttp 8352 27112 "GET /favicon.ico HTTP/1.1" 404 23659
+INFO 2025-10-06 10:50:33,338 basehttp 8352 20116 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 10:50:38,668 basehttp 8352 20116 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 10:50:46,731 basehttp 8352 20116 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37855
+WARNING 2025-10-06 10:50:46,788 log 8352 20116 Forbidden: /demos/15/webgl-content/
+WARNING 2025-10-06 10:50:46,788 basehttp 8352 20116 "GET /demos/15/webgl-content/ HTTP/1.1" 403 13
+WARNING 2025-10-06 10:52:55,073 log 8352 20116 Forbidden: /demos/15/webgl-content/
+WARNING 2025-10-06 10:52:55,074 basehttp 8352 20116 "GET /demos/15/webgl-content/ HTTP/1.1" 403 13
+INFO 2025-10-06 10:56:57,809 autoreload 8352 2160 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 10:56:58,573 autoreload 22840 11436 Watching for file changes with StatReloader
+INFO 2025-10-06 10:57:05,641 basehttp 22840 25732 "GET /demos/15/webgl-content/ HTTP/1.1" 200 1723
+WARNING 2025-10-06 10:57:05,678 log 22840 24444 Not Found: /demos/15/webgl-content/%PUBLIC_URL%/manifest.json
+WARNING 2025-10-06 10:57:05,681 basehttp 22840 24444 "GET /demos/15/webgl-content/%PUBLIC_URL%/manifest.json HTTP/1.1" 404 25166
+WARNING 2025-10-06 10:57:05,685 log 22840 25732 Not Found: /demos/15/webgl-content/%PUBLIC_URL%/favicon.ico
+WARNING 2025-10-06 10:57:05,686 basehttp 22840 25732 "GET /demos/15/webgl-content/%PUBLIC_URL%/favicon.ico HTTP/1.1" 404 25160
+INFO 2025-10-06 10:57:11,251 basehttp 22840 25732 "GET /demos/15/webgl-content/ HTTP/1.1" 200 1723
+WARNING 2025-10-06 10:57:11,269 log 22840 24444 Not Found: /demos/15/webgl-content/%PUBLIC_URL%/manifest.json
+WARNING 2025-10-06 10:57:11,270 basehttp 22840 24444 "GET /demos/15/webgl-content/%PUBLIC_URL%/manifest.json HTTP/1.1" 404 25166
+INFO 2025-10-06 10:57:17,320 basehttp 22840 25732 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37855
+INFO 2025-10-06 10:57:17,471 basehttp 22840 25732 "GET /demos/15/webgl-content/ HTTP/1.1" 200 1723
+INFO 2025-10-06 10:57:20,434 basehttp 22840 25732 "GET /demos/15/webgl-content/ HTTP/1.1" 200 1723
+INFO 2025-10-06 10:57:21,823 basehttp 22840 25732 "GET /demos/15/webgl-content/ HTTP/1.1" 200 1723
+WARNING 2025-10-06 10:57:24,450 log 22840 24444 Not Found: /demos/15/webgl-content/%PUBLIC_URL%/manifest.json
+WARNING 2025-10-06 10:57:24,451 basehttp 22840 24444 "GET /demos/15/webgl-content/%PUBLIC_URL%/manifest.json HTTP/1.1" 404 25166
+WARNING 2025-10-06 10:57:24,471 log 22840 25732 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 10:57:24,472 basehttp 22840 25732 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23770
+INFO 2025-10-06 10:57:30,977 basehttp 22840 25732 "GET /demos/15/webgl-content/ HTTP/1.1" 200 1723
+INFO 2025-10-06 11:01:44,608 basehttp 22840 25732 "GET /demos/15/webgl-content/ HTTP/1.1" 200 1723
+WARNING 2025-10-06 11:01:44,631 log 22840 24444 Not Found: /demos/15/webgl-content/%PUBLIC_URL%/manifest.json
+WARNING 2025-10-06 11:01:44,632 basehttp 22840 24444 "GET /demos/15/webgl-content/%PUBLIC_URL%/manifest.json HTTP/1.1" 404 25166
+INFO 2025-10-06 11:02:56,291 autoreload 22840 11436 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:02:57,407 autoreload 26276 19628 Watching for file changes with StatReloader
+INFO 2025-10-06 11:03:01,845 basehttp 26276 3636 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37855
+INFO 2025-10-06 11:03:02,040 basehttp 26276 3636 "GET /demos/15/webgl-content/ HTTP/1.1" 200 4908
+INFO 2025-10-06 11:03:05,045 basehttp 26276 3636 "GET /demos/15/webgl-content/ HTTP/1.1" 200 4908
+INFO 2025-10-06 11:03:05,793 basehttp 26276 3636 "GET /demos/15/webgl-content/ HTTP/1.1" 200 4908
+INFO 2025-10-06 11:03:09,803 basehttp 26276 3636 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:03:38,428 autoreload 23232 5684 Watching for file changes with StatReloader
+INFO 2025-10-06 11:03:40,423 basehttp 23232 2828 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:03:47,771 autoreload 17032 22108 Watching for file changes with StatReloader
+INFO 2025-10-06 11:03:50,471 basehttp 17032 18840 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:03:51,025 basehttp 17032 18840 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:03:51,777 basehttp 17032 18840 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:03:52,753 basehttp 17032 18840 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:03:55,530 basehttp 17032 18840 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:03:55,986 basehttp 17032 18840 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:03:58,400 basehttp 17032 18840 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37855
+INFO 2025-10-06 11:03:58,529 basehttp 17032 18840 "GET /demos/15/webgl-content/ HTTP/1.1" 200 4908
+WARNING 2025-10-06 11:04:01,736 log 17032 18840 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:04:01,737 basehttp 17032 18840 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23770
+WARNING 2025-10-06 11:04:06,133 log 17032 18840 Not Found: /demos/15/webgl-zip/demo-portal (2)\demo-portal\source file\demo-portal-customer\public/
+WARNING 2025-10-06 11:04:06,133 basehttp 17032 18840 "GET /demos/15/webgl-zip/demo-portal%20(2)%5Cdemo-portal%5Csource%20file%5Cdemo-portal-customer%5Cpublic/ HTTP/1.1" 404 8728
+INFO 2025-10-06 11:10:37,437 autoreload 17508 23912 Watching for file changes with StatReloader
+INFO 2025-10-06 11:10:41,524 basehttp 17508 14904 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:10:45,674 basehttp 17508 14904 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:10:47,101 basehttp 17508 14904 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37855
+INFO 2025-10-06 11:10:47,289 basehttp 17508 14904 "GET /demos/15/webgl-content/ HTTP/1.1" 200 4908
+INFO 2025-10-06 11:10:49,984 basehttp 17508 14904 "GET /demos/15/webgl-content/ HTTP/1.1" 200 4908
+INFO 2025-10-06 11:10:50,708 basehttp 17508 14904 "GET /demos/15/webgl-content/ HTTP/1.1" 200 4908
+WARNING 2025-10-06 11:10:52,795 log 17508 14904 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:10:52,796 basehttp 17508 14904 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+WARNING 2025-10-06 11:10:57,319 log 17508 14904 Bad Request: /demos/15/webgl-zip/demo-portal (2)\demo-portal\source file\demo-portal-customer\public/
+WARNING 2025-10-06 11:10:57,320 basehttp 17508 14904 "GET /demos/15/webgl-zip/demo-portal%20(2)%5Cdemo-portal%5Csource%20file%5Cdemo-portal-customer%5Cpublic/ HTTP/1.1" 400 80
+INFO 2025-10-06 11:15:24,103 autoreload 20692 3504 Watching for file changes with StatReloader
+INFO 2025-10-06 11:15:28,132 basehttp 20692 9676 "GET /admin/demos/15/ HTTP/1.1" 200 59717
+INFO 2025-10-06 11:15:29,989 basehttp 20692 9676 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37855
+INFO 2025-10-06 11:15:30,171 basehttp 20692 9676 "GET /demos/15/webgl-content/ HTTP/1.1" 200 5335
+INFO 2025-10-06 11:15:32,809 basehttp 20692 9676 "GET /demos/15/webgl-content/ HTTP/1.1" 200 5335
+WARNING 2025-10-06 11:15:35,343 log 20692 9676 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:15:35,343 basehttp 20692 9676 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+WARNING 2025-10-06 11:15:40,824 log 20692 9676 Bad Request: /demos/15/webgl-zip/demo-portal (2)\demo-portal\source file\demo-portal-customer\public/
+WARNING 2025-10-06 11:15:40,824 basehttp 20692 9676 "GET /demos/15/webgl-zip/demo-portal%20(2)%5Cdemo-portal%5Csource%20file%5Cdemo-portal-customer%5Cpublic/ HTTP/1.1" 400 80
+WARNING 2025-10-06 11:15:45,927 log 20692 9676 Bad Request: /demos/15/webgl-zip/demo-portal (2)\demo-portal\source file\demo-portal-customer\public/
+WARNING 2025-10-06 11:15:45,927 basehttp 20692 9676 "GET /demos/15/webgl-zip/demo-portal%20(2)%5Cdemo-portal%5Csource%20file%5Cdemo-portal-customer%5Cpublic/ HTTP/1.1" 400 80
+WARNING 2025-10-06 11:15:52,252 log 20692 9676 Bad Request: /demos/15/webgl-zip/demo-portal (2)\demo-portal\source file\demo-portal-customer\public/
+WARNING 2025-10-06 11:15:52,253 basehttp 20692 9676 "GET /demos/15/webgl-zip/demo-portal%20(2)%5Cdemo-portal%5Csource%20file%5Cdemo-portal-customer%5Cpublic/ HTTP/1.1" 400 80
+WARNING 2025-10-06 11:16:15,997 log 20692 9676 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:16:15,998 basehttp 20692 9676 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+INFO 2025-10-06 11:16:20,171 basehttp 20692 9676 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37855
+INFO 2025-10-06 11:16:20,366 basehttp 20692 9676 "GET /demos/15/webgl-content/ HTTP/1.1" 200 5335
+WARNING 2025-10-06 11:16:22,905 log 20692 9676 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:16:22,906 basehttp 20692 9676 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+WARNING 2025-10-06 11:16:48,137 log 20692 9676 Bad Request: /demos/15/webgl-zip/demo-portal (2)\demo-portal\source file\demo-portal-customer\public/
+WARNING 2025-10-06 11:16:48,138 basehttp 20692 9676 "GET /demos/15/webgl-zip/demo-portal%20(2)%5Cdemo-portal%5Csource%20file%5Cdemo-portal-customer%5Cpublic/ HTTP/1.1" 400 80
+WARNING 2025-10-06 11:17:07,422 log 20692 9676 Bad Request: /demos/15/webgl-zip/demo-portal (2)\demo-portal\source file\demo-portal-customer\public/
+WARNING 2025-10-06 11:17:07,422 basehttp 20692 9676 "GET /demos/15/webgl-zip/demo-portal%20(2)%5Cdemo-portal%5Csource%20file%5Cdemo-portal-customer%5Cpublic/ HTTP/1.1" 400 80
+INFO 2025-10-06 11:17:51,458 basehttp 20692 9676 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37855
+INFO 2025-10-06 11:17:51,642 basehttp 20692 9676 "GET /demos/15/webgl-content/ HTTP/1.1" 200 5335
+INFO 2025-10-06 11:17:54,002 basehttp 20692 9676 "GET /demos/15/webgl-content/ HTTP/1.1" 200 5335
+INFO 2025-10-06 11:18:02,108 basehttp 20692 9676 "POST /admin/demos/15/ HTTP/1.1" 302 0
+INFO 2025-10-06 11:18:02,145 basehttp 20692 9676 "GET /admin/demos/15/ HTTP/1.1" 200 61159
+INFO 2025-10-06 11:18:05,540 basehttp 20692 9676 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37847
+INFO 2025-10-06 11:18:05,707 basehttp 20692 9676 "GET /demos/15/webgl-content/ HTTP/1.1" 200 5335
+INFO 2025-10-06 11:19:15,860 autoreload 20692 3504 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 11:19:16,687 autoreload 13636 10592 Watching for file changes with StatReloader
+INFO 2025-10-06 11:19:48,074 autoreload 13636 10592 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:19:49,204 autoreload 16736 9212 Watching for file changes with StatReloader
+INFO 2025-10-06 11:20:13,594 autoreload 16736 9212 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:20:15,362 autoreload 18240 13092 Watching for file changes with StatReloader
+INFO 2025-10-06 11:20:19,846 basehttp 18240 21080 "GET /admin/demos/15/ HTTP/1.1" 200 59718
+INFO 2025-10-06 11:20:21,244 basehttp 18240 21080 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37847
+INFO 2025-10-06 11:20:21,452 basehttp 18240 21080 "GET /demos/15/webgl-content/ HTTP/1.1" 200 5088
+WARNING 2025-10-06 11:20:24,169 log 18240 21080 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:20:24,170 basehttp 18240 21080 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+WARNING 2025-10-06 11:20:26,793 log 18240 21080 Bad Request: /demos/15/webgl-zip/demo-portal (2)/demo-portal/source file/demo-portal-customer/public/
+WARNING 2025-10-06 11:20:26,793 basehttp 18240 21080 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/ HTTP/1.1" 400 80
+INFO 2025-10-06 11:24:15,481 autoreload 18240 13092 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\demo_portal\settings.py changed, reloading.
+INFO 2025-10-06 11:24:16,204 autoreload 18056 27436 Watching for file changes with StatReloader
+INFO 2025-10-06 11:24:51,427 autoreload 18056 27436 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\demo_portal\settings.py changed, reloading.
+INFO 2025-10-06 11:24:52,105 autoreload 21056 9888 Watching for file changes with StatReloader
+INFO 2025-10-06 11:24:58,039 basehttp 21056 9772 "GET /admin/demos/15/ HTTP/1.1" 200 59718
+INFO 2025-10-06 11:24:59,038 basehttp 21056 9772 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37847
+INFO 2025-10-06 11:24:59,230 basehttp 21056 9772 "GET /demos/15/webgl-content/ HTTP/1.1" 200 5088
+WARNING 2025-10-06 11:25:31,562 log 21056 9772 Bad Request: /demos/15/webgl-zip/demo-portal (2)/demo-portal/source file/demo-portal-customer/public/
+WARNING 2025-10-06 11:25:31,562 basehttp 21056 9772 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/ HTTP/1.1" 400 80
+INFO 2025-10-06 11:27:18,112 autoreload 21056 9888 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:27:19,273 autoreload 25080 13876 Watching for file changes with StatReloader
+INFO 2025-10-06 11:27:23,688 autoreload 17480 24564 Watching for file changes with StatReloader
+INFO 2025-10-06 11:27:28,751 basehttp 17480 15660 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37847
+INFO 2025-10-06 11:27:28,913 basehttp 17480 15660 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2714
+WARNING 2025-10-06 11:27:44,150 log 17480 15660 Bad Request: /demos/15/webgl-zip/demo-portal (2)/demo-portal/source file/demo-portal-customer/public/
+WARNING 2025-10-06 11:27:44,151 basehttp 17480 15660 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/ HTTP/1.1" 400 80
+INFO 2025-10-06 11:32:26,863 autoreload 17480 24564 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:32:27,693 autoreload 16316 15764 Watching for file changes with StatReloader
+INFO 2025-10-06 11:35:01,133 autoreload 16316 15764 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:35:02,452 autoreload 25000 10472 Watching for file changes with StatReloader
+INFO 2025-10-06 11:35:19,807 autoreload 27028 9864 Watching for file changes with StatReloader
+INFO 2025-10-06 11:35:25,459 basehttp 27028 17812 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37848
+INFO 2025-10-06 11:35:25,610 basehttp 27028 17812 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2811
+INFO 2025-10-06 11:35:28,945 basehttp 27028 17812 "GET /admin/demos/15/ HTTP/1.1" 200 59718
+INFO 2025-10-06 11:35:32,133 basehttp 27028 17812 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37848
+INFO 2025-10-06 11:35:32,327 basehttp 27028 17812 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2811
+WARNING 2025-10-06 11:35:35,283 log 27028 17812 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:35:35,284 basehttp 27028 17812 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+WARNING 2025-10-06 11:35:37,328 log 27028 17812 Bad Request: /demos/15/webgl-zip/demo-portal (2)/demo-portal/source file/demo-portal-customer/public/
+WARNING 2025-10-06 11:35:37,328 basehttp 27028 17812 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/ HTTP/1.1" 400 80
+WARNING 2025-10-06 11:35:40,457 log 27028 17812 Bad Request: /demos/15/webgl-zip/demo-portal (2)/demo-portal/source file/demo-portal-customer/public/
+WARNING 2025-10-06 11:35:40,457 basehttp 27028 17812 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/ HTTP/1.1" 400 80
+INFO 2025-10-06 11:38:19,562 autoreload 27028 9864 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:38:20,356 autoreload 22540 25816 Watching for file changes with StatReloader
+INFO 2025-10-06 11:38:27,307 autoreload 15836 23328 Watching for file changes with StatReloader
+INFO 2025-10-06 11:38:32,411 basehttp 15836 20068 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37848
+WARNING 2025-10-06 11:38:32,467 log 15836 20068 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:38:32,468 basehttp 15836 20068 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+INFO 2025-10-06 11:38:32,613 basehttp 15836 27008 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2811
+INFO 2025-10-06 11:38:34,331 basehttp 15836 27008 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/ HTTP/1.1" 200 1723
+INFO 2025-10-06 11:38:34,367 basehttp 15836 14024 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/manifest.json HTTP/1.1" 302 0
+WARNING 2025-10-06 11:38:34,381 log 15836 14024 Not Found: /accounts/login/
+WARNING 2025-10-06 11:38:34,382 basehttp 15836 14024 "GET /accounts/login/?next=/demos/15/webgl-zip/demo-portal%2520%282%29/demo-portal/source%2520file/demo-portal-customer/public/%2525PUBLIC_URL%2525/manifest.json HTTP/1.1" 404 23817
+INFO 2025-10-06 11:38:34,501 basehttp 15836 27008 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/favicon.ico HTTP/1.1" 200 3870
+INFO 2025-10-06 11:38:38,094 basehttp 15836 14024 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/manifest.json HTTP/1.1" 302 0
+WARNING 2025-10-06 11:38:38,104 log 15836 14024 Not Found: /accounts/login/
+WARNING 2025-10-06 11:38:38,105 basehttp 15836 14024 "GET /accounts/login/?next=/demos/15/webgl-zip/demo-portal%2520%282%29/demo-portal/source%2520file/demo-portal-customer/public/%2525PUBLIC_URL%2525/manifest.json HTTP/1.1" 404 23817
+INFO 2025-10-06 11:39:03,755 basehttp 15836 27008 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/ HTTP/1.1" 200 1723
+INFO 2025-10-06 11:39:03,768 basehttp 15836 14024 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/manifest.json HTTP/1.1" 302 0
+WARNING 2025-10-06 11:39:03,775 log 15836 14024 Not Found: /accounts/login/
+WARNING 2025-10-06 11:39:03,775 basehttp 15836 14024 "GET /accounts/login/?next=/demos/15/webgl-zip/demo-portal%2520%282%29/demo-portal/source%2520file/demo-portal-customer/public/%2525PUBLIC_URL%2525/manifest.json HTTP/1.1" 404 23817
+INFO 2025-10-06 11:39:54,936 basehttp 15836 14024 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/manifest.json HTTP/1.1" 302 0
+WARNING 2025-10-06 11:39:54,945 log 15836 14024 Not Found: /accounts/login/
+WARNING 2025-10-06 11:39:54,946 basehttp 15836 14024 "GET /accounts/login/?next=/demos/15/webgl-zip/demo-portal%2520%282%29/demo-portal/source%2520file/demo-portal-customer/public/%2525PUBLIC_URL%2525/manifest.json HTTP/1.1" 404 23817
+INFO 2025-10-06 11:41:09,911 autoreload 15836 23328 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:41:11,144 autoreload 26056 23676 Watching for file changes with StatReloader
+INFO 2025-10-06 11:41:14,876 basehttp 26056 17736 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37848
+WARNING 2025-10-06 11:41:14,910 log 26056 17736 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:41:14,912 basehttp 26056 17736 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+INFO 2025-10-06 11:41:15,055 basehttp 26056 6244 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2774
+INFO 2025-10-06 11:41:18,569 basehttp 26056 6244 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2774
+INFO 2025-10-06 11:41:20,995 basehttp 26056 6244 "GET /demos/15/webgl-zip/demo-portal%20(2)/demo-portal/source%20file/demo-portal-customer/public/ HTTP/1.1" 200 1723
+INFO 2025-10-06 11:41:21,036 basehttp 26056 248 "GET /demos/15/webgl-zip/demo-portal%20(2)/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/manifest.json HTTP/1.1" 302 0
+WARNING 2025-10-06 11:41:21,050 log 26056 248 Not Found: /accounts/login/
+WARNING 2025-10-06 11:41:21,051 basehttp 26056 248 "GET /accounts/login/?next=/demos/15/webgl-zip/demo-portal%2520%282%29/demo-portal/source%2520file/demo-portal-customer/public/%2525PUBLIC_URL%2525/manifest.json HTTP/1.1" 404 23817
+INFO 2025-10-06 11:41:21,164 basehttp 26056 6244 "GET /demos/15/webgl-zip/demo-portal%20(2)/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/favicon.ico HTTP/1.1" 200 3870
+INFO 2025-10-06 11:41:23,505 basehttp 26056 248 "GET /demos/15/webgl-zip/demo-portal%20(2)/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/manifest.json HTTP/1.1" 302 0
+WARNING 2025-10-06 11:41:23,515 log 26056 248 Not Found: /accounts/login/
+WARNING 2025-10-06 11:41:23,516 basehttp 26056 248 "GET /accounts/login/?next=/demos/15/webgl-zip/demo-portal%2520%282%29/demo-portal/source%2520file/demo-portal-customer/public/%2525PUBLIC_URL%2525/manifest.json HTTP/1.1" 404 23817
+INFO 2025-10-06 11:41:33,293 basehttp 26056 6244 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2774
+INFO 2025-10-06 11:43:07,566 autoreload 26056 23676 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:43:08,518 autoreload 9696 3504 Watching for file changes with StatReloader
+INFO 2025-10-06 11:43:15,225 autoreload 15008 3184 Watching for file changes with StatReloader
+INFO 2025-10-06 11:43:18,029 basehttp 15008 26956 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37848
+INFO 2025-10-06 11:43:18,148 basehttp 15008 26956 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2774
+INFO 2025-10-06 11:43:21,624 basehttp 15008 26956 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37848
+INFO 2025-10-06 11:43:21,758 basehttp 15008 26956 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2774
+WARNING 2025-10-06 11:43:29,311 log 15008 26956 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:43:29,312 basehttp 15008 26956 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+INFO 2025-10-06 11:43:31,410 basehttp 15008 17480 "GET /demos/15/webgl-zip/demo-portal%20(2)/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/manifest.json HTTP/1.1" 302 0
+WARNING 2025-10-06 11:43:31,421 log 15008 17480 Not Found: /accounts/login/
+WARNING 2025-10-06 11:43:31,421 basehttp 15008 17480 "GET /accounts/login/?next=/demos/15/webgl-zip/demo-portal%2520%282%29/demo-portal/source%2520file/demo-portal-customer/public/%2525PUBLIC_URL%2525/manifest.json HTTP/1.1" 404 23817
+INFO 2025-10-06 11:43:34,587 basehttp 15008 17480 "GET /demos/15/webgl-zip/demo-portal%20(2)/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/manifest.json HTTP/1.1" 302 0
+WARNING 2025-10-06 11:43:34,597 log 15008 17480 Not Found: /accounts/login/
+WARNING 2025-10-06 11:43:34,598 basehttp 15008 17480 "GET /accounts/login/?next=/demos/15/webgl-zip/demo-portal%2520%282%29/demo-portal/source%2520file/demo-portal-customer/public/%2525PUBLIC_URL%2525/manifest.json HTTP/1.1" 404 23817
+INFO 2025-10-06 11:43:40,298 basehttp 15008 26956 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37848
+WARNING 2025-10-06 11:43:40,336 log 15008 26956 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:43:40,336 basehttp 15008 26956 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+INFO 2025-10-06 11:43:40,481 basehttp 15008 26956 "GET /demos/15/webgl-content/ HTTP/1.1" 200 2774
+INFO 2025-10-06 11:45:01,603 autoreload 15008 3184 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 11:45:03,019 autoreload 15860 17364 Watching for file changes with StatReloader
+INFO 2025-10-06 11:45:07,497 autoreload 15264 21128 Watching for file changes with StatReloader
+INFO 2025-10-06 11:45:12,743 basehttp 15264 11456 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37848
+WARNING 2025-10-06 11:45:12,780 log 15264 11456 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:45:12,781 basehttp 15264 11456 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+INFO 2025-10-06 11:45:12,935 basehttp 15264 11456 "GET /demos/15/webgl-content/ HTTP/1.1" 200 716
+INFO 2025-10-06 11:45:12,965 basehttp 15264 11456 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/index.html HTTP/1.1" 200 1723
+INFO 2025-10-06 11:45:15,785 basehttp 15264 11456 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 200 37848
+WARNING 2025-10-06 11:45:15,818 log 15264 11456 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:45:15,819 basehttp 15264 11456 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+INFO 2025-10-06 11:45:15,991 basehttp 15264 11456 "GET /demos/15/webgl-content/ HTTP/1.1" 200 716
+INFO 2025-10-06 11:45:33,598 basehttp 15264 13572 "GET /demos/15/webgl-zip/demo-portal%20%282%29/demo-portal/source%20file/demo-portal-customer/public/%PUBLIC_URL%/manifest.json HTTP/1.1" 302 0
+WARNING 2025-10-06 11:45:33,613 log 15264 13572 Not Found: /accounts/login/
+WARNING 2025-10-06 11:45:33,615 basehttp 15264 13572 "GET /accounts/login/?next=/demos/15/webgl-zip/demo-portal%2520%282%29/demo-portal/source%2520file/demo-portal-customer/public/%2525PUBLIC_URL%2525/manifest.json HTTP/1.1" 404 23817
+WARNING 2025-10-06 11:45:33,635 log 15264 11456 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 11:45:33,636 basehttp 15264 11456 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23776
+WARNING 2025-10-06 11:46:34,151 log 15264 11456 Not Found: /demos/webgl/webgl_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_ec2a57bc.zip
+WARNING 2025-10-06 11:46:34,152 basehttp 15264 11456 "GET /demos/webgl/webgl_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_ec2a57bc.zip HTTP/1.1" 404 25210
+WARNING 2025-10-06 11:47:03,019 log 15264 11456 Not Found: /demos/webgl/webgl_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_ec2a57bc.zip
+WARNING 2025-10-06 11:47:03,020 basehttp 15264 11456 "GET /demos/webgl/webgl_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_ec2a57bc.zip HTTP/1.1" 404 25210
+INFO 2025-10-06 12:10:13,279 autoreload 15264 21128 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 12:10:15,551 autoreload 22412 16748 Watching for file changes with StatReloader
+INFO 2025-10-06 12:12:32,048 autoreload 22412 16748 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 12:12:33,079 autoreload 3948 9988 Watching for file changes with StatReloader
+INFO 2025-10-06 12:15:59,265 basehttp 3948 10668 "GET /admin/demos/add/ HTTP/1.1" 302 0
+WARNING 2025-10-06 12:15:59,403 log 3948 10668 Not Found: /accounts/login/
+WARNING 2025-10-06 12:15:59,404 basehttp 3948 10668 "GET /accounts/login/?next=/admin/demos/add/ HTTP/1.1" 404 23487
+WARNING 2025-10-06 12:15:59,495 log 3948 10668 Not Found: /favicon.ico
+WARNING 2025-10-06 12:15:59,495 basehttp 3948 10668 "GET /favicon.ico HTTP/1.1" 404 23452
+INFO 2025-10-06 12:18:57,056 autoreload 3948 9988 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 12:18:58,208 autoreload 20100 8752 Watching for file changes with StatReloader
+INFO 2025-10-06 12:19:51,674 autoreload 20100 8752 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 12:19:52,638 autoreload 25064 21600 Watching for file changes with StatReloader
+INFO 2025-10-06 12:20:05,420 autoreload 25064 21600 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 12:20:06,172 autoreload 18748 8132 Watching for file changes with StatReloader
+INFO 2025-10-06 12:20:53,844 autoreload 18748 8132 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 12:20:54,745 autoreload 13916 10640 Watching for file changes with StatReloader
+INFO 2025-10-06 12:22:16,331 autoreload 13916 10640 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 12:22:17,476 autoreload 11268 20312 Watching for file changes with StatReloader
+INFO 2025-10-06 12:22:31,213 autoreload 11268 20312 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 12:22:32,084 autoreload 26764 25908 Watching for file changes with StatReloader
+INFO 2025-10-06 12:22:56,211 autoreload 26764 25908 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 12:22:57,006 autoreload 4628 25080 Watching for file changes with StatReloader
+INFO 2025-10-06 12:23:16,922 autoreload 4628 25080 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 12:23:17,736 autoreload 23232 12672 Watching for file changes with StatReloader
+INFO 2025-10-06 12:53:23,057 autoreload 23232 12672 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\urls.py changed, reloading.
+INFO 2025-10-06 12:53:24,206 autoreload 27776 19324 Watching for file changes with StatReloader
+INFO 2025-10-06 16:55:34,604 autoreload 26724 3964 Watching for file changes with StatReloader
+WARNING 2025-10-06 16:55:40,182 log 26724 2464 Not Found: /admin/demos/15/webgl-preview/
+WARNING 2025-10-06 16:55:40,183 basehttp 26724 2464 "GET /admin/demos/15/webgl-preview/ HTTP/1.1" 404 23928
+WARNING 2025-10-06 16:55:40,244 log 26724 2464 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 16:55:40,245 basehttp 26724 2464 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23985
+INFO 2025-10-06 16:55:46,511 basehttp 26724 2464 "GET /admin/demos/15/ HTTP/1.1" 200 61109
+INFO 2025-10-06 16:55:46,527 basehttp 26724 2464 "GET /media/demos/thumbnails/thumb_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_709bf1ec.jpg HTTP/1.1" 304 0
+ERROR 2025-10-06 16:55:57,548 log 26724 2464 Internal Server Error: /admin/webgl-preview/15/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 34, in admin_webgl_preview
+    return render(request, 'core/admin/webgl_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/admin/webgl_preview.html
+ERROR 2025-10-06 16:55:57,551 basehttp 26724 2464 "GET /admin/webgl-preview/15/ HTTP/1.1" 500 97140
+INFO 2025-10-06 16:58:14,121 autoreload 26724 3964 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 16:58:14,910 autoreload 12544 20200 Watching for file changes with StatReloader
+ERROR 2025-10-06 16:58:19,112 log 12544 16252 Internal Server Error: /admin/webgl-preview/15/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 34, in admin_webgl_preview
+    return render(request, 'core/admin/demos/webgl_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/admin/demos/webgl_preview.html
+ERROR 2025-10-06 16:58:19,115 basehttp 12544 16252 "GET /admin/webgl-preview/15/ HTTP/1.1" 500 97397
+INFO 2025-10-06 16:59:35,624 autoreload 12544 20200 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 16:59:36,774 autoreload 27132 27344 Watching for file changes with StatReloader
+INFO 2025-10-06 16:59:37,601 basehttp 27132 20724 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 35421
+INFO 2025-10-06 16:59:39,923 basehttp 27132 20724 "GET /webgl/serve/15/ HTTP/1.1" 200 645618
+INFO 2025-10-06 16:59:49,756 basehttp 27132 20724 "GET /admin/webgl-info/15/ HTTP/1.1" 200 492053
+ERROR 2025-10-06 17:00:06,035 log 27132 20724 Internal Server Error: /admin/universal-preview/15/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 53, in admin_universal_preview
+    return render(request, 'core/admin/universal_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/admin/universal_preview.html
+ERROR 2025-10-06 17:00:06,038 basehttp 27132 20724 "GET /admin/universal-preview/15/ HTTP/1.1" 500 97453
+INFO 2025-10-06 17:03:58,730 basehttp 27132 20724 "GET /admin/demos/15/ HTTP/1.1" 200 61109
+INFO 2025-10-06 17:04:03,177 basehttp 27132 20724 "GET /admin/demo-requests/ HTTP/1.1" 200 77472
+INFO 2025-10-06 17:04:05,187 basehttp 27132 20724 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-06 17:04:08,903 basehttp 27132 20724 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 17:04:08,919 basehttp 27132 20724 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-06 17:04:11,406 basehttp 27132 20724 "GET /admin/demos/15/ HTTP/1.1" 200 61109
+INFO 2025-10-06 17:04:15,061 basehttp 27132 20724 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 46084
+INFO 2025-10-06 17:04:17,266 basehttp 27132 20724 "GET /webgl/serve/15/ HTTP/1.1" 200 645618
+INFO 2025-10-06 17:04:25,851 basehttp 27132 20724 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 46084
+INFO 2025-10-06 17:04:28,038 basehttp 27132 20724 "GET /webgl/serve/15/ HTTP/1.1" 200 645618
+INFO 2025-10-06 17:04:31,871 basehttp 27132 20724 "GET /admin/demos/15/ HTTP/1.1" 200 61109
+INFO 2025-10-06 17:04:59,994 basehttp 27132 20724 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 46084
+INFO 2025-10-06 17:05:02,247 basehttp 27132 20724 "GET /webgl/serve/15/ HTTP/1.1" 200 645618
+WARNING 2025-10-06 17:10:15,564 log 27132 20892 Not Found: /demos/15/webgl-zip/demo-portal (2)\demo-portal\source file\demo-portal-customer\public/
+WARNING 2025-10-06 17:10:15,565 basehttp 27132 20892 "GET /demos/15/webgl-zip/demo-portal%20(2)%5Cdemo-portal%5Csource%20file%5Cdemo-portal-customer%5Cpublic/ HTTP/1.1" 404 25503
+INFO 2025-10-06 17:10:17,888 basehttp 27132 20892 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 41460
+INFO 2025-10-06 17:10:20,243 basehttp 27132 20892 "GET /webgl/serve/15/ HTTP/1.1" 200 645618
+INFO 2025-10-06 17:10:34,633 basehttp 27132 20892 "GET /admin/webgl-info/15/ HTTP/1.1" 200 492053
+ERROR 2025-10-06 17:10:39,387 log 27132 20892 Internal Server Error: /admin/universal-preview/15/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 53, in admin_universal_preview
+    return render(request, 'core/admin/universal_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/admin/universal_preview.html
+ERROR 2025-10-06 17:10:39,388 basehttp 27132 20892 "GET /admin/universal-preview/15/ HTTP/1.1" 500 97453
+INFO 2025-10-06 17:10:46,483 basehttp 27132 20892 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 41460
+INFO 2025-10-06 17:10:48,883 basehttp 27132 20892 "GET /webgl/serve/15/ HTTP/1.1" 200 645618
+WARNING 2025-10-06 17:10:51,189 log 27132 10716 Not Found: /webgl/serve/15/%PUBLIC_URL%/manifest.json
+WARNING 2025-10-06 17:10:51,189 basehttp 27132 10716 "GET /webgl/serve/15/%PUBLIC_URL%/manifest.json HTTP/1.1" 404 23968
+WARNING 2025-10-06 17:10:51,215 log 27132 20892 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 17:10:51,215 basehttp 27132 20892 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23985
+INFO 2025-10-06 17:11:10,563 basehttp 27132 20892 "GET /media/demos/webgl/webgl_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_ec2a57bc.zip HTTP/1.1" 200 2958791
+INFO 2025-10-06 17:16:32,566 autoreload 27132 27344 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 17:16:33,640 autoreload 26640 16372 Watching for file changes with StatReloader
+INFO 2025-10-06 17:50:40,546 autoreload 26640 16372 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 17:50:41,423 autoreload 22892 22604 Watching for file changes with StatReloader
+INFO 2025-10-06 17:51:11,790 basehttp 22892 29044 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 41646
+INFO 2025-10-06 17:51:13,887 basehttp 22892 29044 "GET /webgl/serve/15/ HTTP/1.1" 200 1735
+WARNING 2025-10-06 17:51:18,448 log 22892 20912 Not Found: /media/%PUBLIC_URL%/manifest.json
+WARNING 2025-10-06 17:51:18,449 basehttp 22892 20912 "GET /media/%PUBLIC_URL%/manifest.json HTTP/1.1" 404 24046
+WARNING 2025-10-06 17:51:18,469 log 22892 29044 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 17:51:18,469 basehttp 22892 29044 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23985
+INFO 2025-10-06 17:51:24,771 basehttp 22892 29044 "GET /admin/webgl-info/15/ HTTP/1.1" 200 492053
+ERROR 2025-10-06 17:51:44,747 log 22892 29044 Internal Server Error: /admin/universal-preview/15/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 58, in admin_universal_preview
+    return render(request, 'core/admin/universal_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/admin/universal_preview.html
+ERROR 2025-10-06 17:51:44,749 basehttp 22892 29044 "GET /admin/universal-preview/15/ HTTP/1.1" 500 97453
+WARNING 2025-10-06 17:51:53,965 log 22892 29044 Forbidden: /demo/view/15/
+WARNING 2025-10-06 17:51:53,966 basehttp 22892 29044 "GET /demo/view/15/ HTTP/1.1" 403 34
+WARNING 2025-10-06 17:52:02,417 log 22892 29044 Forbidden: /demo/view/15/
+WARNING 2025-10-06 17:52:02,417 basehttp 22892 29044 "GET /demo/view/15/ HTTP/1.1" 403 34
+INFO 2025-10-06 17:52:36,617 basehttp 22892 29044 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-06 17:52:38,258 basehttp 22892 29044 "GET /admin/customers/ HTTP/1.1" 200 65524
+INFO 2025-10-06 17:52:40,628 basehttp 22892 29044 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-06 17:52:41,153 basehttp 22892 29044 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 17:52:42,905 basehttp 22892 29044 "GET /admin/dashboard/ HTTP/1.1" 200 84437
+INFO 2025-10-06 17:52:44,665 basehttp 22892 29044 "GET /admin/demo-requests/ HTTP/1.1" 200 77472
+INFO 2025-10-06 17:52:46,087 basehttp 22892 29044 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 17:52:58,980 basehttp 22892 29044 "GET /admin/demos/15/ HTTP/1.1" 200 61098
+INFO 2025-10-06 17:53:09,275 basehttp 22892 29044 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 41646
+INFO 2025-10-06 17:53:11,187 basehttp 22892 29044 "GET /webgl/serve/15/ HTTP/1.1" 200 1735
+WARNING 2025-10-06 17:53:15,798 log 22892 20912 Not Found: /media/%PUBLIC_URL%/manifest.json
+WARNING 2025-10-06 17:53:15,799 basehttp 22892 20912 "GET /media/%PUBLIC_URL%/manifest.json HTTP/1.1" 404 24046
+WARNING 2025-10-06 17:53:15,823 log 22892 29044 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-10-06 17:53:15,823 basehttp 22892 29044 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 23985
+INFO 2025-10-06 17:55:17,936 autoreload 22892 22604 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 17:55:18,785 autoreload 12544 29616 Watching for file changes with StatReloader
+INFO 2025-10-06 17:56:24,089 autoreload 12544 29616 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 17:56:25,418 autoreload 4552 13592 Watching for file changes with StatReloader
+INFO 2025-10-06 17:57:32,438 autoreload 4552 13592 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 17:57:33,312 autoreload 26752 2548 Watching for file changes with StatReloader
+INFO 2025-10-06 17:58:07,786 autoreload 26752 2548 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 17:58:08,862 autoreload 14216 18576 Watching for file changes with StatReloader
+ERROR 2025-10-06 17:58:23,988 log 14216 23912 Internal Server Error: /admin/universal-preview/15/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 69, in admin_universal_preview
+    return render(request, 'core/admin/universal_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/admin/universal_preview.html
+ERROR 2025-10-06 17:58:23,990 basehttp 14216 23912 "GET /admin/universal-preview/15/ HTTP/1.1" 500 98529
+ERROR 2025-10-06 17:58:25,136 log 14216 23912 Internal Server Error: /admin/universal-preview/15/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 69, in admin_universal_preview
+    return render(request, 'core/admin/universal_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/admin/universal_preview.html
+ERROR 2025-10-06 17:58:25,137 basehttp 14216 23912 "GET /admin/universal-preview/15/ HTTP/1.1" 500 98529
+INFO 2025-10-06 17:58:46,331 autoreload 14216 18576 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 17:58:47,113 autoreload 23292 13840 Watching for file changes with StatReloader
+INFO 2025-10-06 17:58:49,683 basehttp 23292 28696 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 17:58:49,732 log 23292 28696 Not Found: /demos/15/content/
+WARNING 2025-10-06 17:58:49,733 basehttp 23292 28696 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:00:49,619 autoreload 23292 13840 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 18:00:50,356 autoreload 10496 9816 Watching for file changes with StatReloader
+INFO 2025-10-06 18:00:51,801 autoreload 10496 9816 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 18:00:52,751 autoreload 5332 29132 Watching for file changes with StatReloader
+INFO 2025-10-06 18:01:32,301 autoreload 5332 29132 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 18:01:33,068 autoreload 8888 16808 Watching for file changes with StatReloader
+INFO 2025-10-06 18:01:48,554 basehttp 8888 18540 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:01:48,601 log 8888 18540 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:01:48,602 basehttp 8888 18540 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:01:51,438 basehttp 8888 18540 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:01:51,473 log 8888 18540 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:01:51,474 basehttp 8888 18540 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:01:51,971 basehttp 8888 18540 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:01:52,008 log 8888 18540 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:01:52,008 basehttp 8888 18540 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:01:53,956 basehttp 8888 18540 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-06 18:01:56,812 basehttp 8888 18540 "GET /admin/business-categories/16/edit/ HTTP/1.1" 200 34396
+INFO 2025-10-06 18:02:02,779 basehttp 8888 18540 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 18:02:05,438 basehttp 8888 18540 "GET /admin/demos/15/ HTTP/1.1" 200 61098
+ERROR 2025-10-06 18:02:08,107 log 8888 18540 Internal Server Error: /admin/webgl-preview/15/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 43, in admin_webgl_preview
+    return render(request, 'admin/demos/webgl_preview.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ~~~~~~~~~~~~^^
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 484, in parse
+    raise self.error(token, e)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\base.py", line 703, in __init__
+    raise TemplateSyntaxError(
+    ...<2 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: ' == 'video' and 'video' or 'cube'' from 'demo.file_type == 'video' and 'video' or 'cube''
+ERROR 2025-10-06 18:02:08,116 basehttp 8888 18540 "GET /admin/webgl-preview/15/ HTTP/1.1" 500 219342
+INFO 2025-10-06 18:08:45,093 autoreload 8888 16808 C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py changed, reloading.
+INFO 2025-10-06 18:08:46,018 autoreload 28772 18320 Watching for file changes with StatReloader
+INFO 2025-10-06 18:08:57,755 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:57,817 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:57,818 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:08:58,451 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:58,490 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:58,490 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:08:58,652 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:58,688 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:58,689 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:08:58,803 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:58,842 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:58,842 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:08:58,981 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:59,016 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:59,017 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:08:59,150 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:59,185 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:59,186 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:08:59,308 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:59,343 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:59,344 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:08:59,482 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:59,520 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:59,521 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:08:59,659 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:59,694 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:59,694 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:08:59,816 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:08:59,857 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:08:59,858 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:09:00,020 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:09:00,055 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:09:00,056 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:09:00,207 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:09:00,248 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:09:00,249 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:09:00,722 basehttp 28772 5992 "GET /admin/universal-preview/15/ HTTP/1.1" 200 30038
+WARNING 2025-10-06 18:09:00,756 log 28772 5992 Not Found: /demos/15/content/
+WARNING 2025-10-06 18:09:00,757 basehttp 28772 5992 "GET /demos/15/content/ HTTP/1.1" 404 25281
+INFO 2025-10-06 18:09:02,998 basehttp 28772 5992 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 33796
+INFO 2025-10-06 18:09:05,101 basehttp 28772 5992 "GET /webgl/serve/15/ HTTP/1.1" 200 1608
+INFO 2025-10-06 18:09:07,893 basehttp 28772 5992 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 18:09:09,009 basehttp 28772 5992 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-06 18:09:10,980 basehttp 28772 5992 "GET /admin/customers/ HTTP/1.1" 200 65533
+INFO 2025-10-06 18:09:12,909 basehttp 28772 5992 "GET /admin/demo-requests/ HTTP/1.1" 200 77472
+INFO 2025-10-06 18:09:16,079 basehttp 28772 5992 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-06 18:09:18,175 basehttp 28772 5992 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 18:09:21,181 basehttp 28772 5992 "GET /admin/demo-requests/ HTTP/1.1" 200 77472
+INFO 2025-10-06 18:09:24,220 basehttp 28772 5992 "GET /admin/enquiries/ HTTP/1.1" 200 49228
+INFO 2025-10-06 18:09:26,258 basehttp 28772 5992 "GET /admin/customers/ HTTP/1.1" 200 65533
+INFO 2025-10-06 18:09:31,734 basehttp 28772 5992 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-06 18:09:36,608 basehttp 28772 5992 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 18:09:39,797 basehttp 28772 5992 "GET /admin/demos/add/ HTTP/1.1" 200 55233
+INFO 2025-10-06 18:10:30,247 basehttp 28772 5992 "POST /admin/demos/add/ HTTP/1.1" 302 0
+INFO 2025-10-06 18:10:30,287 basehttp 28772 5992 "GET /admin/demos/16/ HTTP/1.1" 200 61889
+INFO 2025-10-06 18:10:30,356 basehttp 28772 5992 "GET /media/demos/thumbnails/thumb_testibg-on-6-october_dd988524.jpg HTTP/1.1" 200 65111
+ERROR 2025-10-06 18:10:36,386 log 28772 5992 Internal Server Error: /demo/view/16/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 99, in universal_viewer
+    return render(request, 'core/demos/universal_viewer.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/demos/universal_viewer.html
+ERROR 2025-10-06 18:10:36,389 basehttp 28772 5992 "GET /demo/view/16/ HTTP/1.1" 500 97071
+INFO 2025-10-06 18:10:45,647 basehttp 28772 5992 "GET /admin/webgl-preview/16/ HTTP/1.1" 200 33751
+INFO 2025-10-06 18:10:47,560 basehttp 28772 5992 "GET /webgl/serve/16/ HTTP/1.1" 200 1608
+INFO 2025-10-06 18:11:43,166 basehttp 28772 5992 "GET /admin/webgl-preview/16/ HTTP/1.1" 200 33751
+INFO 2025-10-06 18:11:45,081 basehttp 28772 5992 "GET /webgl/serve/16/ HTTP/1.1" 200 1608
+ERROR 2025-10-06 18:20:24,918 log 28772 21640 Internal Server Error: /demo/view/16/
+Traceback (most recent call last):
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Sandeep Kumar\Documents\CHRP\demo_portal\core\webgl_views.py", line 99, in universal_viewer
+    return render(request, 'core/demos/universal_viewer.html', context)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "C:\Users\Sandeep Kumar\AppData\Roaming\Python\Python313\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: core/demos/universal_viewer.html
+ERROR 2025-10-06 18:20:24,920 basehttp 28772 21640 "GET /demo/view/16/ HTTP/1.1" 500 97208
+INFO 2025-10-06 18:20:29,056 basehttp 28772 21640 "GET /admin/customers/ HTTP/1.1" 200 65533
+INFO 2025-10-06 18:20:30,439 basehttp 28772 21640 "GET /admin/business-categories/ HTTP/1.1" 200 45762
+INFO 2025-10-06 18:20:31,289 basehttp 28772 17212 "GET /admin/demos/ HTTP/1.1" 200 55945
+INFO 2025-10-06 18:20:31,310 basehttp 28772 17212 "GET /media/demos/thumbnails/thumb_testibg-on-6-october_dd988524.jpg HTTP/1.1" 304 0
+INFO 2025-10-06 18:20:32,530 basehttp 28772 17212 "GET /admin/customers/ HTTP/1.1" 200 65533
+INFO 2025-10-06 18:20:42,459 basehttp 28772 17212 "GET /admin/demos/ HTTP/1.1" 200 55945
+INFO 2025-10-06 18:20:43,227 basehttp 28772 17212 "GET /admin/demo-requests/ HTTP/1.1" 200 77606
+INFO 2025-10-06 18:20:54,777 basehttp 28772 17212 "GET /admin/enquiries/ HTTP/1.1" 200 49228
+INFO 2025-10-06 18:21:00,295 basehttp 28772 17212 "GET /admin/notifications/ HTTP/1.1" 200 40057
+INFO 2025-10-06 18:21:03,783 basehttp 28772 17212 "GET /admin/dashboard/ HTTP/1.1" 200 84437
+INFO 2025-10-06 18:22:12,485 basehttp 28772 17212 "GET /admin/webgl-preview/15/ HTTP/1.1" 200 33796
+INFO 2025-10-06 18:22:14,515 basehttp 28772 17212 "GET /webgl/serve/15/ HTTP/1.1" 200 1608

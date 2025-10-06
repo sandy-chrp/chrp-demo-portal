@@ -1,4 +1,4 @@
-# core/urls.py - CLEANED with duplicates removed
+# core/urls.py - UPDATED WITH WEBGL SUPPORT
 
 from django.urls import path
 from . import views
@@ -10,8 +10,8 @@ from . import admin_notification_views
 from . import admin_settings_views
 from .views import get_subcategories_ajax, get_subcategories_for_category
 
-
-
+# Import WebGL views
+from . import webgl_views
 
 app_name = 'core'
 
@@ -37,7 +37,6 @@ urlpatterns = [
     path('admin/dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     
     path('dashboard/', views.dashboard_redirect, name='dashboard'),
-
 
     # =====================================
     # ADMIN CUSTOMER MANAGEMENT (CRUD)
@@ -70,6 +69,24 @@ urlpatterns = [
     path('admin/demos/<int:demo_id>/delete/', views.admin_delete_demo_view, name='admin_delete_demo'),
     path('admin/demos/<int:demo_id>/toggle-status/', views.admin_toggle_demo_status_view, name='admin_toggle_demo_status'),
     path('admin/demos/filter/', demo_request_views.admin_get_filtered_demos, name='admin_filter_demos'),
+
+    # =====================================
+    # WEBGL DEMO VIEWING & SERVING (NEW)
+    # =====================================
+    
+    # Admin WebGL Preview Routes
+    path('admin/webgl-preview/<int:demo_id>/', webgl_views.admin_webgl_preview, name='admin_webgl_preview'),
+    path('admin/universal-preview/<int:demo_id>/', webgl_views.admin_universal_preview, name='admin_universal_preview'),
+    
+    # Customer Universal Viewer
+    path('demo/view/<int:demo_id>/', webgl_views.universal_viewer, name='universal_viewer'),
+    
+    # WebGL Content Serving
+    path('webgl/serve/<int:demo_id>/', webgl_views.serve_webgl_content, name='serve_webgl_content'),
+    path('api/webgl-asset/<int:demo_id>/<path:asset_path>/', webgl_views.serve_webgl_asset, name='serve_webgl_asset'),
+    
+    # WebGL Debug/Info (Admin Only)
+    path('admin/webgl-info/<int:demo_id>/', webgl_views.webgl_file_info, name='webgl_file_info'),
 
     # =====================================
     # ADMIN ENQUIRY MANAGEMENT
@@ -112,7 +129,7 @@ urlpatterns = [
     path('api/subcategories/', get_subcategories_ajax, name='get_subcategories_ajax'),
     path('auth/ajax/get-subcategories/', get_subcategories_for_category, name='get_subcategories'),
 
-        # Business Category Management
+    # Business Category Management
     path('admin/business-categories/', business_categories_views.admin_business_categories, name='admin_business_categories'),
     path('admin/business-categories/create/', business_categories_views.admin_business_category_create, name='admin_business_category_create'),
     path('admin/business-categories/<int:category_id>/edit/', business_categories_views.admin_business_category_edit, name='admin_business_category_edit'),
@@ -178,7 +195,7 @@ urlpatterns = [
     path('admin/notifications/announcements/<int:announcement_id>/edit/', admin_notification_views.admin_edit_announcement, name='admin_edit_announcement'),
     path('admin/notifications/announcements/<int:announcement_id>/delete/', admin_notification_views.admin_delete_announcement, name='admin_delete_announcement'),
 
-    # Bulk Operations - THIS IS THE MISSING ONE
+    # Bulk Operations
     path('admin/notifications/send-bulk/', admin_notification_views.admin_send_bulk_notification, name='admin_send_bulk_notification'),
     path('admin/notifications/bulk-actions/', admin_notification_views.admin_bulk_notification_actions, name='admin_bulk_notification_actions'),
 
