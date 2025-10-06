@@ -19074,3 +19074,75 @@ INFO 2025-10-03 17:40:49,678 basehttp 8752 7148 "GET /customer/contact-sales/ HT
 INFO 2025-10-03 17:40:51,179 basehttp 8752 7148 "GET /auth/profile/ HTTP/1.1" 200 63989
 INFO 2025-10-03 17:40:54,131 basehttp 8752 7148 "GET /customer/enquiries/ HTTP/1.1" 200 51969
 INFO 2025-10-03 17:40:57,290 basehttp 8752 7148 "GET /customer/notifications/ HTTP/1.1" 200 53172
+INFO 2025-10-03 18:00:19,400 autoreload 17256 25136 Watching for file changes with StatReloader
+INFO 2025-10-03 18:00:22,835 basehttp 17256 20400 "GET /customer/demos/ HTTP/1.1" 200 64686
+INFO 2025-10-03 18:00:22,854 basehttp 17256 18964 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 18:00:22,855 basehttp 17256 20400 "GET /media/demos/thumbnails/thumb_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_709bf1ec.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 18:00:23,982 basehttp 17256 20400 "GET /customer/demos/ HTTP/1.1" 200 64686
+INFO 2025-10-03 18:00:27,891 basehttp 17256 20400 "GET /customer/my-requests/ HTTP/1.1" 200 69487
+INFO 2025-10-03 18:00:29,531 basehttp 17256 20400 "GET /customer/request-demo/ HTTP/1.1" 200 53510
+INFO 2025-10-03 18:03:19,101 basehttp 17256 20400 "GET /customer/request-demo/ HTTP/1.1" 200 53510
+INFO 2025-10-03 18:03:19,789 basehttp 17256 20400 "GET /customer/request-demo/ HTTP/1.1" 200 53510
+INFO 2025-10-03 18:03:19,963 basehttp 17256 20400 "GET /customer/request-demo/ HTTP/1.1" 200 53510
+INFO 2025-10-03 18:03:20,164 basehttp 17256 20400 "GET /customer/request-demo/ HTTP/1.1" 200 53510
+INFO 2025-10-03 18:03:20,331 basehttp 17256 20400 "GET /customer/request-demo/ HTTP/1.1" 200 53510
+INFO 2025-10-03 18:03:20,492 basehttp 17256 20400 "GET /customer/request-demo/ HTTP/1.1" 200 53510
+INFO 2025-10-03 18:03:20,692 basehttp 17256 20400 "GET /customer/request-demo/ HTTP/1.1" 200 53510
+INFO 2025-10-03 18:06:32,885 basehttp 17256 19040 "GET /admin/dashboard/ HTTP/1.1" 200 84457
+INFO 2025-10-03 18:06:34,110 basehttp 17256 19040 "GET /admin/customers/ HTTP/1.1" 200 65536
+INFO 2025-10-03 18:36:22,027 autoreload 7136 26340 Watching for file changes with StatReloader
+INFO 2025-10-03 18:36:48,206 basehttp 7136 20328 "GET /admin/customers/ HTTP/1.1" 200 65537
+INFO 2025-10-03 18:37:05,748 basehttp 7136 24444 "GET /customer/ HTTP/1.1" 200 54831
+INFO 2025-10-03 18:37:05,768 basehttp 7136 24444 "GET /media/demos/thumbnails/thumb_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_709bf1ec.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 18:37:05,769 basehttp 7136 24572 "GET /media/demos/thumbnails/thumb_testing-for-particular-customer_ebc456e4.png HTTP/1.1" 304 0
+INFO 2025-10-03 18:37:18,200 basehttp 7136 24444 "GET /customer/ HTTP/1.1" 200 54831
+INFO 2025-10-03 18:37:23,094 basehttp 7136 24444 "GET /customer/demos/ HTTP/1.1" 200 64686
+INFO 2025-10-03 18:37:23,109 basehttp 7136 24444 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 18:37:57,008 basehttp 7136 24444 "GET /customer/ HTTP/1.1" 200 54831
+INFO 2025-10-03 18:37:59,558 basehttp 7136 24444 "GET /customer/demos/ HTTP/1.1" 200 64686
+INFO 2025-10-03 18:38:03,029 basehttp 7136 24444 "GET /customer/enquiries/ HTTP/1.1" 200 51969
+INFO 2025-10-03 18:38:05,051 basehttp 7136 24444 "GET /customer/ HTTP/1.1" 200 54831
+INFO 2025-10-03 18:38:10,422 basehttp 7136 24444 "GET /customer/ HTTP/1.1" 200 54831
+INFO 2025-10-03 18:38:17,419 basehttp 7136 24444 "GET /customer/demos/ HTTP/1.1" 200 64686
+INFO 2025-10-03 18:38:29,156 basehttp 7136 24444 "GET /customer/liked-demos/ HTTP/1.1" 200 64691
+INFO 2025-10-03 18:39:09,655 basehttp 7136 24444 "GET /customer/demos/dcvdvc-hsvchd-hsdvchds-hvdchdvcs/ HTTP/1.1" 200 70304
+INFO 2025-10-03 18:39:32,897 basehttp 7136 24444 "GET /customer/ HTTP/1.1" 200 54831
+INFO 2025-10-03 18:41:44,703 basehttp 7136 24444 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 72312
+INFO 2025-10-03 18:41:54,636 basehttp 7136 24444 - Broken pipe from ('127.0.0.1', 59796)
+INFO 2025-10-03 18:42:08,459 basehttp 7136 10336 "GET /customer/demos/testing-for-particular-customer/ HTTP/1.1" 200 72312
+INFO 2025-10-03 18:42:23,619 basehttp 7136 10336 - Broken pipe from ('127.0.0.1', 57889)
+INFO 2025-10-03 18:42:25,220 basehttp 7136 20148 "GET /customer/my-requests/ HTTP/1.1" 200 69487
+INFO 2025-10-03 18:42:25,237 basehttp 7136 20148 "GET /media/demos/thumbnails/thumb_demo-testing-on-1-october_033c0b6e.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 18:43:01,813 basehttp 7136 20148 "GET /customer/contact-sales/ HTTP/1.1" 200 49208
+INFO 2025-10-03 18:43:43,270 basehttp 7136 20148 "GET /auth/profile/ HTTP/1.1" 200 63998
+INFO 2025-10-03 18:43:58,007 basehttp 7136 20148 "GET /customer/ HTTP/1.1" 200 54831
+INFO 2025-10-03 18:45:12,066 basehttp 7136 20148 "GET /customer/contact-sales/ HTTP/1.1" 200 49208
+INFO 2025-10-03 18:47:19,764 basehttp 7136 17572 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-03 18:47:19,785 basehttp 7136 17572 "GET /media/demos/thumbnails/thumb_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_709bf1ec.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 18:47:19,790 basehttp 7136 17572 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-03 18:47:22,755 basehttp 7136 17572 "GET /admin/demos/add/ HTTP/1.1" 200 74094
+INFO 2025-10-03 18:47:35,088 basehttp 7136 17572 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-03 18:47:37,363 basehttp 7136 17572 "GET /admin/demos/add/ HTTP/1.1" 200 74094
+INFO 2025-10-06 09:41:03,646 autoreload 16328 18996 Watching for file changes with StatReloader
+INFO 2025-10-06 09:41:10,295 basehttp 16328 27668 "GET / HTTP/1.1" 302 0
+INFO 2025-10-06 09:41:10,455 basehttp 16328 27668 "GET /dashboard/ HTTP/1.1" 200 37756
+WARNING 2025-10-06 09:41:10,680 basehttp 16328 27668 "GET /static/images/favicon.ico HTTP/1.1" 404 1914
+INFO 2025-10-06 09:41:19,058 basehttp 16328 12268 "GET /auth/signout/ HTTP/1.1" 302 0
+INFO 2025-10-06 09:41:19,091 basehttp 16328 12268 "GET /auth/signin/ HTTP/1.1" 200 26212
+INFO 2025-10-06 09:42:20,476 basehttp 16328 12268 "GET /auth/signup/ HTTP/1.1" 200 104881
+INFO 2025-10-06 09:56:14,066 autoreload 19320 4324 Watching for file changes with StatReloader
+INFO 2025-10-06 09:56:17,032 basehttp 19320 21368 "GET / HTTP/1.1" 302 0
+INFO 2025-10-06 09:56:17,181 basehttp 19320 21368 "GET /admin/dashboard/ HTTP/1.1" 200 84464
+WARNING 2025-10-06 09:56:17,492 log 19320 21368 Not Found: /favicon.ico
+WARNING 2025-10-06 09:56:17,493 basehttp 19320 21368 "GET /favicon.ico HTTP/1.1" 404 22586
+INFO 2025-10-06 09:56:18,682 basehttp 19320 21368 "GET /admin/customers/ HTTP/1.1" 200 65560
+INFO 2025-10-06 09:56:20,669 basehttp 19320 21368 "GET /admin/customers/create/ HTTP/1.1" 200 75123
+INFO 2025-10-06 09:56:23,359 basehttp 19320 21368 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 09:56:23,375 basehttp 19320 14884 "GET /media/demos/thumbnails/thumb_demo-consultation_617867f5.jpg HTTP/1.1" 304 0
+INFO 2025-10-06 09:56:23,375 basehttp 19320 21368 "GET /media/demos/thumbnails/thumb_dcvdvc-hsvchd-hsdvchds-hvdchdvcs_709bf1ec.jpg HTTP/1.1" 304 0
+INFO 2025-10-06 09:56:23,377 basehttp 19320 9376 "GET /media/demos/thumbnails/thumb_testing-for-particular-customer_ebc456e4.png HTTP/1.1" 304 0
+INFO 2025-10-06 09:56:23,378 basehttp 19320 11784 "GET /media/demos/thumbnails/thumb_demo-testing-on-1-october_033c0b6e.jpg HTTP/1.1" 304 0
+INFO 2025-10-06 09:56:26,592 basehttp 19320 11784 "GET /admin/demos/ HTTP/1.1" 200 52739
+INFO 2025-10-06 09:56:30,805 basehttp 19320 11784 "GET /admin/demos/add/ HTTP/1.1" 200 74094
+INFO 2025-10-06 10:03:27,693 basehttp 19320 25876 "GET /admin/demos/add/ HTTP/1.1" 200 54993
+INFO 2025-10-06 10:10:13,588 basehttp 19320 19056 "GET /admin/demos/add/ HTTP/1.1" 200 55233

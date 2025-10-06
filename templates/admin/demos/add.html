@@ -23,10 +23,10 @@
 
 {% block header_actions %}
 <div class="d-flex align-items-center gap-2">
-    <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary">
+    <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary btn-sm">
         <i class="fas fa-arrow-left me-1"></i>Back
     </a>
-    <button type="submit" form="demoForm" class="btn btn-primary">
+    <button type="submit" form="demoForm" class="btn btn-primary btn-sm">
         <i class="fas fa-save me-1"></i>Save Demo
     </button>
 </div>
@@ -34,97 +34,51 @@
 
 {% block admin_extra_css %}
 <style>
-    .form-container {
+    .compact-form {
         background: white;
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-md);
+        padding: var(--spacing-lg);
     }
 
-    .accordion-item {
-        border: none;
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .accordion-item:last-child {
-        border-bottom: none;
-    }
-
-    .accordion-header {
-        margin: 0;
-    }
-
-    .accordion-button {
-        background: white;
-        color: var(--dark-color);
+    .section-header {
+        font-size: 1rem;
         font-weight: 600;
-        font-size: 1.1rem;
-        padding: var(--spacing-lg) var(--spacing-xl);
-        border: none;
-        box-shadow: none !important;
-    }
-
-    .accordion-button:not(.collapsed) {
-        background: var(--gray-50);
         color: var(--primary-color);
-    }
-
-    .accordion-button::after {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231e3c72'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-    }
-
-    .accordion-button .section-icon {
-        font-size: 1.5rem;
-        margin-right: var(--spacing-md);
-        color: var(--primary-color);
-    }
-
-    .accordion-body {
-        padding: var(--spacing-xl);
-    }
-
-    .form-label {
-        font-weight: 500;
-        color: var(--dark-color);
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 2px solid var(--gray-200);
         display: flex;
         align-items: center;
         gap: var(--spacing-sm);
     }
 
-    .form-label.required::after {
-        content: '*';
-        color: var(--danger-color);
-    }
-
-    .form-control, .form-select {
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-md);
-        transition: all 0.3s ease;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.1);
-    }
-
-    .form-text {
-        font-size: 0.875rem;
-        color: var(--gray-600);
-        margin-top: var(--spacing-xs);
-    }
-
-    .file-type-selector {
+    .form-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-md);
         margin-bottom: var(--spacing-lg);
     }
 
+    .form-grid.three-col {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-grid .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .file-type-selector {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
     .file-type-option {
-        padding: var(--spacing-lg);
+        flex: 1;
+        padding: var(--spacing-md);
         border: 2px solid var(--gray-200);
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius-md);
         cursor: pointer;
         transition: all 0.3s ease;
         text-align: center;
@@ -134,7 +88,6 @@
     .file-type-option:hover {
         border-color: var(--primary-color);
         background: rgba(30, 60, 114, 0.05);
-        transform: translateY(-2px);
     }
 
     .file-type-option.active {
@@ -147,8 +100,8 @@
     }
 
     .file-type-icon {
-        font-size: 2.5rem;
-        margin-bottom: var(--spacing-sm);
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-xs);
         color: var(--gray-400);
     }
 
@@ -156,56 +109,24 @@
         color: var(--primary-color);
     }
 
-    .file-type-title {
-        font-weight: 600;
-        margin-bottom: var(--spacing-xs);
-    }
-
-    .file-type-description {
-        font-size: 0.875rem;
-        color: var(--gray-600);
-    }
-
-    .file-upload-area {
+    .file-upload-compact {
         border: 2px dashed var(--gray-300);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
         text-align: center;
         background: var(--gray-50);
         cursor: pointer;
         transition: all 0.3s ease;
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
     }
 
-    .file-upload-area:hover {
+    .file-upload-compact:hover {
         border-color: var(--primary-color);
         background: rgba(30, 60, 114, 0.05);
     }
 
-    .file-upload-area.error {
+    .file-upload-compact.error {
         border-color: var(--danger-color);
         background: rgba(220, 53, 69, 0.05);
-    }
-
-    .file-upload-icon {
-        font-size: 2.5rem;
-        color: var(--gray-400);
-        margin-bottom: var(--spacing-sm);
-    }
-
-    .file-upload-text {
-        font-weight: 500;
-        color: var(--gray-600);
-        margin-bottom: var(--spacing-xs);
-    }
-
-    .file-upload-hint {
-        font-size: 0.875rem;
-        color: var(--gray-500);
     }
 
     .file-section {
@@ -216,127 +137,89 @@
         display: block;
     }
 
-    .category-selection-area, .customer-selection-area {
+    .selection-box {
         padding: var(--spacing-md);
         background: var(--gray-50);
         border-radius: var(--radius-md);
         border: 1px solid var(--gray-200);
-        max-height: 350px;
+        max-height: 200px;
         overflow-y: auto;
     }
 
-    .category-selection-area.disabled, .customer-selection-area.disabled {
+    .selection-box.disabled {
         opacity: 0.5;
         pointer-events: none;
     }
 
-    .category-item, .customer-item {
-        margin-bottom: var(--spacing-sm);
-        padding: var(--spacing-sm) var(--spacing-md);
+    .checkbox-item {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        margin-bottom: var(--spacing-xs);
         background: white;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--gray-200);
-        transition: all 0.2s ease;
-    }
-
-    .category-item:hover, .customer-item:hover {
-        border-color: var(--primary-color);
-    }
-
-    .category-check, .customer-check {
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         gap: var(--spacing-sm);
     }
 
-    .category-check input[type="checkbox"], .customer-check input[type="checkbox"] {
-        width: 1.1rem;
-        height: 1.1rem;
-        cursor: pointer;
+    .checkbox-item:hover {
+        background: var(--gray-100);
     }
 
-    .category-check label, .customer-check label {
+    .checkbox-item input {
         margin: 0;
-        font-weight: 500;
+    }
+
+    .checkbox-item label {
+        margin: 0;
+        font-size: 0.9rem;
         cursor: pointer;
         flex: 1;
-        font-size: 0.95rem;
-    }
-
-    .customer-details {
-        font-size: 0.8rem;
-        color: var(--gray-600);
-        margin-left: 1.6rem;
-        margin-top: 0.2rem;
     }
 
     .subcategory-list {
-        margin-top: var(--spacing-xs);
         margin-left: var(--spacing-lg);
+        margin-top: var(--spacing-xs);
         padding-left: var(--spacing-sm);
         border-left: 2px solid var(--gray-200);
     }
 
-    .subcategory-item {
-        margin-bottom: var(--spacing-xs);
-        padding: var(--spacing-xs) var(--spacing-sm);
-        background: var(--gray-50);
-        border-radius: var(--radius-sm);
-    }
-
     .search-box {
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--spacing-sm);
         position: relative;
     }
 
     .search-box input {
-        padding-left: 2.5rem;
+        padding-left: 2rem;
+        font-size: 0.9rem;
     }
 
     .search-box i {
         position: absolute;
-        left: 1rem;
+        left: 0.75rem;
         top: 50%;
         transform: translateY(-50%);
         color: var(--gray-400);
     }
 
-    .alert {
-        border-radius: var(--radius-md);
-        padding: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
-    }
-
     .form-actions {
+        position: sticky;
+        bottom: 0;
         background: white;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
-        padding: var(--spacing-lg) var(--spacing-xl);
+        padding: var(--spacing-md);
+        border-top: 1px solid var(--gray-200);
         display: flex;
         justify-content: flex-end;
         gap: var(--spacing-md);
-        margin-top: var(--spacing-lg);
-        position: sticky;
-        bottom: var(--spacing-md);
-        z-index: 100;
+        margin: var(--spacing-lg) calc(-1 * var(--spacing-lg)) calc(-1 * var(--spacing-lg));
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
 
     @media (max-width: 768px) {
-        .file-type-selector {
+        .form-grid {
             grid-template-columns: 1fr;
         }
-
-        .accordion-button {
-            font-size: 1rem;
-            padding: var(--spacing-md) var(--spacing-lg);
-        }
-
-        .accordion-body {
-            padding: var(--spacing-lg);
-        }
-
-        .form-actions {
-            flex-direction: column;
+        .form-grid.three-col {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -346,287 +229,148 @@
 <form method="post" enctype="multipart/form-data" id="demoForm" class="needs-validation" novalidate>
     {% csrf_token %}
 
-    <div class="form-container">
-        <div class="accordion" id="demoFormAccordion">
-            
-            <!-- 1. Basic Information -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#basicInfo">
-                        <i class="fas fa-info-circle section-icon"></i>
-                        Basic Information
-                    </button>
-                </h2>
-                <div id="basicInfo" class="accordion-collapse collapse show" data-bs-parent="#demoFormAccordion">
-                    <div class="accordion-body">
-                        <div class="row">
-                            <div class="col-lg-8">
-                                <div class="mb-3">
-                                    <label for="id_title" class="form-label required">Demo Title</label>
-                                    <input type="text" name="title" id="id_title" class="form-control" placeholder="Enter demo title" required>
-                                    <div class="form-text">Clear, descriptive title</div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="id_description" class="form-label required">Description</label>
-                                    <textarea name="description" id="id_description" class="form-control" rows="4" placeholder="Describe what this demo showcases..." required></textarea>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-4">
-                                <div class="mb-3">
-                                    <label for="id_demo_type" class="form-label">Demo Type</label>
-                                    <select name="demo_type" id="id_demo_type" class="form-select">
-                                        {% for value, label in demo_types %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-
-                                <div class="mb-3" id="durationField">
-                                    <label for="id_duration" class="form-label">Duration</label>
-                                    <input type="text" name="duration" id="id_duration" class="form-control" placeholder="MM:SS or HH:MM:SS">
-                                    <div class="form-text">e.g., 5:30</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. File Upload -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fileUpload">
-                        <i class="fas fa-file-upload section-icon"></i>
-                        File Upload
-                    </button>
-                </h2>
-                <div id="fileUpload" class="accordion-collapse collapse" data-bs-parent="#demoFormAccordion">
-                    <div class="accordion-body">
-                        <!-- File Type Selection -->
-                        <div class="file-type-selector">
-                            <label class="file-type-option active" for="fileTypeVideo">
-                                <input type="radio" name="file_type" id="fileTypeVideo" value="video" checked>
-                                <div class="file-type-icon"><i class="fas fa-video"></i></div>
-                                <div class="file-type-title">Video Demo</div>
-                                <div class="file-type-description">MP4, AVI, MOV, WMV</div>
-                            </label>
-
-                            <label class="file-type-option" for="fileTypeWebGL">
-                                <input type="radio" name="file_type" id="fileTypeWebGL" value="webgl">
-                                <div class="file-type-icon"><i class="fas fa-cube"></i></div>
-                                <div class="file-type-title">WebGL Interactive</div>
-                                <div class="file-type-description">HTML, ZIP, GLTF, GLB</div>
-                            </label>
-                        </div>
-
-                        <div class="row">
-                            <!-- Video File -->
-                            <div class="col-md-6 file-section active" id="videoSection">
-                                <div class="mb-3">
-                                    <label class="form-label required">Demo Video</label>
-                                    <div class="file-upload-area" id="videoUploadArea">
-                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                                        <div class="file-upload-text">Click or drag video file</div>
-                                        <div class="file-upload-hint">Max 100MB</div>
-                                        <input type="file" name="video_file" id="id_video_file" accept="video/mp4,video/avi,video/mov,video/wmv" style="display: none;">
-                                    </div>
-                                    <div id="videoPreview" class="mt-2" style="display: none;"></div>
-                                    <div id="videoError" class="alert alert-danger mt-2" style="display: none;"></div>
-                                </div>
-                            </div>
-
-                            <!-- WebGL File -->
-                            <div class="col-md-6 file-section" id="webglSection">
-                                <div class="mb-3">
-                                    <label class="form-label required">WebGL File</label>
-                                    <div class="file-upload-area" id="webglUploadArea">
-                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                                        <div class="file-upload-text">Click or drag WebGL file</div>
-                                        <div class="file-upload-hint">Max 100MB</div>
-                                        <input type="file" name="webgl_file" id="id_webgl_file" accept=".html,.zip,.gltf,.glb" style="display: none;">
-                                    </div>
-                                    <div id="webglPreview" class="mt-2" style="display: none;"></div>
-                                    <div id="webglError" class="alert alert-danger mt-2" style="display: none;"></div>
-                                </div>
-                            </div>
-
-                            <!-- Thumbnail -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label required">Thumbnail Image</label>
-                                    <div class="file-upload-area" id="thumbnailUploadArea">
-                                        <div class="file-upload-icon"><i class="fas fa-image"></i></div>
-                                        <div class="file-upload-text">Click or drag thumbnail</div>
-                                        <div class="file-upload-hint">Max 5MB</div>
-                                        <input type="file" name="thumbnail" id="id_thumbnail" accept="image/jpeg,image/jpg,image/png,image/webp" required style="display: none;">
-                                    </div>
-                                    <div id="thumbnailPreview" class="mt-2" style="display: none;"></div>
-                                    <div id="thumbnailError" class="alert alert-danger mt-2" style="display: none;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Business Categories -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#categories">
-                        <i class="fas fa-bullseye section-icon"></i>
-                        Target Business Categories
-                    </button>
-                </h2>
-                <div id="categories" class="accordion-collapse collapse" data-bs-parent="#demoFormAccordion">
-                    <div class="accordion-body">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Select at least one category or enable "All Categories"
-                        </div>
-
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="allBusinessCategoriesCheckbox">
-                            <label class="form-check-label" for="allBusinessCategoriesCheckbox">
-                                <strong>Available to All Business Categories</strong>
-                            </label>
-                        </div>
-
-                        <div id="categorySelectionArea" class="category-selection-area">
-                            {% if business_categories %}
-                                {% for category in business_categories %}
-                                <div class="category-item">
-                                    <div class="category-check">
-                                        <input type="checkbox" name="target_business_categories" value="{{ category.id }}" id="cat_{{ category.id }}" class="category-checkbox">
-                                        <label for="cat_{{ category.id }}">
-                                            {% if category.icon %}{{ category.icon }}{% endif %} {{ category.name }}
-                                        </label>
-                                    </div>
-                                    
-                                    {% if category.subcategories.all %}
-                                    <div class="subcategory-list" id="subcat_list_{{ category.id }}" style="display: none;">
-                                        {% for subcategory in category.subcategories.all %}
-                                        <div class="subcategory-item">
-                                            <div class="category-check">
-                                                <input type="checkbox" name="target_business_subcategories" value="{{ subcategory.id }}" id="subcat_{{ subcategory.id }}" class="subcategory-checkbox" data-parent="{{ category.id }}">
-                                                <label for="subcat_{{ subcategory.id }}">{{ subcategory.name }}</label>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                            <div class="text-center py-4 text-muted">
-                                <i class="fas fa-folder-open fa-2x mb-2"></i>
-                                <p>No categories available</p>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. Customer Access -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#customers">
-                        <i class="fas fa-users section-icon"></i>
-                        Customer Access Control
-                    </button>
-                </h2>
-                <div id="customers" class="accordion-collapse collapse" data-bs-parent="#demoFormAccordion">
-                    <div class="accordion-body">
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="allCustomersCheckbox" checked>
-                            <label class="form-check-label" for="allCustomersCheckbox">
-                                <strong>Available to All Customers</strong>
-                            </label>
-                        </div>
-
-                        <div id="customerSelectionArea" class="customer-selection-area disabled">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="customerSearch" class="form-control form-control-sm" placeholder="Search customers...">
-                            </div>
-
-                            <div id="customerList">
-                                {% if customers %}
-                                    {% for customer in customers %}
-                                    <div class="customer-item" data-search="{{ customer.full_name|lower }} {{ customer.email|lower }} {{ customer.organization|lower }}">
-                                        <div class="customer-check">
-                                            <input type="checkbox" name="target_customers" value="{{ customer.id }}" id="cust_{{ customer.id }}" class="customer-checkbox">
-                                            <label for="cust_{{ customer.id }}">{{ customer.full_name }}</label>
-                                        </div>
-                                        <div class="customer-details">
-                                            {{ customer.email }}{% if customer.organization %} | {{ customer.organization }}{% endif %}
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="fas fa-user-slash fa-2x mb-2"></i>
-                                    <p>No customers available</p>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5. Settings -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#settings">
-                        <i class="fas fa-cogs section-icon"></i>
-                        Settings
-                    </button>
-                </h2>
-                <div id="settings" class="accordion-collapse collapse" data-bs-parent="#demoFormAccordion">
-                    <div class="accordion-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured">
-                                    <label class="form-check-label" for="id_is_featured">
-                                        <strong>Feature this demo</strong>
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" checked>
-                                    <label class="form-check-label" for="id_is_active">
-                                        <strong>Make demo active</strong>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="id_sort_order" class="form-label">Sort Order</label>
-                                    <input type="number" name="sort_order" id="id_sort_order" class="form-control" min="0" value="0">
-                                    <div class="form-text">Lower numbers appear first</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+    <div class="compact-form">
+        <!-- Basic Information -->
+        <div class="section-header">
+            <i class="fas fa-info-circle"></i> Basic Information
         </div>
-    </div>
+        <div class="form-grid">
+            <div class="full-width">
+                <label for="id_title" class="form-label">Demo Title <span class="text-danger">*</span></label>
+                <input type="text" name="title" id="id_title" class="form-control" required>
+            </div>
+            <div class="full-width">
+                <label for="id_description" class="form-label">Description <span class="text-danger">*</span></label>
+                <textarea name="description" id="id_description" class="form-control" rows="2" required></textarea>
+            </div>
+            <div>
+                <label for="id_demo_type" class="form-label">Demo Type</label>
+                <select name="demo_type" id="id_demo_type" class="form-select">
+                    {% for value, label in demo_types %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="durationField">
+                <label for="id_duration" class="form-label">Duration</label>
+                <input type="text" name="duration" id="id_duration" class="form-control" placeholder="MM:SS">
+            </div>
+        </div>
 
-    <!-- Form Actions -->
-    <div class="form-actions">
-        <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-times me-1"></i>Cancel
-        </a>
-        <button type="submit" class="btn btn-primary" id="submitBtn">
-            <i class="fas fa-save me-1"></i>Create Demo
-        </button>
+        <!-- File Upload -->
+        <div class="section-header">
+            <i class="fas fa-file-upload"></i> File Upload
+        </div>
+        
+        <div class="form-grid">
+            <div>
+                <label for="id_file_type" class="form-label">File Type <span class="text-danger">*</span></label>
+                <select name="file_type" id="id_file_type" class="form-select">
+                    <option value="video" selected>Video Demo (MP4, AVI, MOV, WMV)</option>
+                    <option value="webgl">WebGL Interactive (HTML, ZIP, GLTF, GLB)</option>
+                </select>
+            </div>
+            <div id="demoFileField">
+                <label class="form-label">Demo File <span class="text-danger">*</span></label>
+                <input type="file" name="video_file" id="id_video_file" class="form-control" accept="video/*">
+                <input type="file" name="webgl_file" id="id_webgl_file" class="form-control" accept=".html,.zip,.gltf,.glb" style="display: none;">
+                <div class="form-text" id="fileHelp">Max 100MB</div>
+                <div id="demoFilePreview" style="display: none; margin-top: 0.5rem;"></div>
+                <div id="demoFileError" class="alert alert-danger mt-2" style="display: none; padding: 0.5rem; font-size: 0.85rem;"></div>
+            </div>
+            <div>
+                <label for="id_thumbnail" class="form-label">Thumbnail <span class="text-danger">*</span></label>
+                <input type="file" name="thumbnail" id="id_thumbnail" class="form-control" accept="image/*" required>
+                <div class="form-text">Max 5MB (JPG, PNG, WebP)</div>
+                <div id="thumbnailPreview" style="display: none; margin-top: 0.5rem;"></div>
+                <div id="thumbnailError" class="alert alert-danger mt-2" style="display: none; padding: 0.5rem; font-size: 0.85rem;"></div>
+            </div>
+        </div>
+
+        <!-- Business Categories & Customers -->
+        <div class="section-header mt-4">
+            <i class="fas fa-bullseye"></i> Target Audience
+        </div>
+        <div class="form-grid">
+            <div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="allBusinessCategoriesCheckbox">
+                    <label class="form-check-label" for="allBusinessCategoriesCheckbox">
+                        <strong>All Business Categories</strong>
+                    </label>
+                </div>
+                <div id="categorySelectionArea" class="selection-box">
+                    {% for category in business_categories %}
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="target_business_categories" value="{{ category.id }}" id="cat_{{ category.id }}" class="category-checkbox">
+                        <label for="cat_{{ category.id }}">{{ category.name }}</label>
+                    </div>
+                    {% if category.subcategories.all %}
+                    <div class="subcategory-list" id="subcat_list_{{ category.id }}" style="display: none;">
+                        {% for subcategory in category.subcategories.all %}
+                        <div class="checkbox-item">
+                            <input type="checkbox" name="target_business_subcategories" value="{{ subcategory.id }}" id="subcat_{{ subcategory.id }}" class="subcategory-checkbox" data-parent="{{ category.id }}">
+                            <label for="subcat_{{ subcategory.id }}">{{ subcategory.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="allCustomersCheckbox" checked>
+                    <label class="form-check-label" for="allCustomersCheckbox">
+                        <strong>All Customers</strong>
+                    </label>
+                </div>
+                <div id="customerSelectionArea" class="selection-box disabled">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="customerSearch" class="form-control form-control-sm" placeholder="Search...">
+                    </div>
+                    <div id="customerList">
+                        {% for customer in customers %}
+                        <div class="checkbox-item" data-search="{{ customer.full_name|lower }} {{ customer.email|lower }}">
+                            <input type="checkbox" name="target_customers" value="{{ customer.id }}" id="cust_{{ customer.id }}">
+                            <label for="cust_{{ customer.id }}">{{ customer.full_name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="section-header mt-4">
+            <i class="fas fa-cogs"></i> Settings
+        </div>
+        <div class="form-grid three-col">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured">
+                <label class="form-check-label" for="id_is_featured">Featured</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" checked>
+                <label class="form-check-label" for="id_is_active">Active</label>
+            </div>
+            <div>
+                <label for="id_sort_order" class="form-label">Sort Order</label>
+                <input type="number" name="sort_order" id="id_sort_order" class="form-control" value="0">
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times me-1"></i>Cancel
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm" id="submitBtn">
+                <i class="fas fa-save me-1"></i>Create Demo
+            </button>
+        </div>
     </div>
 </form>
 {% endblock %}
@@ -642,147 +386,98 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setupFileTypeSelection() {
-    const fileTypeOptions = document.querySelectorAll('.file-type-option');
-    const videoSection = document.getElementById('videoSection');
-    const webglSection = document.getElementById('webglSection');
+    const fileTypeSelect = document.getElementById('id_file_type');
+    const videoFileInput = document.getElementById('id_video_file');
+    const webglFileInput = document.getElementById('id_webgl_file');
     const durationField = document.getElementById('durationField');
+    const fileHelp = document.getElementById('fileHelp');
     
-    fileTypeOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            fileTypeOptions.forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
-            
-            const fileType = this.querySelector('input').value;
-            
-            if (fileType === 'video') {
-                videoSection.classList.add('active');
-                webglSection.classList.remove('active');
-                durationField.style.display = 'block';
-                document.getElementById('id_video_file').required = true;
-                document.getElementById('id_webgl_file').required = false;
-            } else {
-                videoSection.classList.remove('active');
-                webglSection.classList.add('active');
-                durationField.style.display = 'none';
-                document.getElementById('id_video_file').required = false;
-                document.getElementById('id_webgl_file').required = true;
-            }
-            
-            clearFileErrors();
-        });
+    fileTypeSelect.addEventListener('change', function() {
+        const fileType = this.value;
+        
+        if (fileType === 'video') {
+            videoFileInput.style.display = 'block';
+            webglFileInput.style.display = 'none';
+            videoFileInput.required = true;
+            webglFileInput.required = false;
+            durationField.style.display = 'block';
+            fileHelp.textContent = 'Max 100MB (MP4, AVI, MOV, WMV)';
+        } else {
+            videoFileInput.style.display = 'none';
+            webglFileInput.style.display = 'block';
+            videoFileInput.required = false;
+            webglFileInput.required = true;
+            durationField.style.display = 'none';
+            fileHelp.textContent = 'Max 100MB (HTML, ZIP, GLTF, GLB)';
+        }
+        
+        // Clear previous file selections
+        videoFileInput.value = '';
+        webglFileInput.value = '';
+        document.getElementById('demoFilePreview').style.display = 'none';
+        document.getElementById('demoFileError').style.display = 'none';
     });
 }
 
 function setupFileUpload() {
-    setupFileInput('id_video_file', 'videoUploadArea', 'videoPreview', 'videoError', {
-        maxSize: 100 * 1024 * 1024,
-        allowedExtensions: ['mp4', 'avi', 'mov', 'wmv'],
-        fileType: 'video'
-    });
+    // Setup video file input
+    setupDemoFileInput('id_video_file', 100);
     
-    setupFileInput('id_webgl_file', 'webglUploadArea', 'webglPreview', 'webglError', {
-        maxSize: 100 * 1024 * 1024,
-        allowedExtensions: ['html', 'zip', 'gltf', 'glb'],
-        fileType: 'webgl'
-    });
+    // Setup webgl file input
+    setupDemoFileInput('id_webgl_file', 100);
     
-    setupFileInput('id_thumbnail', 'thumbnailUploadArea', 'thumbnailPreview', 'thumbnailError', {
-        maxSize: 5 * 1024 * 1024,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
-        fileType: 'image'
+    // Setup thumbnail input
+    const thumbnailInput = document.getElementById('id_thumbnail');
+    const thumbnailPreview = document.getElementById('thumbnailPreview');
+    const thumbnailError = document.getElementById('thumbnailError');
+    
+    thumbnailInput.addEventListener('change', () => {
+        const file = thumbnailInput.files[0];
+        thumbnailError.style.display = 'none';
+        thumbnailPreview.style.display = 'none';
+        
+        if (!file) return;
+        
+        if (file.size > 5 * 1024 * 1024) {
+            thumbnailError.textContent = 'File exceeds 5MB limit';
+            thumbnailError.style.display = 'block';
+            thumbnailInput.value = '';
+            return;
+        }
+        
+        const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+        thumbnailPreview.innerHTML = `<div class="alert alert-success mb-0" style="padding: 0.5rem; font-size: 0.85rem;">
+            <i class="fas fa-check me-1"></i>${file.name} (${fileSizeMB} MB)
+        </div>`;
+        thumbnailPreview.style.display = 'block';
     });
 }
 
-function setupFileInput(inputId, areaId, previewId, errorId, options) {
+function setupDemoFileInput(inputId, maxSizeMB) {
     const input = document.getElementById(inputId);
-    const area = document.getElementById(areaId);
-    const preview = document.getElementById(previewId);
-    const errorDiv = document.getElementById(errorId);
-    
-    area.addEventListener('click', () => input.click());
-    
-    area.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        area.style.borderColor = 'var(--primary-color)';
-    });
-    
-    area.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        area.style.borderColor = 'var(--gray-300)';
-    });
-    
-    area.addEventListener('drop', (e) => {
-        e.preventDefault();
-        area.style.borderColor = 'var(--gray-300)';
-        if (e.dataTransfer.files.length) {
-            input.files = e.dataTransfer.files;
-            validateAndPreviewFile(input, preview, errorDiv, area, options);
-        }
-    });
+    const preview = document.getElementById('demoFilePreview');
+    const errorDiv = document.getElementById('demoFileError');
     
     input.addEventListener('change', () => {
-        validateAndPreviewFile(input, preview, errorDiv, area, options);
-    });
-}
-
-function validateAndPreviewFile(input, preview, errorDiv, area, options) {
-    const file = input.files[0];
-    
-    errorDiv.style.display = 'none';
-    errorDiv.textContent = '';
-    area.classList.remove('error');
-    preview.style.display = 'none';
-    
-    if (!file) return;
-    
-    if (file.size > options.maxSize) {
-        const maxSizeMB = (options.maxSize / 1024 / 1024).toFixed(0);
-        showFileError(errorDiv, area, `File exceeds ${maxSizeMB}MB limit`);
-        input.value = '';
-        return;
-    }
-    
-    const fileExt = file.name.split('.').pop().toLowerCase();
-    if (!options.allowedExtensions.includes(fileExt)) {
-        showFileError(errorDiv, area, `Invalid format. Allowed: ${options.allowedExtensions.join(', ').toUpperCase()}`);
-        input.value = '';
-        return;
-    }
-    
-    showFilePreview(file, preview, options.fileType);
-}
-
-function showFileError(errorDiv, area, message) {
-    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${message}`;
-    errorDiv.style.display = 'block';
-    area.classList.add('error');
-}
-
-function clearFileErrors() {
-    ['videoError', 'webglError', 'thumbnailError'].forEach(id => {
-        const div = document.getElementById(id);
-        if (div) {
-            div.style.display = 'none';
-            div.textContent = '';
+        const file = input.files[0];
+        errorDiv.style.display = 'none';
+        preview.style.display = 'none';
+        
+        if (!file) return;
+        
+        if (file.size > maxSizeMB * 1024 * 1024) {
+            errorDiv.textContent = `File exceeds ${maxSizeMB}MB limit`;
+            errorDiv.style.display = 'block';
+            input.value = '';
+            return;
         }
+        
+        const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+        preview.innerHTML = `<div class="alert alert-success mb-0" style="padding: 0.5rem; font-size: 0.85rem;">
+            <i class="fas fa-check me-1"></i>${file.name} (${fileSizeMB} MB)
+        </div>`;
+        preview.style.display = 'block';
     });
-    
-    document.querySelectorAll('.file-upload-area').forEach(area => {
-        area.classList.remove('error');
-    });
-}
-
-function showFilePreview(file, preview, fileType) {
-    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-    const icon = fileType === 'video' ? 'fa-video' : fileType === 'webgl' ? 'fa-cube' : 'fa-image';
-    
-    preview.innerHTML = `
-        <div class="alert alert-success mb-0">
-            <i class="fas ${icon} me-2"></i>
-            <strong>${file.name}</strong> (${fileSizeMB} MB)
-        </div>
-    `;
-    preview.style.display = 'block';
 }
 
 function setupCategorySelection() {
@@ -815,7 +510,6 @@ function setupCategorySelection() {
                     subcategoryList.querySelectorAll('input').forEach(sub => sub.checked = false);
                 }
             }
-            
             if (this.checked) {
                 allCategoriesCheckbox.checked = false;
             }
@@ -826,27 +520,24 @@ function setupCategorySelection() {
 function setupCustomerSelection() {
     const allCustomersCheckbox = document.getElementById('allCustomersCheckbox');
     const customerSelectionArea = document.getElementById('customerSelectionArea');
-    const customerCheckboxes = document.querySelectorAll('.customer-checkbox');
     const customerSearch = document.getElementById('customerSearch');
     
     allCustomersCheckbox.addEventListener('change', function() {
         if (this.checked) {
             customerSelectionArea.classList.add('disabled');
-            customerCheckboxes.forEach(cb => cb.checked = false);
+            document.querySelectorAll('.customer-checkbox').forEach(cb => cb.checked = false);
         } else {
             customerSelectionArea.classList.remove('disabled');
         }
     });
     
-    if (customerSearch) {
-        customerSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            document.querySelectorAll('.customer-item').forEach(item => {
-                const searchData = item.getAttribute('data-search');
-                item.style.display = searchData.includes(searchTerm) ? 'block' : 'none';
-            });
+    customerSearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        document.querySelectorAll('#customerList .checkbox-item').forEach(item => {
+            const searchData = item.getAttribute('data-search');
+            item.style.display = searchData.includes(searchTerm) ? 'flex' : 'none';
         });
-    }
+    });
 }
 
 function setupFormValidation() {
@@ -857,34 +548,29 @@ function setupFormValidation() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating...';
         
-        const fileType = document.querySelector('input[name="file_type"]:checked').value;
-        let isValid = true;
-        
-        clearFileErrors();
-        
-        if (fileType === 'video' && !document.getElementById('id_video_file').files[0]) {
-            showFileError(document.getElementById('videoError'), document.getElementById('videoUploadArea'), 'Video file required');
-            isValid = false;
-        } else if (fileType === 'webgl' && !document.getElementById('id_webgl_file').files[0]) {
-            showFileError(document.getElementById('webglError'), document.getElementById('webglUploadArea'), 'WebGL file required');
-            isValid = false;
-        }
-        
-        if (!document.getElementById('id_thumbnail').files[0]) {
-            showFileError(document.getElementById('thumbnailError'), document.getElementById('thumbnailUploadArea'), 'Thumbnail required');
-            isValid = false;
-        }
-        
+        const fileType = document.getElementById('id_file_type').value;
         const allCategoriesChecked = document.getElementById('allBusinessCategoriesCheckbox').checked;
         const anyCategorySelected = document.querySelectorAll('.category-checkbox:checked').length > 0;
         
-        if (!allCategoriesChecked && !anyCategorySelected) {
-            alert('Select at least one business category or enable "All Categories"');
-            isValid = false;
+        // Validate file upload based on file type
+        let fileValid = false;
+        if (fileType === 'video') {
+            fileValid = document.getElementById('id_video_file').files.length > 0;
+        } else {
+            fileValid = document.getElementById('id_webgl_file').files.length > 0;
         }
         
-        if (!isValid) {
+        if (!fileValid) {
             e.preventDefault();
+            alert('Please upload the required demo file');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save me-1"></i>Create Demo';
+            return false;
+        }
+        
+        if (!allCategoriesChecked && !anyCategorySelected) {
+            e.preventDefault();
+            alert('Select at least one business category or enable "All Categories"');
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-save me-1"></i>Create Demo';
             return false;
