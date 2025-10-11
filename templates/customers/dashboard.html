@@ -98,89 +98,142 @@
         margin-bottom: 0;
     }
 
-    /* Featured Demos Filter Section */
-    .featured-filters {
-        display: flex;
-        gap: var(--spacing-sm);
-        margin-bottom: var(--spacing-lg);
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .filter-btn {
-        padding: 8px 16px;
-        border: 2px solid var(--gray-300);
-        border-radius: 20px;
-        background: white;
-        color: var(--gray-700);
-        font-size: 0.875rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .filter-btn:hover {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-    }
-
-    .filter-btn.active {
-        background: var(--gradient-primary);
-        color: white;
-        border-color: var(--primary-color);
-    }
-
-    /* Demo Cards Grid */
+    /* Demo Cards Grid - Matching Browse Demos Style */
     .demos-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: var(--spacing-lg);
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: var(--spacing-xl);
     }
 
     .demo-card {
         background: white;
-        border-radius: var(--radius-lg);
+        border-radius: var(--radius-xl);
         overflow: hidden;
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--shadow-md);
         transition: all 0.3s ease;
         border: 1px solid var(--gray-200);
+        position: relative;
     }
 
     .demo-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-lg);
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    /* Thumbnail Container */
+    .demo-thumbnail-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        background: var(--gray-100);
     }
 
     .demo-card-thumbnail {
         width: 100%;
-        height: 180px;
+        height: 100%;
         object-fit: cover;
-        background: var(--gray-200);
+        transition: all 0.3s ease;
+        -webkit-user-drag: none;
+        pointer-events: none;
     }
 
-    .demo-card-body {
-        padding: var(--spacing-md);
+    .demo-card:hover .demo-card-thumbnail {
+        transform: scale(1.05);
     }
 
-    .demo-category-badge {
-        display: inline-block;
+    /* Overlay with Play Button */
+    .demo-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(30, 60, 114, 0.8), rgba(42, 82, 152, 0.6));
+        opacity: 0;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .demo-card:hover .demo-overlay {
+        opacity: 1;
+    }
+
+    .play-button {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        transform: scale(0.8);
+        transition: all 0.3s ease;
+        pointer-events: auto;
+    }
+
+    .demo-card:hover .play-button {
+        transform: scale(1);
+    }
+
+    /* Badge Styles */
+    .demo-badge {
+        position: absolute;
+        top: var(--spacing-md);
+        right: var(--spacing-md);
         background: var(--primary-color);
         color: white;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.7rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-md);
+        font-size: 0.75rem;
         font-weight: 600;
-        margin-bottom: var(--spacing-xs);
+        text-transform: uppercase;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .demo-badge.webgl {
+        background: rgba(6, 182, 212, 0.95);
+    }
+
+    .demo-badge.video {
+        background: rgba(59, 130, 246, 0.95);
+    }
+
+    .demo-badge.status-watched {
+        background: var(--success-color);
+    }
+
+    .demo-badge.status-featured {
+        background: var(--info-color);
+    }
+
+    /* Card Content */
+    .demo-card-content {
+        padding: var(--spacing-lg);
+    }
+
+    .demo-category {
+        color: var(--primary-color);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--spacing-sm);
     }
 
     .demo-card-title {
-        font-size: 1rem;
+        font-size: 1.25rem;
         font-weight: 700;
         color: var(--dark-color);
-        margin-bottom: var(--spacing-xs);
+        margin-bottom: var(--spacing-sm);
+        line-height: 1.3;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -188,65 +241,109 @@
     }
 
     .demo-card-description {
-        font-size: 0.875rem;
         color: var(--gray-600);
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+        line-height: 1.5;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
 
-    .demo-card-meta {
+    /* Demo Meta */
+    .demo-meta {
         display: flex;
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
-        font-size: 0.75rem;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+        font-size: 0.875rem;
         color: var(--gray-500);
     }
 
-    .demo-card-meta span {
+    .demo-stats {
         display: flex;
-        align-items: center;
-        gap: 4px;
+        gap: var(--spacing-md);
     }
 
-    .demo-card-actions {
+    /* Demo Actions */
+    .demo-actions {
         display: flex;
         gap: var(--spacing-sm);
     }
 
-    .demo-card-actions .btn {
-        flex: 1;
-        font-size: 0.875rem;
-        padding: 8px 12px;
-    }
-
-    .demo-type-badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba(0, 0, 0, 0.7);
+    .btn-watch {
+        background: var(--gradient-primary);
         color: white;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.7rem;
+        border: none;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-lg);
         font-weight: 600;
-        display: flex;
+        transition: all 0.3s ease;
+        flex: 1;
+        text-decoration: none;
+        display: inline-flex;
         align-items: center;
-        gap: 4px;
+        justify-content: center;
     }
 
-    .demo-type-badge i {
-        font-size: 0.75rem;
+    .btn-watch:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: translateY(-2px);
     }
 
-    .demo-type-badge.webgl {
-        background: rgba(6, 182, 212, 0.9);
+    .btn-launch {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        color: white;
+        border: none;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .demo-card-thumbnail-wrapper {
-        position: relative;
+    .btn-launch:hover {
+        background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-request {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-lg);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-request:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* Watermark */
+    .demo-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        color: rgba(255, 255, 255, 0.1);
+        font-size: 1.5rem;
+        font-weight: bold;
+        pointer-events: none;
+        z-index: 1;
+        user-select: none;
     }
 
     /* Empty State */
@@ -274,53 +371,6 @@
         display: block;
     }
 
-    /* Activity Feed */
-    .activity-feed {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-
-    .activity-item {
-        display: flex;
-        align-items: center;
-        padding: var(--spacing-md);
-        border-bottom: 1px solid var(--gray-200);
-        transition: all 0.3s ease;
-    }
-
-    .activity-item:hover {
-        background: var(--gray-50);
-    }
-
-    .activity-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: var(--spacing-md);
-        font-size: 1.125rem;
-    }
-
-    .activity-icon.demo { background: var(--gradient-primary); color: white; }
-    .activity-icon.enquiry { background: var(--gradient-success); color: white; }
-
-    .activity-content {
-        flex: 1;
-    }
-
-    .activity-title {
-        font-weight: 600;
-        margin-bottom: var(--spacing-xs);
-        color: var(--dark-color);
-    }
-
-    .activity-meta {
-        font-size: 0.875rem;
-        color: var(--gray-500);
-    }
-
     @media (max-width: 768px) {
         .welcome-title {
             font-size: 1.5rem;
@@ -328,10 +378,7 @@
 
         .demos-grid {
             grid-template-columns: 1fr;
-        }
-
-        .featured-filters {
-            justify-content: center;
+            gap: var(--spacing-lg);
         }
     }
 </style>
@@ -347,12 +394,12 @@
 </div>
 
 <div class="row">
-    <!-- Featured Demos with Filters -->
+    <!-- Featured Demos -->
     <div class="col-lg-12">
         <div class="customer-card">
             <div class="customer-card-header">
                 <h2 class="customer-card-title">
-                    <i class="fas fa-star"></i>
+                    <i class="fas fa-lightbulb"></i>
                     Featured Demos
                 </h2>
                 <a href="{% url 'customers:browse_demos' %}" class="btn btn-outline-primary btn-sm">
@@ -360,18 +407,6 @@
                 </a>
             </div>
             <div class="customer-card-body">
-                <!-- Filters - Only All and Product Demo -->
-                <div class="featured-filters">
-                    <button class="filter-btn active" data-filter="all">
-                        <i class="fas fa-th"></i>
-                        All
-                    </button>
-                    <button class="filter-btn" data-filter="product">
-                        <i class="fas fa-box"></i>
-                        Product Demo
-                    </button>
-                </div>
-
                 <!-- Loading State -->
                 <div class="demos-loading">
                     <i class="fas fa-spinner fa-spin fa-2x"></i>
@@ -383,81 +418,95 @@
                     <div class="demos-grid" id="demosGrid">
                         {% for demo in featured_demos %}
                             <div class="demo-card" data-demo-type="{{ demo.demo_type }}">
-                                <div class="demo-card-thumbnail-wrapper">
+                                <div class="demo-watermark">{{ user.email }}</div>
+                                
+                                <div class="demo-thumbnail-container">
                                     {% if demo.thumbnail %}
                                         <img src="{{ demo.thumbnail.url }}" 
                                              alt="{{ demo.title }}" 
                                              class="demo-card-thumbnail no-select">
                                     {% else %}
-                                        <div class="demo-card-thumbnail d-flex align-items-center justify-content-center">
+                                        <div class="demo-card-thumbnail" style="background: var(--gray-200); display: flex; align-items: center; justify-content: center;">
                                             {% if demo.file_type == 'webgl' %}
-                                                <i class="fas fa-cube fa-3x text-muted"></i>
+                                                <i class="fas fa-cube text-muted" style="font-size: 3rem;"></i>
                                             {% else %}
-                                                <i class="fas fa-video fa-3x text-muted"></i>
+                                                <i class="fas fa-video text-muted" style="font-size: 3rem;"></i>
                                             {% endif %}
                                         </div>
                                     {% endif %}
                                     
-                                    <!-- File Type Badge -->
-                                    {% if demo.file_type == 'webgl' %}
-                                        <span class="demo-type-badge webgl">
-                                            <i class="fas fa-cube"></i>WebGL
-                                        </span>
-                                    {% else %}
-                                        <span class="demo-type-badge">
-                                            <i class="fas fa-video"></i>Video
-                                        </span>
+                                    {% if demo.file_type == 'video' and demo.video_file %}
+                                    <div class="demo-overlay">
+                                        <a href="{% url 'customers:demo_detail' demo.slug %}">                       
+                                            <div class="play-button">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    {% elif demo.file_type == 'webgl' and demo.webgl_file %}
+                                    <div class="demo-overlay">
+                                        <a href="{% url 'customers:webgl_viewer' demo.slug %}">                       
+                                            <div class="play-button">
+                                                <i class="fas fa-cube"></i>
+                                            </div>
+                                        </a>
+                                    </div>
                                     {% endif %}
+                            
                                 </div>
                                 
-                                <div class="demo-card-body">
-                                    {% if demo.primary_business_category %}
-                                        <span class="demo-category-badge">
+                                <div class="demo-card-content">
+                                    <div class="demo-category">
+                                        {% if demo.primary_business_category %}
                                             {{ demo.primary_business_category.name }}
-                                        </span>
-                                    {% endif %}
+                                        {% else %}
+                                            {{ demo.get_demo_type_display }}
+                                        {% endif %}
+                                    </div>
                                     
                                     <h3 class="demo-card-title">{{ demo.title }}</h3>
                                     
                                     {% if demo.description %}
-                                        <p class="demo-card-description">{{ demo.description|truncatewords:15 }}</p>
+                                        <p class="demo-card-description">{{ demo.description|truncatewords:20 }}</p>
                                     {% endif %}
                                     
-                                    <div class="demo-card-meta">
-                                        <span>
-                                            <i class="fas fa-eye"></i>
-                                            {{ demo.views_count }}
-                                        </span>
-                                        <span>
-                                            <i class="fas fa-heart"></i>
-                                            {{ demo.likes_count }}
-                                        </span>
-                                        {% if demo.file_type == 'video' and demo.duration %}
-                                            <span>
-                                                <i class="fas fa-clock"></i>
-                                                {{ demo.formatted_duration }}
-                                            </span>
-                                        {% elif demo.file_type == 'webgl' %}
-                                            <span>
-                                                <i class="fas fa-cube"></i>
-                                                Interactive
-                                            </span>
-                                        {% endif %}
+                                    <div class="demo-meta">
+                                        <div class="demo-stats">
+                                            <span><i class="fas fa-eye me-1"></i>{{ demo.views_count }}</span>
+                                            <span><i class="fas fa-heart me-1"></i>{{ demo.likes_count }}</span>
+                                            {% comment %} {% if demo.file_type == 'video' and demo.duration %}
+                                                <span><i class="fas fa-clock me-1"></i>{{ demo.formatted_duration }}</span>
+                                            {% elif demo.file_type == 'webgl' %}
+                                                <span><i class="fas fa-cube me-1"></i>Interactive</span>
+                                            {% endif %} {% endcomment %}
+                                        </div>
                                     </div>
                                     
-                                    <div class="demo-card-actions">
-                                        <a href="{% url 'customers:demo_detail' demo.slug %}" 
-                                           class="btn btn-primary btn-sm">
-                                            {% if demo.file_type == 'webgl' %}
-                                                <i class="fas fa-play me-1"></i>Launch
-                                            {% else %}
-                                                <i class="fas fa-play me-1"></i>Watch
-                                            {% endif %}
-                                        </a>
-                                        <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
-                                           class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-calendar me-1"></i>Request
-                                        </a>
+                                    <div class="demo-actions">
+                                        {% if demo.file_type == 'video' and demo.video_file %}
+                                            <a href="{% url 'customers:demo_detail' demo.slug %}" class="btn-watch">
+                                                <i class="fas fa-play me-2"></i>Watch Demo
+                                            </a>
+                                            <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
+                                               class="btn-request" 
+                                               title="Request Live Demo Session">
+                                                <i class="fas fa-calendar"></i>
+                                            </a>
+                                        {% elif demo.file_type == 'webgl' and demo.webgl_file %}
+                                            <a href="{% url 'customers:webgl_viewer' demo.slug %}" class="btn-launch">
+                                            View Demo
+                                            </a>
+                                            <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
+                                               class="btn-request" 
+                                               title="Request Live Demo Session">
+                                                <i class="fas fa-calendar"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
+                                               class="btn-watch">
+                                                <i class="fas fa-calendar-plus me-2"></i>Request Demo
+                                            </a>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -482,60 +531,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Recent Activity -->
-    {% comment %} <div class="col-lg-12 mt-4">
-        <div class="customer-card">
-            <div class="customer-card-header">
-                <h3 class="customer-card-title">
-                    <i class="fas fa-clock"></i>
-                    Recent Activity
-                </h3>
-            </div>
-            <div class="customer-card-body p-0">
-                <div class="activity-feed">
-                    {% if recent_demo_requests %}
-                        {% for request in recent_demo_requests %}
-                            <div class="activity-item">
-                                <div class="activity-icon demo">
-                                    <i class="fas fa-calendar"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Demo Request: {{ request.demo.title }}</div>
-                                    <div class="activity-meta">
-                                        Status: <span class="badge bg-{{ request.status|default:'secondary' }}">{{ request.get_status_display }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    
-                    {% if recent_enquiries %}
-                        {% for enquiry in recent_enquiries %}
-                            <div class="activity-item">
-                                <div class="activity-icon enquiry">
-                                    <i class="fas fa-envelope"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Enquiry: {{ enquiry.enquiry_id }}</div>
-                                    <div class="activity-meta">
-                                        Status: <span class="badge bg-{{ enquiry.status|default:'secondary' }}">{{ enquiry.get_status_display }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    
-                    {% if not recent_demo_requests and not recent_enquiries %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-history text-muted" style="font-size: 2.5rem;"></i>
-                            <p class="mt-2 mb-0 text-muted">No recent activity</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div> {% endcomment %}
 </div>
 {% endblock %}
 
@@ -588,70 +583,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     window.addEventListener('focus', function() {
         document.body.style.filter = 'none';
-    });
-
-    // Featured Demos Filter - Only All and Product Demo
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const demoCards = document.querySelectorAll('.demo-card');
-    const loadingState = document.querySelector('.demos-loading');
-    const emptyState = document.querySelector('.featured-empty');
-
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const filterType = this.getAttribute('data-filter');
-            
-            // Update active button
-            filterBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Show loading
-            if (loadingState) {
-                loadingState.classList.add('active');
-            }
-            
-            // Filter demos with animation
-            setTimeout(() => {
-                let visibleCount = 0;
-                
-                demoCards.forEach(card => {
-                    const cardType = card.getAttribute('data-demo-type');
-                    
-                    if (filterType === 'all' || cardType === filterType) {
-                        card.style.display = 'block';
-                        setTimeout(() => {
-                            card.style.opacity = '1';
-                            card.style.transform = 'scale(1)';
-                        }, 50);
-                        visibleCount++;
-                    } else {
-                        card.style.opacity = '0';
-                        card.style.transform = 'scale(0.9)';
-                        setTimeout(() => {
-                            card.style.display = 'none';
-                        }, 300);
-                    }
-                });
-                
-                // Hide loading
-                if (loadingState) {
-                    loadingState.classList.remove('active');
-                }
-                
-                // Show/hide empty state based on visible cards
-                if (emptyState) {
-                    if (visibleCount === 0) {
-                        emptyState.style.display = 'block';
-                    } else {
-                        emptyState.style.display = 'none';
-                    }
-                }
-            }, 300);
-        });
-    });
-
-    // Initialize card animations
-    demoCards.forEach(card => {
-        card.style.transition = 'all 0.3s ease';
     });
 });
 </script>

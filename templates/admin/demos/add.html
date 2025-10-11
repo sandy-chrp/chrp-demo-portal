@@ -26,6 +26,9 @@
     <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary btn-sm">
         <i class="fas fa-arrow-left me-1"></i>Back
     </a>
+    <button type="button" class="btn btn-info btn-sm" id="previewBtn" style="display: none;">
+        <i class="fas fa-eye me-1"></i>Preview
+    </button>
     <button type="submit" form="demoForm" class="btn btn-primary btn-sm">
         <i class="fas fa-save me-1"></i>Save Demo
     </button>
@@ -34,6 +37,12 @@
 
 {% block admin_extra_css %}
 <style>
+    .page-container {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: var(--spacing-lg);
+    }
+
     .compact-form {
         background: white;
         border-radius: var(--radius-lg);
@@ -68,48 +77,7 @@
         grid-column: 1 / -1;
     }
 
-    .file-type-selector {
-        display: flex;
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
-    }
-
-    .file-type-option {
-        flex: 1;
-        padding: var(--spacing-md);
-        border: 2px solid var(--gray-200);
-        border-radius: var(--radius-md);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-align: center;
-        background: white;
-    }
-
-    .file-type-option:hover {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
-    }
-
-    .file-type-option.active {
-        border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.1);
-    }
-
-    .file-type-option input[type="radio"] {
-        display: none;
-    }
-
-    .file-type-icon {
-        font-size: 1.5rem;
-        margin-bottom: var(--spacing-xs);
-        color: var(--gray-400);
-    }
-
-    .file-type-option.active .file-type-icon {
-        color: var(--primary-color);
-    }
-
-    .file-upload-compact {
+    .file-upload-area {
         border: 2px dashed var(--gray-300);
         border-radius: var(--radius-md);
         padding: var(--spacing-md);
@@ -117,26 +85,159 @@
         background: var(--gray-50);
         cursor: pointer;
         transition: all 0.3s ease;
+        position: relative;
     }
 
-    .file-upload-compact:hover {
+    .file-upload-area:hover {
         border-color: var(--primary-color);
         background: rgba(30, 60, 114, 0.05);
     }
 
-    .file-upload-compact.error {
-        border-color: var(--danger-color);
-        background: rgba(220, 53, 69, 0.05);
+    .file-upload-area.has-file {
+        border-color: var(--success-color);
+        background: rgba(16, 185, 129, 0.05);
     }
 
-    .file-section {
+    .file-preview {
+        display: none;
+        margin-top: var(--spacing-sm);
+        padding: var(--spacing-sm);
+        background: white;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--gray-200);
+    }
+
+    .file-preview.active {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .file-preview-icon {
+        font-size: 1.5rem;
+        color: var(--success-color);
+    }
+
+    .file-preview-info {
+        flex: 1;
+        text-align: left;
+    }
+
+    .file-preview-name {
+        font-weight: 600;
+        color: var(--dark-color);
+        font-size: 0.875rem;
+    }
+
+    .file-preview-size {
+        font-size: 0.75rem;
+        color: var(--gray-600);
+    }
+
+    .file-preview-remove {
+        color: var(--danger-color);
+        cursor: pointer;
+        padding: var(--spacing-xs);
+    }
+
+    .file-preview-remove:hover {
+        color: #c53030;
+    }
+
+    /* Live Preview Panel */
+    .preview-panel {
+        position: sticky;
+        top: calc(var(--admin-header-height) + 20px);
+        height: calc(100vh - var(--admin-header-height) - 40px);
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .preview-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: var(--spacing-md);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .preview-body {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background: var(--gray-100);
+    }
+
+    .preview-empty {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: var(--gray-500);
+        width: 100%;
+        padding: var(--spacing-lg);
+    }
+
+    .preview-empty i {
+        font-size: 3rem;
+        margin-bottom: var(--spacing-md);
+        opacity: 0.3;
+    }
+
+    .preview-content {
+        width: 100%;
+        height: 100%;
         display: none;
     }
 
-    .file-section.active {
+    .preview-content.active {
         display: block;
     }
 
+    /* Thumbnail Preview */
+    .thumbnail-preview-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: var(--spacing-md);
+    }
+
+    /* Video Preview */
+    .video-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: black;
+    }
+
+    /* WebGL Preview */
+    .webgl-preview-frame {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .webgl-preview-message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: var(--gray-600);
+        background: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Selection Box */
     .selection-box {
         padding: var(--spacing-md);
         background: var(--gray-50);
@@ -214,6 +315,18 @@
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     }
 
+    @media (max-width: 1200px) {
+        .page-container {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-panel {
+            position: relative;
+            height: 500px;
+            top: 0;
+        }
+    }
+
     @media (max-width: 768px) {
         .form-grid {
             grid-template-columns: 1fr;
@@ -226,153 +339,219 @@
 {% endblock %}
 
 {% block admin_content %}
-<form method="post" enctype="multipart/form-data" id="demoForm" class="needs-validation" novalidate>
-    {% csrf_token %}
+<div class="page-container">
+    <!-- Left Column - Form -->
+    <div>
+        <form method="post" enctype="multipart/form-data" id="demoForm" class="needs-validation" novalidate>
+            {% csrf_token %}
 
-    <div class="compact-form">
-        <!-- Basic Information -->
-        <div class="section-header">
-            <i class="fas fa-info-circle"></i> Basic Information
-        </div>
-        <div class="form-grid">
-            <div class="full-width">
-                <label for="id_title" class="form-label">Demo Title <span class="text-danger">*</span></label>
-                <input type="text" name="title" id="id_title" class="form-control" required>
-            </div>
-            <div class="full-width">
-                <label for="id_description" class="form-label">Description <span class="text-danger">*</span></label>
-                <textarea name="description" id="id_description" class="form-control" rows="2" required></textarea>
-            </div>
-            <div>
-                <label for="id_demo_type" class="form-label">Demo Type</label>
-                <select name="demo_type" id="id_demo_type" class="form-select">
-                    {% for value, label in demo_types %}
-                    <option value="{{ value }}">{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div id="durationField">
-                <label for="id_duration" class="form-label">Duration</label>
-                <input type="text" name="duration" id="id_duration" class="form-control" placeholder="MM:SS">
-            </div>
-        </div>
-
-        <!-- File Upload -->
-        <div class="section-header">
-            <i class="fas fa-file-upload"></i> File Upload
-        </div>
-        
-        <div class="form-grid">
-            <div>
-                <label for="id_file_type" class="form-label">File Type <span class="text-danger">*</span></label>
-                <select name="file_type" id="id_file_type" class="form-select">
-                    <option value="video" selected>Video Demo (MP4, AVI, MOV, WMV)</option>
-                    <option value="webgl">WebGL Interactive (HTML, ZIP, GLTF, GLB)</option>
-                </select>
-            </div>
-            <div id="demoFileField">
-                <label class="form-label">Demo File <span class="text-danger">*</span></label>
-                <input type="file" name="video_file" id="id_video_file" class="form-control" accept="video/*">
-                <input type="file" name="webgl_file" id="id_webgl_file" class="form-control" accept=".html,.zip,.gltf,.glb" style="display: none;">
-                <div class="form-text" id="fileHelp">Max 100MB</div>
-                <div id="demoFilePreview" style="display: none; margin-top: 0.5rem;"></div>
-                <div id="demoFileError" class="alert alert-danger mt-2" style="display: none; padding: 0.5rem; font-size: 0.85rem;"></div>
-            </div>
-            <div>
-                <label for="id_thumbnail" class="form-label">Thumbnail <span class="text-danger">*</span></label>
-                <input type="file" name="thumbnail" id="id_thumbnail" class="form-control" accept="image/*" required>
-                <div class="form-text">Max 5MB (JPG, PNG, WebP)</div>
-                <div id="thumbnailPreview" style="display: none; margin-top: 0.5rem;"></div>
-                <div id="thumbnailError" class="alert alert-danger mt-2" style="display: none; padding: 0.5rem; font-size: 0.85rem;"></div>
-            </div>
-        </div>
-
-        <!-- Business Categories & Customers -->
-        <div class="section-header mt-4">
-            <i class="fas fa-bullseye"></i> Target Audience
-        </div>
-        <div class="form-grid">
-            <div>
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="allBusinessCategoriesCheckbox">
-                    <label class="form-check-label" for="allBusinessCategoriesCheckbox">
-                        <strong>All Business Categories</strong>
-                    </label>
+            <div class="compact-form">
+                <!-- Basic Information -->
+                <div class="section-header">
+                    <i class="fas fa-info-circle"></i> Basic Information
                 </div>
-                <div id="categorySelectionArea" class="selection-box">
-                    {% for category in business_categories %}
-                    <div class="checkbox-item">
-                        <input type="checkbox" name="target_business_categories" value="{{ category.id }}" id="cat_{{ category.id }}" class="category-checkbox">
-                        <label for="cat_{{ category.id }}">{{ category.name }}</label>
+                <div class="form-grid">
+                    <div class="full-width">
+                        <label for="id_title" class="form-label">Demo Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" id="id_title" class="form-control" required>
                     </div>
-                    {% if category.subcategories.all %}
-                    <div class="subcategory-list" id="subcat_list_{{ category.id }}" style="display: none;">
-                        {% for subcategory in category.subcategories.all %}
-                        <div class="checkbox-item">
-                            <input type="checkbox" name="target_business_subcategories" value="{{ subcategory.id }}" id="subcat_{{ subcategory.id }}" class="subcategory-checkbox" data-parent="{{ category.id }}">
-                            <label for="subcat_{{ subcategory.id }}">{{ subcategory.name }}</label>
+                    <div class="full-width">
+                        <label for="id_description" class="form-label">Description <span class="text-danger">*</span></label>
+                        <textarea name="description" id="id_description" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <div>
+                        <label for="id_demo_type" class="form-label">Demo Type</label>
+                        <select name="demo_type" id="id_demo_type" class="form-select">
+                            {% for value, label in demo_types %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="durationField">
+                        <label for="id_duration" class="form-label">Duration</label>
+                        <input type="text" name="duration" id="id_duration" class="form-control" placeholder="MM:SS">
+                    </div>
+                </div>
+
+                <!-- File Upload -->
+                <div class="section-header">
+                    <i class="fas fa-file-upload"></i> File Upload
+                </div>
+                
+                <div class="form-grid">
+                    <div>
+                        <label for="id_file_type" class="form-label">File Type <span class="text-danger">*</span></label>
+                        <select name="file_type" id="id_file_type" class="form-select">
+                            <option value="video" selected>Video Demo</option>
+                            <option value="webgl">WebGL Interactive</option>
+                        </select>
+                    </div>
+                    <div id="demoFileField">
+                        <label class="form-label">Demo File <span class="text-danger">*</span></label>
+                        <div class="file-upload-area" onclick="document.getElementById('actualFileInput').click()">
+                            <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                            <p class="mb-0">Click to upload or drag & drop</p>
+                            <small class="text-muted" id="fileTypeHint">MP4, AVI, MOV, WMV</small>
                         </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div>
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="allCustomersCheckbox" checked>
-                    <label class="form-check-label" for="allCustomersCheckbox">
-                        <strong>All Customers</strong>
-                    </label>
-                </div>
-                <div id="customerSelectionArea" class="selection-box disabled">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="customerSearch" class="form-control form-control-sm" placeholder="Search...">
-                    </div>
-                    <div id="customerList">
-                        {% for customer in customers %}
-                        <div class="checkbox-item" data-search="{{ customer.full_name|lower }} {{ customer.email|lower }}">
-                            <input type="checkbox" name="target_customers" value="{{ customer.id }}" id="cust_{{ customer.id }}">
-                            <label for="cust_{{ customer.id }}">{{ customer.full_name }}</label>
+                        <input type="file" name="video_file" id="id_video_file" class="d-none" accept="video/*">
+                        <input type="file" name="webgl_file" id="id_webgl_file" class="d-none" accept=".html,.zip,.gltf,.glb">
+                        <input type="file" id="actualFileInput" class="d-none">
+                        
+                        <div class="file-preview" id="demoFilePreview">
+                            <i class="fas fa-file file-preview-icon"></i>
+                            <div class="file-preview-info">
+                                <div class="file-preview-name" id="demoFileName"></div>
+                                <div class="file-preview-size" id="demoFileSize"></div>
+                            </div>
+                            <i class="fas fa-times file-preview-remove" onclick="removeDemoFile()"></i>
                         </div>
-                        {% endfor %}
+                    </div>
+                    <div>
+                        <label for="id_thumbnail" class="form-label">Thumbnail <span class="text-danger">*</span></label>
+                        <div class="file-upload-area" onclick="document.getElementById('id_thumbnail').click()">
+                            <i class="fas fa-image fa-2x text-muted mb-2"></i>
+                            <p class="mb-0">Click to upload thumbnail</p>
+                            <small class="text-muted">JPG, PNG, WebP</small>
+                        </div>
+                        <input type="file" name="thumbnail" id="id_thumbnail" class="d-none" accept="image/*" required>
+                        
+                        <div class="file-preview" id="thumbnailPreview">
+                            <i class="fas fa-image file-preview-icon"></i>
+                            <div class="file-preview-info">
+                                <div class="file-preview-name" id="thumbnailName"></div>
+                                <div class="file-preview-size" id="thumbnailSize"></div>
+                            </div>
+                            <i class="fas fa-times file-preview-remove" onclick="removeThumbnail()"></i>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Settings -->
-        <div class="section-header mt-4">
-            <i class="fas fa-cogs"></i> Settings
-        </div>
-        <div class="form-grid three-col">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured">
-                <label class="form-check-label" for="id_is_featured">Featured</label>
-            </div>
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" checked>
-                <label class="form-check-label" for="id_is_active">Active</label>
-            </div>
-            <div>
-                <label for="id_sort_order" class="form-label">Sort Order</label>
-                <input type="number" name="sort_order" id="id_sort_order" class="form-control" value="0">
-            </div>
-        </div>
+                <!-- Business Categories & Customers -->
+                <div class="section-header mt-4">
+                    <i class="fas fa-bullseye"></i> Target Audience
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="allBusinessCategoriesCheckbox">
+                            <label class="form-check-label" for="allBusinessCategoriesCheckbox">
+                                <strong>All Business Categories</strong>
+                            </label>
+                        </div>
+                        <div id="categorySelectionArea" class="selection-box">
+                            {% for category in business_categories %}
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="target_business_categories" value="{{ category.id }}" id="cat_{{ category.id }}" class="category-checkbox">
+                                <label for="cat_{{ category.id }}">{{ category.name }}</label>
+                            </div>
+                            {% if category.subcategories.all %}
+                            <div class="subcategory-list" id="subcat_list_{{ category.id }}" style="display: none;">
+                                {% for subcategory in category.subcategories.all %}
+                                <div class="checkbox-item">
+                                    <input type="checkbox" name="target_business_subcategories" value="{{ subcategory.id }}" id="subcat_{{ subcategory.id }}" class="subcategory-checkbox" data-parent="{{ category.id }}">
+                                    <label for="subcat_{{ subcategory.id }}">{{ subcategory.name }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
 
-        <!-- Form Actions -->
-        <div class="form-actions">
-            <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-times me-1"></i>Cancel
-            </a>
-            <button type="submit" class="btn btn-primary btn-sm" id="submitBtn">
-                <i class="fas fa-save me-1"></i>Create Demo
+                    <div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="allCustomersCheckbox" checked>
+                            <label class="form-check-label" for="allCustomersCheckbox">
+                                <strong>All Customers</strong>
+                            </label>
+                        </div>
+                        <div id="customerSelectionArea" class="selection-box disabled">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="customerSearch" class="form-control form-control-sm" placeholder="Search...">
+                            </div>
+                            <div id="customerList">
+                                {% for customer in customers %}
+                                <div class="checkbox-item" data-search="{{ customer.full_name|lower }} {{ customer.email|lower }}">
+                                    <input type="checkbox" name="target_customers" value="{{ customer.id }}" id="cust_{{ customer.id }}">
+                                    <label for="cust_{{ customer.id }}">{{ customer.full_name }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="section-header mt-4">
+                    <i class="fas fa-cogs"></i> Settings
+                </div>
+                <div class="form-grid three-col">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_featured" id="id_is_featured">
+                        <label class="form-check-label" for="id_is_featured">Featured</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" checked>
+                        <label class="form-check-label" for="id_is_active">Active</label>
+                    </div>
+                    <div>
+                        <label for="id_sort_order" class="form-label">Sort Order</label>
+                        <input type="number" name="sort_order" id="id_sort_order" class="form-control" value="0">
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-sm" id="submitBtn">
+                        <i class="fas fa-save me-1"></i>Create Demo
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right Column - Live Preview -->
+    <div class="preview-panel">
+        <div class="preview-header">
+            <span><i class="fas fa-eye me-2"></i>Live Preview</span>
+            <button type="button" class="btn btn-sm btn-light" id="refreshPreview" style="display: none;">
+                <i class="fas fa-sync-alt"></i>
             </button>
         </div>
+        <div class="preview-body">
+            <!-- Empty State -->
+            <div class="preview-empty" id="previewEmpty">
+                <i class="fas fa-eye-slash"></i>
+                <h5>No Preview Available</h5>
+                <p>Upload a file to see preview</p>
+            </div>
+
+            <!-- Thumbnail Preview -->
+            <div class="preview-content" id="thumbnailPreviewContent">
+                <img id="thumbnailPreviewImg" class="thumbnail-preview-img" alt="Thumbnail Preview">
+            </div>
+
+            <!-- Video Preview -->
+            <div class="preview-content" id="videoPreviewContent">
+                <video id="videoPreviewPlayer" class="video-preview" controls></video>
+            </div>
+
+            <!-- WebGL Preview -->
+            <div class="preview-content" id="webglPreviewContent">
+                <div class="webgl-preview-message">
+                    <i class="fas fa-cube fa-3x mb-3 text-primary"></i>
+                    <h5>WebGL File Uploaded</h5>
+                    <p class="mb-0">Preview will be available after saving</p>
+                    <small class="text-muted d-block mt-2" id="webglFileName"></small>
+                </div>
+            </div>
+        </div>
     </div>
-</form>
+</div>
 {% endblock %}
 
 {% block admin_extra_js %}
@@ -383,101 +562,168 @@ document.addEventListener('DOMContentLoaded', function() {
     setupCategorySelection();
     setupCustomerSelection();
     setupFormValidation();
+    setupLivePreview();
 });
 
 function setupFileTypeSelection() {
     const fileTypeSelect = document.getElementById('id_file_type');
-    const videoFileInput = document.getElementById('id_video_file');
-    const webglFileInput = document.getElementById('id_webgl_file');
+    const actualFileInput = document.getElementById('actualFileInput');
+    const fileTypeHint = document.getElementById('fileTypeHint');
     const durationField = document.getElementById('durationField');
-    const fileHelp = document.getElementById('fileHelp');
     
     fileTypeSelect.addEventListener('change', function() {
         const fileType = this.value;
         
         if (fileType === 'video') {
-            videoFileInput.style.display = 'block';
-            webglFileInput.style.display = 'none';
-            videoFileInput.required = true;
-            webglFileInput.required = false;
+            actualFileInput.accept = 'video/*';
+            fileTypeHint.textContent = 'MP4, AVI, MOV, WMV';
             durationField.style.display = 'block';
-            fileHelp.textContent = 'Max 100MB (MP4, AVI, MOV, WMV)';
         } else {
-            videoFileInput.style.display = 'none';
-            webglFileInput.style.display = 'block';
-            videoFileInput.required = false;
-            webglFileInput.required = true;
+            actualFileInput.accept = '.html,.zip,.gltf,.glb';
+            fileTypeHint.textContent = 'HTML, ZIP, GLTF, GLB';
             durationField.style.display = 'none';
-            fileHelp.textContent = 'Max 100MB (HTML, ZIP, GLTF, GLB)';
         }
         
-        // Clear previous file selections
-        videoFileInput.value = '';
-        webglFileInput.value = '';
-        document.getElementById('demoFilePreview').style.display = 'none';
-        document.getElementById('demoFileError').style.display = 'none';
+        // Clear previous file
+        actualFileInput.value = '';
+        document.getElementById('id_video_file').value = '';
+        document.getElementById('id_webgl_file').value = '';
+        document.getElementById('demoFilePreview').classList.remove('active');
+        hideAllPreviews();
     });
 }
 
 function setupFileUpload() {
-    // Setup video file input
-    setupDemoFileInput('id_video_file', 100);
+    const actualFileInput = document.getElementById('actualFileInput');
+    const videoFileInput = document.getElementById('id_video_file');
+    const webglFileInput = document.getElementById('id_webgl_file');
+    const fileTypeSelect = document.getElementById('id_file_type');
+    const uploadArea = document.querySelector('.file-upload-area');
     
-    // Setup webgl file input
-    setupDemoFileInput('id_webgl_file', 100);
-    
-    // Setup thumbnail input
-    const thumbnailInput = document.getElementById('id_thumbnail');
-    const thumbnailPreview = document.getElementById('thumbnailPreview');
-    const thumbnailError = document.getElementById('thumbnailError');
-    
-    thumbnailInput.addEventListener('change', () => {
-        const file = thumbnailInput.files[0];
-        thumbnailError.style.display = 'none';
-        thumbnailPreview.style.display = 'none';
-        
+    actualFileInput.addEventListener('change', function() {
+        const file = this.files[0];
         if (!file) return;
         
-        if (file.size > 5 * 1024 * 1024) {
-            thumbnailError.textContent = 'File exceeds 5MB limit';
-            thumbnailError.style.display = 'block';
-            thumbnailInput.value = '';
-            return;
+        const fileType = fileTypeSelect.value;
+        
+        // Copy to appropriate hidden input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        
+        if (fileType === 'video') {
+            videoFileInput.files = dataTransfer.files;
+            webglFileInput.value = '';
+        } else {
+            webglFileInput.files = dataTransfer.files;
+            videoFileInput.value = '';
         }
         
-        const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-        thumbnailPreview.innerHTML = `<div class="alert alert-success mb-0" style="padding: 0.5rem; font-size: 0.85rem;">
-            <i class="fas fa-check me-1"></i>${file.name} (${fileSizeMB} MB)
-        </div>`;
-        thumbnailPreview.style.display = 'block';
+        // Show file preview info
+        showFilePreview(file);
+        
+        // Show live preview
+        showLivePreview(file, fileType);
+        
+        uploadArea.classList.add('has-file');
+    });
+    
+    // Thumbnail upload
+    const thumbnailInput = document.getElementById('id_thumbnail');
+    thumbnailInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        
+        showThumbnailPreview(file);
     });
 }
 
-function setupDemoFileInput(inputId, maxSizeMB) {
-    const input = document.getElementById(inputId);
+function showFilePreview(file) {
     const preview = document.getElementById('demoFilePreview');
-    const errorDiv = document.getElementById('demoFileError');
+    const fileName = document.getElementById('demoFileName');
+    const fileSize = document.getElementById('demoFileSize');
     
-    input.addEventListener('change', () => {
-        const file = input.files[0];
-        errorDiv.style.display = 'none';
-        preview.style.display = 'none';
-        
-        if (!file) return;
-        
-        if (file.size > maxSizeMB * 1024 * 1024) {
-            errorDiv.textContent = `File exceeds ${maxSizeMB}MB limit`;
-            errorDiv.style.display = 'block';
-            input.value = '';
-            return;
-        }
-        
-        const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-        preview.innerHTML = `<div class="alert alert-success mb-0" style="padding: 0.5rem; font-size: 0.85rem;">
-            <i class="fas fa-check me-1"></i>${file.name} (${fileSizeMB} MB)
-        </div>`;
-        preview.style.display = 'block';
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
+    preview.classList.add('active');
+}
+
+function showThumbnailPreview(file) {
+    const preview = document.getElementById('thumbnailPreview');
+    const name = document.getElementById('thumbnailName');
+    const size = document.getElementById('thumbnailSize');
+    
+    name.textContent = file.name;
+    size.textContent = formatFileSize(file.size);
+    preview.classList.add('active');
+    
+    // Show in preview panel
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('thumbnailPreviewImg').src = e.target.result;
+        showPreviewContent('thumbnailPreviewContent');
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeDemoFile() {
+    document.getElementById('actualFileInput').value = '';
+    document.getElementById('id_video_file').value = '';
+    document.getElementById('id_webgl_file').value = '';
+    document.getElementById('demoFilePreview').classList.remove('active');
+    document.querySelector('.file-upload-area').classList.remove('has-file');
+    hideAllPreviews();
+}
+
+function removeThumbnail() {
+    document.getElementById('id_thumbnail').value = '';
+    document.getElementById('thumbnailPreview').classList.remove('active');
+    
+    // Hide thumbnail preview if it's showing
+    const thumbnailContent = document.getElementById('thumbnailPreviewContent');
+    if (thumbnailContent.classList.contains('active')) {
+        hideAllPreviews();
+    }
+}
+
+function setupLivePreview() {
+    // Preview is automatically shown when files are uploaded
+}
+
+function showLivePreview(file, fileType) {
+    if (fileType === 'video') {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const video = document.getElementById('videoPreviewPlayer');
+            video.src = e.target.result;
+            showPreviewContent('videoPreviewContent');
+        };
+        reader.readAsDataURL(file);
+    } else {
+        // WebGL preview
+        document.getElementById('webglFileName').textContent = file.name;
+        showPreviewContent('webglPreviewContent');
+    }
+}
+
+function showPreviewContent(contentId) {
+    hideAllPreviews();
+    document.getElementById('previewEmpty').style.display = 'none';
+    document.getElementById(contentId).classList.add('active');
+}
+
+function hideAllPreviews() {
+    document.getElementById('previewEmpty').style.display = 'block';
+    document.querySelectorAll('.preview-content').forEach(el => {
+        el.classList.remove('active');
     });
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
 function setupCategorySelection() {
@@ -525,7 +771,7 @@ function setupCustomerSelection() {
     allCustomersCheckbox.addEventListener('change', function() {
         if (this.checked) {
             customerSelectionArea.classList.add('disabled');
-            document.querySelectorAll('.customer-checkbox').forEach(cb => cb.checked = false);
+            document.querySelectorAll('input[name="target_customers"]').forEach(cb => cb.checked = false);
         } else {
             customerSelectionArea.classList.remove('disabled');
         }
@@ -552,7 +798,6 @@ function setupFormValidation() {
         const allCategoriesChecked = document.getElementById('allBusinessCategoriesCheckbox').checked;
         const anyCategorySelected = document.querySelectorAll('.category-checkbox:checked').length > 0;
         
-        // Validate file upload based on file type
         let fileValid = false;
         if (fileType === 'video') {
             fileValid = document.getElementById('id_video_file').files.length > 0;

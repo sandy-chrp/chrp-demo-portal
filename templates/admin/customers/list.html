@@ -300,11 +300,21 @@
         <p class="text-muted mb-0">Manage your customers and their accounts</p>
     </div>
     <div class="header-actions">
+        <!-- Bulk Import Button -->
+        <a href="{% url 'core:admin_bulk_import_customers' %}" 
+           class="btn btn-info">
+            <i class="fas fa-file-import me-1"></i>Bulk Import
+        </a>
+        
+        <!-- Export CSV Button -->
         <a href="{% url 'core:admin_customer_export' %}{% if status_filter %}?status={{ status_filter }}{% endif %}{% if search %}{% if status_filter %}&{% else %}?{% endif %}search={{ search }}{% endif %}" 
            class="btn btn-outline-secondary">
             <i class="fas fa-download me-1"></i>Export CSV
         </a>
-        <a href="{% url 'core:admin_create_customer' %}" class="btn btn-success">
+        
+        <!-- Create Customer Button -->
+        <a href="{% url 'core:admin_create_customer' %}" 
+           class="btn btn-success">
             <i class="fas fa-plus me-1"></i>Create Customer
         </a>
     </div>

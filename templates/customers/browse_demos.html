@@ -5,7 +5,6 @@
 
 {% block customer_extra_css %}
 <style>
-    /* Security Protection Styles */
     body {
         -webkit-user-select: none;
         -moz-user-select: none;
@@ -17,9 +16,6 @@
 
     .demo-card-content, .demo-title, .demo-description {
         -webkit-user-select: none;
-        -khtml-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
         user-select: none;
     }
 
@@ -30,13 +26,9 @@
 
     img, video {
         -webkit-user-drag: none;
-        -khtml-user-drag: none;
-        -moz-user-drag: none;
-        -o-user-drag: none;
         user-drag: none;
     }
 
-    /* Filters Section */
     .filters-section {
         background: white;
         padding: var(--spacing-lg);
@@ -93,7 +85,6 @@
         color: var(--gray-500);
     }
 
-    /* Demo Grid */
     .demos-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -427,7 +418,6 @@
     </div>
 </div>
 
-<!-- Filters Section -->
 <div class="filters-section">
     <form method="GET" id="filterForm">
         <div class="row g-3 align-items-end">
@@ -473,11 +463,12 @@
             <div class="col-lg-2 col-md-6">
                 <label class="filter-label">Sort By</label>
                 <select name="sort" class="form-select sort-dropdown">
-                    <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
-                    <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
-                    <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Popular</option>
+                     <option value="title" {% if sort_by == 'title' %}selected{% endif %}>All</option>
+                    <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+                    {% comment %} <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option> {% endcomment %}
+                    {% comment %} <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Popular</option> {% endcomment %}
                     <option value="liked" {% if sort_by == 'liked' %}selected{% endif %}>Most Liked</option>
-                    <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title A-Z</option>
+                   
                 </select>
             </div>
             
@@ -495,7 +486,6 @@
     </form>
 </div>
 
-<!-- Results Info -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         {% if page_obj %}
@@ -509,7 +499,6 @@
     </div>
 </div>
 
-<!-- Demos Grid -->
 {% if page_obj.object_list %}
     <div class="demos-grid">
         {% for demo in page_obj.object_list %}
@@ -539,7 +528,7 @@
                     </div>
                     {% elif demo.file_type == 'webgl' and demo.webgl_file %}
                     <div class="demo-overlay">
-                        <a href="{% url 'customers:demo_detail' demo.slug %}">                       
+                        <a href="{% url 'customers:webgl_viewer' demo.slug %}">                       
                             <div class="play-button">
                                 <i class="fas fa-cube"></i>
                             </div>
@@ -547,7 +536,6 @@
                     </div>
                     {% endif %}
                     
-                    <!-- Status/Type Badge -->
                     {% if demo.id in user_views %}
                         <div class="demo-badge status-watched">
                             <i class="fas fa-eye"></i>Watched
@@ -601,8 +589,8 @@
                                 <i class="fas fa-calendar"></i>
                             </a>
                         {% elif demo.file_type == 'webgl' and demo.webgl_file %}
-                            <a href="{% url 'customers:demo_detail' demo.slug %}" class="btn-launch">
-                                <i class="fas fa-cube me-2"></i>Launch Demo
+                            <a href="{% url 'customers:webgl_viewer' demo.slug %}" class="btn-launch">
+                            View Demo
                             </a>
                             <a href="{% url 'customers:request_demo' %}?demo={{ demo.id }}" 
                                class="btn-request" 
@@ -621,7 +609,6 @@
         {% endfor %}
     </div>
     
-    <!-- Pagination -->
     {% if page_obj.has_other_pages %}
         <div class="pagination-wrapper">
             <nav>

@@ -2,7 +2,10 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-
+from django.http import HttpResponse, Http404
+from django.conf import settings
+import os
+import mimetypes
 User = get_user_model()
 
 class CustomerSession(models.Model):
@@ -100,3 +103,47 @@ class SecurityViolation(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.get_violation_type_display()}"
+    
+
+class WebGLFileMiddleware:
+    """Middleware to serve WebGL files without template processing"""
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+    
+    def __call__(self, request):
+        # Check if this is a WebGL file request
+        if '/webgl-content/' in request.path:
+            try:
+                return self.serve_webgl_file(request)
+            except:
+                pass
+        
+        return self.get_response(request)
+    
+    def serve_webgl_file(self, request):
+        # Extract path components
+        path_parts = request.path.split('/webgl-content/')
+        if len(path_parts) != 2:
+            raise Http404()
+        
+        filepath = path_parts[1]
+        
+        # Build full path (you need to determine this based on your structure)
+        # This is a simplified version
+        base_path = os.path.join(settings.MEDIA_ROOT, 'webgl_extracted')
+        full_path = os.path.join(base_path, filepath)
+        
+        if not os.path.isfile(full_path):
+            raise Http404()
+        
+        # Get content type
+        content_type, _ = mimetypes.guess_type(full_path)
+        if not content_type:
+            content_type = 'application/octet-stream'
+        
+        # Read and return file
+        with open(full_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type=content_type)
+            response['Access-Control-Allow-Origin'] = '*'
+            return response

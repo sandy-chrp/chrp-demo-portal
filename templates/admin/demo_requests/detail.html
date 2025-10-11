@@ -1,7 +1,8 @@
-<!-- templates/admin/demo_requests/detail.html -->
+<!-- templates/admin/demo_requests/detail.html - COMPLETE ENHANCED VERSION -->
 {% extends 'admin/base.html' %}
+{% load static %}
 
-{% block admin_title %}Demo Request Details{% endblock %}
+{% block admin_title %}Demo Request Details - #{{ demo_request.id }}{% endblock %}
 {% block page_title %}Demo Request Details{% endblock %}
 
 {% block breadcrumb %}
@@ -29,25 +30,24 @@
     </a>
     
     {% if demo_request.status == 'pending' %}
-        <button type="button" class="btn btn-success" onclick="confirmRequest()">
-            <i class="fas fa-check me-1"></i>Confirm
-        </button>
-        <button type="button" class="btn btn-warning" onclick="rescheduleRequest()">
-            <i class="fas fa-calendar-alt me-1"></i>Reschedule
-        </button>
-        <button type="button" class="btn btn-danger" onclick="cancelRequest()">
-            <i class="fas fa-times me-1"></i>Cancel
-        </button>
-    {% elif demo_request.status == 'confirmed' %}
-        <button type="button" class="btn btn-info" onclick="rescheduleRequest()">
-            <i class="fas fa-calendar-alt me-1"></i>Reschedule
-        </button>
-        <button type="button" class="btn btn-success" onclick="completeRequest()">
-            <i class="fas fa-check-circle me-1"></i>Mark Complete
-        </button>
-        <button type="button" class="btn btn-danger" onclick="cancelRequest()">
-            <i class="fas fa-times me-1"></i>Cancel
-        </button>
+    <button type="button" class="btn btn-success" onclick="openConfirmModal()">
+        <i class="fas fa-check me-1"></i>Confirm Demo
+    </button>
+    {% endif %}
+    
+    {% if demo_request.status == 'confirmed' %}
+    <button type="button" class="btn btn-warning" onclick="openRescheduleModal()">
+        <i class="fas fa-calendar-alt me-1"></i>Reschedule
+    </button>
+    <button type="button" class="btn btn-success" onclick="markAsComplete()">
+        <i class="fas fa-check-circle me-1"></i>Mark Complete
+    </button>
+    {% endif %}
+    
+    {% if demo_request.status in 'pending,confirmed' %}
+    <button type="button" class="btn btn-danger" onclick="openCancelModal()">
+        <i class="fas fa-times me-1"></i>Cancel
+    </button>
     {% endif %}
     
     <a href="{% url 'core:admin_edit_demo_request' demo_request.id %}" class="btn btn-primary">
@@ -58,6 +58,12 @@
 
 {% block admin_extra_css %}
 <style>
+    /* Disable text selection */
+    body {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
     .detail-card {
         background: white;
         border-radius: 12px;
@@ -65,8 +71,36 @@
         padding: 2rem;
         margin-bottom: 1.5rem;
     }
+    /* Add to existing <style> section */
 
-    .detail-header {
+.cancellation-section {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    margin: 0 -2rem;
+    padding: 1rem 2rem;
+    border-left: 5px solid #dc2626;
+}
+
+.cancellation-badge-large {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #dc2626;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.cancellation-alert {
+    background: white;
+    border: 2px solid #dc2626;
+    border-radius: 8px;
+    padding: 1rem;
+    color: #991b1b;
+}
+
+    .detail-section-title {
         font-size: 1.25rem;
         font-weight: 600;
         color: #1e3c72;
@@ -78,145 +112,685 @@
         gap: 0.75rem;
     }
 
+    .detail-row {
+        display: flex;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: #6c757d;
+        min-width: 180px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-value {
+        flex: 1;
+        color: #212529;
+    }
+
     .status-badge {
         padding: 0.5rem 1rem;
         border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .status-pending {
+    .status-badge.pending {
         background: #fff3cd;
         color: #856404;
-        border: 1px solid #ffeaa7;
     }
 
-    .status-confirmed {
+    .status-badge.confirmed {
         background: #d1ecf1;
         color: #0c5460;
-        border: 1px solid #bee5eb;
     }
 
-    .status-completed {
+    .status-badge.completed {
         background: #d4edda;
         color: #155724;
-        border: 1px solid #c3e6cb;
     }
 
-    .status-cancelled {
+    .status-badge.cancelled {
         background: #f8d7da;
         color: #721c24;
-        border: 1px solid #f5c6cb;
     }
 
-    .status-rescheduled {
+    .status-badge.rescheduled {
         background: #e2e3e5;
         color: #383d41;
-        border: 1px solid #d6d8db;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .info-item {
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border-left: 4px solid #1e3c72;
-    }
-
-    .info-label {
-        font-size: 0.875rem;
-        color: #6c757d;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-
-    .info-value {
-        font-size: 1rem;
-        color: #212529;
-        font-weight: 500;
-    }
-
-    .timeline {
-        position: relative;
-        padding-left: 2rem;
-    }
-
-    .timeline::before {
-        content: '';
-        position: absolute;
-        left: 0.5rem;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: #1e3c72;
     }
 
     .timeline-item {
+        padding-left: 2rem;
         position: relative;
-        margin-bottom: 2rem;
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding-bottom: 1.5rem;
+    }
+
+    .timeline-item:last-child {
+        padding-bottom: 0;
     }
 
     .timeline-item::before {
         content: '';
         position: absolute;
-        left: -1.75rem;
-        top: 1.5rem;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #1e3c72;
-        border: 3px solid white;
-        box-shadow: 0 0 0 2px #1e3c72;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
     }
 
-    .conflict-warning {
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        left: -4px;
+        top: 4px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #1e3c72;
+    }
+
+    .conflict-alert {
         background: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
-        padding: 1rem;
+        border: 1px solid #ffc107;
         border-radius: 8px;
+        padding: 1rem;
         margin-bottom: 1rem;
     }
 
-    .user-requests {
-        max-height: 300px;
+    /* ====================================
+       ENHANCED MODAL STYLES - Customer Design
+    ==================================== */
+    
+    .modal-xl {
+        max-width: 1200px;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border-bottom: none;
+        padding: 1.5rem 2rem;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .modal-title {
+        color: white;
+        font-weight: 700;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .btn-close-white {
+        filter: invert(1) grayscale(100%) brightness(200%);
+        opacity: 1;
+    }
+
+    .modal-body {
+        padding: 2rem;
+        background: #f8f9fa;
+    }
+
+    .modal-footer {
+        border-top: none;
+        padding: 1.5rem 2rem;
+        background: white;
+        border-radius: 0 0 12px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-footer .selection-summary {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .modal-footer .selection-summary strong {
+        color: #1e3c72;
+    }
+
+    /* ====================================
+       CALENDAR CONTAINER - Customer Style
+    ==================================== */
+    
+    .calendar-container {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #e3f2fd;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e3f2fd;
+    }
+
+    .calendar-header h6 {
+        margin: 0;
+        color: #1e3c72;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .calendar-header button {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 2px solid #1e3c72;
+        background: white;
+        color: #1e3c72;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .calendar-header button:hover {
+        background: #1e3c72;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* ====================================
+       CALENDAR GRID - Customer Style
+    ==================================== */
+    
+    .calendar-grid {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid #e3f2fd;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .calendar-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        gap: 0;
+    }
+
+    .weekday {
+        padding: 0.75rem;
+        text-align: center;
+        font-weight: 700;
+        color: white;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .calendar-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background: white;
+        gap: 0;
+    }
+
+    .calendar-day {
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1e3c72;
+    }
+
+    .calendar-day:hover:not(.disabled):not(.other-month) {
+        background: rgba(30, 60, 114, 0.08);
+        transform: scale(1.08);
+        z-index: 1;
+        box-shadow: 0 2px 8px rgba(30, 60, 114, 0.2);
+        border-color: #1e3c72;
+    }
+
+    .calendar-day.other-month {
+        color: #cbd5e1;
+        background: #f8fafc;
+        cursor: default;
+    }
+
+    .calendar-day.disabled {
+        color: #cbd5e1;
+        cursor: not-allowed !important;
+        background: #f1f5f9;
+        opacity: 0.5;
+        pointer-events: none !important;
+    }
+
+    .calendar-day.disabled:hover {
+        transform: none;
+        box-shadow: none;
+        background: #f1f5f9;
+    }
+
+    .calendar-day.selected {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
+        color: white !important;
+        font-weight: 800;
+        transform: scale(1.12);
+        z-index: 10;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.4);
+    }
+
+    .calendar-day.today {
+        border: 3px solid #f59e0b;
+        font-weight: 800;
+        background: #fffbeb;
+    }
+
+    .calendar-day.today:not(.selected) {
+        color: #f59e0b;
+    }
+
+    /* ====================================
+       TIME SLOTS PANEL - Customer Style
+    ==================================== */
+    
+    .time-slots-panel {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #e3f2fd;
+        max-height: 500px;
         overflow-y: auto;
     }
 
-    .request-item {
+    /* Custom Scrollbar */
+    .time-slots-panel::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .time-slots-panel::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+
+    .time-slots-panel::-webkit-scrollbar-thumb {
+        background: #1e3c72;
+        border-radius: 4px;
+    }
+
+    .time-slots-panel::-webkit-scrollbar-thumb:hover {
+        background: #2a5298;
+    }
+
+    .time-slots-panel h6 {
+        color: #1e3c72;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .selected-date-info {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border: 2px solid #3b82f6;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        animation: slideDown 0.3s ease;
+    }
+
+    .selected-date-info.show {
+        display: flex;
+    }
+
+    .selected-date-info i {
+        color: #3b82f6;
+        font-size: 1.1rem;
+    }
+
+    .selected-date-info strong {
+        color: #1e3c72;
+        font-weight: 700;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ====================================
+       TIME SLOTS GRID - Customer Style
+    ==================================== */
+    
+    .time-slots-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .time-slot-card {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .time-slot-card:hover:not(.disabled) {
+        border-color: #1e3c72;
+        background: rgba(30, 60, 114, 0.02);
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.15);
+    }
+
+    .time-slot-card.selected {
+        border-color: #1e3c72 !important;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe) !important;
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        transform: translateX(4px);
+    }
+
+    .time-slot-card.selected::before {
+        content: '✓';
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: #1e3c72;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.75rem;
+    }
+
+    /* Disabled States - Customer Style */
+    .time-slot-card.disabled {
+        background: #f3f4f6 !important;
+        border-color: #d1d5db !important;
+        cursor: not-allowed !important;
+        opacity: 0.6;
+        pointer-events: none !important;
+    }
+
+    .time-slot-card.disabled:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .time-slot-card.starting_soon {
+        background: #fef3c7 !important;
+        border-color: #fbbf24 !important;
+        opacity: 0.7;
+    }
+
+    .time-slot-card.full {
+        background: #fee2e2 !important;
+        border-color: #fca5a5 !important;
+        opacity: 0.7;
+    }
+
+    /* Time Slot Content */
+    .slot-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .slot-time {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e3c72;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .slot-status-badge {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+        border-radius: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .slot-status-badge.available {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .slot-status-badge.past {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .slot-status-badge.starting_soon {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .slot-status-badge.full {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .slot-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    .slot-booking-details {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .slot-booking-details strong {
+        color: #1e3c72;
+    }
+
+    /* Loading State */
+    .loading-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        border: 4px solid rgba(30, 60, 114, 0.1);
+        border-top-color: #1e3c72;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    /* Form Controls */
+    .form-control, .form-textarea {
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
         padding: 0.75rem;
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
-        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
         transition: all 0.3s ease;
     }
 
-    .request-item:hover {
-        background: #f8f9fa;
-        transform: translateX(5px);
+    .form-control:focus, .form-textarea:focus {
+        border-color: #1e3c72;
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        outline: none;
     }
 
+    .form-label {
+        font-weight: 600;
+        color: #1e3c72;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .required {
+        color: #ef4444;
+    }
+
+    /* Buttons */
+    .btn {
+        border-radius: 10px;
+        padding: 0.625rem 1.25rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border: none;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        border: none;
+        color: white;
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        border: none;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* Mobile Responsive */
     @media (max-width: 768px) {
-        .detail-card {
-            padding: 1.5rem;
+        .detail-row {
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
-        .info-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
+        .detail-label {
+            min-width: auto;
+        }
+
+        .calendar-day {
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            min-height: 45px;
+        }
+
+        .weekday {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .time-slot-card {
+            padding: 0.75rem;
+        }
+
+        .slot-time {
+            font-size: 0.9rem;
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .calendar-container,
+        .time-slots-panel {
+            padding: 1rem;
         }
     }
 </style>
@@ -224,373 +798,579 @@
 
 {% block admin_content %}
 
-<!-- Status Overview -->
-<div class="detail-card">
-    <div class="detail-header">
-        <i class="fas fa-info-circle"></i>Request Overview
-        <div class="ms-auto">
-            <span class="status-badge status-{{ demo_request.status }}">
-                {{ demo_request.get_status_display }}
-            </span>
-        </div>
-    </div>
+<!-- Status Alert -->
+{% if demo_request.status == 'pending' %}
+<div class="alert alert-warning mb-4">
+    <i class="fas fa-clock me-2"></i>
+    This demo request is pending confirmation. Please confirm or cancel at your earliest convenience.
+</div>
+{% elif demo_request.status == 'confirmed' %}
+<div class="alert alert-info mb-4">
+    <i class="fas fa-check-circle me-2"></i>
+    This demo is confirmed for <strong>{{ demo_request.confirmed_date|date:"F d, Y" }}</strong> at 
+    <strong>{{ demo_request.confirmed_time_slot }}</strong>
+</div>
+{% endif %}
 
-    <div class="info-grid">
-        <div class="info-item">
-            <div class="info-label">Request ID</div>
-            <div class="info-value">#{{ demo_request.id }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Customer</div>
-            <div class="info-value">{{ demo_request.user.full_name }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Demo</div>
-            <div class="info-value">{{ demo_request.demo.title }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Created</div>
-            <div class="info-value">{{ demo_request.created_at|date:"M d, Y g:i A" }}</div>
-        </div>
+<!-- Conflicts Alert -->
+{% if conflicts %}
+<div class="conflict-alert">
+    <h6><i class="fas fa-exclamation-triangle me-2"></i>Time Slot Conflict Warning</h6>
+    <p class="mb-2">The following demo(s) are also scheduled at this time:</p>
+    <ul class="mb-0">
+        {% for conflict in conflicts %}
+        <li>
+            <a href="{% url 'core:admin_demo_request_detail' conflict.id %}">
+                Request #{{ conflict.id }}
+            </a> - {{ conflict.user.full_name }} ({{ conflict.demo.title }})
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="row">
+    <!-- Left Column -->
+    <div class="col-lg-8">
+        <!-- Request Information -->
+        <div class="detail-card">
+            <h3 class="detail-section-title">
+                <i class="fas fa-info-circle"></i>Request Information
+            </h3>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-hashtag"></i>Request ID
+                </div>
+                <div class="detail-value">
+                    <strong>#{{ demo_request.id }}</strong>
+                </div>
+            </div>
+
+          <div class="detail-row">
+    <div class="detail-label">
+        <i class="fas fa-traffic-light"></i>Status
+    </div>
+    <div class="detail-value">
+        <span class="status-badge {{ demo_request.status }}">
+            <i class="fas fa-circle"></i>
+            {{ demo_request.get_status_display }}
+        </span>
     </div>
 </div>
 
-<!-- Customer Information -->
-<div class="detail-card">
-    <div class="detail-header">
-        <i class="fas fa-user"></i>Customer Information
+<!-- CANCELLATION INFORMATION SECTION -->
+{% if demo_request.status == 'cancelled' and demo_request.cancellation_reason %}
+<div class="detail-row" style="background: #fee2e2; margin: 0 -2rem; padding: 1rem 2rem; border-top: 1px solid #fca5a5;">
+    <div class="detail-label">
+        <i class="fas fa-ban text-danger"></i>Cancellation Reason
     </div>
-
-    <div class="info-grid">
-        <div class="info-item">
-            <div class="info-label">Name</div>
-            <div class="info-value">{{ demo_request.user.full_name }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Email</div>
-            <div class="info-value">
-                <a href="mailto:{{ demo_request.user.email }}" class="text-decoration-none">
-                    {{ demo_request.user.email }}
-                </a>
-            </div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Mobile</div>
-            <div class="info-value">
-                <a href="tel:{{ demo_request.user.full_mobile }}" class="text-decoration-none">
-                    {{ demo_request.user.full_mobile }}
-                </a>
-            </div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Organization</div>
-            <div class="info-value">{{ demo_request.user.organization|default:"Not specified" }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Job Title</div>
-            <div class="info-value">{{ demo_request.user.job_title|default:"Not specified" }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Location</div>
-            <div class="info-value">
-                {% if demo_request.city %}
-                    {{ demo_request.city }}{% if demo_request.country_region %}, {{ demo_request.get_country_region_display }}{% endif %}
-                {% else %}
-                    Not specified
-                {% endif %}
-            </div>
-        </div>
+    <div class="detail-value">
+        <span class="badge bg-danger px-3 py-2" style="font-size: 0.9rem;">
+            {{ demo_request.get_cancellation_reason_display }}
+        </span>
     </div>
 </div>
 
-<!-- Demo Information -->
-<div class="detail-card">
-    <div class="detail-header">
-        <i class="fas fa-video"></i>Demo Information
+{% if demo_request.cancellation_details %}
+<div class="detail-row" style="background: #fee2e2; margin: 0 -2rem; padding: 1rem 2rem; border-bottom: 1px solid #fca5a5;">
+    <div class="detail-label">
+        <i class="fas fa-file-alt text-danger"></i>Details
     </div>
+    <div class="detail-value">
+        <div class="alert alert-danger mb-0" style="border-left: 4px solid #dc2626;">
+            {{ demo_request.cancellation_details }}
+        </div>
+    </div>
+</div>
+{% endif %}
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Demo Title</div>
-                    <div class="info-value">{{ demo_request.demo.title }}</div>
+{% if demo_request.cancelled_at %}
+<div class="detail-row" style="background: #fee2e2; margin: 0 -2rem; padding: 1rem 2rem;">
+    <div class="detail-label">
+        <i class="fas fa-calendar-times text-danger"></i>Cancelled At
+    </div>
+    <div class="detail-value">
+        <strong class="text-danger">{{ demo_request.cancelled_at|date:"F d, Y - g:i A" }}</strong>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+<!-- END CANCELLATION INFORMATION -->
+
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-user"></i>Customer
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Demo Type</div>
-                    <div class="info-value">{{ demo_request.demo.get_demo_type_display }}</div>
+                <div class="detail-value">
+                    <a href="{% url 'core:admin_customer_detail' demo_request.user.id %}">
+                        {{ demo_request.user.full_name }}
+                    </a>
+                    <br>
+                    <small class="text-muted">{{ demo_request.user.email }}</small>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Duration</div>
-                    <div class="info-value">{{ demo_request.demo.formatted_duration|default:"Not specified" }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Views</div>
-                    <div class="info-value">{{ demo_request.demo.views_count }}</div>
-                </div>
-                {% if demo_request.demo.is_featured %}
-                <div class="info-item">
-                    <div class="info-label">Featured</div>
-                    <div class="info-value">
-                        <span class="badge bg-warning text-dark">
-                            <i class="fas fa-star me-1"></i>Featured Demo
-                        </span>
-                    </div>
-                </div>
-                {% endif %}
             </div>
-            
-            {% if demo_request.demo.description %}
-                <div class="mt-3">
-                    <div class="info-label">Description</div>
-                    <div class="info-value">{{ demo_request.demo.description }}</div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-video"></i>Demo
                 </div>
+                <div class="detail-value">
+                    <a href="{% url 'core:admin_demo_detail' demo_request.demo.id %}">
+                        {{ demo_request.demo.title }}
+                    </a>
+                    <br>
+                    <small class="text-muted">{{ demo_request.demo.get_demo_type_display }}</small>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-calendar"></i>Requested Date
+                </div>
+                <div class="detail-value">
+                    {{ demo_request.requested_date|date:"l, F d, Y" }}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-clock"></i>Requested Time
+                </div>
+                <div class="detail-value">
+                    {{ demo_request.requested_time_slot }}
+                </div>
+            </div>
+
+            {% if demo_request.confirmed_date %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-check-circle text-success"></i>Confirmed Date
+                </div>
+                <div class="detail-value">
+                    <strong>{{ demo_request.confirmed_date|date:"l, F d, Y" }}</strong>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-clock text-success"></i>Confirmed Time
+                </div>
+                <div class="detail-value">
+                    <strong>{{ demo_request.confirmed_time_slot }}</strong>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if demo_request.business_category %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-briefcase"></i>Business Category
+                </div>
+                <div class="detail-value">
+                    {{ demo_request.business_category.name }}
+                    {% if demo_request.business_subcategory %}
+                    <br>
+                    <small class="text-muted">{{ demo_request.business_subcategory.name }}</small>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if demo_request.city or demo_request.country_region %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-map-marker-alt"></i>Location
+                </div>
+                <div class="detail-value">
+                    {% if demo_request.postal_code %}{{ demo_request.postal_code }}, {% endif %}
+                    {% if demo_request.city %}{{ demo_request.city }}, {% endif %}
+                    {% if demo_request.country_region %}{{ demo_request.get_country_region_display }}{% else %}India{% endif %}
+                    {% if demo_request.is_international %}
+                    <span class="badge bg-info ms-2">International</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if demo_request.notes %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-comment"></i>Customer Notes
+                </div>
+                <div class="detail-value">
+                    {{ demo_request.notes }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if demo_request.admin_notes %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-user-shield"></i>Admin Notes
+                </div>
+                <div class="detail-value">
+                    <pre style="white-space: pre-wrap; font-family: inherit;">{{ demo_request.admin_notes }}</pre>
+                </div>
+            </div>
             {% endif %}
         </div>
-        
-        {% if demo_request.demo.thumbnail %}
-            <div class="col-md-4">
-                <img src="{{ demo_request.demo.thumbnail.url }}" 
-                     alt="{{ demo_request.demo.title }}" 
-                     class="img-fluid rounded shadow-sm">
-            </div>
-        {% endif %}
-    </div>
-</div>
 
-
-
-<!-- Business Category Information -->
-{% if demo_request.business_category or demo_request.business_subcategory %}
+       <!-- Timeline -->
 <div class="detail-card">
-    <div class="detail-header">
-        <i class="fas fa-briefcase"></i>Business Category Information
+    <h3 class="detail-section-title">
+        <i class="fas fa-history"></i>Activity Timeline
+    </h3>
+
+    <div class="timeline-item">
+        <strong>Request Created</strong>
+        <br>
+        <small class="text-muted">{{ demo_request.created_at|date:"F d, Y g:i A" }}</small>
     </div>
 
-    <div class="info-grid">
-        {% if demo_request.business_category %}
-        <div class="info-item">
-            <div class="info-label">Business Category</div>
-            <div class="info-value">
-                {% if demo_request.business_category.icon %}{{ demo_request.business_category.icon }} {% endif %}
-                {{ demo_request.business_category.name }}
-            </div>
-        </div>
-        {% endif %}
-        
-        {% if demo_request.business_subcategory %}
-        <div class="info-item">
-            <div class="info-label">Business Subcategory</div>
-            <div class="info-value">{{ demo_request.business_subcategory.name }}</div>
-        </div>
-        {% endif %}
-        
-        {% if demo_request.is_international %}
-        <div class="info-item">
-            <div class="info-label">Customer Type</div>
-            <div class="info-value">
-                <span class="badge bg-info">
-                    <i class="fas fa-globe me-1"></i>International Customer
-                </span>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-    
-    {% if demo_request.business_category.description %}
-    <div class="mt-3">
-        <div class="info-label">Category Description</div>
-        <div class="info-value text-muted">{{ demo_request.business_category.description }}</div>
+    {% if demo_request.confirmed_date %}
+    <div class="timeline-item">
+        <strong>Demo Confirmed</strong>
+        <br>
+        <small class="text-muted">
+            Confirmed for {{ demo_request.confirmed_date|date:"F d, Y" }} at {{ demo_request.confirmed_time_slot }}
+        </small>
     </div>
     {% endif %}
-</div>
-{% endif %}
 
-<!-- Schedule Information -->
-<div class="detail-card">
-    <div class="detail-header">
-        <i class="fas fa-calendar-alt"></i>Schedule Information
+    {% if demo_request.is_cancelled and demo_request.cancelled_at %}
+    <div class="timeline-item">
+        <strong class="text-danger">
+            <i class="fas fa-ban me-1"></i>Demo Cancelled
+        </strong>
+        <br>
+        <small class="text-muted">{{ demo_request.cancelled_at|date:"F d, Y g:i A" }}</small>
+        {% if demo_request.cancellation_reason %}
+        <br>
+        <small class="text-danger">
+            <strong>Reason:</strong> {{ demo_request.get_cancellation_reason_display }}
+        </small>
+        {% endif %}
     </div>
-
-    <!-- Conflicts Warning -->
-    {% if conflicts %}
-        <div class="conflict-warning">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Scheduling Conflict:</strong> Another demo is already scheduled at the same time.
-            <ul class="mb-0 mt-2">
-                {% for conflict in conflicts %}
-                    <li>{{ conflict.user.full_name }} - {{ conflict.demo.title }}</li>
-                {% endfor %}
-            </ul>
-        </div>
     {% endif %}
 
-    <div class="info-grid">
-        <div class="info-item">
-            <div class="info-label">Requested Date</div>
-            <div class="info-value">{{ demo_request.requested_date|date:"l, M d, Y" }}</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">Requested Time</div>
-            <div class="info-value">{{ demo_request.requested_time_slot }}</div>
-        </div>
-        {% if demo_request.confirmed_date %}
-            <div class="info-item">
-                <div class="info-label">Confirmed Date</div>
-                <div class="info-value">{{ demo_request.confirmed_date|date:"l, M d, Y" }}</div>
-            </div>
-        {% endif %}
-        {% if demo_request.confirmed_time_slot %}
-            <div class="info-item">
-                <div class="info-label">Confirmed Time</div>
-                <div class="info-value">{{ demo_request.confirmed_time_slot }}</div>
-            </div>
-        {% endif %}
+    {% if demo_request.handled_by %}
+    <div class="timeline-item">
+        <strong>Handled By</strong>
+        <br>
+        <small class="text-muted">{{ demo_request.handled_by.username }}</small>
     </div>
-</div>
-
-<!-- Notes & Comments -->
-<div class="detail-card">
-    <div class="detail-header">
-        <i class="fas fa-sticky-note"></i>Notes & Comments
-    </div>
-
-    <div class="row">
-        {% if demo_request.notes %}
-            <div class="col-md-6">
-                <div class="info-item">
-                    <div class="info-label">Customer Notes</div>
-                    <div class="info-value">{{ demo_request.notes }}</div>
-                </div>
-            </div>
-        {% endif %}
-        
-        {% if demo_request.admin_notes %}
-            <div class="col-md-6">
-                <div class="info-item">
-                    <div class="info-label">Admin Notes</div>
-                    <div class="info-value">{{ demo_request.admin_notes|linebreaks }}</div>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-
-    {% if not demo_request.notes and not demo_request.admin_notes %}
-        <p class="text-muted mb-0">No notes or comments available.</p>
     {% endif %}
-</div>
 
-<!-- Request History -->
-<div class="detail-card">
-    <div class="detail-header">
-        <i class="fas fa-history"></i>Request Timeline
+    <div class="timeline-item">
+        <strong>Last Updated</strong>
+        <br>
+        <small class="text-muted">{{ demo_request.updated_at|date:"F d, Y g:i A" }}</small>
+    </div>
+</div>
     </div>
 
-    <div class="timeline">
-        <div class="timeline-item">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <h6 class="mb-1 text-primary">Request Created</h6>
-                    <p class="mb-1">Demo request submitted by {{ demo_request.user.full_name }}</p>
-                    <small class="text-muted">{{ demo_request.created_at|date:"M d, Y g:i A" }}</small>
-                </div>
-                <span class="badge bg-primary">Created</span>
+    <!-- Right Column -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="detail-card">
+            <h3 class="detail-section-title">
+                <i class="fas fa-bolt"></i>Quick Actions
+            </h3>
+
+            <div class="d-grid gap-2">
+                {% if demo_request.status == 'pending' %}
+                <button class="btn btn-success" onclick="openConfirmModal()">
+                    <i class="fas fa-check me-2"></i>Confirm Demo
+                </button>
+                {% endif %}
+
+                {% if demo_request.status == 'confirmed' %}
+                <button class="btn btn-warning" onclick="openRescheduleModal()">
+                    <i class="fas fa-calendar-alt me-2"></i>Reschedule
+                </button>
+                <button class="btn btn-success" onclick="markAsComplete()">
+                    <i class="fas fa-check-circle me-2"></i>Mark as Complete
+                </button>
+                {% endif %}
+
+                {% if demo_request.status in 'pending,confirmed' %}
+                <button class="btn btn-danger" onclick="openCancelModal()">
+                    <i class="fas fa-times me-2"></i>Cancel Request
+                </button>
+                {% endif %}
+
+                <a href="{% url 'core:admin_edit_demo_request' demo_request.id %}" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Edit Request
+                </a>
+
+                <a href="mailto:{{ demo_request.user.email }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-envelope me-2"></i>Email Customer
+                </a>
             </div>
         </div>
 
-        {% if demo_request.status == 'confirmed' %}
-            <div class="timeline-item">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h6 class="mb-1 text-success">Request Confirmed</h6>
-                        <p class="mb-1">Demo confirmed for {{ demo_request.effective_date|date:"M d, Y" }} at {{ demo_request.effective_time_slot }}</p>
-                        {% if demo_request.handled_by %}
-                            <small class="text-muted">Confirmed by {{ demo_request.handled_by.username }}</small>
-                        {% endif %}
-                    </div>
-                    <span class="badge bg-success">Confirmed</span>
-                </div>
-            </div>
-        {% endif %}
+        <!-- Customer's Other Requests -->
+        {% if user_other_requests %}
+        <div class="detail-card">
+            <h3 class="detail-section-title">
+                <i class="fas fa-list"></i>Customer's Other Requests
+            </h3>
 
-        {% if demo_request.status == 'completed' %}
-            <div class="timeline-item">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h6 class="mb-1 text-info">Demo Completed</h6>
-                        <p class="mb-1">Demo session completed successfully</p>
-                        {% if demo_request.handled_by %}
-                            <small class="text-muted">Marked complete by {{ demo_request.handled_by.username }}</small>
-                        {% endif %}
-                    </div>
-                    <span class="badge bg-info">Completed</span>
-                </div>
-            </div>
-        {% endif %}
-
-        {% if demo_request.status == 'cancelled' %}
-            <div class="timeline-item">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h6 class="mb-1 text-danger">Request Cancelled</h6>
-                        <p class="mb-1">Demo request was cancelled</p>
-                        {% if demo_request.handled_by %}
-                            <small class="text-muted">Cancelled by {{ demo_request.handled_by.username }}</small>
-                        {% endif %}
-                    </div>
-                    <span class="badge bg-danger">Cancelled</span>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Customer's Other Requests -->
-{% if user_other_requests %}
-    <div class="detail-card">
-        <div class="detail-header">
-            <i class="fas fa-list"></i>Customer's Other Requests
-        </div>
-
-        <div class="user-requests">
-            {% for request in user_other_requests %}
-                <div class="request-item">
+            <div class="list-group">
+                {% for req in user_other_requests %}
+                <a href="{% url 'core:admin_demo_request_detail' req.id %}" 
+                   class="list-group-item list-group-item-action">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>{{ request.demo.title }}</strong>
+                            <strong>#{{ req.id }}</strong> - {{ req.demo.title }}
                             <br>
-                            <small class="text-muted">
-                                {{ request.requested_date|date:"M d, Y" }} at {{ request.requested_time_slot }}
-                            </small>
+                            <small class="text-muted">{{ req.requested_date|date:"M d, Y" }}</small>
                         </div>
-                        <div class="text-end">
-                            <span class="status-badge status-{{ request.status }}">
-                                {{ request.get_status_display }}
-                            </span>
-                            <br>
-                            <small class="text-muted">{{ request.created_at|date:"M d" }}</small>
+                        <span class="badge bg-{{ req.status }}">{{ req.get_status_display }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ====================================
+     CONFIRM DEMO MODAL - Customer Style
+==================================== -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">
+                    <i class="fas fa-check-circle"></i>Confirm Demo Request
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Calendar Section -->
+                    <div class="col-lg-7">
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <button type="button" onclick="previousMonth()">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <h6 id="currentMonth"></h6>
+                                <button type="button" onclick="nextMonth()">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="calendar-grid">
+                                <div class="calendar-weekdays">
+                                    <div class="weekday">Sun</div>
+                                    <div class="weekday">Mon</div>
+                                    <div class="weekday">Tue</div>
+                                    <div class="weekday">Wed</div>
+                                    <div class="weekday">Thu</div>
+                                    <div class="weekday">Fri</div>
+                                    <div class="weekday">Sat</div>
+                                </div>
+                                <div class="calendar-days" id="calendarDays">
+                                    <!-- Generated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots Section -->
+                    <div class="col-lg-5">
+                        <div class="time-slots-panel">
+                            <h6>
+                                <i class="fas fa-clock"></i>Available Time Slots
+                            </h6>
+                            
+                            <div class="selected-date-info" id="selectedDateDisplay">
+                                <i class="fas fa-calendar-check"></i>
+                                <div>
+                                    <strong>Selected Date:</strong><br>
+                                    <span id="selectedDateText"></span>
+                                </div>
+                            </div>
+                            
+                            <div id="timeSlotsContainer">
+                                <div class="empty-state">
+                                    <i class="fas fa-calendar-day"></i>
+                                    <p class="mb-0">Please select a date first</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-    </div>
-{% endif %}
 
-<!-- Action Modals -->
-<div class="modal fade" id="actionModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="actionModalTitle">Confirm Action</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="actionModalBody">
-                <!-- Dynamic content -->
+                <!-- Admin Notes -->
+                <div class="mt-3">
+                    <label for="confirmAdminNotes" class="form-label">
+                        <i class="fas fa-sticky-note"></i>
+                        Admin Notes (Optional)
+                    </label>
+                    <textarea class="form-control form-textarea" id="confirmAdminNotes" rows="3" 
+                              placeholder="Add any internal notes about this confirmation..."></textarea>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmActionBtn">Confirm</button>
+                <div class="selection-summary" id="selectionSummary">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <span id="summaryText">No date & time selected</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" id="confirmSubmitBtn" disabled onclick="submitConfirmation()">
+                        <i class="fas fa-check me-1"></i>Confirm Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====================================
+     RESCHEDULE MODAL - Customer Style
+==================================== -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1" aria-labelledby="rescheduleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rescheduleModalLabel">
+                    <i class="fas fa-calendar-alt"></i>Reschedule Demo
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Customer will be notified via email about the rescheduling.
+                </div>
+
+                <div class="row">
+                    <!-- Calendar Section -->
+                    <div class="col-lg-7">
+                        <div class="calendar-container">
+                            <div class="calendar-header">
+                                <button type="button" onclick="previousMonthReschedule()">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <h6 id="currentMonthReschedule"></h6>
+                                <button type="button" onclick="nextMonthReschedule()">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="calendar-grid">
+                                <div class="calendar-weekdays">
+                                    <div class="weekday">Sun</div>
+                                    <div class="weekday">Mon</div>
+                                    <div class="weekday">Tue</div>
+                                    <div class="weekday">Wed</div>
+                                    <div class="weekday">Thu</div>
+                                    <div class="weekday">Fri</div>
+                                    <div class="weekday">Sat</div>
+                                </div>
+                                <div class="calendar-days" id="calendarDaysReschedule">
+                                    <!-- Generated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots Section -->
+                    <div class="col-lg-5">
+                        <div class="time-slots-panel">
+                            <h6>
+                                <i class="fas fa-clock"></i>Available Time Slots
+                            </h6>
+                            
+                            <div class="selected-date-info" id="selectedDateDisplayReschedule">
+                                <i class="fas fa-calendar-check"></i>
+                                <div>
+                                    <strong>Selected Date:</strong><br>
+                                    <span id="selectedDateTextReschedule"></span>
+                                </div>
+                            </div>
+                            
+                            <div id="timeSlotsContainerReschedule">
+                                <div class="empty-state">
+                                    <i class="fas fa-calendar-day"></i>
+                                    <p class="mb-0">Please select a date first</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reschedule Reason -->
+                <div class="mt-3">
+                    <label for="rescheduleReason" class="form-label">
+                        <i class="fas fa-comment-dots"></i>
+                        Reason for Rescheduling <span class="required">*</span>
+                    </label>
+                    <textarea class="form-control form-textarea" id="rescheduleReason" rows="3" required
+                              placeholder="Please provide a reason for rescheduling..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="selection-summary" id="selectionSummaryReschedule">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <span id="summaryTextReschedule">No date & time selected</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-warning" id="rescheduleSubmitBtn" disabled onclick="submitReschedule()">
+                        <i class="fas fa-calendar-alt me-1"></i>Reschedule Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====================================
+     CANCEL MODAL
+==================================== -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
+                <h5 class="modal-title text-white" id="cancelModalLabel">
+                    <i class="fas fa-times-circle me-2"></i>Cancel Demo Request
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Customer will be notified via email about the cancellation.
+                </div>
+
+                <div class="mb-3">
+                    <label for="cancelReason" class="form-label">
+                        <i class="fas fa-comment-dots"></i>
+                        Reason for Cancellation <span class="required">*</span>
+                    </label>
+                    <textarea class="form-control form-textarea" id="cancelReason" rows="4" required
+                              placeholder="Please provide a reason for cancelling this demo..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-arrow-left me-1"></i>Go Back
+                </button>
+                <button type="button" class="btn btn-danger" onclick="submitCancellation()">
+                    <i class="fas fa-times me-1"></i>Cancel Demo
+                </button>
             </div>
         </div>
     </div>
@@ -600,421 +1380,550 @@
 
 {% block admin_extra_js %}
 <script>
-let currentAction = null;
-let availableTimeSlots = [
-    { id: 1, text: "9:30 AM - 10:30 AM", type: "morning" },
-    { id: 2, text: "10:30 AM - 11:30 AM", type: "morning" },
-    { id: 3, text: "11:30 AM - 12:30 PM", type: "morning" },
-    { id: 4, text: "12:30 PM - 1:30 PM", type: "morning" },
-    { id: 5, text: "2:00 PM - 3:00 PM", type: "afternoon" },
-    { id: 6, text: "3:00 PM - 4:00 PM", type: "afternoon" },
-    { id: 7, text: "4:00 PM - 5:00 PM", type: "afternoon" },
-    { id: 8, text: "5:00 PM - 6:00 PM", type: "afternoon" },
-    { id: 9, text: "6:00 PM - 7:00 PM", type: "afternoon" }
+// Disable context menu
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// Global variables
+let selectedDate = null;
+let selectedSlotId = null;
+let currentDate = new Date();
+let currentDateReschedule = new Date();
+
+// Time slots from server
+const timeSlots = [
+    {% for slot in time_slots %}
+    {
+        id: {{ slot.id }},
+        start_time: "{{ slot.start_time|time:'H:i' }}",
+        end_time: "{{ slot.end_time|time:'H:i' }}",
+        display: "{{ slot }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
 ];
 
-function confirmRequest() {
-    currentAction = 'confirm';
-    showActionModal('Confirm Demo Request', `
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            This will confirm the demo for <strong>{{ demo_request.requested_date|date:"M d, Y" }}</strong> at <strong>{{ demo_request.requested_time_slot }}</strong>
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Or select different date & time:</label>
-            <div class="row">
-                <div class="col-md-6">
-                    <label class="form-label">Date</label>
-                    <input type="date" class="form-control" id="confirmedDate" 
-                           value="{{ demo_request.requested_date|date:"Y-m-d" }}"
-                           min="${new Date().toISOString().split('T')[0]}">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Time Slot</label>
-                    <select class="form-select" id="confirmedTimeSlot">
-                        <option value="">Select time slot...</option>
-                        <optgroup label="Morning Slots">
-                            ${availableTimeSlots.filter(slot => slot.type === 'morning').map(slot => 
-                                `<option value="${slot.id}">${slot.text}</option>`
-                            ).join('')}
-                        </optgroup>
-                        <optgroup label="Afternoon/Evening Slots">
-                            ${availableTimeSlots.filter(slot => slot.type === 'afternoon').map(slot => 
-                                `<option value="${slot.id}">${slot.text}</option>`
-                            ).join('')}
-                        </optgroup>
-                    </select>
-                </div>
-            </div>
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Confirmation Notes (Optional)</label>
-            <textarea class="form-control" id="actionNotes" rows="3" 
-                      placeholder="Add any confirmation notes for the customer..."></textarea>
-        </div>
-    `);
+console.log('✅ Time slots loaded:', timeSlots);
+
+// ====================================
+// CONFIRM MODAL FUNCTIONS
+// ====================================
+
+function openConfirmModal() {
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    modal.show();
+    selectedDate = null;
+    selectedSlotId = null;
+    generateCalendar();
+}
+
+function generateCalendar() {
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
     
-    // Set default time slot if current request slot exists
-    setTimeout(() => {
-        const timeSlotSelect = document.getElementById('confirmedTimeSlot');
-        if (timeSlotSelect) {
-            // Try to match current request time slot
-            const currentSlotText = "{{ demo_request.requested_time_slot }}";
-            const matchingSlot = availableTimeSlots.find(slot => slot.text === currentSlotText);
-            if (matchingSlot) {
-                timeSlotSelect.value = matchingSlot.id;
-            }
-        }
-    }, 100);
-}
-
-function rescheduleRequest() {
-    currentAction = 'reschedule';
-    showActionModal('Reschedule Demo Request', `
-        <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            Current booking: <strong>{{ demo_request.effective_date|date:"M d, Y" }}</strong> at <strong>{{ demo_request.effective_time_slot }}</strong>
-        </div>
-        
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label class="form-label required">New Date</label>
-                <input type="date" class="form-control" id="newDate" 
-                       min="${new Date().toISOString().split('T')[0]}" 
-                       onchange="validateRescheduleDate(this.value)" required>
-                <div class="invalid-feedback" id="dateError"></div>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label required">New Time Slot</label>
-                <select class="form-select" id="newTimeSlot" required>
-                    <option value="">Select new time slot...</option>
-                    <optgroup label="Morning Slots (9 AM - 1 PM)">
-                        ${availableTimeSlots.filter(slot => slot.type === 'morning').map(slot => 
-                            `<option value="${slot.id}">${slot.text}</option>`
-                        ).join('')}
-                    </optgroup>
-                    <optgroup label="Afternoon/Evening Slots (2 PM - 7 PM)">
-                        ${availableTimeSlots.filter(slot => slot.type === 'afternoon').map(slot => 
-                            `<option value="${slot.id}">${slot.text}</option>`
-                        ).join('')}
-                    </optgroup>
-                </select>
-            </div>
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label required">Reason for Rescheduling</label>
-            <textarea class="form-control" id="actionNotes" rows="3" 
-                      placeholder="Please explain why the demo is being rescheduled. This will be sent to the customer." 
-                      required></textarea>
-            <div class="form-text">This reason will be included in the email notification to the customer.</div>
-        </div>
-        
-        <div class="mb-3">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="sendNotification" checked>
-                <label class="form-check-label" for="sendNotification">
-                    Send email notification to customer
-                </label>
-            </div>
-        </div>
-    `);
-}
-
-function cancelRequest() {
-    currentAction = 'cancel';
-    showActionModal('Cancel Demo Request', `
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Warning:</strong> This action cannot be undone. The customer will be notified via email.
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Cancellation Reason</label>
-            <select class="form-select" id="cancelReason" onchange="updateCancelNotes()">
-                <option value="">Select a reason...</option>
-                <option value="technical_issues">Technical Issues</option>
-                <option value="scheduling_conflict">Scheduling Conflict</option>
-                <option value="resource_unavailable">Resource Unavailable</option>
-                <option value="customer_request">Customer Requested Cancellation</option>
-                <option value="other">Other (Please specify)</option>
-            </select>
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label required">Detailed Explanation</label>
-            <textarea class="form-control" id="actionNotes" rows="4" 
-                      placeholder="Please provide a detailed explanation. This will be sent to the customer." 
-                      required></textarea>
-            <div class="form-text">Be professional and helpful. Consider offering alternative solutions if appropriate.</div>
-        </div>
-        
-        <div class="mb-3">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="offerReschedule" checked>
-                <label class="form-check-label" for="offerReschedule">
-                    Offer to reschedule instead of cancel
-                </label>
-            </div>
-        </div>
-    `);
-}
-
-function completeRequest() {
-    currentAction = 'complete';
-    showActionModal('Mark Demo as Complete', `
-        <div class="alert alert-success">
-            <i class="fas fa-check-circle me-2"></i>
-            Mark this demo as successfully completed?
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Demo Quality Rating</label>
-            <div class="rating-stars mb-2">
-                <i class="fas fa-star rating-star" data-rating="1"></i>
-                <i class="fas fa-star rating-star" data-rating="2"></i>
-                <i class="fas fa-star rating-star" data-rating="3"></i>
-                <i class="fas fa-star rating-star" data-rating="4"></i>
-                <i class="fas fa-star rating-star" data-rating="5"></i>
-            </div>
-            <input type="hidden" id="demoRating" value="5">
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Completion Summary</label>
-            <textarea class="form-control" id="actionNotes" rows="4" 
-                      placeholder="Summarize what was covered in the demo, customer feedback, follow-up actions, etc."></textarea>
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Follow-up Actions</label>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="sendFollowUp" checked>
-                <label class="form-check-label" for="sendFollowUp">
-                    Send follow-up email with resources
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="scheduleFollowUpCall">
-                <label class="form-check-label" for="scheduleFollowUpCall">
-                    Schedule follow-up call
-                </label>
-            </div>
-        </div>
-    `);
+    document.getElementById('currentMonth').textContent = 
+        `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
     
-    // Add rating star functionality
-    setTimeout(() => {
-        document.querySelectorAll('.rating-star').forEach(star => {
-            star.addEventListener('click', function() {
-                const rating = this.dataset.rating;
-                document.getElementById('demoRating').value = rating;
-                
-                // Update star display
-                document.querySelectorAll('.rating-star').forEach((s, index) => {
-                    if (index < rating) {
-                        s.style.color = '#ffc107';
-                    } else {
-                        s.style.color = '#dee2e6';
-                    }
-                });
-            });
-        });
-        
-        // Set default 5-star rating
-        document.querySelectorAll('.rating-star').forEach(s => s.style.color = '#ffc107');
-    }, 100);
-}
-
-function validateRescheduleDate(dateValue) {
-    const selectedDate = new Date(dateValue);
+    const calendarDays = document.getElementById('calendarDays');
+    calendarDays.innerHTML = '';
+    
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
     const today = new Date();
-    const dateError = document.getElementById('dateError');
-    const dateInput = document.getElementById('newDate');
-    
     today.setHours(0, 0, 0, 0);
     
-    if (selectedDate < today) {
-        dateError.textContent = 'Cannot select past dates';
-        dateInput.classList.add('is-invalid');
-        return false;
+    for (let i = 0; i < 42; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        
+        const dayElement = document.createElement('div');
+        dayElement.classList.add('calendar-day');
+        dayElement.textContent = date.getDate();
+        
+        if (date.getMonth() !== currentDate.getMonth()) {
+            dayElement.classList.add('other-month');
+        }
+        
+        if (date.getTime() === today.getTime()) {
+            dayElement.classList.add('today');
+        }
+        
+        if (date < today || date.getDay() === 0) {
+            dayElement.classList.add('disabled');
+            dayElement.title = date.getDay() === 0 ? 'Sundays not available' : 'Past date';
+        } else {
+            dayElement.addEventListener('click', () => selectDate(date, dayElement, 'confirm'));
+        }
+        
+        calendarDays.appendChild(dayElement);
     }
-    
-    if (selectedDate.getDay() === 0) { // Sunday
-        dateError.textContent = 'Sundays are not available for demos';
-        dateInput.classList.add('is-invalid');
-        return false;
-    }
-    
-    dateInput.classList.remove('is-invalid');
-    dateError.textContent = '';
-    return true;
 }
 
-function updateCancelNotes() {
-    const reason = document.getElementById('cancelReason').value;
-    const notesField = document.getElementById('actionNotes');
+function previousMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    generateCalendar();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    generateCalendar();
+}
+
+async function selectDate(date, element, mode) {
+    console.log('📅 Date selected:', date, 'Mode:', mode);
     
-    const templates = {
-        'technical_issues': 'Due to unforeseen technical issues with our demo system, we need to cancel your scheduled demo session. We apologize for the inconvenience and would like to reschedule at your earliest convenience.',
-        'scheduling_conflict': 'Unfortunately, we have a scheduling conflict that requires us to cancel your demo session. We sincerely apologize and would be happy to find an alternative time that works for you.',
-        'resource_unavailable': 'The required resources for your demo are temporarily unavailable. We apologize for the short notice and would like to reschedule when everything is ready.',
-        'customer_request': 'As requested, we are cancelling your scheduled demo session. Please let us know if you would like to reschedule for a future date.'
+    const containerSelector = mode === 'confirm' ? '#calendarDays' : '#calendarDaysReschedule';
+    document.querySelectorAll(`${containerSelector} .calendar-day.selected`).forEach(day => {
+        day.classList.remove('selected');
+    });
+    
+    element.classList.add('selected');
+    selectedDate = date;
+    
+    const displayId = mode === 'confirm' ? 'selectedDateDisplay' : 'selectedDateDisplayReschedule';
+    const textId = mode === 'confirm' ? 'selectedDateText' : 'selectedDateTextReschedule';
+    
+    document.getElementById(displayId).classList.add('show');
+    document.getElementById(textId).textContent = formatDate(date);
+    
+    await loadTimeSlots(date, mode);
+    
+    selectedSlotId = null;
+    updateConfirmButton(mode);
+    updateSelectionSummary(mode);
+}
+
+async function loadTimeSlots(date, mode) {
+    const dateStr = formatDateForServer(date);
+    const containerId = mode === 'confirm' ? 'timeSlotsContainer' : 'timeSlotsContainerReschedule';
+    const container = document.getElementById(containerId);
+    
+    console.log('🔍 Loading slots for:', dateStr);
+    
+    container.innerHTML = `
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p class="mt-2 mb-0">Checking availability...</p>
+        </div>
+    `;
+    
+    try {
+        const response = await fetch(`{% url 'core:ajax_admin_check_slot_availability' %}?date=${dateStr}`);
+        const data = await response.json();
+        
+        console.log('📦 Slots response:', data);
+        
+        if (data.success) {
+            renderTimeSlots(data.slots, mode);
+        } else {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p class="mb-0">${data.message || 'No slots available'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('❌ Error loading slots:', error);
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p class="mb-0">Error loading time slots</p>
+                <button type="button" onclick="location.reload()" class="btn btn-sm btn-primary mt-2">
+                    <i class="fas fa-sync me-1"></i>Refresh Page
+                </button>
+            </div>
+        `;
+    }
+}
+
+function renderTimeSlots(slots, mode) {
+    const containerId = mode === 'confirm' ? 'timeSlotsContainer' : 'timeSlotsContainerReschedule';
+    const container = document.getElementById(containerId);
+    
+    console.log('🎨 Rendering slots:', slots);
+    
+    if (!slots || slots.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <p class="mb-0">No time slots available</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const html = slots.map(slot => {
+        const isDisabled = !slot.is_available || slot.is_past || slot.is_starting_soon;
+        const disabledClass = isDisabled ? 'disabled' : '';
+        
+        let statusClass = 'available';
+        let statusText = 'AVAILABLE';
+        
+        if (slot.status === 'past') {
+            statusClass = 'past';
+            statusText = 'TIME PASSED';
+        } else if (slot.status === 'starting_soon') {
+            statusClass = 'starting_soon';
+            statusText = 'STARTING SOON';
+        } else if (slot.status === 'full') {
+            statusClass = 'full';
+            statusText = 'BOOKED';
+        }
+        
+        let bookingInfo = '';
+        if (slot.booking_details && slot.booking_details.length > 0) {
+            const details = slot.booking_details[0];
+            bookingInfo = `
+                <div class="slot-booking-details">
+                    <strong>${details.customer_name}</strong><br>
+                    <small>${details.customer_email}</small>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="time-slot-card ${disabledClass} ${slot.status}" 
+                 data-slot-id="${slot.id}"
+                 data-is-available="${slot.is_available}"
+                 data-status="${slot.status}"
+                 ${!isDisabled ? `onclick="selectTimeSlot(${slot.id}, '${mode}')"` : ''}
+                 ${isDisabled ? `title="${statusText}"` : ''}>
+                <div class="slot-header">
+                    <div class="slot-time">
+                        <i class="fas fa-clock"></i>
+                        ${slot.start_time}
+                    </div>
+                    <span class="slot-status-badge ${statusClass}">${statusText}</span>
+                </div>
+                ${!isDisabled ? `
+                    <div class="slot-info">
+                        <i class="fas fa-users"></i>
+                        <span>${slot.confirmed_bookings}/${slot.total_capacity}</span>
+                    </div>
+                ` : ''}
+                ${bookingInfo}
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = `<div class="time-slots-grid">${html}</div>`;
+}
+
+function selectTimeSlot(slotId, mode) {
+    console.log('⏰ Slot selected:', slotId, 'Mode:', mode);
+    
+    const container = mode === 'confirm' ? 'timeSlotsContainer' : 'timeSlotsContainerReschedule';
+    document.querySelectorAll(`#${container} .time-slot-card.selected`).forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    const card = document.querySelector(`#${container} .time-slot-card[data-slot-id="${slotId}"]`);
+    if (card) {
+        const isAvailable = card.getAttribute('data-is-available') === 'true';
+        const status = card.getAttribute('data-status');
+        
+        if (isAvailable && status === 'available') {
+            card.classList.add('selected');
+            selectedSlotId = slotId;
+            updateConfirmButton(mode);
+            updateSelectionSummary(mode);
+        } else {
+            alert(`⚠️ This slot is not available (${status})`);
+        }
+    }
+}
+
+function updateConfirmButton(mode) {
+    const btnId = mode === 'confirm' ? 'confirmSubmitBtn' : 'rescheduleSubmitBtn';
+    const btn = document.getElementById(btnId);
+    
+    if (btn) {
+        btn.disabled = !(selectedDate && selectedSlotId);
+    }
+}
+
+function updateSelectionSummary(mode) {
+    const summaryId = mode === 'confirm' ? 'summaryText' : 'summaryTextReschedule';
+    const summaryElement = document.getElementById(summaryId);
+    
+    if (summaryElement) {
+        if (selectedDate && selectedSlotId) {
+            const slot = timeSlots.find(s => s.id === selectedSlotId);
+            summaryElement.innerHTML = `<strong>${formatDate(selectedDate)}</strong> at <strong>${slot ? slot.display : ''}</strong>`;
+        } else if (selectedDate) {
+            summaryElement.textContent = `${formatDate(selectedDate)} - Select time slot`;
+        } else {
+            summaryElement.textContent = 'No date & time selected';
+        }
+    }
+}
+
+function submitConfirmation() {
+    if (!selectedDate || !selectedSlotId) {
+        alert('⚠️ Please select a date and time slot');
+        return;
+    }
+    
+    const adminNotes = document.getElementById('confirmAdminNotes').value;
+    const btn = document.getElementById('confirmSubmitBtn');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Confirming...';
+    
+    const data = {
+        action: 'confirm',
+        confirmed_date: formatDateForServer(selectedDate),
+        confirmed_time_slot_id: selectedSlotId,
+        admin_notes: adminNotes
     };
     
-    if (reason && templates[reason]) {
-        notesField.value = templates[reason];
-    }
-}
-
-function showActionModal(title, body) {
-    document.getElementById('actionModalTitle').textContent = title;
-    document.getElementById('actionModalBody').innerHTML = body;
-    
-    const modal = new bootstrap.Modal(document.getElementById('actionModal'));
-    modal.show();
-}
-
-// Handle action confirmation with full validation
-document.getElementById('confirmActionBtn').addEventListener('click', function() {
-    const notes = document.getElementById('actionNotes')?.value || '';
-    let isValid = true;
-    let data = {
-        action: currentAction,
-        admin_notes: notes
-    };
-    
-    // Validate based on action type
-    if (currentAction === 'confirm') {
-        const confirmedDate = document.getElementById('confirmedDate').value;
-        const confirmedTimeSlot = document.getElementById('confirmedTimeSlot').value;
-        
-        if (confirmedDate && confirmedTimeSlot) {
-            data.confirmed_date = confirmedDate;
-            data.confirmed_time_slot_id = confirmedTimeSlot;
-        }
-        
-    } else if (currentAction === 'reschedule') {
-        const newDate = document.getElementById('newDate').value;
-        const newTimeSlot = document.getElementById('newTimeSlot').value;
-        const sendNotification = document.getElementById('sendNotification').checked;
-        
-        if (!newDate || !newTimeSlot) {
-            alert('Please select both new date and time slot');
-            return;
-        }
-        
-        if (!validateRescheduleDate(newDate)) {
-            return;
-        }
-        
-        if (!notes.trim()) {
-            alert('Please provide a reason for rescheduling');
-            return;
-        }
-        
-        data.new_date = newDate;
-        data.new_time_slot_id = newTimeSlot;
-        data.send_notification = sendNotification;
-        
-    } else if (currentAction === 'cancel') {
-        const cancelReason = document.getElementById('cancelReason').value;
-        const offerReschedule = document.getElementById('offerReschedule').checked;
-        
-        if (!notes.trim()) {
-            alert('Please provide a cancellation reason');
-            return;
-        }
-        
-        data.cancel_reason = cancelReason;
-        data.offer_reschedule = offerReschedule;
-        
-    } else if (currentAction === 'complete') {
-        const rating = document.getElementById('demoRating').value;
-        const sendFollowUp = document.getElementById('sendFollowUp').checked;
-        const scheduleFollowUpCall = document.getElementById('scheduleFollowUpCall').checked;
-        
-        data.demo_rating = rating;
-        data.send_followup = sendFollowUp;
-        data.schedule_followup_call = scheduleFollowUpCall;
-    }
-    
-    // Show loading state
-    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
-    this.disabled = true;
-    
-    // Submit action
-    fetch(`{% url 'core:admin_confirm_demo_request' demo_request.id %}`, {
+    fetch("{% url 'core:admin_confirm_demo_request' demo_request.id %}", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            'X-CSRFToken': '{{ csrf_token }}'
         },
         body: JSON.stringify(data)
     })
     .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            // Show success message
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-success alert-dismissible fade show';
-            alertDiv.innerHTML = `
-                <i class="fas fa-check-circle me-2"></i>
-                ${result.message || 'Action completed successfully'}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.querySelector('.detail-card').prepend(alertDiv);
-            
-            // Reload page after 2 seconds
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
-            
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
         } else {
-            alert('Error: ' + result.error);
-            // Reset button
-            this.innerHTML = 'Confirm';
-            this.disabled = false;
+            alert('❌ ' + (data.error || 'Error confirming demo'));
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check me-1"></i>Confirm Demo';
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while processing the request');
-        // Reset button
-        this.innerHTML = 'Confirm';
-        this.disabled = false;
+        alert('❌ Error confirming demo');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Confirm Demo';
     });
-    
-    // Close modal
-    bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
-});
-
-// Add CSRF token to page if not exists
-if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'csrfmiddlewaretoken';
-    csrfInput.value = '{{ csrf_token }}';
-    document.body.appendChild(csrfInput);
 }
 
-// Add custom styles for rating stars
-const style = document.createElement('style');
-style.textContent = `
-    .rating-stars {
-        font-size: 1.5rem;
+// ====================================
+// RESCHEDULE MODAL FUNCTIONS
+// ====================================
+
+function openRescheduleModal() {
+    const modal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
+    modal.show();
+    selectedDate = null;
+    selectedSlotId = null;
+    generateCalendarReschedule();
+}
+
+function generateCalendarReschedule() {
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
+    
+    document.getElementById('currentMonthReschedule').textContent = 
+        `${monthNames[currentDateReschedule.getMonth()]} ${currentDateReschedule.getFullYear()}`;
+    
+    const calendarDays = document.getElementById('calendarDaysReschedule');
+    calendarDays.innerHTML = '';
+    
+    const firstDay = new Date(currentDateReschedule.getFullYear(), currentDateReschedule.getMonth(), 1);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < 42; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        
+        const dayElement = document.createElement('div');
+        dayElement.classList.add('calendar-day');
+        dayElement.textContent = date.getDate();
+        
+        if (date.getMonth() !== currentDateReschedule.getMonth()) {
+            dayElement.classList.add('other-month');
+        }
+        
+        if (date.getTime() === today.getTime()) {
+            dayElement.classList.add('today');
+        }
+        
+        if (date < today || date.getDay() === 0) {
+            dayElement.classList.add('disabled');
+            dayElement.title = date.getDay() === 0 ? 'Sundays not available' : 'Past date';
+        } else {
+            dayElement.addEventListener('click', () => selectDate(date, dayElement, 'reschedule'));
+        }
+        
+        calendarDays.appendChild(dayElement);
     }
-    .rating-star {
-        cursor: pointer;
-        margin-right: 0.25rem;
-        transition: color 0.3s ease;
+}
+
+function previousMonthReschedule() {
+    currentDateReschedule.setMonth(currentDateReschedule.getMonth() - 1);
+    generateCalendarReschedule();
+}
+
+function nextMonthReschedule() {
+    currentDateReschedule.setMonth(currentDateReschedule.getMonth() + 1);
+    generateCalendarReschedule();
+}
+
+function submitReschedule() {
+    if (!selectedDate || !selectedSlotId) {
+        alert('⚠️ Please select a date and time slot');
+        return;
     }
-    .rating-star:hover {
-        color: #ffc107;
+    
+    const reason = document.getElementById('rescheduleReason').value.trim();
+    if (!reason) {
+        alert('⚠️ Please provide a reason for rescheduling');
+        return;
     }
-`;
-document.head.appendChild(style);
+    
+    const btn = document.getElementById('rescheduleSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Rescheduling...';
+    
+    const data = {
+        action: 'reschedule',
+        new_date: formatDateForServer(selectedDate),
+        new_time_slot_id: selectedSlotId,
+        reason: reason
+    };
+    
+    fetch("{% url 'core:admin_confirm_demo_request' demo_request.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('❌ ' + (data.error || 'Error rescheduling demo'));
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-calendar-alt me-1"></i>Reschedule Demo';
+        }
+    })
+    .catch(error => {console.error('Error:', error);
+        alert('❌ Error rescheduling demo');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-calendar-alt me-1"></i>Reschedule Demo';
+    });
+}
+
+// ====================================
+// CANCEL MODAL FUNCTIONS
+// ====================================
+
+function openCancelModal() {
+    const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+    modal.show();
+}
+
+function submitCancellation() {
+    const reason = document.getElementById('cancelReason').value.trim();
+    if (!reason) {
+        alert('⚠️ Please provide a reason for cancellation');
+        return;
+    }
+    
+    if (!confirm('⚠️ Are you sure you want to cancel this demo? The customer will be notified via email.')) {
+        return;
+    }
+    
+    const data = {
+        action: 'cancel',
+        cancel_reason: reason
+    };
+    
+    fetch("{% url 'core:admin_confirm_demo_request' demo_request.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('❌ ' + (data.error || 'Error cancelling demo'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error cancelling demo');
+    });
+}
+
+// ====================================
+// MARK AS COMPLETE
+// ====================================
+
+function markAsComplete() {
+    const notes = prompt('✅ Completion notes (optional):');
+    if (notes === null) return;
+    
+    const data = {
+        action: 'complete',
+        completion_notes: notes || 'Demo completed successfully'
+    };
+    
+    fetch("{% url 'core:admin_confirm_demo_request' demo_request.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('❌ ' + (data.error || 'Error marking as complete'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Error marking as complete');
+    });
+}
+
+// ====================================
+// HELPER FUNCTIONS
+// ====================================
+
+function formatDate(date) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}
+
+function formatDateForServer(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// ====================================
+// INITIALIZE ON PAGE LOAD
+// ====================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Admin Demo Request Detail Page loaded');
+    console.log('📋 Request ID:', {{ demo_request.id }});
+    console.log('🎯 Status:', '{{ demo_request.status }}');
+});
 </script>
 {% endblock %}

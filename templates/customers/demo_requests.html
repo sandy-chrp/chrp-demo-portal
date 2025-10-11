@@ -1,4 +1,4 @@
-<!-- templates/customers/demo_requests.html - Clean Version with Cancel Reason -->
+<!-- templates/customers/demo_requests.html - Collapsible Accordion Style with Dropdown Filter -->
 {% extends 'customers/base.html' %}
 {% load static %}
 
@@ -7,12 +7,88 @@
 
 {% block customer_extra_css %}
 <style>
-    /* Request Card Styles */
+    /* Filter Bar with Dropdown */
+    .filter-bar {
+        background: white;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: var(--spacing-md);
+        border: 1px solid var(--gray-200);
+    }
+
+    .dropdown-toggle {
+        font-weight: 600;
+        padding: 0.65rem 1.25rem;
+        border-radius: var(--radius-md);
+        border: 2px solid var(--primary-color);
+        background: white;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+        min-width: 200px;
+    }
+
+    .dropdown-toggle:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .dropdown-toggle:focus {
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.2);
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: var(--radius-lg);
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        box-shadow: var(--shadow-lg);
+        min-width: 280px;
+    }
+
+    .dropdown-item {
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background: var(--gray-100);
+        transform: translateX(4px);
+    }
+
+    .dropdown-item.active {
+        background: var(--gradient-primary);
+        color: white;
+    }
+
+    .dropdown-item.active i {
+        color: white !important;
+    }
+
+    .dropdown-item.active .badge {
+        background: rgba(255, 255, 255, 0.3) !important;
+        color: white !important;
+    }
+
+    .dropdown-divider {
+        margin: 0.5rem 0;
+        border-color: var(--gray-200);
+    }
+
+    /* Collapsible Card */
     .request-card {
         background: white;
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-sm);
-        margin-bottom: var(--spacing-lg);
+        margin-bottom: var(--spacing-sm);
         border: 1px solid var(--gray-200);
         transition: all 0.3s ease;
         overflow: hidden;
@@ -22,300 +98,315 @@
         box-shadow: var(--shadow-md);
     }
 
+    .request-card.collapsed {
+        box-shadow: var(--shadow-xs);
+    }
+
+    /* Clickable Header */
     .request-header {
-        padding: var(--spacing-lg);
-        border-bottom: 1px solid var(--gray-200);
+        padding: var(--spacing-md);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: var(--gray-50);
-        gap: var(--spacing-md);
+        background: linear-gradient(135deg, #f9fafb, #ffffff);
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.2s ease;
     }
 
-    .request-title-section {
+    .request-header:hover {
+        background: linear-gradient(135deg, #f3f4f6, #f9fafb);
+    }
+
+    .request-header:active {
+        transform: scale(0.99);
+    }
+
+    /* Header Left Section */
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
         flex: 1;
     }
 
-    .request-title {
-        font-size: 1.125rem;
+    .collapse-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .request-card.collapsed .collapse-icon {
+        transform: rotate(-90deg);
+    }
+
+    .header-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .request-title-mini {
+        font-size: 0.95rem;
         font-weight: 700;
         color: var(--dark-color);
-        margin: 0 0 var(--spacing-xs) 0;
+        margin: 0 0 4px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    .request-meta {
+    .request-meta-mini {
+        font-size: 0.75rem;
         color: var(--gray-500);
-        font-size: 0.875rem;
         display: flex;
-        gap: var(--spacing-md);
-        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+        align-items: center;
     }
 
-    .request-body {
-        padding: var(--spacing-lg);
-    }
-
-    /* Demo Info */
-    .demo-info {
-        display: flex;
-        gap: var(--spacing-md);
-        {% comment %} margin-bottom: var(--spacing-lg); {% endcomment %}
-        padding: var(--spacing-md);
-        background: var(--gray-50);
-        border-radius: var(--radius-md);
-    }
-
-    .demo-thumbnail {
-        width: 80px;
-        height: 60px;
+    /* Thumbnail in Header */
+    .header-thumbnail {
+        width: 50px;
+        height: 38px;
         object-fit: cover;
         border-radius: var(--radius-sm);
         flex-shrink: 0;
     }
 
-    .demo-placeholder {
-        width: 80px;
-        height: 60px;
-        background: var(--gray-200);
-        border-radius: var(--radius-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    /* Status Badge */
+    .status-badge-mini {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        white-space: nowrap;
         flex-shrink: 0;
     }
 
-    .demo-info-text {
-        flex: 1;
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-confirmed { background: #d1fae5; color: #065f46; }
+    .status-rescheduled { background: #dbeafe; color: #1e40af; }
+    .status-completed { background: #dcfce7; color: #166534; }
+    .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+    /* Collapsible Body */
+    .request-body {
+        max-height: 1000px;
+        overflow: hidden;
+        transition: max-height 0.4s ease, padding 0.4s ease;
+        padding: var(--spacing-md);
+        border-top: 1px solid var(--gray-200);
     }
 
-    .demo-info-text h4 {
-        margin: 0 0 var(--spacing-xs) 0;
-        font-size: 1rem;
-        font-weight: 600;
+    .request-card.collapsed .request-body {
+        max-height: 0;
+        padding: 0 var(--spacing-md);
+        border-top: none;
     }
 
-    .demo-categories {
+    /* Info Grid */
+    .info-grid-compact {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .info-item-compact {
         display: flex;
-        gap: var(--spacing-xs);
-        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
     }
 
-    .category-tag {
+    .info-icon {
+        width: 32px;
+        height: 32px;
         background: var(--primary-color);
         color: white;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 0.7rem;
-        font-weight: 600;
-    }
-
-    /* Request Info Grid */
-    .request-info {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .info-item {
-        background: var(--gray-50);
-        padding: var(--spacing-md);
-        border-radius: var(--radius-md);
-        border-left: 3px solid var(--primary-color);
-    }
-
-    .info-item.confirmed {
-        border-left-color: var(--success-color);
-    }
-
-    .info-label {
-        font-size: 0.75rem;
-        color: var(--gray-600);
-        font-weight: 600;
-        margin-bottom: var(--spacing-xs);
+        border-radius: 8px;
         display: flex;
         align-items: center;
-        gap: 4px;
+        justify-content: center;
+        font-size: 0.85rem;
+        flex-shrink: 0;
     }
 
-    .info-value {
-        font-size: 0.95rem;
+    .info-icon.confirmed {
+        background: var(--success-color);
+    }
+
+    .info-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .info-label-small {
+        font-size: 0.65rem;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .info-value-small {
+        font-size: 0.85rem;
         color: var(--dark-color);
         font-weight: 600;
-    }
-
-    /* Status Badges */
-    .status-badge {
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .status-pending {
-        background: #fef3c7;
-        color: #92400e;
-        border: 2px solid #fbbf24;
-    }
-
-    .status-confirmed {
-        background: #d1fae5;
-        color: #065f46;
-        border: 2px solid #10b981;
-    }
-
-    .status-rescheduled {
-        background: #dbeafe;
-        color: #1e40af;
-        border: 2px solid #3b82f6;
-    }
-
-    .status-completed {
-        background: #dcfce7;
-        color: #166534;
-        border: 2px solid #22c55e;
-    }
-
-    .status-cancelled {
-        background: #fee2e2;
-        color: #991b1b;
-        border: 2px solid #ef4444;
-    }
-
-    /* Filter Bar */
-    .filter-bar {
-        background: white;
-        padding: var(--spacing-md) var(--spacing-lg);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        margin-bottom: var(--spacing-lg);
-        border: 1px solid var(--gray-200);
-    }
-
-    .filter-pills {
-        display: flex;
-        gap: var(--spacing-sm);
-        flex-wrap: wrap;
-    }
-
-    .filter-pill {
-        padding: 8px 14px;
-        border: 2px solid var(--gray-300);
-        border-radius: 20px;
-        background: white;
-        color: var(--gray-700);
-        text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .filter-pill:hover {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-        text-decoration: none;
-    }
-
-    .filter-pill.active {
-        background: var(--gradient-primary);
-        color: white;
-        border-color: var(--primary-color);
-    }
-
-    .filter-count {
-        background: rgba(255, 255, 255, 0.3);
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 0.7rem;
-    }
-
-    .filter-pill:not(.active) .filter-count {
-        background: var(--gray-200);
-        color: var(--gray-700);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     /* Notes */
-    .notes-box {
+    .notes-box-compact {
         background: var(--gray-50);
-        padding: var(--spacing-md);
-        border-radius: var(--radius-md);
-        margin-top: var(--spacing-md);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-sm);
+        font-size: 0.85rem;
         border-left: 3px solid var(--info-color);
     }
 
-    .notes-box.admin {
-        border-left-color: var(--warning-color);
+    .notes-box-compact.admin {
         background: #fffbeb;
+        border-left-color: var(--warning-color);
     }
 
-    .notes-header {
+    .notes-header-small {
         font-weight: 700;
-        font-size: 0.875rem;
-        margin-bottom: var(--spacing-xs);
+        font-size: 0.75rem;
+        margin-bottom: 4px;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
+        color: var(--gray-700);
     }
 
-    /* Action Buttons */
-    .request-actions {
+    /* Cancellation Info Box */
+    .cancellation-info-box {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-left: 4px solid #dc2626;
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .cancellation-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #dc2626;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .cancellation-detail {
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(220, 38, 38, 0.1);
+        font-size: 0.85rem;
+    }
+
+    .cancellation-detail:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .cancellation-detail strong {
+        color: #991b1b;
+    }
+
+    /* Actions */
+    .request-actions-compact {
         display: flex;
-        gap: var(--spacing-sm);
-        margin-top: var(--spacing-md);
+        gap: var(--spacing-xs);
+        padding-top: var(--spacing-sm);
+        border-top: 1px solid var(--gray-100);
     }
 
-    .action-btn {
-        padding: 8px 16px;
+    .action-btn-compact {
+        padding: 6px 14px;
         border-radius: var(--radius-md);
         font-weight: 600;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         border: 2px solid;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
         cursor: pointer;
         text-decoration: none;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
+        flex: 1;
+        justify-content: center;
     }
 
-    .action-btn:hover {
-        transform: translateY(-2px);
-        text-decoration: none;
-    }
-
-    .btn-cancel {
+    .btn-cancel-compact {
         background: white;
         color: var(--danger-color);
         border-color: var(--danger-color);
     }
 
-    .btn-cancel:hover {
+    .btn-cancel-compact:hover {
         background: var(--danger-color);
         color: white;
+        transform: translateY(-1px);
     }
 
-    .btn-view {
-        background: var(--gradient-primary);
-        color: white;
+    /* Bulk Actions */
+    .bulk-actions {
+        padding: var(--spacing-sm);
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-sm);
+        display: flex;
+        gap: var(--spacing-sm);
+        align-items: center;
+    }
+
+    .bulk-btn {
+        padding: 4px 12px;
+        border-radius: var(--radius-md);
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 2px solid var(--gray-300);
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .bulk-btn:hover {
         border-color: var(--primary-color);
+        color: var(--primary-color);
     }
 
-    .btn-view:hover {
-        background: var(--secondary-color);
-        color: white;
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--gray-500);
     }
 
-    /* Cancel Modal */
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: var(--spacing-md);
+        opacity: 0.3;
+    }
+
+    /* Modal */
     .modal-content {
         border-radius: var(--radius-xl);
-        border: none;
     }
 
     .modal-header {
@@ -328,73 +419,37 @@
         filter: brightness(0) invert(1);
     }
 
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: var(--gray-500);
-    }
-
-    .empty-icon {
-        font-size: 4rem;
-        margin-bottom: var(--spacing-lg);
-        opacity: 0.3;
-    }
-
-    /* Loading */
-    .btn-loading {
-        opacity: 0.6;
-        pointer-events: none;
-    }
-
-    /* Pagination */
-    .pagination .page-link {
-        border: 2px solid var(--gray-300);
-        color: var(--gray-700);
-        padding: 8px 14px;
-        margin: 0 4px;
-        border-radius: var(--radius-md);
-        font-weight: 600;
-    }
-
-    .pagination .page-link:hover {
-        border-color: var(--primary-color);
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .pagination .page-item.active .page-link {
-        background: var(--gradient-primary);
-        border-color: var(--primary-color);
-    }
-
     /* Responsive */
     @media (max-width: 768px) {
-        .request-header {
+        .filter-bar .d-flex {
             flex-direction: column;
-            align-items: stretch;
-        }
-
-        .demo-info {
-            flex-direction: column;
-        }
-
-        .demo-thumbnail, .demo-placeholder {
             width: 100%;
-            height: 120px;
+            gap: var(--spacing-sm) !important;
+        }
+        
+        .dropdown,
+        .dropdown-toggle {
+            width: 100%;
+        }
+        
+        .dropdown-menu {
+            width: 100%;
         }
 
-        .request-info {
+        .header-left {
+            flex-wrap: wrap;
+        }
+
+        .header-thumbnail {
+            display: none;
+        }
+
+        .request-title-mini {
+            font-size: 0.85rem;
+        }
+
+        .info-grid-compact {
             grid-template-columns: 1fr;
-        }
-
-        .request-actions {
-            flex-direction: column;
-        }
-
-        .action-btn {
-            width: 100%;
-            justify-content: center;
         }
     }
 </style>
@@ -403,193 +458,277 @@
 {% block customer_content %}
 {% csrf_token %}
 
-
-<!-- Combined Header with Filters -->
-<div class="mb-4">
-  
-    <!-- Filter Bar with New Request Button -->
-    <div class="filter-bar">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div class="filter-pills">
-                <a href="{% url 'customers:demo_requests' %}" 
-                   class="filter-pill {% if not current_status %}active{% endif %}">
-                    <i class="fas fa-th-list"></i>
-                    All
-                    <span class="filter-count">{{ status_counts.all }}</span>
-                </a>
-                
-                <a href="?status=pending" 
-                   class="filter-pill {% if current_status == 'pending' %}active{% endif %}">
-                    <i class="fas fa-clock"></i>
-                    Pending
-                    <span class="filter-count">{{ status_counts.pending|default:0 }}</span>
-                </a>
-                
-                <a href="?status=confirmed" 
-                   class="filter-pill {% if current_status == 'confirmed' %}active{% endif %}">
-                    <i class="fas fa-check-circle"></i>
-                    Confirmed
-                    <span class="filter-count">{{ status_counts.confirmed|default:0 }}</span>
-                </a>
-                
-                <a href="?status=completed" 
-                   class="filter-pill {% if current_status == 'completed' %}active{% endif %}">
-                    <i class="fas fa-check-double"></i>
-                    Completed
-                    <span class="filter-count">{{ status_counts.completed|default:0 }}</span>
-                </a>
-                
-                <a href="?status=cancelled" 
-                   class="filter-pill {% if current_status == 'cancelled' %}active{% endif %}">
-                    <i class="fas fa-times-circle"></i>
-                    Cancelled
-                    <span class="filter-count">{{ status_counts.cancelled|default:0 }}</span>
-                </a>
-            </div>
+<!-- Filter Bar with Dropdown -->
+<div class="filter-bar">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <!-- Filter Dropdown -->
+        <div class="dropdown">
+            <button class="btn dropdown-toggle d-flex align-items-center justify-content-between gap-2" 
+                    type="button" 
+                    id="filterDropdown" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false">
+                <span class="d-flex align-items-center gap-2">
+                    {% if current_status == 'pending' %}
+                        <i class="fas fa-clock"></i>Pending
+                    {% elif current_status == 'confirmed' %}
+                        <i class="fas fa-check-circle"></i>Confirmed
+                    {% elif current_status == 'completed' %}
+                        <i class="fas fa-check-double"></i>Completed
+                    {% elif current_status == 'cancelled' %}
+                        <i class="fas fa-times-circle"></i>Cancelled
+                    {% else %}
+                        <i class="fas fa-th-list"></i>All Requests
+                    {% endif %}
+                </span>
+                <span class="badge bg-primary rounded-pill">
+                    {% if current_status %}
+                        {% if current_status == 'pending' %}{{ status_counts.pending|default:0 }}
+                        {% elif current_status == 'confirmed' %}{{ status_counts.confirmed|default:0 }}
+                        {% elif current_status == 'completed' %}{{ status_counts.completed|default:0 }}
+                        {% elif current_status == 'cancelled' %}{{ status_counts.cancelled|default:0 }}
+                        {% endif %}
+                    {% else %}
+                        {{ status_counts.all }}
+                    {% endif %}
+                </span>
+            </button>
             
-            <!-- New Request Button -->
-            <a href="{% url 'customers:request_demo' %}" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>New Request
-            </a>
+            <ul class="dropdown-menu dropdown-menu-start shadow-lg" aria-labelledby="filterDropdown">
+                <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center {% if not current_status %}active{% endif %}" 
+                       href="{% url 'customers:demo_requests' %}">
+                        <span>
+                            <i class="fas fa-th-list me-2"></i>All Requests
+                        </span>
+                        <span class="badge bg-secondary rounded-pill">{{ status_counts.all }}</span>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                
+                <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center {% if current_status == 'pending' %}active{% endif %}" 
+                       href="?status=pending">
+                        <span>
+                            <i class="fas fa-clock me-2 text-warning"></i>Pending
+                        </span>
+                        <span class="badge bg-warning text-dark rounded-pill">{{ status_counts.pending|default:0 }}</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center {% if current_status == 'confirmed' %}active{% endif %}" 
+                       href="?status=confirmed">
+                        <span>
+                            <i class="fas fa-check-circle me-2 text-success"></i>Confirmed
+                        </span>
+                        <span class="badge bg-success rounded-pill">{{ status_counts.confirmed|default:0 }}</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center {% if current_status == 'completed' %}active{% endif %}" 
+                       href="?status=completed">
+                        <span>
+                            <i class="fas fa-check-double me-2 text-primary"></i>Completed
+                        </span>
+                        <span class="badge bg-primary rounded-pill">{{ status_counts.completed|default:0 }}</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center {% if current_status == 'cancelled' %}active{% endif %}" 
+                       href="?status=cancelled">
+                        <span>
+                            <i class="fas fa-times-circle me-2 text-danger"></i>Cancelled
+                        </span>
+                        <span class="badge bg-danger rounded-pill">{{ status_counts.cancelled|default:0 }}</span>
+                    </a>
+                </li>
+            </ul>
         </div>
+        
+        <!-- New Request Button -->
+        <a href="{% url 'customers:request_demo' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>New Request
+        </a>
     </div>
 </div>
-<!-- Demo Requests List -->
+
+<!-- Bulk Actions -->
+{% if page_obj.object_list %}
+<div class="bulk-actions">
+    <button class="bulk-btn" onclick="expandAll()">
+        <i class="fas fa-chevron-down me-1"></i>Expand All
+    </button>
+    <button class="bulk-btn" onclick="collapseAll()">
+        <i class="fas fa-chevron-up me-1"></i>Collapse All
+    </button>
+    <span class="ms-auto text-muted small">
+        <i class="fas fa-info-circle me-1"></i>
+        Click on cards to expand/collapse
+    </span>
+</div>
+{% endif %}
+
+<!-- Collapsible Demo Requests List -->
 {% if page_obj.object_list %}
     {% for demo_request in page_obj.object_list %}
-        <div class="request-card" id="request-{{ demo_request.id }}">
-            <!-- Header -->
-            <div class="request-header">
-                <div class="request-title-section">
-                    <h3 class="request-title">{{ demo_request.demo.title }}</h3>
-                    <div class="request-meta">
-                        <span><i class="fas fa-hashtag"></i> #{{ demo_request.id }}</span>
-                        <span><i class="fas fa-calendar"></i> {{ demo_request.created_at|date:"M d, Y" }}</span>
+        <div class="request-card {% if demo_request.status == 'completed' or demo_request.status == 'cancelled' %}collapsed{% endif %}" 
+             id="card-{{ demo_request.id }}">
+            
+            <!-- Clickable Header -->
+            <div class="request-header" onclick="toggleCard('card-{{ demo_request.id }}')">
+                <div class="header-left">
+                    <div class="collapse-icon">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    
+                    {% if demo_request.demo.thumbnail %}
+                        <img src="{{ demo_request.demo.thumbnail.url }}" 
+                             alt="{{ demo_request.demo.title }}" 
+                             class="header-thumbnail">
+                    {% endif %}
+                    
+                    <div class="header-info">
+                        <div class="request-title-mini">
+                            {{ demo_request.demo.title }}
+                        </div>
+                        <div class="request-meta-mini">
+                            <span><i class="fas fa-hashtag"></i>{{ demo_request.id }}</span>
+                            <span><i class="fas fa-calendar"></i>{{ demo_request.requested_date|date:"M d, Y" }}</span>
+                            <span><i class="fas fa-clock"></i>{{ demo_request.requested_time_slot.start_time|time:"g:i A" }}</span>
+                        </div>
                     </div>
                 </div>
-                <span class="status-badge status-{{ demo_request.status }}">
-                    {% if demo_request.status == 'pending' %}<i class="fas fa-hourglass-half"></i>
-                    {% elif demo_request.status == 'confirmed' %}<i class="fas fa-check"></i>
-                    {% elif demo_request.status == 'rescheduled' %}<i class="fas fa-redo"></i>
-                    {% elif demo_request.status == 'completed' %}<i class="fas fa-check-double"></i>
-                    {% elif demo_request.status == 'cancelled' %}<i class="fas fa-ban"></i>
-                    {% endif %}
+                
+                <span class="status-badge-mini status-{{ demo_request.status }}">
                     {{ demo_request.get_status_display }}
                 </span>
             </div>
             
+            <!-- Collapsible Body -->
             <div class="request-body">
-                <!-- Demo Info -->
-                <div class="demo-info">
-                    {% if demo_request.demo.thumbnail %}
-                        <img src="{{ demo_request.demo.thumbnail.url }}" 
-                             alt="{{ demo_request.demo.title }}" 
-                             class="demo-thumbnail">
-                    {% comment %} {% else %}
-                        <div class="demo-placeholder">
-                            <i class="fas fa-video text-muted"></i>
-                        </div> {% endcomment %}
-                    {% endif %}
-                    
-                    <div class="demo-info-text">
-                        {% comment %} <h4>{{ demo_request.demo.title }}</h4> {% endcomment %}
-                        <div class="demo-categories">
-                            {% if demo_request.demo.primary_business_category %}
-                                <span class="category-tag">
-                                    {{ demo_request.demo.primary_business_category.name }}
-                                </span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Request Info -->
-                <div class="request-info">
-                    <div class="info-item">
-                        <div class="info-label">
+                <!-- Info Grid -->
+                <div class="info-grid-compact">
+                    <div class="info-item-compact">
+                        <div class="info-icon">
                             <i class="fas fa-calendar"></i>
-                            Requested Date
                         </div>
-                        <div class="info-value">{{ demo_request.requested_date|date:"M d, Y" }}</div>
+                        <div class="info-text">
+                            <div class="info-label-small">Requested Date</div>
+                            <div class="info-value-small">{{ demo_request.requested_date|date:"M d, Y" }}</div>
+                        </div>
                     </div>
                     
-                    <div class="info-item">
-                        <div class="info-label">
+                    <div class="info-item-compact">
+                        <div class="info-icon">
                             <i class="fas fa-clock"></i>
-                            Time Slot
                         </div>
-                        <div class="info-value">{{ demo_request.requested_time_slot }}</div>
+                        <div class="info-text">
+                            <div class="info-label-small">Time Slot</div>
+                            <div class="info-value-small">{{ demo_request.requested_time_slot.start_time|time:"g:i A" }}</div>
+                        </div>
                     </div>
                     
                     {% if demo_request.confirmed_date %}
-                    <div class="info-item confirmed">
-                        <div class="info-label">
-                            <i class="fas fa-check-circle"></i>
-                            Confirmed Date
+                    <div class="info-item-compact">
+                        <div class="info-icon confirmed">
+                            <i class="fas fa-check"></i>
                         </div>
-                        <div class="info-value">{{ demo_request.confirmed_date|date:"M d, Y" }}</div>
+                        <div class="info-text">
+                            <div class="info-label-small">Confirmed Date</div>
+                            <div class="info-value-small">{{ demo_request.confirmed_date|date:"M d, Y" }}</div>
+                        </div>
                     </div>
                     {% endif %}
                     
                     {% if demo_request.confirmed_time_slot %}
-                    <div class="info-item confirmed">
-                        <div class="info-label">
+                    <div class="info-item-compact">
+                        <div class="info-icon confirmed">
                             <i class="fas fa-clock"></i>
-                            Confirmed Time
                         </div>
-                        <div class="info-value">{{ demo_request.confirmed_time_slot }}</div>
+                        <div class="info-text">
+                            <div class="info-label-small">Confirmed Time</div>
+                            <div class="info-value-small">{{ demo_request.confirmed_time_slot.start_time|time:"g:i A" }}</div>
+                        </div>
                     </div>
                     {% endif %}
                 </div>
                 
-                <!-- Customer Notes -->
-                {% if demo_request.notes %}
-                <div class="notes-box">
-                    <div class="notes-header">
-                        <i class="fas fa-sticky-note"></i>
-                        Your Notes
+                <!-- Cancellation Information -->
+                {% if demo_request.is_cancelled and demo_request.cancellation_reason %}
+                <div class="cancellation-info-box">
+                    <div class="notes-header-small" style="color: #991b1b;">
+                        <i class="fas fa-ban"></i>
+                        Cancellation Information
                     </div>
-                    <p class="mb-0 small">{{ demo_request.notes }}</p>
+                    <div class="cancellation-detail">
+                        <i class="fas fa-info-circle text-danger me-1"></i>
+                        <strong>Reason:</strong>
+                        <span class="cancellation-badge ms-1">
+                            {{ demo_request.get_cancellation_reason_display }}
+                        </span>
+                    </div>
+                    {% if demo_request.cancellation_details %}
+                    <div class="cancellation-detail">
+                        <i class="fas fa-file-alt text-danger me-1"></i>
+                        <strong>Additional Details:</strong><br>
+                        <span class="text-muted">{{ demo_request.cancellation_details }}</span>
+                    </div>
+                    {% endif %}
+                    {% if demo_request.cancelled_at %}
+                    <div class="cancellation-detail">
+                        <i class="fas fa-calendar-times text-danger me-1"></i>
+                        <strong>Cancelled On:</strong>
+                        <span class="text-muted">{{ demo_request.cancelled_at|date:"F d, Y - g:i A" }}</span>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
                 
-                <!-- Admin Response -->
+                <!-- Notes -->
+                {% if demo_request.notes %}
+                <div class="notes-box-compact">
+                    <div class="notes-header-small">
+                        <i class="fas fa-sticky-note"></i>
+                        Your Notes
+                    </div>
+                    <div class="small">{{ demo_request.notes }}</div>
+                </div>
+                {% endif %}
+                
                 {% if demo_request.admin_notes %}
-                <div class="notes-box admin">
-                    <div class="notes-header">
+                <div class="notes-box-compact admin">
+                    <div class="notes-header-small">
                         <i class="fas fa-comment-alt"></i>
                         Team Response
                     </div>
-                    <p class="mb-0 small">{{ demo_request.admin_notes }}</p>
+                    <div class="small">{{ demo_request.admin_notes }}</div>
                 </div>
                 {% endif %}
                 
                 <!-- Actions -->
-                <div class="request-actions">
-                    {% if demo_request.status == 'pending' or demo_request.status == 'confirmed' %}
-                        <button class="action-btn btn-cancel cancel-btn" 
-                                data-request-id="{{ demo_request.id }}"
-                                data-demo-title="{{ demo_request.demo.title }}">
-                            <i class="fas fa-times"></i>
-                            Cancel Request
-                        </button>
-                    {% endif %}
-                    
-                    {% comment %} <a href="{% url 'customers:demo_detail' demo_request.demo.slug %}" 
-                       class="action-btn btn-view">
-                        <i class="fas fa-play"></i>
-                        Watch Demo
-                    </a> {% endcomment %}
+                {% if demo_request.status == 'pending' or demo_request.status == 'confirmed' %}
+                <div class="request-actions-compact">
+                    <button class="action-btn-compact btn-cancel-compact cancel-btn" 
+                            data-request-id="{{ demo_request.id }}"
+                            data-demo-title="{{ demo_request.demo.title }}"
+                            onclick="event.stopPropagation()">
+                        <i class="fas fa-times"></i>
+                        Cancel Request
+                    </button>
                 </div>
+                {% endif %}
             </div>
         </div>
     {% endfor %}
     
     <!-- Pagination -->
     {% if page_obj.has_other_pages %}
-        <div class="d-flex justify-content-center mt-4">
+        <div class="d-flex justify-content-center mt-3">
             <nav>
-                <ul class="pagination">
+                <ul class="pagination pagination-sm">
                     {% if page_obj.has_previous %}
                         <li class="page-item">
                             <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}">
@@ -628,10 +767,10 @@
         <div class="empty-icon">
             <i class="fas fa-calendar-times"></i>
         </div>
-        <h3>No Requests Found</h3>
+        <h4>No Requests Found</h4>
         {% if current_status %}
             <p>No requests with status "{{ current_status|title }}"</p>
-            <a href="{% url 'customers:demo_requests' %}" class="btn btn-outline-primary me-2">
+            <a href="{% url 'customers:demo_requests' %}" class="btn btn-outline-primary btn-sm me-2">
                 View All
             </a>
         {% else %}
@@ -643,7 +782,7 @@
     </div>
 {% endif %}
 
-<!-- Cancel Request Modal -->
+<!-- Cancel Modal -->
 <div class="modal fade" id="cancelModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -662,32 +801,31 @@
                     <label class="form-label">Cancellation Reason *</label>
                     <select class="form-select" id="cancelReason" required>
                         <option value="">Select a reason...</option>
-                        <option value="scheduling_conflict">Scheduling Conflict / Availability Issues</option>
-                        <option value="requirements_change">Change in Project Requirements</option>
+                        <option value="scheduling_conflict">Scheduling Conflict</option>
+                        <option value="requirements_change">Change in Requirements</option>
                         <option value="found_alternative">Found Alternative Solution</option>
                         <option value="no_longer_interested">No Longer Interested</option>
-                        <option value="demo_not_relevant">Demo Not Relevant</option>
                         <option value="other">Other Reasons</option>
                     </select>
                 </div>
                 
                 <div class="mb-3">
                     <label class="form-label">Additional Details (Optional)</label>
-                    <textarea class="form-control" id="cancelDetails" rows="3" 
+                    <textarea class="form-control" id="cancelDetails" rows="2" 
                               placeholder="Any additional information..."></textarea>
                 </div>
                 
                 <div class="alert alert-warning mb-0">
                     <i class="fas fa-info-circle me-2"></i>
-                    This action cannot be undone. You can request a new demo anytime.
+                    This action cannot be undone.
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-arrow-left me-2"></i>Go Back
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    Go Back
                 </button>
-                <button type="button" class="btn btn-danger" id="confirmCancelBtn">
-                    <i class="fas fa-check me-2"></i>Confirm Cancellation
+                <button type="button" class="btn btn-danger btn-sm" id="confirmCancelBtn">
+                    Confirm Cancellation
                 </button>
             </div>
         </div>
@@ -703,21 +841,39 @@ let cancelModal = null;
 document.addEventListener('DOMContentLoaded', function() {
     cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
     
-    // Initialize cancel buttons
     document.querySelectorAll('.cancel-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
             currentRequestId = this.dataset.requestId;
-            const demoTitle = this.dataset.demoTitle;
-            document.getElementById('cancelDemoTitle').textContent = demoTitle;
+            document.getElementById('cancelDemoTitle').textContent = this.dataset.demoTitle;
             document.getElementById('cancelReason').value = '';
             document.getElementById('cancelDetails').value = '';
             cancelModal.show();
         });
     });
     
-    // Handle cancel confirmation
     document.getElementById('confirmCancelBtn').addEventListener('click', submitCancellation);
 });
+
+// Toggle single card
+function toggleCard(cardId) {
+    const card = document.getElementById(cardId);
+    card.classList.toggle('collapsed');
+}
+
+// Expand all cards
+function expandAll() {
+    document.querySelectorAll('.request-card').forEach(card => {
+        card.classList.remove('collapsed');
+    });
+}
+
+// Collapse all cards
+function collapseAll() {
+    document.querySelectorAll('.request-card').forEach(card => {
+        card.classList.add('collapsed');
+    });
+}
 
 function submitCancellation() {
     const reason = document.getElementById('cancelReason').value;
@@ -729,7 +885,6 @@ function submitCancellation() {
     }
     
     const btn = document.getElementById('confirmCancelBtn');
-    btn.classList.add('btn-loading');
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
     
@@ -739,10 +894,7 @@ function submitCancellation() {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfToken()
         },
-        body: JSON.stringify({
-            reason: reason,
-            details: details
-        })
+        body: JSON.stringify({ reason, details })
     })
     .then(r => r.json())
     .then(data => {
@@ -756,9 +908,8 @@ function submitCancellation() {
     })
     .catch(error => {
         showToast(error.message, 'error');
-        btn.classList.remove('btn-loading');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check me-2"></i>Confirm Cancellation';
+        btn.innerHTML = 'Confirm Cancellation';
     });
 }
 
@@ -786,7 +937,7 @@ function showToast(msg, type = 'info') {
     `;
     
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 5000);
+    setTimeout(() => toast.remove(), 3000);
 }
 </script>
 {% endblock %}

@@ -45,6 +45,8 @@ LOCAL_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    'django.middleware.gzip.GZipMiddleware',  # ✅ ADD THIS LINE AT TOP
+
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -55,6 +57,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'customers.middleware.CustomerSecurityMiddleware',
     'customers.middleware.ContentProtectionMiddleware',
+    'customers.middleware.WebGLFileMiddleware'
 ]
 
 CUSTOMER_SECURITY_SETTINGS = {
@@ -240,16 +243,18 @@ if not DEBUG:
 # Session security - UPDATED for development/production
 if DEBUG:
     # Development settings
-    SESSION_COOKIE_SECURE = False  # Set False for HTTP in development
-    CSRF_COOKIE_SECURE = False     # Set False for HTTP in development
+    SESSION_COOKIE_SECURE = False  
+    CSRF_COOKIE_SECURE = False     
 else:
     # Production settings (HTTPS required)
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'  # Changed from 'Strict' to 'Lax' for better compatibility
-CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False  
+
+# =====================================
 
 # =====================================
 # BLOCKED EMAIL DOMAINS

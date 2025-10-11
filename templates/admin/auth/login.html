@@ -483,13 +483,7 @@
 </head>
 
 <body>
-    <!-- Back to Site Link -->
-    <div class="back-to-site">
-        <a href="{% url 'core:home' %}" class="back-link">
-            <i class="fas fa-arrow-left"></i>
-            <span>Back to Site</span>
-        </a>
-    </div>
+    
 
     <div class="login-container">
         <div class="login-card">
@@ -498,7 +492,7 @@
                 <div class="company-logo">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
-                <h1 class="login-title">CHRP India Admin Portal</h1>
+                <h1 class="login-title">CHRP-INDIA Admin Portal</h1>
                 <p class="login-subtitle">eLearning & VR/AR Solutions Management System</p>
             </div>
 
@@ -543,7 +537,6 @@
                                    name="email" 
                                    required 
                                    autocomplete="email"
-                                   placeholder="admin@chrp-india.com" 
                                    autofocus>
                         </div>
                     </div>
@@ -560,9 +553,9 @@
                                    name="password" 
                                    required 
                                    autocomplete="current-password"
-                                   placeholder="Enter your secure password">
                         </div>
                     </div>
+                    <br>
 
                     <button type="submit" class="btn-login" id="loginButton">
                         <i class="fas fa-laptop-code me-2"></i>
@@ -574,7 +567,7 @@
             <!-- Footer -->
             <div class="login-footer">
                 <div class="company-info">
-                    <span class="company-name">CHRP India</span> - Demo Portal Administration
+                    <span class="company-name">CHRP-INDIA</span> - Demo Portal Administration
                 </div>
                 <div>
                     <small>
@@ -704,10 +697,7 @@
 
             // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
-                // Escape key - go back to site
-                if (e.key === 'Escape') {
-                    window.location.href = '{% url "core:home" %}';
-                }
+           
                 
                 // Ctrl/Cmd + Enter - submit form
                 if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {

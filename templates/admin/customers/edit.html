@@ -1,7 +1,7 @@
 {% extends 'admin/base.html' %}
 {% load static %}
 
-{% block page_title %}Create Customer{% endblock %}
+{% block page_title %}Edit Customer{% endblock %}
 
 {% block admin_content %}
 <style>
@@ -202,7 +202,7 @@
 <div class="admin-card">
     <div class="admin-card-header">
         <h2 class="admin-card-title">
-            <i class="fas fa-user-plus"></i>Create New Customer
+            <i class="fas fa-user-plus"></i>Edit Customer
         </h2>
         <a href="{% url 'core:admin_users' %}" class="btn btn-light">
             <i class="fas fa-arrow-left me-2"></i>Back
@@ -418,7 +418,7 @@
 
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                    <i class="fas fa-save me-2"></i>Create Customer Account
+                    <i class="fas fa-save me-2"></i>Update Customer
                 </button>
                 <a href="{% url 'core:admin_users' %}" class="btn btn-secondary btn-lg">
                     <i class="fas fa-times me-2"></i>Cancel

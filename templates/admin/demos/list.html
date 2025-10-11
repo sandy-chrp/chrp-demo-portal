@@ -1,8 +1,7 @@
-<!-- templates/admin/demos/list.html - FIXED DELETE VERSION -->
 {% extends 'admin/base.html' %}
 
 {% block admin_title %}Demo Management{% endblock %}
-{% block page_title %}Demo Videos Management{% endblock %}
+{% block page_title %}Demo Content Management{% endblock %}
 
 {% block breadcrumb %}
 <div class="admin-breadcrumb">
@@ -11,7 +10,7 @@
             <li class="breadcrumb-item">
                 <a href="{% url 'core:admin_dashboard' %}"><i class="fas fa-home me-1"></i>Dashboard</a>
             </li>
-            <li class="breadcrumb-item active">Demo Videos</li>
+            <li class="breadcrumb-item active">Demo Content</li>
         </ol>
     </nav>
 </div>
@@ -45,6 +44,10 @@
         justify-content: center;
         color: white;
         font-size: 1.25rem;
+    }
+
+    .demo-placeholder.webgl {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
     }
 
     .status-badge {
@@ -119,6 +122,12 @@
         gap: 0.25rem;
     }
 
+    /* ✅ Add hover effect for action buttons */
+    .table-actions .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
@@ -164,9 +173,45 @@
         font-weight: 500;
     }
 
+    /* ✅ File type badges enhancement */
+    .file-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .file-type-badge.video {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+    }
+
+    .file-type-badge.webgl {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        color: white;
+    }
+
+    /* ✅ Quick action tooltips */
+    [data-bs-toggle="tooltip"] {
+        cursor: pointer;
+    }
+
     @media (max-width: 768px) {
         .stats-row {
             grid-template-columns: repeat(2, 1fr);
+        }
+
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .demo-thumbnail,
+        .demo-placeholder {
+            width: 50px;
+            height: 35px;
         }
     }
 </style>
@@ -211,6 +256,15 @@
         </div>
         
         <div class="col-md-2">
+            <label class="form-label">File Type</label>
+            <select name="file_type" class="form-select" onchange="this.form.submit()">
+                <option value="">All Types</option>
+                <option value="video" {% if file_type_filter == 'video' %}selected{% endif %}>Video</option>
+                <option value="webgl" {% if file_type_filter == 'webgl' %}selected{% endif %}>WebGL</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
             <label class="form-label">Demo Type</label>
             <select name="demo_type" class="form-select" onchange="this.form.submit()">
                 <option value="">All Types</option>
@@ -221,14 +275,6 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-2">
-    <label class="form-label">File Type</label>
-    <select name="file_type" class="form-select" onchange="this.form.submit()">
-        <option value="">All Types</option>
-        <option value="video" {% if file_type_filter == 'video' %}selected{% endif %}>Video</option>
-        <option value="webgl" {% if file_type_filter == 'webgl' %}selected{% endif %}>WebGL</option>
-    </select>
-</div>
         
         <div class="col-md-2">
             <label class="form-label">Business Category</label>
@@ -253,14 +299,13 @@
             </select>
         </div>
         
-        <div class="col-md-2">
-            <label class="form-label">&nbsp;</label>
-            <div class="d-grid">
-                <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-times me-1"></i>Clear
-                </a>
-            </div>
+        {% if search or file_type_filter or demo_type_filter or business_category_filter or status_filter %}
+        <div class="col-md-12">
+            <a href="{% url 'core:admin_demos' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times me-1"></i>Clear All Filters
+            </a>
         </div>
+        {% endif %}
     </form>
 </div>
 
@@ -269,128 +314,145 @@
     <div class="admin-card">
         <div class="admin-card-header">
             <h3 class="admin-card-title">
-                <i class="fas fa-video"></i>Demo Videos
+                <i class="fas fa-video"></i>Demo Content
             </h3>
             <div class="d-flex align-items-center gap-2">
                 <small class="text-muted">{{ demos.start_index }}-{{ demos.end_index }} of {{ demos.paginator.count }} demos</small>
             </div>
         </div>
-     <div class="admin-card-body p-0">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th width="80">Thumbnail</th>
-                    <th>Title & Description</th>
-                    <th width="180">Business Categories</th>
-                    <th width="100">File Type</th>
-                    <th width="80">Views</th>
-                    <th width="80">Likes</th>
-                    <th width="100">Status</th>
-                    <th width="100">Created</th>
-                    <th width="150">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for demo in demos %}
-                    <tr>
-                        <td>
-                            {% if demo.thumbnail %}
-                                <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-thumbnail">
-                            {% else %}
-                                <div class="demo-placeholder">
-                                    {% if demo.file_type == 'webgl' %}
-                                        <i class="fas fa-cube"></i>
+        <div class="admin-card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            {% comment %} <th width="80">Preview</th> {% endcomment %}
+                            <th>Title & Description</th>
+                            <th width="180">Business Categories</th>
+                            <th width="100">File Type</th>
+                            <th width="80" class="text-center">Views</th>
+                            <th width="80" class="text-center">Likes</th>
+                            <th width="100">Status</th>
+                            <th width="100">Created</th>
+                            <th width="180" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for demo in demos %}
+                            <tr>
+                                {% comment %} <td>
+                                    {% if demo.thumbnail %}
+                                        <img src="{{ demo.thumbnail.url }}" alt="{{ demo.title }}" class="demo-thumbnail">
                                     {% else %}
-                                        <i class="fas fa-video"></i>
+                                        <div class="demo-placeholder {% if demo.file_type == 'webgl' %}webgl{% endif %}">
+                                            {% if demo.file_type == 'webgl' %}
+                                                <i class="fas fa-cube"></i>
+                                            {% else %}
+                                                <i class="fas fa-video"></i>
+                                            {% endif %}
+                                        </div>
                                     {% endif %}
-                                </div>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div>
-                                <div class="fw-semibold">{{ demo.title }}</div>
-                                <small class="text-muted">{{ demo.description|truncatechars:60 }}</small>
-                                {% if demo.is_featured %}
-                                    <span class="featured-badge ms-2">
-                                        <i class="fas fa-star me-1"></i>Featured
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="category-tags">
-                                {% with categories=demo.target_business_categories.all subcategories=demo.target_business_subcategories.all %}
-                                    {% if categories %}
-                                        {% for category in categories|slice:":2" %}
-                                            <span class="category-badge">{{ category.name }}</span>
-                                        {% endfor %}
-                                        {% if categories|length > 2 %}
-                                            <span class="category-count">+{{ categories|length|add:"-2" }} more</span>
+                                </td> {% endcomment %}
+                                <td>
+                                    <div>
+                                        <div class="fw-semibold">{{ demo.title }}</div>
+                                        <small class="text-muted">{{ demo.description|truncatechars:60 }}</small>
+                                        {% if demo.is_featured %}
+                                            <span class="featured-badge ms-2">
+                                                <i class="fas fa-star me-1"></i>Featured
+                                            </span>
                                         {% endif %}
-                                    {% elif subcategories %}
-                                        {% for subcat in subcategories|slice:":2" %}
-                                            <span class="subcategory-badge">{{ subcat.name }}</span>
-                                        {% endfor %}
-                                        {% if subcategories|length > 2 %}
-                                            <span class="category-count">+{{ subcategories|length|add:"-2" }} more</span>
-                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="category-tags">
+                                        {% with categories=demo.target_business_categories.all subcategories=demo.target_business_subcategories.all %}
+                                            {% if categories %}
+                                                {% for category in categories|slice:":2" %}
+                                                    <span class="category-badge">{{ category.name }}</span>
+                                                {% endfor %}
+                                                {% if categories|length > 2 %}
+                                                    <span class="category-count">+{{ categories|length|add:"-2" }} more</span>
+                                                {% endif %}
+                                            {% elif subcategories %}
+                                                {% for subcat in subcategories|slice:":2" %}
+                                                    <span class="subcategory-badge">{{ subcat.name }}</span>
+                                                {% endfor %}
+                                                {% if subcategories|length > 2 %}
+                                                    <span class="category-count">+{{ subcategories|length|add:"-2" }} more</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted" style="font-size: 0.75rem;">All Categories</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if demo.file_type == 'video' %}
+                                        <span class="file-type-badge video">
+                                            <i class="fas fa-video"></i>Video
+                                        </span>
                                     {% else %}
-                                        <span class="text-muted" style="font-size: 0.75rem;">All Categories</span>
+                                        <span class="file-type-badge webgl">
+                                            <i class="fas fa-cube"></i>WebGL
+                                        </span>
                                     {% endif %}
-                                {% endwith %}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex flex-column gap-1">
-                                {% if demo.file_type == 'video' %}
-                                    <span class="badge bg-primary" style="font-size: 0.7rem;">
-                                        <i class="fas fa-video me-1"></i>Video
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-info" style="font-size: 0.7rem;">
-                                        <i class="fas fa-cube me-1"></i>WebGL
-                                    </span>
-                                {% endif %}
-                                {% comment %} <small class="text-muted">{{ demo.get_demo_type_display }}</small> {% endcomment %}
-                            </div>
-                        </td>
-                        <td>
-                            <span class="fw-semibold">{{ demo.views_count }}</span>
-                        </td>
-                        <td>
-                            <span class="fw-semibold">{{ demo.likes_count }}</span>
-                        </td>
-                        <td>
-                            {% if demo.is_active %}
-                                <span class="status-badge status-active">Active</span>
-                            {% else %}
-                                <span class="status-badge status-inactive">Inactive</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <small>{{ demo.created_at|date:"M d, Y" }}</small>
-                        </td>
-                        <td>
-                            <div class="table-actions">
-                                <a href="{% url 'core:admin_demo_detail' demo.id %}" 
-                                   class="btn btn-sm btn-outline-primary" title="View/Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                
-                                <button class="btn btn-sm btn-outline-danger" 
-                                        onclick="deleteDemo({{ demo.id }}, '{{ demo.title|escapejs }}')"
-                                        title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-semibold">{{ demo.views_count }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-semibold">{{ demo.likes_count }}</span>
+                                </td>
+                                <td>
+                                    {% if demo.is_active %}
+                                        <span class="status-badge status-active">Active</span>
+                                    {% else %}
+                                        <span class="status-badge status-inactive">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ demo.created_at|date:"M d, Y" }}</small>
+                                </td>
+                                <td>
+                                    <div class="table-actions justify-content-center">
+                                        <!-- ✅ Preview Button -->
+                                        {% if demo.file_type == 'webgl' %}
+                                            <a href="{% url 'core:admin_webgl_preview' demo.id %}" 
+                                               class="btn btn-sm btn-outline-info" 
+                                               title="Preview Demo"
+                                               target="_blank">
+                                                <i class="fas fa-cube"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'core:admin_demo_watch' demo.id %}" 
+                                               class="btn btn-sm btn-outline-info" 
+                                               title="Watch Video"
+                                               target="_blank">
+                                                <i class="fas fa-play"></i>
+                                            </a>
+                                        {% endif %}
+
+                                        <!-- ✅ Edit Button -->
+                                        <a href="{% url 'core:admin_demo_detail' demo.id %}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Edit Details">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                        <!-- ✅ Delete Button -->
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                onclick="deleteDemo({{ demo.id }}, '{{ demo.title|escapejs }}')"
+                                                title="Delete Demo">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Pagination -->
@@ -399,10 +461,10 @@
             <ul class="pagination justify-content-center">
                 {% if demos.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if business_category_filter %}&business_category={{ business_category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">First</a>
+                        <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if file_type_filter %}&file_type={{ file_type_filter }}{% endif %}{% if demo_type_filter %}&demo_type={{ demo_type_filter }}{% endif %}{% if business_category_filter %}&business_category={{ business_category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">First</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ demos.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if business_category_filter %}&business_category={{ business_category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+                        <a class="page-link" href="?page={{ demos.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if file_type_filter %}&file_type={{ file_type_filter }}{% endif %}{% if demo_type_filter %}&demo_type={{ demo_type_filter }}{% endif %}{% if business_category_filter %}&business_category={{ business_category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
                     </li>
                 {% endif %}
 
@@ -412,10 +474,10 @@
 
                 {% if demos.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ demos.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if business_category_filter %}&business_category={{ business_category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+                        <a class="page-link" href="?page={{ demos.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if file_type_filter %}&file_type={{ file_type_filter }}{% endif %}{% if demo_type_filter %}&demo_type={{ demo_type_filter }}{% endif %}{% if business_category_filter %}&business_category={{ business_category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ demos.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if business_category_filter %}&business_category={{ business_category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last</a>
+                        <a class="page-link" href="?page={{ demos.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if file_type_filter %}&file_type={{ file_type_filter }}{% endif %}{% if demo_type_filter %}&demo_type={{ demo_type_filter }}{% endif %}{% if business_category_filter %}&business_category={{ business_category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last</a>
                     </li>
                 {% endif %}
             </ul>
@@ -426,14 +488,14 @@
         <div class="admin-card-body">
             <div class="empty-state">
                 <i class="fas fa-video"></i>
-                <h3>No Demo Videos Found</h3>
-                {% if search or business_category_filter or status_filter %}
+                <h3>No Demo Content Found</h3>
+                {% if search or business_category_filter or status_filter or file_type_filter %}
                     <p>No demos match your current filters.</p>
                     <a href="{% url 'core:admin_demos' %}" class="btn btn-primary mt-3">
                         <i class="fas fa-times me-1"></i>Clear Filters
                     </a>
                 {% else %}
-                    <p>Get started by uploading your first demo video.</p>
+                    <p>Get started by uploading your first demo.</p>
                     <a href="{% url 'core:admin_add_demo' %}" class="btn btn-primary mt-3">
                         <i class="fas fa-plus me-1"></i>Add First Demo
                     </a>
@@ -447,7 +509,13 @@
 {% block admin_extra_js %}
 <script>
     function deleteDemo(demoId, title) {
-        if (confirm(`Delete "${title}"?\n\nThis action cannot be undone.`)) {
+        if (confirm(`Are you sure you want to delete "${title}"?\n\n⚠️ This action cannot be undone and will delete:\n• Demo file\n• Thumbnail\n• All view/like statistics\n• All demo requests`)) {
+            // Show loading state
+            const btn = event.target.closest('button');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
             // Create hidden form
             const form = document.createElement('form');
             form.method = 'POST';
@@ -466,5 +534,12 @@
             form.submit();
         }
     }
+
+    // Add smooth scroll to top on pagination
+    document.querySelectorAll('.pagination a').forEach(link => {
+        link.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
 </script>
 {% endblock %}

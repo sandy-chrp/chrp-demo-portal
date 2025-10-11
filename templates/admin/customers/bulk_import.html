@@ -1,0 +1,214 @@
+<!-- templates/admin/customers/bulk_import.html -->
+{% extends 'admin/base.html' %}
+
+{% block admin_title %}Bulk Import Customers{% endblock %}
+{% block page_title %}Bulk Import Customers{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <!-- Instructions Card -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h3 class="admin-card-title">
+                        <i class="fas fa-info-circle"></i>
+                        Import Instructions
+                    </h3>
+                </div>
+                <div class="admin-card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-lightbulb me-2"></i>How to Import Customers</h5>
+                        <ol class="mb-0">
+                            <li>Download the sample template using the button below</li>
+                            <li>Fill in customer details in the template (Excel or CSV format)</li>
+                            <li>Upload the completed file using the form below</li>
+                            <li>Review the import results and fix any errors</li>
+                        </ol>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="fas fa-table me-2"></i>Required Columns:</h6>
+                        <ul class="mb-2">
+                            <li><strong>first_name</strong> - Customer's first name</li>
+                            <li><strong>last_name</strong> - Customer's last name</li>
+                            <li><strong>email</strong> - Valid business email</li>
+                            <li><strong>mobile</strong> - 10-digit mobile number (without country code)</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="fas fa-list me-2"></i>Optional Columns:</h6>
+                        <ul class="mb-0">
+                            <li><strong>country_code</strong> - Default: +91</li>
+                            <li><strong>job_title</strong> - Customer's designation</li>
+                            <li><strong>organization</strong> - Company name</li>
+                            <li><strong>business_category</strong> - Category name (must exist in system)</li>
+                            <li><strong>business_subcategory</strong> - Subcategory name (must exist under category)</li>
+                        </ul>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'core:download_import_template' %}" 
+                           class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-download me-2"></i>
+                            Download Sample Template
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Form Card -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h3 class="admin-card-title">
+                        <i class="fas fa-upload"></i>
+                        Upload Customer File
+                    </h3>
+                </div>
+                <div class="admin-card-body">
+                    <form method="post" enctype="multipart/form-data" id="importForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="fileInput" class="form-label">
+                                <i class="fas fa-file-excel me-2"></i>
+                                Select CSV or Excel File
+                            </label>
+                            <input type="file" 
+                                   class="form-control form-control-lg" 
+                                   id="fileInput"
+                                   name="file" 
+                                   accept=".csv,.xlsx,.xls"
+                                   required>
+                            <div class="form-text">
+                                Supported formats: .csv, .xlsx, .xls (Max 5MB)
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="sendWelcomeEmails"
+                                       name="send_welcome_emails">
+                                <label class="form-check-label" for="sendWelcomeEmails">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    Send welcome emails to imported customers
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Note: Emails will be sent only to valid email addresses
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="uploadBtn">
+                                <i class="fas fa-upload me-2"></i>
+                                Upload & Import
+                            </button>
+                            <a href="{% url 'core:admin_users' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- File Preview (Optional) -->
+            <div class="admin-card mt-4" id="previewCard" style="display: none;">
+                <div class="admin-card-header">
+                    <h3 class="admin-card-title">
+                        <i class="fas fa-eye"></i>
+                        File Preview
+                    </h3>
+                </div>
+                <div class="admin-card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="previewTable">
+                            <thead>
+                                <tr>
+                                    <th>Row</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>Mobile</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="text-muted small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Showing first 5 rows for preview
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+    
+    .form-control-lg {
+        padding: 0.75rem 1rem;
+    }
+    
+    #previewTable {
+        font-size: 0.9rem;
+    }
+    
+    #previewTable thead {
+        background-color: #f8f9fa;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('importForm');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    // File size validation
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            // Check file size (5MB = 5 * 1024 * 1024 bytes)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size exceeds 5MB. Please choose a smaller file.');
+                this.value = '';
+                return;
+            }
+            
+            // Check file extension
+            const validExtensions = ['csv', 'xlsx', 'xls'];
+            const extension = file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(extension)) {
+                alert('Invalid file format. Please upload CSV or Excel file.');
+                this.value = '';
+                return;
+            }
+        }
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            alert('Please select a file to upload.');
+            return;
+        }
+        
+        // Show loading state
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Importing...';
+    });
+});
+</script>
+{% endblock %}

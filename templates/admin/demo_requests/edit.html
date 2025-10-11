@@ -1,17 +1,16 @@
-<!-- templates/admin/demo_requests/edit.html - COMPLETE FIXED VERSION -->
+<!-- templates/admin/demo_requests/edit.html - COMPACT INLINE DESIGN -->
 {% extends 'admin/base.html' %}
+{% load static %}
 
 {% block admin_title %}Edit Demo Request{% endblock %}
-{% block page_title %}Edit Demo Request #{{ demo_request.id }}{% endblock %}
+{% block page_title %}Edit Request #{{ demo_request.id }}{% endblock %}
 
 {% block breadcrumb %}
 <div class="admin-breadcrumb">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item">
-                <a href="{% url 'core:admin_dashboard' %}">
-                    <i class="fas fa-home me-1"></i>Dashboard
-                </a>
+                <a href="{% url 'core:admin_dashboard' %}"><i class="fas fa-home me-1"></i>Dashboard</a>
             </li>
             <li class="breadcrumb-item">
                 <a href="{% url 'core:admin_demo_requests' %}">Demo Requests</a>
@@ -28,7 +27,7 @@
 {% block header_actions %}
 <div class="d-flex align-items-center gap-2">
     <a href="{% url 'core:admin_demo_request_detail' demo_request.id %}" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left me-1"></i>Back to Details
+        <i class="fas fa-arrow-left me-1"></i>Back
     </a>
     <button type="submit" form="editRequestForm" class="btn btn-primary">
         <i class="fas fa-save me-1"></i>Save Changes
@@ -38,33 +37,33 @@
 
 {% block admin_extra_css %}
 <style>
+    body { -webkit-user-select: none; user-select: none; }
+
     .form-section {
         background: white;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 1.5rem;
         margin-bottom: 1.5rem;
     }
 
     .section-title {
-        font-size: 1.25rem;
-        font-weight: 600;
+        font-size: 1.1rem;
+        font-weight: 700;
         color: #1e3c72;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         padding-bottom: 0.75rem;
         border-bottom: 2px solid #e9ecef;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.5rem;
     }
 
     .form-label {
-        font-weight: 500;
+        font-weight: 600;
         color: #495057;
         margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        font-size: 0.9rem;
     }
 
     .form-label.required::after {
@@ -76,245 +75,241 @@
     .form-control, .form-select {
         border: 2px solid #dee2e6;
         border-radius: 8px;
-        padding: 0.75rem;
-        transition: all 0.3s ease;
+        padding: 0.65rem;
+        font-size: 0.9rem;
     }
 
     .form-control:focus, .form-select:focus {
         border-color: #1e3c72;
-        box-shadow: 0 0 0 0.2rem rgba(30, 60, 114, 0.1);
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
     }
 
-    .status-indicator {
-        padding: 0.5rem 1rem;
+    /* Status Badge */
+    .status-badge {
+        padding: 0.4rem 0.75rem;
         border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.875rem;
+        font-weight: 700;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.35rem;
     }
 
-    .status-pending {
-        background: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeaa7;
-    }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-confirmed { background: #d1ecf1; color: #0c5460; }
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .status-rescheduled { background: #e2e3e5; color: #383d41; }
 
-    .status-confirmed {
-        background: #d1ecf1;
-        color: #0c5460;
-        border: 1px solid #bee5eb;
-    }
-
-    .status-completed {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .status-cancelled {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-
-    .status-rescheduled {
-        background: #e2e3e5;
-        color: #383d41;
-        border: 1px solid #d6d8db;
-    }
-
+    /* Current Info Box */
     .current-info {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border: 2px solid #3b82f6;
         border-radius: 8px;
         padding: 1rem;
         margin-bottom: 1rem;
+        font-size: 0.9rem;
     }
 
+    .current-info strong {
+        color: #1e3c72;
+    }
+
+    /* Inline Date Picker */
+    .datetime-inline {
+        background: #f8f9fa;
+        border: 2px solid #e3f2fd;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .date-input-wrapper {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    #dateInput {
+        width: 100%;
+        padding: 0.75rem;
+        padding-left: 2.5rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1e3c72;
+        cursor: pointer;
+    }
+
+    #dateInput:focus {
+        outline: none;
+        border-color: #1e3c72;
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+    }
+
+    .date-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #1e3c72;
+        pointer-events: none;
+    }
+
+    #timeSlotSelect {
+        width: 100%;
+        padding: 0.75rem;
+        padding-left: 2.5rem;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1e3c72;
+    }
+
+    #timeSlotSelect:focus {
+        outline: none;
+        border-color: #1e3c72;
+        box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+    }
+
+    /* Better visibility for disabled options */
+    #timeSlotSelect option:disabled {
+        background: #f3f4f6;
+        color: #9ca3af !important;
+    }
+
+    #timeSlotSelect option[data-status="available"] {
+        background: #ecfdf5;
+        color: #065f46 !important;
+        font-weight: 700;
+    }
+
+    #timeSlotSelect option[data-status="full"] {
+        background: #fee2e2;
+        color: #991b1b !important;
+    }
+
+    #timeSlotSelect option[data-status="starting_soon"] {
+        background: #fef3c7;
+        color: #92400e !important;
+    }
+
+    #timeSlotSelect option[data-status="past"] {
+        background: #f3f4f6;
+        color: #6b7280 !important;
+    }
+
+    .time-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #1e3c72;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* Selection Summary */
+    .selection-summary {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        border: 2px solid #10b981;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .selection-summary.show {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .selection-summary i {
+        color: #065f46;
+        font-size: 1.25rem;
+    }
+
+    /* Danger Zone */
     .danger-zone {
         border: 2px solid #dc3545;
-        border-radius: 8px;
-        padding: 1.5rem;
+        border-radius: 10px;
+        padding: 1.25rem;
         background: rgba(220, 53, 69, 0.05);
     }
 
-    .btn-danger-outline {
+    .danger-zone h5 {
         color: #dc3545;
-        border: 2px solid #dc3545;
-        background: transparent;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
     }
 
-    .btn-danger-outline:hover {
-        background: #dc3545;
-        color: white;
-    }
-
-    /* Calendar & Time Slots Styles */
-    .calendar-section {
-        border: 1px solid #e3f2fd;
-        border-radius: 8px;
+    /* Loading */
+    .loading-slots {
+        text-align: center;
         padding: 1rem;
-        background: white;
+        color: #6b7280;
     }
 
-    .calendar-grid {
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid #e3f2fd;
-    }
-
-    .calendar-weekdays {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    }
-
-    .weekday {
-        padding: 0.75rem;
-        text-align: center;
-        font-weight: 600;
-        color: white;
-        font-size: 0.875rem;
-    }
-
-    .calendar-days {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        background: white;
-    }
-
-    .calendar-day {
-        padding: 0.75rem;
-        text-align: center;
-        border: 1px solid #f0f0f0;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        min-height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .calendar-day:hover {
-        background: rgba(30, 60, 114, 0.1);
-        transform: scale(1.05);
-    }
-
-    .calendar-day.other-month {
-        color: #ccc;
-        background: #f9f9f9;
-    }
-
-    .calendar-day.disabled {
-        color: #ccc;
-        cursor: not-allowed;
-        background: #f5f5f5;
-    }
-
-    .calendar-day.disabled:hover {
-        transform: none;
-        background: #f5f5f5;
-    }
-
-    .calendar-day.selected {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        color: white;
-        font-weight: bold;
-        transform: scale(1.1);
-        z-index: 2;
+    .loading-spinner {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        border: 3px solid rgba(30, 60, 114, 0.1);
+        border-top-color: #1e3c72;
         border-radius: 50%;
+        animation: spin 0.8s linear infinite;
     }
 
-    .calendar-day.today {
-        border: 2px solid #1e3c72;
-        font-weight: bold;
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 
-    .time-slots-section {
-        border: 1px solid #e3f2fd;
+    /* Buttons */
+    .btn {
         border-radius: 8px;
-        padding: 1rem;
-        background: white;
-        max-height: 400px;
-        overflow-y: auto;
+        padding: 0.6rem 1.25rem;
+        font-weight: 600;
     }
 
-    .time-slot-btn {
-        width: 100%;
-        text-align: left;
-        border: 2px solid #e3f2fd;
-        background: white;
-        color: #1e3c72;
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        margin-bottom: 0.5rem;
-    }
-
-    .time-slot-btn:hover {
-        border-color: #1e3c72;
-        background: rgba(30, 60, 114, 0.05);
-        transform: translateY(-1px);
-    }
-
-    .time-slot-btn.selected {
+    .btn-primary {
         background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        color: white;
-        border-color: #1e3c72;
-        font-weight: bold;
+        border: none;
     }
 
-    #dateTimeDisplay {
-        background-color: white;
-        border: 2px solid #dee2e6;
-        transition: all 0.3s ease;
-        cursor: pointer;
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
     }
 
-    #dateTimeDisplay:hover {
-        border-color: #1e3c72;
-        background-color: rgba(30, 60, 114, 0.05);
-    }
-
-    .modal-xl {
-        max-width: 1000px;
-    }
-
+    /* Responsive */
     @media (max-width: 768px) {
-        .form-section {
-            padding: 1.5rem;
-        }
-
-        .calendar-day {
-            padding: 0.5rem;
-            font-size: 0.875rem;
-        }
+        .form-section { padding: 1rem; }
+        .datetime-inline { padding: 0.75rem; }
     }
 </style>
 {% endblock %}
 
 {% block admin_content %}
 
-<!-- Edit Form -->
 <form method="post" id="editRequestForm" class="needs-validation" novalidate>
     {% csrf_token %}
 
-    <!-- Current Status Overview -->
+    <!-- Current Status -->
     <div class="form-section">
         <div class="section-title">
-            <i class="fas fa-info-circle"></i>Current Request Information
+            <i class="fas fa-info-circle"></i>Current Request Status
         </div>
 
         <div class="current-info">
-            <div class="row">
+            <div class="row g-3">
                 <div class="col-md-3">
                     <strong>Status:</strong><br>
-                    <span class="status-indicator status-{{ demo_request.status }}">
+                    <span class="status-badge status-{{ demo_request.status }}">
                         <i class="fas fa-circle"></i>{{ demo_request.get_status_display }}
                     </span>
                 </div>
@@ -334,18 +329,16 @@
         </div>
     </div>
 
-    <!-- Customer & Demo Selection -->
+    <!-- Basic Information -->
     <div class="form-section">
         <div class="section-title">
-            <i class="fas fa-user-cog"></i>Customer & Demo Information
+            <i class="fas fa-user-cog"></i>Customer & Demo
         </div>
 
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="user_id" class="form-label required">
-                        <i class="fas fa-user-circle"></i>Customer
-                    </label>
+                    <label for="user_id" class="form-label required">Customer</label>
                     <select name="user_id" id="user_id" class="form-select" required>
                         {% for customer in customers %}
                             <option value="{{ customer.id }}" 
@@ -354,128 +347,104 @@
                             </option>
                         {% endfor %}
                     </select>
-                    <div class="form-text">
-                        Change the customer for this demo request if needed.
-                    </div>
                 </div>
             </div>
 
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="demo_id" class="form-label required">
-                        <i class="fas fa-video"></i>Demo
-                    </label>
+                    <label for="demo_id" class="form-label required">Demo</label>
                     <select name="demo_id" id="demo_id" class="form-select" required>
                         {% for demo in demos %}
                             <option value="{{ demo.id }}" 
                                     {% if demo.id == demo_request.demo.id %}selected{% endif %}>
-                                {{ demo.title }} ({{ demo.get_demo_type_display }})
+                                {{ demo.title }}
                             </option>
                         {% endfor %}
                     </select>
-                    <div class="form-text">
-                        Select which demo the customer wants to see.
-                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Business Category Information -->
-    <div class="form-section">
-        <div class="section-title">
-            <i class="fas fa-briefcase"></i>Business Category Information
         </div>
 
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="business_category_id" class="form-label">
-                        <i class="fas fa-building"></i>Business Category
-                    </label>
-                    <select name="business_category_id" id="business_category_id" class="form-select">
-                        <option value="">Select Business Category...</option>
+                    <label for="business_category_id" class="form-label">Business Category</label>
+                    <select name="business_category_id" id="business_category_id" class="form-select" onchange="filterSubcategories()">
+                        <option value="">Select Category...</option>
                         {% for category in business_categories %}
                             <option value="{{ category.id }}" 
                                     {% if demo_request.business_category and demo_request.business_category.id == category.id %}selected{% endif %}>
-                                {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
+                                {{ category.name }}
                             </option>
                         {% endfor %}
                     </select>
-                    <div class="form-text">
-                        Business category for this customer
-                    </div>
                 </div>
             </div>
 
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="business_subcategory_id" class="form-label">
-                        <i class="fas fa-sitemap"></i>Business Subcategory
-                    </label>
+                    <label for="business_subcategory_id" class="form-label">Subcategory</label>
                     <select name="business_subcategory_id" id="business_subcategory_id" class="form-select">
-                        <option value="">Select Subcategory (Optional)</option>
+                        <option value="">Select Subcategory...</option>
                         {% for subcategory in business_subcategories %}
                             <option value="{{ subcategory.id }}" 
                                     data-parent="{{ subcategory.category.id }}"
                                     {% if demo_request.business_subcategory and demo_request.business_subcategory.id == subcategory.id %}selected{% endif %}>
-                                {{ subcategory.name }} ({{ subcategory.category.name }})
+                                {{ subcategory.name }}
                             </option>
                         {% endfor %}
                     </select>
-                    <div class="form-text">
-                        Specific subcategory if applicable
-                    </div>
                 </div>
             </div>
         </div>
-
-        {% if demo_request.is_international %}
-        <div class="alert alert-info">
-            <i class="fas fa-globe me-2"></i>
-            <strong>International Customer:</strong> This customer is from outside India
-        </div>
-        {% endif %}
     </div>
 
-    <!-- Date & Time Selection -->
+    <!-- Date & Time - INLINE -->
     <div class="form-section">
         <div class="section-title">
-            <i class="fas fa-calendar-clock"></i>Schedule Information
+            <i class="fas fa-calendar-clock"></i>Schedule
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="current-info mb-3">
-                    <h6>Current Schedule:</h6>
-                    <strong>Requested:</strong> {{ demo_request.requested_date|date:"l, M d, Y" }} at {{ demo_request.requested_time_slot }}<br>
-                    {% if demo_request.confirmed_date %}
-                        <strong>Confirmed:</strong> {{ demo_request.confirmed_date|date:"l, M d, Y" }} at {{ demo_request.confirmed_time_slot }}
-                    {% endif %}
-                </div>
+        <div class="current-info mb-3">
+            <strong>Current Schedule:</strong><br>
+            {{ demo_request.requested_date|date:"l, M d, Y" }} at {{ demo_request.requested_time_slot }}
+        </div>
 
-                <div class="mb-3">
-                    <label class="form-label required">
-                        <i class="fas fa-calendar-alt"></i>Update Date & Time
-                    </label>
-                    
-                    <input type="text" 
-                           id="dateTimeDisplay" 
-                           class="form-control form-control-lg" 
-                           placeholder="Click to change date and time..." 
-                           readonly 
-                           onclick="openEditDateTimeModal()"
-                           value="{{ demo_request.requested_date|date:'l, M d, Y' }} at {{ demo_request.requested_time_slot }}"
-                           style="cursor: pointer; font-size: 1.1rem;">
-                    
-                    <input type="hidden" name="requested_date" id="selectedDate" 
-                           value="{{ demo_request.requested_date|date:'Y-m-d' }}" required>
-                    <input type="hidden" name="requested_time_slot_id" id="selectedSlotId" 
-                           value="{{ demo_request.requested_time_slot.id }}" required>
-                    
-                    <div class="form-text">
-                        Click to change the requested date and time for this demo.
-                    </div>
+        <div class="datetime-inline">
+            <!-- Date Input -->
+            <label class="form-label required">Select New Date</label>
+            <div class="date-input-wrapper">
+                <i class="fas fa-calendar-day date-icon"></i>
+                <input type="date" 
+                       id="dateInput" 
+                       class="form-control"
+                       min="{{ today|date:'Y-m-d' }}"
+                       value="{{ demo_request.requested_date|date:'Y-m-d' }}"
+                       onchange="loadTimeSlots(this.value)"
+                       required>
+            </div>
+            <input type="hidden" name="requested_date" id="selectedDate" value="{{ demo_request.requested_date|date:'Y-m-d' }}">
+
+            <!-- Time Slot Dropdown -->
+            <label class="form-label required">Select New Time</label>
+            <div class="position-relative">
+                <i class="fas fa-clock time-icon"></i>
+                <select id="timeSlotSelect" 
+                        name="requested_time_slot_id" 
+                        class="form-control" 
+                        required>
+                    <option value="{{ demo_request.requested_time_slot.id }}" selected>
+                        {{ demo_request.requested_time_slot }} (Current)
+                    </option>
+                </select>
+            </div>
+
+            <!-- Selection Summary -->
+            <div class="selection-summary" id="selectionSummary">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>Updated to:</strong><br>
+                    <span id="summaryText"></span>
                 </div>
             </div>
         </div>
@@ -484,15 +453,13 @@
     <!-- Status & Location -->
     <div class="form-section">
         <div class="section-title">
-            <i class="fas fa-cogs"></i>Status & Location Details
+            <i class="fas fa-cogs"></i>Status & Location
         </div>
 
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-3">
-                    <label for="status" class="form-label">
-                        <i class="fas fa-flag"></i>Status
-                    </label>
+                    <label for="status" class="form-label">Status</label>
                     <select name="status" id="status" class="form-select">
                         <option value="pending" {% if demo_request.status == 'pending' %}selected{% endif %}>Pending</option>
                         <option value="confirmed" {% if demo_request.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
@@ -505,75 +472,45 @@
 
             <div class="col-md-4">
                 <div class="mb-3">
-                    <label for="city" class="form-label">
-                        <i class="fas fa-city"></i>City
-                    </label>
+                    <label for="city" class="form-label">City</label>
                     <input type="text" name="city" id="city" class="form-control" 
-                           value="{{ demo_request.city|default:'' }}"
-                           placeholder="Customer's city">
+                           value="{{ demo_request.city|default:'' }}" placeholder="City">
                 </div>
             </div>
 
             <div class="col-md-4">
                 <div class="mb-3">
-                    <label for="country_region" class="form-label">
-                        <i class="fas fa-globe"></i>Country/Region
-                    </label>
+                    <label for="country_region" class="form-label">Country</label>
                     <select name="country_region" id="country_region" class="form-select">
-                        <option value="">Select Country...</option>
-                        <option value="IN" {% if demo_request.country_region == 'IN' %}selected{% endif %}>🇮🇳 India</option>
+                        <option value="">Select...</option>
+                        <option value="IN" {% if demo_request.country_region == 'IN' or not demo_request.country_region %}selected{% endif %}>🇮🇳 India</option>
                         <option value="US" {% if demo_request.country_region == 'US' %}selected{% endif %}>🇺🇸 United States</option>
                         <option value="UK" {% if demo_request.country_region == 'UK' %}selected{% endif %}>🇬🇧 United Kingdom</option>
-                        <option value="CA" {% if demo_request.country_region == 'CA' %}selected{% endif %}>🇨🇦 Canada</option>
-                        <option value="AU" {% if demo_request.country_region == 'AU' %}selected{% endif %}>🇦🇺 Australia</option>
                         <option value="OTHER" {% if demo_request.country_region == 'OTHER' %}selected{% endif %}>🌍 Other</option>
                     </select>
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="mb-3">
-                    <label for="postal_code" class="form-label">
-                        <i class="fas fa-map-pin"></i>Postal Code
-                    </label>
-                    <input type="text" name="postal_code" id="postal_code" class="form-control" 
-                           value="{{ demo_request.postal_code|default:'' }}"
-                           placeholder="Customer's postal/ZIP code">
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Notes & Comments -->
+    <!-- Notes -->
     <div class="form-section">
         <div class="section-title">
-            <i class="fas fa-sticky-note"></i>Notes & Comments
+            <i class="fas fa-sticky-note"></i>Notes
         </div>
 
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="notes" class="form-label">
-                        <i class="fas fa-comment"></i>Customer Notes
-                    </label>
-                    <textarea name="notes" id="notes" class="form-control" rows="5">{{ demo_request.notes|default:'' }}</textarea>
-                    <div class="form-text">
-                        Notes or requirements from the customer.
-                    </div>
+                    <label for="notes" class="form-label">Customer Notes</label>
+                    <textarea name="notes" id="notes" class="form-control" rows="3">{{ demo_request.notes|default:'' }}</textarea>
                 </div>
             </div>
 
             <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="admin_notes" class="form-label">
-                        <i class="fas fa-user-shield"></i>Admin Notes
-                    </label>
-                    <textarea name="admin_notes" id="admin_notes" class="form-control" rows="5">{{ demo_request.admin_notes|default:'' }}</textarea>
-                    <div class="form-text">
-                        Internal admin notes (not visible to customer).
-                    </div>
+                    <label for="admin_notes" class="form-label">Admin Notes</label>
+                    <textarea name="admin_notes" id="admin_notes" class="form-control" rows="3">{{ demo_request.admin_notes|default:'' }}</textarea>
                 </div>
             </div>
         </div>
@@ -583,139 +520,54 @@
     <div class="form-section">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <button type="submit" class="btn btn-primary btn-lg">
+                <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save me-2"></i>Save Changes
                 </button>
-                <a href="{% url 'core:admin_demo_request_detail' demo_request.id %}" class="btn btn-outline-secondary btn-lg ms-2">
+                <a href="{% url 'core:admin_demo_request_detail' demo_request.id %}" class="btn btn-outline-secondary ms-2">
                     <i class="fas fa-times me-2"></i>Cancel
                 </a>
             </div>
 
-            <div>
-                <button type="button" class="btn btn-danger-outline" onclick="confirmDelete()">
-                    <i class="fas fa-trash me-2"></i>Delete Request
-                </button>
-            </div>
+            <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                <i class="fas fa-trash me-2"></i>Delete
+            </button>
         </div>
     </div>
 
     <!-- Danger Zone -->
     <div class="form-section danger-zone">
-        <h5 class="text-danger mb-3">
-            <i class="fas fa-exclamation-triangle me-2"></i>Danger Zone
-        </h5>
-        <p class="mb-3">
-            Delete this demo request permanently. This action cannot be undone and the customer will need to create a new request.
-        </p>
-        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-            <i class="fas fa-trash me-2"></i>Delete Demo Request
+        <h5><i class="fas fa-exclamation-triangle me-2"></i>Danger Zone</h5>
+        <p class="mb-3 small">Delete this request permanently. This action cannot be undone.</p>
+        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete()">
+            <i class="fas fa-trash me-2"></i>Delete Request
         </button>
     </div>
 </form>
 
-<!-- Date & Time Edit Modal -->
-<div class="modal fade" id="editDateTimeModal" tabindex="-1" data-bs-backdrop="static">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
-                <h5 class="modal-title text-white">
-                    <i class="fas fa-calendar-edit me-2"></i>Edit Date & Time
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <!-- Calendar Section -->
-                    <div class="col-md-7">
-                        <div class="calendar-section">
-                            <div class="calendar-header d-flex justify-content-between align-items-center mb-3">
-                                <button type="button" class="btn btn-outline-primary" onclick="previousMonth()">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <h6 class="mb-0" id="currentMonth" style="color: #1e3c72; font-weight: 600;"></h6>
-                                <button type="button" class="btn btn-outline-primary" onclick="nextMonth()">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="calendar-grid" id="calendarGrid">
-                                <div class="calendar-weekdays">
-                                    <div class="weekday">Sun</div>
-                                    <div class="weekday">Mon</div>
-                                    <div class="weekday">Tue</div>
-                                    <div class="weekday">Wed</div>
-                                    <div class="weekday">Thu</div>
-                                    <div class="weekday">Fri</div>
-                                    <div class="weekday">Sat</div>
-                                </div>
-                                <div class="calendar-days" id="calendarDays"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Time Slots Section -->
-                    <div class="col-md-5">
-                        <div class="time-slots-section">
-                            <h6 class="mb-3" style="color: #1e3c72; font-weight: 600;">
-                                <i class="fas fa-clock me-2"></i>Available Time Slots
-                            </h6>
-                            
-                            <div id="selectedDateDisplay" class="alert alert-info mb-3" style="display: none;">
-                                <i class="fas fa-calendar-check me-2"></i>
-                                <strong>Selected Date:</strong> <span id="selectedDateText"></span>
-                            </div>
-                            
-                            <div id="timeSlotsList">
-                                <div class="text-center text-muted">
-                                    <i class="fas fa-calendar-day fa-2x mb-2"></i>
-                                    <p>Please select a date first</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer" style="background: #f8f9ff; border-top: 1px solid #e3f2fd;">
-                <div class="selected-info me-auto">
-                    <small class="text-muted" id="selectionSummary">Current: {{ demo_request.requested_date|date:"M d, Y" }} at {{ demo_request.requested_time_slot }}</small>
-                </div>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Cancel
-                </button>
-                <button type="button" class="btn btn-primary" id="confirmEditDateTime" disabled>
-                    <i class="fas fa-check me-1"></i>Update Date & Time
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">
+                <h5 class="modal-title" id="deleteModalLabel">
                     <i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-danger">
-                    <strong>Warning:</strong> This action cannot be undone!
+                    <strong>⚠️ Warning:</strong> This action cannot be undone!
                 </div>
-                <p>Are you sure you want to delete this demo request?</p>
-                <ul class="mb-0">
-                    <li>Customer: <strong>{{ demo_request.user.full_name }}</strong></li>
-                    <li>Demo: <strong>{{ demo_request.demo.title }}</strong></li>
-                    <li>Date: <strong>{{ demo_request.requested_date|date:"M d, Y" }}</strong></li>
+                <p>Delete this demo request?</p>
+                <ul>
+                    <li><strong>Customer:</strong> {{ demo_request.user.full_name }}</li>
+                    <li><strong>Demo:</strong> {{ demo_request.demo.title }}</li>
+                    <li><strong>Date:</strong> {{ demo_request.requested_date|date:"M d, Y" }}</li>
                 </ul>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="deleteRequest()">
-                    <i class="fas fa-trash me-1"></i>Yes, Delete Request
-                </button>
+                <button type="button" class="btn btn-danger" onclick="deleteRequest()">Yes, Delete</button>
             </div>
         </div>
     </div>
@@ -725,254 +577,118 @@
 
 {% block admin_extra_js %}
 <script>
-// Time slots from database
+document.addEventListener('contextmenu', e => e.preventDefault());
+
 const timeSlots = [
     {% for slot in time_slots %}
-    {
-        id: {{ slot.id }},
-        text: "{{ slot }}",
-        type: "{{ slot.slot_type }}",
-        start_time: "{{ slot.start_time|time:'H:i' }}",
-        end_time: "{{ slot.end_time|time:'H:i' }}"
-    }{% if not forloop.last %},{% endif %}
+    { id: {{ slot.id }}, text: "{{ slot }}" }{% if not forloop.last %},{% endif %}
     {% endfor %}
 ];
 
-// Calendar and time slot functionality
-let selectedDate = null;
-let selectedSlot = null;
-
-const today = new Date();
-let currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-function openEditDateTimeModal() {
-    const modal = document.getElementById('editDateTimeModal');
-    if (modal) {
-        generateCalendar();
-        const bsModal = new bootstrap.Modal(modal);
-        bsModal.show();
-    }
-}
-
-// Calendar generation
-function generateCalendar() {
-    const monthNames = ["January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"];
+// Load time slots when date changes
+async function loadTimeSlots(dateStr) {
+    const timeSlotSelect = document.getElementById('timeSlotSelect');
+    const selectedDateInput = document.getElementById('selectedDate');
+    const summaryDiv = document.getElementById('selectionSummary');
     
-    const currentMonthElement = document.getElementById('currentMonth');
-    const calendarDays = document.getElementById('calendarDays');
-    
-    if (currentMonthElement) {
-        currentMonthElement.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    if (!dateStr) {
+        timeSlotSelect.innerHTML = '<option value="">Select date first</option>';
+        timeSlotSelect.disabled = true;
+        summaryDiv.classList.remove('show');
+        return;
     }
     
-    if (calendarDays) {
-        calendarDays.innerHTML = '';
-        
-        const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        const startDate = new Date(firstDay);
-        startDate.setDate(startDate.getDate() - firstDay.getDay());
-        
-        const now = new Date();
-        const todayDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        
-        for (let i = 0; i < 42; i++) {
-            const date = new Date(startDate);
-            date.setDate(startDate.getDate() + i);
-            
-            const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-            
-            const dayElement = document.createElement('div');
-            dayElement.classList.add('calendar-day');
-            dayElement.textContent = date.getDate();
-            
-            if (date.getMonth() !== currentDate.getMonth()) {
-                dayElement.classList.add('other-month');
-            }
-            
-            if (dateOnly.getTime() === todayDateOnly.getTime()) {
-                dayElement.classList.add('today');
-            }
-            
-            if (dateOnly.getDay() === 0) {
-                dayElement.classList.add('disabled');
-            } else {
-                dayElement.addEventListener('click', () => selectDate(dateOnly, dayElement));
-            }
-            
-            calendarDays.appendChild(dayElement);
-        }
-    }
-}
-
-function selectDate(date, element) {
-    document.querySelectorAll('.calendar-day.selected').forEach(day => {
-        day.classList.remove('selected');
-    });
-    
-    element.classList.add('selected');
-    selectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    
-    const selectedDateDisplay = document.getElementById('selectedDateDisplay');
-    const selectedDateText = document.getElementById('selectedDateText');
-    
-    if (selectedDateDisplay && selectedDateText) {
-        selectedDateText.textContent = formatDate(selectedDate);
-        selectedDateDisplay.style.display = 'block';
+    // Validate Sunday
+    const selectedDate = new Date(dateStr + 'T00:00:00');
+    if (selectedDate.getDay() === 0) {
+        alert('⚠️ Demos cannot be scheduled on Sundays');
+        document.getElementById('dateInput').value = '{{ demo_request.requested_date|date:"Y-m-d" }}';
+        return;
     }
     
-    showTimeSlots();
-    selectedSlot = null;
-    updateConfirmButton();
-    updateSelectionSummary();
-}
-
-function showTimeSlots() {
-    const timeSlotsList = document.getElementById('timeSlotsList');
-    if (!timeSlotsList) return;
+    selectedDateInput.value = dateStr;
     
-    const morningSlots = timeSlots.filter(slot => slot.type === 'morning');
-    const afternoonSlots = timeSlots.filter(slot => slot.type === 'afternoon');
+    timeSlotSelect.innerHTML = '<option value="">Loading...</option>';
+    timeSlotSelect.disabled = true;
     
-    let html = '';
-    
-    if (morningSlots.length > 0) {
-        html += `
-            <div class="mb-3">
-                <h6 class="text-primary mb-2">
-                    <i class="fas fa-sun me-2"></i>Morning Slots
-                </h6>
-                ${morningSlots.map(slot => `
-                    <div class="time-slot-item">
-                        <button type="button" class="btn time-slot-btn" 
-                                data-slot-id="${slot.id}" 
-                                data-slot-text="${slot.text}">
-                            <i class="fas fa-clock me-2"></i>${slot.text}
-                        </button>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-    
-    if (afternoonSlots.length > 0) {
-        html += `
-            <div>
-                <h6 class="text-primary mb-2">
-                    <i class="fas fa-moon me-2"></i>Afternoon/Evening Slots
-                </h6>
-                ${afternoonSlots.map(slot => `
-                    <div class="time-slot-item">
-                        <button type="button" class="btn time-slot-btn" 
-                                data-slot-id="${slot.id}" 
-                                data-slot-text="${slot.text}">
-                            <i class="fas fa-clock me-2"></i>${slot.text}
-                        </button>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-    
-    timeSlotsList.innerHTML = html;
-    
-    const timeSlotButtons = timeSlotsList.querySelectorAll('.time-slot-btn');
-    timeSlotButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const slotId = parseInt(this.dataset.slotId);
-            const slotText = this.dataset.slotText;
-            selectTimeSlot(slotId, slotText, this);
-        });
-    });
-}
-
-function selectTimeSlot(slotId, slotText, buttonElement) {
     try {
-        document.querySelectorAll('.time-slot-btn').forEach(btn => {
-            if (btn && btn.classList) {
-                btn.classList.remove('selected');
-            }
-        });
+        const response = await fetch(`{% url 'core:ajax_admin_check_slot_availability' %}?date=${dateStr}`);
+        const data = await response.json();
         
-        if (buttonElement && buttonElement.classList) {
-            buttonElement.classList.add('selected');
+        if (data.success && data.slots) {
+            renderTimeSlots(data.slots, selectedDate);
+        } else {
+            timeSlotSelect.innerHTML = '<option value="">No slots available</option>';
         }
-        
-        selectedSlot = { id: slotId, text: slotText };
-        updateConfirmButton();
-        updateSelectionSummary();
-        
     } catch (error) {
-        console.error('Error in selectTimeSlot:', error);
+        console.error('Error:', error);
+        timeSlotSelect.innerHTML = '<option value="">Error loading slots</option>';
     }
 }
 
-function updateConfirmButton() {
-    const confirmBtn = document.getElementById('confirmEditDateTime');
-    if (confirmBtn) {
-        confirmBtn.disabled = !(selectedDate && selectedSlot);
+function renderTimeSlots(slots, selectedDate) {
+    const timeSlotSelect = document.getElementById('timeSlotSelect');
+    
+    timeSlotSelect.innerHTML = '<option value="">Select time...</option>';
+    
+    slots.forEach(slot => {
+        const option = document.createElement('option');
+        option.value = slot.id;
+        
+        let statusBadge = '';
+        let optionStyle = '';
+        
+        if (slot.status === 'available') {
+            statusBadge = ' ✓ Available';
+            optionStyle = 'color: #065f46; font-weight: 600;';
+        } else if (slot.status === 'full') {
+            statusBadge = ' ✗ Fully Booked';
+            option.disabled = true;
+            optionStyle = 'color: #991b1b; font-style: italic;';
+        } else if (slot.status === 'starting_soon') {
+            statusBadge = ' ⚠️ Starting Soon (Cannot Book)';
+            option.disabled = true;
+            optionStyle = 'color: #92400e; font-style: italic; text-decoration: line-through;';
+        } else if (slot.status === 'past') {
+            statusBadge = ' ✗ Time Passed';
+            option.disabled = true;
+            optionStyle = 'color: #6b7280; font-style: italic; text-decoration: line-through;';
+        }
+        
+        option.textContent = `${slot.start_time}${statusBadge}`;
+        option.setAttribute('style', optionStyle);
+        timeSlotSelect.appendChild(option);
+    });
+    
+    timeSlotSelect.disabled = false;
+    
+    timeSlotSelect.onchange = function() {
+        updateSummary(selectedDate, this.value);
+    };
+}
+
+function updateSummary(selectedDate, slotId) {
+    const summaryDiv = document.getElementById('selectionSummary');
+    const summaryText = document.getElementById('summaryText');
+    
+    if (!slotId) {
+        summaryDiv.classList.remove('show');
+        return;
     }
+    
+    const slot = timeSlots.find(s => s.id == slotId);
+    const dateObj = new Date(selectedDate);
+    const dateStr = dateObj.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'long', 
+        day: 'numeric',
+        year: 'numeric'
+    });
+    
+    summaryText.innerHTML = `<strong>${dateStr}</strong> at <strong>${slot ? slot.text : 'Selected Time'}</strong>`;
+    summaryDiv.classList.add('show');
 }
 
-function updateSelectionSummary() {
-    const summaryElement = document.getElementById('selectionSummary');
-    if (summaryElement && selectedDate && selectedSlot) {
-        summaryElement.textContent = `New: ${formatDate(selectedDate)} at ${selectedSlot.text}`;
-    }
-}
-
-function confirmEditDateTime() {
-    if (selectedDate && selectedSlot) {
-        const selectedDateInput = document.getElementById('selectedDate');
-        const selectedSlotIdInput = document.getElementById('selectedSlotId');
-        const dateTimeDisplayInput = document.getElementById('dateTimeDisplay');
-        
-        if (selectedDateInput) {
-            selectedDateInput.value = formatDateForInput(selectedDate);
-        }
-        
-        if (selectedSlotIdInput) {
-            selectedSlotIdInput.value = selectedSlot.id;
-        }
-        
-        if (dateTimeDisplayInput) {
-            dateTimeDisplayInput.value = `${formatDate(selectedDate)} at ${selectedSlot.text}`;
-        }
-        
-        const modal = document.getElementById('editDateTimeModal');
-        if (modal) {
-            const bsModal = bootstrap.Modal.getInstance(modal);
-            if (bsModal) bsModal.hide();
-        }
-    }
-}
-
-// Navigation functions
-function previousMonth() {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    generateCalendar();
-}
-
-function nextMonth() {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    generateCalendar();
-}
-
-// Utility functions
-function formatDate(date) {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
-}
-
-function formatDateForInput(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-// Delete confirmation
 function confirmDelete() {
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
@@ -982,7 +698,8 @@ function deleteRequest() {
     fetch(`{% url 'core:admin_delete_demo_request' demo_request.id %}`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({ force_delete: true })
     })
@@ -993,58 +710,48 @@ function deleteRequest() {
         } else {
             alert('Error: ' + data.error);
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while deleting the request');
     });
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
-    // Business category and subcategory filtering
+function filterSubcategories() {
     const categorySelect = document.getElementById('business_category_id');
     const subcategorySelect = document.getElementById('business_subcategory_id');
     
-    if (categorySelect && subcategorySelect) {
-        function filterSubcategories() {
-            const selectedCategoryId = categorySelect.value;
-            const subcategoryOptions = subcategorySelect.querySelectorAll('option[data-parent]');
-            
-            subcategoryOptions.forEach(option => {
-                if (!selectedCategoryId || option.dataset.parent === selectedCategoryId) {
-                    option.style.display = 'block';
-                } else {
-                    option.style.display = 'none';
-                    if (option.selected) {
-                        option.selected = false;
-                        subcategorySelect.value = '';
-                    }
-                }
-            });
+    const selectedCategoryId = categorySelect.value;
+    const options = subcategorySelect.querySelectorAll('option[data-parent]');
+    
+    options.forEach(option => {
+        if (!selectedCategoryId || option.dataset.parent === selectedCategoryId) {
+            option.style.display = 'block';
+        } else {
+            option.style.display = 'none';
+            if (option.selected) option.selected = false;
         }
-        
-        categorySelect.addEventListener('change', filterSubcategories);
-        filterSubcategories();
+    });
+}
+
+// Form validation
+document.getElementById('editRequestForm').addEventListener('submit', function(e) {
+    const dateInput = document.getElementById('selectedDate');
+    const slotInput = document.getElementById('timeSlotSelect');
+    
+    if (!dateInput.value || !slotInput.value) {
+        e.preventDefault();
+        alert('⚠️ Please select both date and time slot');
+        return false;
     }
     
-    // Add confirm button event listener
-    const confirmButton = document.getElementById('confirmEditDateTime');
-    if (confirmButton) {
-        confirmButton.addEventListener('click', confirmEditDateTime);
-    }
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+    submitBtn.disabled = true;
     
-    // Form validation
-    const form = document.getElementById('editRequestForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            if (!this.checkValidity()) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            this.classList.add('was-validated');
-        });
-    }
+    return true;
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    filterSubcategories();
+    console.log('✅ Edit page initialized');
 });
 </script>
 {% endblock %}

@@ -1,30 +1,30 @@
 # customers/signals.py
+# QUICK FIX: Disable auto-suspend temporarily
+
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-# Import models (only import what exists)
 User = get_user_model()
 
-# Only import demo models if they exist
 try:
     from demos.models import DemoView, DemoLike, DemoRequest
     DEMOS_AVAILABLE = True
 except ImportError:
     DEMOS_AVAILABLE = False
 
-# Only import enquiry models if they exist
 try:
     from enquiries.models import BusinessEnquiry
     ENQUIRIES_AVAILABLE = True
 except ImportError:
     ENQUIRIES_AVAILABLE = False
 
-# Import our customer models
 from .models import CustomerActivity, SecurityViolation
-from .utils import log_customer_activity, send_security_alert
+from .utils import log_customer_activity
+# ❌ COMMENT OUT THIS IMPORT - Template missing
+# from .utils import send_security_alert
 
 @receiver(user_logged_in)
 def log_user_login(sender, request, user, **kwargs):
@@ -48,7 +48,6 @@ def log_user_logout(sender, request, user, **kwargs):
             request=request
         )
 
-# Only register demo signals if demos app is available
 if DEMOS_AVAILABLE:
     @receiver(post_save, sender=DemoView)
     def log_demo_view(sender, instance, created, **kwargs):
@@ -87,7 +86,6 @@ if DEMOS_AVAILABLE:
                 requested_date=str(instance.requested_date)
             )
 
-# Only register enquiry signals if enquiries app is available
 if ENQUIRIES_AVAILABLE:
     @receiver(post_save, sender=BusinessEnquiry)
     def log_enquiry_sent(sender, instance, created, **kwargs):
@@ -103,7 +101,10 @@ if ENQUIRIES_AVAILABLE:
 
 @receiver(post_save, sender=SecurityViolation)
 def handle_security_violation(sender, instance, created, **kwargs):
-    """Handle security violation detection"""
+    """
+    Handle security violation detection
+    ✅ DISABLED AUTO-SUSPEND - Just log for now
+    """
     if created:
         # Log as customer activity
         log_customer_activity(
@@ -114,33 +115,22 @@ def handle_security_violation(sender, instance, created, **kwargs):
             violation_description=instance.description
         )
         
-        # Send alert for serious violations
-        serious_violations = [
-            'screen_recording',
-            'multiple_sessions',
-            'devtools_detected'
-        ]
+        # ❌ DISABLED: Auto-suspend functionality
+        # Reason: Missing email template and too aggressive
         
-        if instance.violation_type in serious_violations:
-            send_security_alert(
-                user=instance.user,
-                violation_type=instance.get_violation_type_display(),
-                description=instance.description
-            )
-        
-        # Auto-suspend user for repeated violations
+        # Count violations
         violation_count = SecurityViolation.objects.filter(
             user=instance.user,
             created_at__date=instance.created_at.date()
         ).count()
         
-        if violation_count >= 10:  # More than 10 violations in a day
-            instance.user.is_active = False
-            instance.user.save()
-            
-            # Send suspension alert
-            send_security_alert(
-                user=instance.user,
-                violation_type='Account Suspended',
-                description=f'User suspended due to {violation_count} security violations in one day'
-            )
+        # Just print warning, don't suspend
+        if violation_count >= 10:
+            print(f"⚠️ WARNING: User {instance.user.email} has {violation_count} violations today")
+            print(f"   Consider reviewing their account manually")
+        
+        # ❌ COMMENT OUT AUTO-SUSPEND CODE
+        # if violation_count >= 10:
+        #     instance.user.is_active = False
+        #     instance.user.save()
+        #     send_security_alert(...)  # This was causing the error

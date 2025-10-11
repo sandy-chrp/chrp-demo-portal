@@ -1,0 +1,499 @@
+<!-- templates/customers/partials/notification_bell.html -->
+<div class="notification-bell-wrapper">
+    <button class="notification-bell-btn" id="notificationBellBtn" title="Notifications">
+        <i class="fas fa-bell"></i>
+        <span class="notification-count-badge" id="notificationCountBadge" style="display: none;">0</span>
+    </button>
+    
+    <!-- Dropdown Panel -->
+    <div class="notification-panel" id="notificationPanel" style="display: none;">
+        <div class="notification-panel-header">
+            <h6 class="mb-0">Notifications</h6>
+            <button class="btn-mark-all" id="btnMarkAllRead">Mark all read</button>
+        </div>
+        
+        <div class="notification-panel-body" id="notificationPanelBody">
+            <div class="notification-loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+            </div>
+        </div>
+        
+        <div class="notification-panel-footer">
+            <a href="{% url 'notifications:list' %}" class="btn-view-all">
+                View All Notifications <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Notification Bell Styles */
+.notification-bell-wrapper {
+    position: relative;
+    margin-right: var(--spacing-md);
+}
+
+.notification-bell-btn {
+    background: none;
+    border: none;
+    color: var(--gray-600);
+    font-size: 1.25rem;
+    cursor: pointer;
+    position: relative;
+    padding: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.notification-bell-btn:hover {
+    color: var(--primary-color);
+}
+
+.notification-bell-btn.has-unread {
+    animation: bellRing 2s ease-in-out infinite;
+}
+
+@keyframes bellRing {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30% { transform: rotate(15deg); }
+    20%, 40% { transform: rotate(-15deg); }
+}
+
+.notification-count-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #dc3545;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+    border: 2px solid white;
+}
+
+.notification-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 380px;
+    max-height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    z-index: 2000;
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+}
+
+.notification-panel-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--gray-50);
+}
+
+.notification-panel-header h6 {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.btn-mark-all {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0;
+    font-weight: 500;
+}
+
+.btn-mark-all:hover {
+    text-decoration: underline;
+}
+
+.notification-panel-body {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.notification-loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--gray-500);
+}
+
+.notification-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.notification-item:hover {
+    background: var(--gray-50);
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item.unread {
+    background: #eff6ff;
+}
+
+.notification-item.unread::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary-color);
+}
+
+.notification-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.notification-icon-wrapper.success { background: #dcfce7; color: #166534; }
+.notification-icon-wrapper.primary { background: #dbeafe; color: #1e40af; }
+.notification-icon-wrapper.warning { background: #fef3c7; color: #92400e; }
+.notification-icon-wrapper.danger { background: #fee2e2; color: #991b1b; }
+.notification-icon-wrapper.info { background: #e0f2fe; color: #075985; }
+.notification-icon-wrapper.secondary { background: #f1f5f9; color: #475569; }
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-title {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.notification-message {
+    color: var(--gray-600);
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.notification-time {
+    color: var(--gray-500);
+    font-size: 0.75rem;
+}
+
+.notification-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--gray-500);
+}
+
+.notification-empty i {
+    font-size: 2.5rem;
+    color: var(--gray-300);
+    margin-bottom: 1rem;
+}
+
+.notification-panel-footer {
+    padding: 0.75rem;
+    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.btn-view-all {
+    display: block;
+    text-align: center;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.btn-view-all:hover {
+    color: var(--secondary-color);
+}
+
+@media (max-width: 576px) {
+    .notification-panel {
+        width: calc(100vw - 2rem);
+        right: -1rem;
+    }
+}
+</style>
+
+<script>
+(function() {
+    let panel = null;
+    let pollInterval = null;
+    const POLL_INTERVAL_MS = 30000; // 30 seconds
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        initNotificationBell();
+    });
+    
+    function initNotificationBell() {
+        const bellBtn = document.getElementById('notificationBellBtn');
+        panel = document.getElementById('notificationPanel');
+        
+        if (!bellBtn || !panel) {
+            console.error('❌ Notification bell elements not found');
+            return;
+        }
+        
+        console.log('✅ Notification bell initialized');
+        
+        // Toggle panel
+        bellBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            togglePanel();
+        });
+        
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            if (!panel.contains(e.target) && e.target !== bellBtn) {
+                closePanel();
+            }
+        });
+        
+        // Mark all as read
+        document.getElementById('btnMarkAllRead').addEventListener('click', function(e) {
+            e.stopPropagation();
+            markAllAsRead();
+        });
+        
+        // Initial load
+        updateUnreadCount();
+        
+        // Start polling
+        startPolling();
+        
+        // Stop polling when page is hidden
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopPolling();
+            } else {
+                updateUnreadCount();
+                startPolling();
+            }
+        });
+    }
+    
+    function togglePanel() {
+        const isVisible = panel.style.display === 'block';
+        if (isVisible) {
+            closePanel();
+        } else {
+            openPanel();
+        }
+    }
+    
+    function openPanel() {
+        panel.style.display = 'block';
+        loadNotifications();
+    }
+    
+    function closePanel() {
+        panel.style.display = 'none';
+    }
+    
+    function startPolling() {
+        pollInterval = setInterval(updateUnreadCount, POLL_INTERVAL_MS);
+    }
+    
+    function stopPolling() {
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+    }
+    
+    function updateUnreadCount() {
+        fetch('/notifications/api/unread-count/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateBadge(data.count);
+                    console.log('📊 Unread count:', data.count);
+                }
+            })
+            .catch(error => console.error('Error fetching unread count:', error));
+    }
+    
+    function updateBadge(count) {
+        const badge = document.getElementById('notificationCountBadge');
+        const bellBtn = document.getElementById('notificationBellBtn');
+        
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = 'block';
+            bellBtn.classList.add('has-unread');
+        } else {
+            badge.style.display = 'none';
+            bellBtn.classList.remove('has-unread');
+        }
+    }
+    
+    function loadNotifications() {
+        const body = document.getElementById('notificationPanelBody');
+        body.innerHTML = '<div class="notification-loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+        
+        fetch('/notifications/api/list/?limit=5')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayNotifications(data.notifications);
+                    updateBadge(data.unread_count);
+                } else {
+                    showError();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                showError();
+            });
+    }
+    
+    function displayNotifications(notifications) {
+        const body = document.getElementById('notificationPanelBody');
+        
+        if (notifications.length === 0) {
+            body.innerHTML = `
+                <div class="notification-empty">
+                    <i class="fas fa-bell-slash"></i>
+                    <p class="mb-0">No notifications yet</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        notifications.forEach(notif => {
+            html += `
+                <div class="notification-item ${notif.is_read ? '' : 'unread'}" 
+                     onclick="handleNotificationClick(${notif.id})"
+                     role="button"
+                     tabindex="0">
+                    <div class="notification-icon-wrapper ${notif.color}">
+                        <i class="fas ${notif.icon}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${escapeHtml(notif.title)}</div>
+                        <div class="notification-message">${escapeHtml(notif.message)}</div>
+                        <div class="notification-time">${notif.time_ago}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        body.innerHTML = html;
+    }
+    
+    function showError() {
+        const body = document.getElementById('notificationPanelBody');
+        body.innerHTML = `
+            <div class="notification-empty">
+                <i class="fas fa-exclamation-circle"></i>
+                <p class="mb-0">Failed to load notifications</p>
+            </div>
+        `;
+    }
+    
+    window.handleNotificationClick = function(notificationId) {
+        // Mark as read
+        fetch(`/notifications/api/${notificationId}/read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateBadge(data.unread_count);
+                loadNotifications();
+            }
+        })
+        .catch(error => console.error('Error marking as read:', error));
+    };
+    
+    function markAllAsRead() {
+        fetch('/notifications/api/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateBadge(0);
+                loadNotifications();
+                showToast('All notifications marked as read', 'success');
+            }
+        })
+        .catch(error => console.error('Error marking all as read:', error));
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>${message}
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.remove(), 3000);
+    }
+})();
+</script>

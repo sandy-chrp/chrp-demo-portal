@@ -649,7 +649,7 @@
                        class="nav-link {% if 'demos' in request.resolver_match.url_name %}active{% endif %}"
                        data-tooltip="Manage Demo Videos">
                         <i class="fas fa-video"></i>
-                        <span class="nav-text">Add Demos</span>
+                        <span class="nav-text">Manage Demos</span>
                     </a>
                 </div>
                 <div class="nav-item">
@@ -692,14 +692,7 @@
                         <span class="nav-text">Notifications</span>
                     </a>
                 </div>
-                
-                <div class="nav-section">Account</div>
-                <div class="nav-item">
-                    <a href="{% url 'core:home' %}" class="nav-link" target="_blank" data-tooltip="View Customer Site">
-                        <i class="fas fa-external-link-alt"></i>
-                        <span class="nav-text">View Site</span>
-                    </a>
-                </div>
+            
                 <div class="nav-item">
                     <a href="{% url 'core:admin_logout' %}" class="nav-link" data-tooltip="Logout">
                         <i class="fas fa-sign-out-alt"></i>
@@ -720,49 +713,31 @@
                     <h1 class="admin-header-title">{% block page_title %}Admin Dashboard{% endblock %}</h1>
                 </div>
                 <div class="admin-header-right">
-                    {% block header_actions %}
-                        <!-- Notifications -->
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-bell me-1"></i>
-                                <span class="badge bg-danger">3</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><h6 class="dropdown-header">Recent Notifications</h6></li>
-                                <li><a class="dropdown-item" href="#">New user registration</a></li>
-                                <li><a class="dropdown-item" href="#">Demo request received</a></li>
-                                <li><a class="dropdown-item" href="#">System backup completed</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-center" href="#">View All</a></li>
-                            </ul>
-                        </div>
+              {% block header_actions %}
+    <!-- Admin Notifications Bell -->
+    {% include 'admin/partials/admin_notification_bell.html' %}
 
-                        <!-- Admin Profile -->
-                        <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i>
-                                {{ user.first_name|default:"Admin" }}
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'accounts:profile' %}">
-                                        <i class="fas fa-user me-2"></i>Profile Settings
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'core:home' %}" target="_blank">
-                                        <i class="fas fa-external-link-alt me-2"></i>View Customer Site
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="{% url 'core:admin_logout' %}">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    {% endblock %}
+    <!-- Admin Profile -->
+    <div class="dropdown">
+        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-user-circle me-1"></i>
+            {{ user.first_name|default:"Admin" }}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                    <i class="fas fa-user me-2"></i>Profile Settings
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item text-danger" href="{% url 'core:admin_logout' %}">
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
                 </div>
             </div>
 

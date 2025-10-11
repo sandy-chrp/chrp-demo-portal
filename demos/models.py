@@ -1,10 +1,15 @@
-# demos/models.py
+# demos/models.py - COMPLETE WITH ALL IMPORTS
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 from django.utils.text import slugify
+from django.conf import settings
+from django.urls import reverse
 import uuid
 import os
+import zipfile
+import shutil
 
 User = get_user_model()
 
@@ -57,7 +62,7 @@ class DemoCategory(models.Model):
         return self.name
 
 class Demo(models.Model):
-    """Demo videos/presentations/WebGL content"""
+    """Demo videos/presentations/WebGL content with complete WebGL support"""
     
     # Basic Information
     title = models.CharField(max_length=200, verbose_name="Demo Title")
@@ -130,6 +135,14 @@ class Demo(models.Model):
         help_text="Upload WebGL file - HTML, ZIP archive, or 3D model (required if file type is WebGL)"
     )
     
+    # ✅ NEW: Extracted path for ZIP files
+    extracted_path = models.CharField(
+        max_length=500,
+        blank=True,
+        verbose_name="Extracted Path",
+        help_text="Path to extracted WebGL files (auto-populated)"
+    )
+    
     # Thumbnail (Common for both)
     thumbnail = models.ImageField(
         upload_to=demo_thumbnail_path,
@@ -195,6 +208,19 @@ class Demo(models.Model):
             raise ValidationError({'webgl_file': 'WebGL file is required when file type is WebGL'})
     
     def save(self, *args, **kwargs):
+        # Check if this is an update and webgl_file changed
+        old_webgl_file = None
+        old_extracted_path = None
+        
+        if self.pk:
+            try:
+                old_demo = Demo.objects.get(pk=self.pk)
+                old_webgl_file = old_demo.webgl_file
+                old_extracted_path = old_demo.extracted_path
+            except Demo.DoesNotExist:
+                pass
+        
+        # Generate slug if not exists
         if not self.slug:
             base_slug = slugify(self.title)
             if not base_slug:
@@ -208,7 +234,186 @@ class Demo(models.Model):
             
             self.slug = unique_slug
         
+        # Save first to get file path
         super().save(*args, **kwargs)
+        
+        # Handle WebGL ZIP extraction after save
+        if self.file_type == 'webgl' and self.webgl_file:
+            # If file changed
+            if old_webgl_file != self.webgl_file:
+                # Clean old extracted files
+                if old_extracted_path:
+                    self._cleanup_extracted_files(old_extracted_path)
+                
+                # Extract new ZIP file
+                if self.webgl_file.name.endswith('.zip'):
+                    self._extract_webgl_zip()
+                    # Save again to update extracted_path
+                    super().save(update_fields=['extracted_path'])
+    
+    def _cleanup_extracted_files(self, path):
+        """Clean up extracted WebGL files"""
+        if path:
+            extract_dir = os.path.join(settings.MEDIA_ROOT, path)
+            if os.path.exists(extract_dir):
+                try:
+                    shutil.rmtree(extract_dir)
+                    print(f"✅ Cleaned up old extracted files: {extract_dir}")
+                except Exception as e:
+                    print(f"❌ Error cleaning up extracted files: {e}")
+    
+    def _extract_webgl_zip(self):
+        """Extract WebGL ZIP file to dedicated folder"""
+        if not self.webgl_file or not self.webgl_file.name.endswith('.zip'):
+            return
+        
+        # Create extraction directory
+        extract_dir = os.path.join(
+            settings.MEDIA_ROOT, 
+            'webgl_extracted', 
+            f'demo_{self.slug}'
+        )
+        
+        # Remove old extracted files if they exist
+        if os.path.exists(extract_dir):
+            shutil.rmtree(extract_dir)
+        
+        # Create directory
+        os.makedirs(extract_dir, exist_ok=True)
+        
+        # Extract ZIP file
+        try:
+            with zipfile.ZipFile(self.webgl_file.path, 'r') as zip_ref:
+                zip_ref.extractall(extract_dir)
+            
+            # Store relative path
+            self.extracted_path = f'webgl_extracted/demo_{self.slug}'
+            print(f"✅ WebGL ZIP extracted to: {extract_dir}")
+            
+        except Exception as e:
+            print(f"❌ Error extracting WebGL ZIP: {e}")
+            self.extracted_path = ''
+    
+    def get_webgl_index_url(self):
+        """Get URL to WebGL index.html or file"""
+        from django.urls import reverse
+        
+        if self.file_type != 'webgl' or not self.webgl_file:
+            return None
+        
+        file_ext = os.path.splitext(self.webgl_file.name)[1].lower()
+        
+        if file_ext == '.zip' and self.extracted_path:
+            # Look for index.html in extracted folder
+            possible_paths = [
+                'index.html',
+                'Index.html',
+                'build/index.html',
+                'Build/index.html',
+                'dist/index.html',
+                'Dist/index.html',
+            ]
+            
+            for rel_path in possible_paths:
+                full_path = os.path.join(settings.MEDIA_ROOT, self.extracted_path, rel_path)
+                if os.path.exists(full_path):
+                    try:
+                        # ✅ Convert Windows backslash to forward slash for URL
+                        url_path = rel_path.replace('\\', '/')
+                        
+                        return reverse('customers:serve_webgl_file', kwargs={
+                            'slug': self.slug,
+                            'filepath': url_path
+                        })
+                    except Exception as e:
+                        print(f"❌ Error generating URL: {e}")
+                        return None
+            
+            # If no index.html found, try first HTML file
+            extracted_dir = os.path.join(settings.MEDIA_ROOT, self.extracted_path)
+            
+            if os.path.exists(extracted_dir):
+                for root, dirs, files in os.walk(extracted_dir):
+                    for file in files:
+                        if file.lower().endswith(('.html', '.htm')):
+                            # Get relative path
+                            rel_path = os.path.relpath(
+                                os.path.join(root, file),
+                                extracted_dir
+                            )
+                            
+                            # ✅ CRITICAL: Convert Windows path to URL path
+                            url_path = rel_path.replace('\\', '/')
+                            
+                            try:
+                                return reverse('customers:serve_webgl_file', kwargs={
+                                    'slug': self.slug,
+                                    'filepath': url_path
+                                })
+                            except Exception as e:
+                                print(f"❌ Error generating URL: {e}")
+                                return None
+        
+        elif file_ext == '.html':
+            filename = os.path.basename(self.webgl_file.name)
+            try:
+                return reverse('customers:serve_webgl_file', kwargs={
+                    'slug': self.slug,
+                    'filepath': filename
+                })
+            except Exception as e:
+                return self.webgl_file.url
+        
+        elif file_ext in ['.glb', '.gltf']:
+            return self.webgl_file.url
+        
+        return None    
+
+    def get_webgl_viewer_type(self):
+        """Determine which viewer to use"""
+        if self.file_type != 'webgl' or not self.webgl_file:
+            return None
+        
+        file_ext = os.path.splitext(self.webgl_file.name)[1].lower()
+        
+        if file_ext in ['.zip', '.html']:
+            return 'iframe'
+        elif file_ext in ['.glb', '.gltf']:
+            return 'model-viewer'
+        
+        return 'iframe'  # default
+    
+    def delete(self, *args, **kwargs):
+        """Override delete to clean up extracted files"""
+        # Clean up extracted files
+        if self.extracted_path:
+            self._cleanup_extracted_files(self.extracted_path)
+        
+        # Delete video file
+        if self.video_file:
+            try:
+                if os.path.isfile(self.video_file.path):
+                    os.remove(self.video_file.path)
+            except Exception as e:
+                print(f"Error deleting video file: {e}")
+        
+        # Delete webgl file
+        if self.webgl_file:
+            try:
+                if os.path.isfile(self.webgl_file.path):
+                    os.remove(self.webgl_file.path)
+            except Exception as e:
+                print(f"Error deleting webgl file: {e}")
+        
+        # Delete thumbnail
+        if self.thumbnail:
+            try:
+                if os.path.isfile(self.thumbnail.path):
+                    os.remove(self.thumbnail.path)
+            except Exception as e:
+                print(f"Error deleting thumbnail: {e}")
+        
+        super().delete(*args, **kwargs)
     
     def __str__(self):
         return f"{self.title} ({self.get_file_type_display()})"
@@ -218,8 +423,8 @@ class Demo(models.Model):
         """Get the appropriate file URL based on file type"""
         if self.file_type == 'video' and self.video_file:
             return self.video_file.url
-        elif self.file_type == 'webgl' and self.webgl_file:
-            return self.webgl_file.url
+        elif self.file_type == 'webgl':
+            return self.get_webgl_index_url()
         return None
     
     @property
@@ -293,6 +498,8 @@ class Demo(models.Model):
         if categories:
             return ", ".join([cat.name for cat in categories])
         return "All Categories"
+
+
 class DemoView(models.Model):
     """Track demo views by users"""
     
@@ -310,6 +517,7 @@ class DemoView(models.Model):
         unique_together = ['demo', 'user']
         ordering = ['-viewed_at']
 
+
 class DemoLike(models.Model):
     """Track demo likes by users"""
     
@@ -323,6 +531,7 @@ class DemoLike(models.Model):
         verbose_name_plural = 'Demo Likes'
         unique_together = ['demo', 'user']
         ordering = ['-liked_at']
+
 
 class DemoFeedback(models.Model):
     """User feedback on demos"""
@@ -352,6 +561,7 @@ class DemoFeedback(models.Model):
     
     def __str__(self):
         return f"Feedback by {self.user.full_name} on {self.demo.title}"
+
 
 class TimeSlot(models.Model):
     """Available time slots for demo bookings"""
@@ -386,11 +596,19 @@ class DemoRequest(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
+    CANCELLATION_REASON_CHOICES = [
+        ('scheduling_conflict', 'Scheduling Conflict'),
+        ('requirements_change', 'Change in Requirements'),
+        ('found_alternative', 'Found Alternative Solution'),
+        ('no_longer_interested', 'No Longer Interested'),
+        ('other', 'Other Reasons'),
+    ]
+    
     # Request Information
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='demo_requests')
     demo = models.ForeignKey(Demo, on_delete=models.CASCADE, related_name='demo_requests')
     
-    # NEW: Business Category Fields
+    # Business Category Fields
     business_category = models.ForeignKey(
         'accounts.BusinessCategory',
         on_delete=models.SET_NULL,
@@ -409,9 +627,9 @@ class DemoRequest(models.Model):
     )
     country_region = models.CharField(
         max_length=50, 
-        blank=True,  # ✅ Allows empty in forms
-        null=True,   # ✅ ADD THIS - Allows NULL in database
-        default='IN',  # Optional: default value
+        blank=True,
+        null=True,
+        default='IN',
         verbose_name="Country/Region"
     )
     
@@ -444,6 +662,25 @@ class DemoRequest(models.Model):
     # Geographic metadata
     is_international = models.BooleanField(default=False, verbose_name="International Customer")
     
+    # Cancellation Information (NEW FIELDS)
+    cancellation_reason = models.CharField(
+        max_length=50,
+        choices=CANCELLATION_REASON_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Cancellation Reason"
+    )
+    cancellation_details = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Cancellation Details"
+    )
+    cancelled_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Cancelled At"
+    )
+    
     # Admin Response
     admin_notes = models.TextField(blank=True, verbose_name="Admin Notes")
     handled_by = models.ForeignKey(
@@ -469,7 +706,6 @@ class DemoRequest(models.Model):
         return f"{self.user.full_name} - {self.demo.title} on {self.requested_date}"
     
     def clean(self):
-        from django.core.exceptions import ValidationError
         from django.utils import timezone
         
         # Check if requested date is not Sunday
@@ -494,3 +730,21 @@ class DemoRequest(models.Model):
     @property 
     def effective_time_slot(self):
         return self.confirmed_time_slot or self.requested_time_slot
+    
+    @property
+    def is_cancelled(self):
+        """Check if request is cancelled"""
+        return self.status == 'cancelled'
+    
+    @property
+    def cancellation_summary(self):
+        """Get formatted cancellation summary"""
+        if not self.is_cancelled:
+            return None
+        
+        summary = {
+            'reason': self.get_cancellation_reason_display() if self.cancellation_reason else 'Not specified',
+            'details': self.cancellation_details or 'No additional details',
+            'cancelled_at': self.cancelled_at,
+        }
+        return summary

@@ -1,4 +1,5 @@
 # core/admin_customer_views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -13,14 +14,21 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.urls import reverse  # ⭐ YEH LINE ADD KAREIN
 from datetime import datetime
 import json
 import uuid
 import csv
 
+# ⭐ YEH BHI ADD KAREIN (pandas ke liye)
+import pandas as pd
+from accounts.models import BusinessCategory, BusinessSubCategory  # ⭐ Models import karein
+
 from .customer_admin_forms import CustomerCreateForm, CustomerEditForm
 
 User = get_user_model()
+
+
 
 def is_admin(user):
     """Check if user is admin/staff"""
@@ -754,3 +762,213 @@ def get_customer_statistics(customer):
         }
 
 
+@login_required
+@user_passes_test(is_admin)
+def admin_bulk_import_customers(request):
+    """Bulk import customers from CSV/Excel"""
+    if request.method == 'POST':
+        if 'file' not in request.FILES:
+            messages.error(request, 'Please select a file to upload.')
+            return redirect('core:admin_bulk_import_customers')
+        
+        uploaded_file = request.FILES['file']
+        file_extension = uploaded_file.name.split('.')[-1].lower()
+        
+        if file_extension not in ['csv', 'xlsx', 'xls']:
+            messages.error(request, 'Invalid file format. Please upload CSV or Excel file.')
+            return redirect('core:admin_bulk_import_customers')
+        
+        try:
+            # Read file based on extension
+            if file_extension == 'csv':
+                df = pd.read_csv(uploaded_file)
+            else:
+                df = pd.read_excel(uploaded_file)
+            
+            # Validate columns
+            required_columns = ['first_name', 'last_name', 'email', 'mobile']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            
+            if missing_columns:
+                messages.error(
+                    request, 
+                    f'Missing required columns: {", ".join(missing_columns)}'
+                )
+                return redirect('core:admin_bulk_import_customers')
+            
+            # Process data
+            success_count = 0
+            error_count = 0
+            errors = []
+            
+            for index, row in df.iterrows():
+                try:
+                    # Clean data
+                    email = str(row['email']).strip().lower()
+                    mobile = str(row['mobile']).strip()
+                    
+                    # Remove country code if present in mobile
+                    mobile = mobile.replace('+91', '').replace('+', '').strip()
+                    if len(mobile) > 10:
+                        mobile = mobile[-10:]
+                    
+                    # Validate mobile number
+                    if not mobile.isdigit() or len(mobile) != 10:
+                        errors.append(f"Row {index + 2}: Invalid mobile number '{mobile}'")
+                        error_count += 1
+                        continue
+                    
+                    # Check if user already exists
+                    if User.objects.filter(email=email).exists():
+                        errors.append(f"Row {index + 2}: Email '{email}' already exists")
+                        error_count += 1
+                        continue
+                    
+                    # Create username from email
+                    username = email.split('@')[0] + str(uuid.uuid4())[:8]
+                    
+                    # Get optional fields
+                    country_code = str(row.get('country_code', '+91')).strip()
+                    job_title = str(row.get('job_title', '')).strip()
+                    organization = str(row.get('organization', '')).strip()
+                    
+                    # Get business category if provided
+                    business_category = None
+                    business_subcategory = None
+                    
+                    if 'business_category' in df.columns and pd.notna(row.get('business_category')):
+                        category_name = str(row['business_category']).strip()
+                        business_category = BusinessCategory.objects.filter(
+                            name__iexact=category_name,
+                            is_active=True
+                        ).first()
+                    
+                    if 'business_subcategory' in df.columns and pd.notna(row.get('business_subcategory')):
+                        subcategory_name = str(row['business_subcategory']).strip()
+                        if business_category:
+                            business_subcategory = BusinessSubCategory.objects.filter(
+                                name__iexact=subcategory_name,
+                                category=business_category,
+                                is_active=True
+                            ).first()
+                    
+                    # Create user
+                    user = User.objects.create(
+                        username=username,
+                        email=email,
+                        first_name=str(row['first_name']).strip(),
+                        last_name=str(row['last_name']).strip(),
+                        mobile=mobile,
+                        country_code=country_code,
+                        job_title=job_title,
+                        organization=organization,
+                        business_category=business_category,
+                        business_subcategory=business_subcategory,
+                        is_email_verified=True,
+                        is_approved=True,
+                        is_active=True,
+                        is_staff=False,
+                        is_superuser=False
+                    )
+                    
+                    # Set random password
+                    random_password = User.objects.make_random_password()
+                    user.set_password(random_password)
+                    user.save()
+                    
+                    success_count += 1
+                    
+                    # Send welcome email if enabled
+                    send_welcome_email = request.POST.get('send_welcome_emails') == 'on'
+                    if send_welcome_email:
+                        send_customer_welcome_email_with_validation(user, request.user)
+                    
+                except Exception as e:
+                    errors.append(f"Row {index + 2}: {str(e)}")
+                    error_count += 1
+                    continue
+            
+            # Show results
+            if success_count > 0:
+                messages.success(
+                    request, 
+                    f'Successfully imported {success_count} customers!'
+                )
+            
+            if error_count > 0:
+                error_message = f'{error_count} customers failed to import.'
+                if len(errors) <= 10:
+                    error_message += ' Errors: ' + '; '.join(errors)
+                else:
+                    error_message += f' First 10 errors: ' + '; '.join(errors[:10])
+                messages.warning(request, error_message)
+            
+            if success_count == 0 and error_count == 0:
+                messages.info(request, 'No customers were imported.')
+            
+            return redirect('core:admin_users')
+            
+        except Exception as e:
+            messages.error(request, f'Error processing file: {str(e)}')
+            return redirect('core:admin_bulk_import_customers')
+    
+    # GET request - show upload form
+    context = {
+        'title': 'Bulk Import Customers',
+        'breadcrumbs': [
+            {'title': 'Customers', 'url': reverse('core:admin_users')},
+            {'title': 'Bulk Import'},
+        ]
+    }
+    
+    return render(request, 'admin/customers/bulk_import.html', context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def download_import_template(request):
+    """Download sample CSV template for bulk import"""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="customer_import_template.csv"'
+    
+    writer = csv.writer(response)
+    
+    # Write header with required and optional fields
+    writer.writerow([
+        'first_name',
+        'last_name', 
+        'email',
+        'mobile',
+        'country_code',
+        'job_title',
+        'organization',
+        'business_category',
+        'business_subcategory'
+    ])
+    
+    # Write sample data
+    writer.writerow([
+        'John',
+        'Doe',
+        'john.doe@example.com',
+        '9876543210',
+        '+91',
+        'Manager',
+        'ABC Company',
+        'IT Services',
+        'Software Development'
+    ])
+    
+    writer.writerow([
+        'Jane',
+        'Smith',
+        'jane.smith@company.com',
+        '9876543211',
+        '+91',
+        'Director',
+        'XYZ Corporation',
+        'Manufacturing',
+        'Electronics'
+    ])
+    
+    return response

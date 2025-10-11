@@ -22,6 +22,7 @@ from demos.models import Demo, DemoRequest, DemoView, DemoLike, DemoCategory
 from enquiries.models import BusinessEnquiry
 from notifications.models import Notification, SystemAnnouncement
 from .models import SiteSettings, ContactMessage
+from django.db.models.functions import ExtractHour
 
 # FIXED - Correct import from accounts app
 
@@ -30,123 +31,625 @@ from .models import SiteSettings, ContactMessage
 def is_admin(user):
     return user.is_authenticated and (user.is_staff or user.is_superuser)
 
-def dashboard_redirect(request):
-    """Redirect to appropriate dashboard based on user type"""
-    if request.user.is_authenticated:
-        if request.user.is_staff or request.user.is_superuser:
-            return redirect('core:admin_dashboard')
-        else:
-            return redirect('customers:dashboard')
-    return redirect('accounts:signin')
+def custom_404(request, exception=None):
+    """Custom 404 error handler"""
+    return render(request, '404.html', status=404)
+
+def custom_500(request):
+    """Custom 500 error handler"""
+    return render(request, '500.html', status=500)
 
 # =====================================
 # CUSTOMER PORTAL VIEWS
-# =====================================
-
-def landing_page_view(request):
-    """Landing page with signup/signin options"""
-    if request.user.is_authenticated:
-        if is_admin(request.user):
-            return redirect('core:admin_dashboard')
-        return redirect('core:dashboard')
-    
-    # Get site settings
-    site_settings = SiteSettings.load()
-    
-    # Get featured demos for preview
-    featured_demos = Demo.objects.filter(
-        is_active=True, 
-        is_featured=True
-    )[:3]
-    
-    # Get demo categories
-    categories = DemoCategory.objects.filter(is_active=True)[:6]
-    
-    # Get current announcements
-    current_announcements = SystemAnnouncement.objects.filter(
-        is_active=True,
-        show_on_login=True,
-        start_date__lte=timezone.now(),
-        end_date__gte=timezone.now()
-    )
-    
-    context = {
-        'site_settings': site_settings,
-        'featured_demos': featured_demos,
-        'categories': categories,
-        'announcements': current_announcements,
-    }
-    
-    return render(request, 'core/landing.html', context)
 
 @login_required
-def dashboard_view(request):
-    """Customer dashboard after login - Fixed with proper context"""
-    if is_admin(request.user):
-        return redirect('core:admin_dashboard')
+@user_passes_test(is_admin)
+def admin_dashboard_view(request):
+    """Main admin dashboard with statistics and demographics - OPTIMIZED"""
     
-    if not request.user.is_approved:
-        return redirect('accounts:pending_approval')
+    # Get activity period from request
+    activity_period = request.GET.get('period', 'daily')
     
-    user = request.user
+    # Date ranges for statistics
+    today = timezone.now().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
     
-    # Dashboard Statistics
-    total_demos_watched = DemoView.objects.filter(user=user).count()
-    total_demo_requests = DemoRequest.objects.filter(user=user).count()
-    total_enquiries = BusinessEnquiry.objects.filter(user=user).count()
-    pending_demo_requests = DemoRequest.objects.filter(
-        user=user, 
-        status='pending'
-    ).count()
+    # ===== BASIC STATS (Fast Queries) =====
+    # Use select_related and prefetch_related to reduce queries
     
-    # Recent Activity
-    recent_demo_views = DemoView.objects.filter(user=user).select_related('demo').order_by('-viewed_at')[:5]
-    recent_demo_requests = DemoRequest.objects.filter(user=user).select_related('demo').order_by('-created_at')[:3]
-    recent_enquiries = BusinessEnquiry.objects.filter(user=user).order_by('-created_at')[:3]
+    # User Statistics - FILTER OUT ADMIN/STAFF USERS
+    user_base_query = User.objects.filter(is_staff=False, is_superuser=False)
     
-    # Featured/Popular Demos
-    featured_demos = Demo.objects.filter(
-        is_active=True,
-        is_featured=True
-    ).exclude(
-        id__in=DemoView.objects.filter(user=user).values_list('demo_id', flat=True)
-    )[:4]
+    total_users = user_base_query.count()
+    new_users_today = user_base_query.filter(created_at__date=today).count()
+    new_users_week = user_base_query.filter(created_at__date__gte=week_ago).count()
+    pending_approvals = user_base_query.filter(is_approved=False, is_active=True).count()
+    active_users = user_base_query.filter(is_active=True, is_approved=True).count()
     
-    # User views and likes for template context
-    user_views = set(DemoView.objects.filter(user=user).values_list('demo_id', flat=True))
-    user_likes = set(DemoLike.objects.filter(user=user).values_list('demo_id', flat=True))
+    # Demo Statistics (Optimized)
+    total_demos = Demo.objects.count()
+    active_demos = Demo.objects.filter(is_active=True).count()
+    total_demo_views = DemoView.objects.count()
+    demo_views_today = DemoView.objects.filter(viewed_at__date=today).count()
+    demo_requests_pending = DemoRequest.objects.filter(status='pending').count()
     
-    # Unread Notifications
-    unread_notifications = Notification.objects.filter(
-        user=user,
-        is_read=False
+    # Enquiry Statistics (Optimized)
+    total_enquiries = BusinessEnquiry.objects.count()
+    open_enquiries = BusinessEnquiry.objects.filter(status='open').count()
+    new_enquiries_today = BusinessEnquiry.objects.filter(created_at__date=today).count()
+    
+    # ===== RECENT ACTIVITY (Limited to 5, Optimized) =====
+    recent_users = user_base_query.only('id', 'first_name', 'last_name', 'email', 'organization', 'created_at').order_by('-created_at')[:5]
+    recent_enquiries = BusinessEnquiry.objects.only('id', 'first_name', 'last_name', 'enquiry_id', 'organization', 'created_at').order_by('-created_at')[:5]
+    recent_demo_requests = DemoRequest.objects.select_related('user', 'demo').only(
+        'id', 'requested_date', 'status', 'created_at',
+        'user__first_name', 'user__last_name', 'user__organization',
+        'demo__title'
     ).order_by('-created_at')[:5]
     
-    # Current Announcements
-    current_announcements = SystemAnnouncement.objects.filter(
-        is_active=True,
-        show_on_dashboard=True,
-        start_date__lte=timezone.now(),
-        end_date__gte=timezone.now()
-    )
+    # ===== POPULAR DEMOS (Optimized) =====
+    popular_demos = Demo.objects.annotate(
+        views_count_calc=Count('demo_views')
+    ).only('id', 'title', 'is_featured', 'is_active', 'likes_count', 'created_at').order_by('-views_count_calc')[:5]
     
-    context = {
-        'user': user,
-        'total_demos_watched': total_demos_watched,
-        'total_demo_requests': total_demo_requests,
-        'total_enquiries': total_enquiries,
-        'pending_demo_requests': pending_demo_requests,
-        'recent_demo_views': recent_demo_views,
-        'recent_demo_requests': recent_demo_requests,
-        'recent_enquiries': recent_enquiries,
-        'featured_demos': featured_demos,
-        'user_views': user_views,
-        'user_likes': user_likes,
-        'unread_notifications': unread_notifications,
-        'current_announcements': current_announcements,
+    # ===== USER REGISTRATION DATA (Simplified for performance) =====
+    monthly_users = []
+    if activity_period == 'monthly':
+        # Last 6 months only
+        for i in range(6):
+            date = today.replace(day=1) - timedelta(days=i*30)
+            count = user_base_query.filter(
+                created_at__year=date.year,
+                created_at__month=date.month
+            ).count()
+            monthly_users.append({'month': date.strftime('%b %Y'), 'count': count})
+        monthly_users.reverse()
+    else:
+        # Last 7 days (daily)
+        for i in range(7):
+            date = today - timedelta(days=i)
+            count = user_base_query.filter(created_at__date=date).count()
+            monthly_users.append({'month': date.strftime('%m/%d'), 'count': count})
+        monthly_users.reverse()
+    
+    # ===== WEEKLY ACTIVITY (Last 7 days only) =====
+    weekly_activity = []
+    for i in range(7):
+        date = today - timedelta(days=i)
+        weekly_activity.append({
+            'date': date.strftime('%m/%d'),
+            'demo_views': DemoView.objects.filter(viewed_at__date=date).count(),
+            'enquiries': BusinessEnquiry.objects.filter(created_at__date=date).count(),
+            'signups': user_base_query.filter(created_at__date=date).count(),
+        })
+    weekly_activity.reverse()
+    
+    # ===== DEMOGRAPHICS (Top 10 only) =====
+    country_distribution = user_base_query.exclude(
+        Q(country_code__isnull=True) | Q(country_code='')
+    ).values('country_code').annotate(count=Count('id')).order_by('-count')[:10]
+    
+    # Country mapping (simplified)
+    PHONE_CODE_TO_COUNTRY = {
+        '+91': 'India', '+1': 'USA/Canada', '+44': 'UK', '+61': 'Australia',
+        '+86': 'China', '+81': 'Japan', '+82': 'South Korea', '+49': 'Germany',
+        '+33': 'France', '+39': 'Italy', '+34': 'Spain', '+92': 'Pakistan',
+        '+971': 'UAE', '+966': 'Saudi Arabia', '+65': 'Singapore',
     }
     
-    return render(request, 'core/dashboard.html', context)
+    country_data = [
+        {
+            'country': PHONE_CODE_TO_COUNTRY.get(item['country_code'], item['country_code']),
+            'count': item['count']
+        }
+        for item in country_distribution
+    ]
+    
+    # ===== SOURCE DATA (Optimized) =====
+    source_distribution = user_base_query.values('referral_source').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    source_labels = {
+        'referral': 'Referral from colleague', 'facebook': 'Facebook',
+        'youtube': 'YouTube', 'linkedin': 'LinkedIn',
+        'google': 'Google Search', 'other': 'Other',
+        '': 'Not Specified', None: 'Not Specified'
+    }
+    
+    source_data = []
+    for item in source_distribution:
+        source_value = item['referral_source'] or ''
+        source_name = source_labels.get(source_value, 'Not Specified')
+        existing = next((x for x in source_data if x['source'] == source_name), None)
+        if existing:
+            existing['count'] += item['count']
+        else:
+            source_data.append({'source': source_name, 'count': item['count']})
+    
+    # ===== ACTIVITY ANALYTICS (Lazy Load - Only basic stats) =====
+    # Heavy queries moved to AJAX endpoint for better performance
+    activity_stats = {
+        'active_users': 0,
+        'active_users_change': 0,
+        'total_views': total_demo_views,
+        'views_change': 0,
+        'demo_requests': demo_requests_pending,
+        'requests_change': 0,
+        'enquiries': open_enquiries,
+        'enquiries_change': 0,
+    }
+    
+    context = {
+        # Basic Stats
+        'total_users': total_users,
+        'new_users_today': new_users_today,
+        'new_users_week': new_users_week,
+        'pending_approvals': pending_approvals,
+        'active_users': active_users,
+        'total_demos': total_demos,
+        'active_demos': active_demos,
+        'total_demo_views': total_demo_views,
+        'demo_views_today': demo_views_today,
+        'demo_requests_pending': demo_requests_pending,
+        'total_enquiries': total_enquiries,
+        'open_enquiries': open_enquiries,
+        'new_enquiries_today': new_enquiries_today,
+        
+        # Recent Activity
+        'recent_users': recent_users,
+        'recent_enquiries': recent_enquiries,
+        'recent_demo_requests': recent_demo_requests,
+        'recent_contact_messages': [],
+        'popular_demos': popular_demos,
+        
+        # Chart Data
+        'monthly_users': monthly_users,
+        'weekly_activity': weekly_activity,
+        'country_data': country_data,
+        'source_data': source_data,
+        
+        # Activity Analytics (Minimal for initial load)
+        'activity_stats': activity_stats,
+        'user_activity_data': [],  # Load via AJAX
+        'peak_hours': [],  # Load via AJAX
+        'most_active_users': [],  # Load via AJAX
+        'activity_period': activity_period,
+        'system_health': {'database': 'healthy', 'email': 'healthy'},
+    }
+    
+    return render(request, 'admin/dashboard.html', context)
+    
+    # User Statistics - FILTER OUT ADMIN/STAFF USERS
+    total_users = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).count()
+    
+    new_users_today = User.objects.filter(
+        created_at__date=today,
+        is_staff=False,
+        is_superuser=False
+    ).count()
+    
+    new_users_week = User.objects.filter(
+        created_at__date__gte=week_ago,
+        is_staff=False,
+        is_superuser=False
+    ).count()
+    
+    pending_approvals = User.objects.filter(
+        is_approved=False, 
+        is_active=True,
+        is_staff=False,
+        is_superuser=False
+    ).count()
+    
+    active_users = User.objects.filter(
+        is_active=True, 
+        is_approved=True,
+        is_staff=False,
+        is_superuser=False
+    ).count()
+    
+    # Demo Statistics
+    total_demos = Demo.objects.count()
+    active_demos = Demo.objects.filter(is_active=True).count()
+    total_demo_views = DemoView.objects.count()
+    demo_views_today = DemoView.objects.filter(viewed_at__date=today).count()
+    demo_requests_pending = DemoRequest.objects.filter(status='pending').count()
+    demo_requests_today = DemoRequest.objects.filter(created_at__date=today).count()
+    
+    # Enquiry Statistics
+    total_enquiries = BusinessEnquiry.objects.count()
+    open_enquiries = BusinessEnquiry.objects.filter(status='open').count()
+    new_enquiries_today = BusinessEnquiry.objects.filter(created_at__date=today).count()
+    overdue_enquiries = BusinessEnquiry.objects.filter(
+        status='open',
+        created_at__lt=timezone.now() - timedelta(hours=24)
+    ).count()
+    
+    # System Health
+    system_health = {
+        'database': 'healthy',
+        'email': 'healthy',
+        'storage': 'healthy',
+        'cache': 'healthy',
+    }
+    
+    # Recent Activity - FILTER OUT ADMIN USERS
+    recent_users = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).order_by('-created_at')[:5]
+    
+    recent_enquiries = BusinessEnquiry.objects.order_by('-created_at')[:5]
+    recent_demo_requests = DemoRequest.objects.select_related('user', 'demo').order_by('-created_at')[:5]
+    
+    # Popular Demos (most viewed)
+    popular_demos = Demo.objects.annotate(
+        views_count_calc=Count('demo_views')
+    ).order_by('-views_count_calc')[:5]
+    
+    # ============ DYNAMIC USER REGISTRATION DATA (WITH FILTERS) ============
+    end_date = timezone.now()
+    
+    if activity_period == 'daily':
+        start_date = end_date - timedelta(days=7)  # Last 7 days
+        date_format = '%m/%d'
+    elif activity_period == 'weekly':
+        start_date = end_date - timedelta(weeks=12)  # Last 12 weeks
+        date_format = 'Week %W'
+    elif activity_period == 'monthly':
+        start_date = end_date - timedelta(days=365)  # Last 12 months
+        date_format = '%b %Y'
+    elif activity_period == 'custom':
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if start_date_str and end_date_str:
+            from datetime import datetime
+            start_date = timezone.make_aware(datetime.strptime(start_date_str, '%Y-%m-%d'))
+            end_date = timezone.make_aware(datetime.strptime(end_date_str, '%Y-%m-%d'))
+        else:
+            start_date = end_date - timedelta(days=30)
+        date_format = '%m/%d'
+    else:
+        start_date = end_date - timedelta(days=7)
+        date_format = '%m/%d'
+    
+    # Monthly User Growth Chart Data
+    monthly_users = []
+    
+    if activity_period == 'monthly':
+        # Monthly breakdown for last 12 months
+        for i in range(12):
+            date = today.replace(day=1) - timedelta(days=i*30)
+            count = User.objects.filter(
+                created_at__year=date.year,
+                created_at__month=date.month,
+                is_staff=False,
+                is_superuser=False
+            ).count()
+            monthly_users.append({
+                'month': date.strftime('%b %Y'),
+                'count': count
+            })
+        monthly_users.reverse()
+    elif activity_period == 'weekly':
+        # Weekly breakdown for last 12 weeks
+        current_date = start_date.date()
+        while current_date <= end_date.date():
+            week_end = current_date + timedelta(days=6)
+            count = User.objects.filter(
+                created_at__date__range=[current_date, week_end],
+                is_staff=False,
+                is_superuser=False
+            ).count()
+            monthly_users.append({
+                'month': f"Week {current_date.strftime('%W')}",
+                'count': count
+            })
+            current_date = week_end + timedelta(days=1)
+    else:
+        # Daily breakdown
+        current_date = start_date.date()
+        while current_date <= end_date.date():
+            count = User.objects.filter(
+                created_at__date=current_date,
+                is_staff=False,
+                is_superuser=False
+            ).count()
+            monthly_users.append({
+                'month': current_date.strftime(date_format),
+                'count': count
+            })
+            current_date += timedelta(days=1)
+    
+    # Weekly Activity Data (always last 7 days)
+    weekly_activity = []
+    for i in range(7):  # Last 7 days
+        date = today - timedelta(days=i)
+        demo_views = DemoView.objects.filter(viewed_at__date=date).count()
+        enquiries = BusinessEnquiry.objects.filter(created_at__date=date).count()
+        signups = User.objects.filter(
+            created_at__date=date,
+            is_staff=False,
+            is_superuser=False
+        ).count()
+        
+        weekly_activity.append({
+            'date': date.strftime('%m/%d'),
+            'demo_views': demo_views,
+            'enquiries': enquiries,
+            'signups': signups,
+        })
+    weekly_activity.reverse()
+    
+    # ============ USER DEMOGRAPHICS BY COUNTRY ============
+    country_distribution = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).exclude(
+        Q(country_code__isnull=True) | Q(country_code='')
+    ).values('country_code').annotate(
+        count=Count('id')
+    ).order_by('-count')[:10]  # Top 10 countries
+    
+    # Phone code to country name mapping
+    PHONE_CODE_TO_COUNTRY = {
+        '+91': 'India', '+1': 'USA/Canada', '+44': 'United Kingdom', '+61': 'Australia',
+        '+86': 'China', '+81': 'Japan', '+82': 'South Korea', '+49': 'Germany',
+        '+33': 'France', '+39': 'Italy', '+34': 'Spain', '+7': 'Russia/Kazakhstan',
+        '+52': 'Mexico', '+55': 'Brazil', '+62': 'Indonesia', '+63': 'Philippines',
+        '+60': 'Malaysia', '+65': 'Singapore', '+66': 'Thailand', '+84': 'Vietnam',
+        '+92': 'Pakistan', '+880': 'Bangladesh', '+94': 'Sri Lanka', '+977': 'Nepal',
+        '+971': 'UAE', '+966': 'Saudi Arabia', '+27': 'South Africa', '+234': 'Nigeria',
+        '+254': 'Kenya', '+20': 'Egypt', '+30': 'Greece', '+31': 'Netherlands',
+        '+41': 'Switzerland', '+46': 'Sweden', '+47': 'Norway', '+48': 'Poland',
+        '+351': 'Portugal', '+353': 'Ireland', '+358': 'Finland', '+380': 'Ukraine',
+        '+420': 'Czech Republic', '+43': 'Austria', '+45': 'Denmark', '+90': 'Turkey',
+    }
+    
+    # Format country data for chart
+    country_data = []
+    for item in country_distribution:
+        phone_code = item['country_code']
+        country_name = PHONE_CODE_TO_COUNTRY.get(phone_code, phone_code)
+        country_data.append({
+            'country': country_name,
+            'count': item['count']
+        })
+    
+    # Add "Not Specified" if there are users without country_code
+    users_without_country = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).filter(
+        Q(country_code__isnull=True) | Q(country_code='')
+    ).count()
+    
+    if users_without_country > 0:
+        country_data.append({
+            'country': 'Not Specified',
+            'count': users_without_country
+        })
+    
+    # ============ USER SOURCE TRACKING ============
+    source_distribution = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).values('referral_source').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Format source data for chart
+    source_data = []
+    source_labels = {
+        'referral': 'Referral from colleague',
+        'facebook': 'Facebook',
+        'youtube': 'YouTube',
+        'linkedin': 'LinkedIn',
+        'google': 'Google Search',
+        'other': 'Other',
+        '': 'Not Specified',
+        None: 'Not Specified'
+    }
+    
+    for item in source_distribution:
+        source_value = item['referral_source'] if item['referral_source'] else ''
+        source_name = source_labels.get(source_value, 'Not Specified')
+        
+        # Avoid duplicate "Not Specified" entries
+        existing = next((x for x in source_data if x['source'] == source_name), None)
+        if existing:
+            existing['count'] += item['count']
+        else:
+            source_data.append({
+                'source': source_name,
+                'count': item['count']
+            })
+    
+    # ============ USER ACTIVITY ANALYTICS ============
+    # Calculate date range based on period
+    period_duration = (end_date.date() - start_date.date()).days
+    previous_period_end = start_date
+    previous_period_start = previous_period_end - timedelta(days=period_duration)
+    
+    # Active Users (users who performed any activity)
+    current_active_users = User.objects.filter(
+        Q(demo_views__viewed_at__range=[start_date, end_date]) |
+        Q(demo_requests__created_at__range=[start_date, end_date]) |
+        Q(enquiries__created_at__range=[start_date, end_date]),
+        is_staff=False,
+        is_superuser=False
+    ).distinct().count()
+    
+    previous_active_users = User.objects.filter(
+        Q(demo_views__viewed_at__range=[previous_period_start, previous_period_end]) |
+        Q(demo_requests__created_at__range=[previous_period_start, previous_period_end]) |
+        Q(enquiries__created_at__range=[previous_period_start, previous_period_end]),
+        is_staff=False,
+        is_superuser=False
+    ).distinct().count()
+    
+    active_users_change = ((current_active_users - previous_active_users) / max(previous_active_users, 1)) * 100 if previous_active_users > 0 else 0
+    
+    # Total Views
+    current_views = DemoView.objects.filter(viewed_at__range=[start_date, end_date]).count()
+    previous_views = DemoView.objects.filter(viewed_at__range=[previous_period_start, previous_period_end]).count()
+    views_change = ((current_views - previous_views) / max(previous_views, 1)) * 100 if previous_views > 0 else 0
+    
+    # Demo Requests
+    current_requests = DemoRequest.objects.filter(created_at__range=[start_date, end_date]).count()
+    previous_requests = DemoRequest.objects.filter(created_at__range=[previous_period_start, previous_period_end]).count()
+    requests_change = ((current_requests - previous_requests) / max(previous_requests, 1)) * 100 if previous_requests > 0 else 0
+    
+    # Enquiries
+    current_enquiries = BusinessEnquiry.objects.filter(created_at__range=[start_date, end_date]).count()
+    previous_enquiries = BusinessEnquiry.objects.filter(created_at__range=[previous_period_start, previous_period_end]).count()
+    enquiries_change = ((current_enquiries - previous_enquiries) / max(previous_enquiries, 1)) * 100 if previous_enquiries > 0 else 0
+    
+    activity_stats = {
+        'active_users': current_active_users,
+        'active_users_change': round(active_users_change, 1),
+        'total_views': current_views,
+        'views_change': round(views_change, 1),
+        'demo_requests': current_requests,
+        'requests_change': round(requests_change, 1),
+        'enquiries': current_enquiries,
+        'enquiries_change': round(enquiries_change, 1),
+    }
+    
+    # User Activity Timeline Data
+    user_activity_data = []
+    current_date = start_date.date()
+    while current_date <= end_date.date():
+        date_start = timezone.make_aware(timezone.datetime.combine(current_date, timezone.datetime.min.time()))
+        date_end = timezone.make_aware(timezone.datetime.combine(current_date, timezone.datetime.max.time()))
+        
+        views = DemoView.objects.filter(viewed_at__range=[date_start, date_end]).count()
+        requests = DemoRequest.objects.filter(created_at__range=[date_start, date_end]).count()
+        enquiries_count = BusinessEnquiry.objects.filter(created_at__range=[date_start, date_end]).count()
+        logins = User.objects.filter(
+            last_login__range=[date_start, date_end],
+            is_staff=False,
+            is_superuser=False
+        ).count()
+        
+        user_activity_data.append({
+            'date': current_date.strftime(date_format),
+            'views': views,
+            'requests': requests,
+            'enquiries': enquiries_count,
+            'logins': logins,
+        })
+        
+        current_date += timedelta(days=1)
+    
+    # Peak Activity Hours (last 30 days)
+    last_30_days = timezone.now() - timedelta(days=30)
+    
+    # Get activity by hour
+    demo_view_hours = DemoView.objects.filter(
+        viewed_at__gte=last_30_days
+    ).annotate(hour=ExtractHour('viewed_at')).values('hour').annotate(count=Count('id'))
+    
+    demo_request_hours = DemoRequest.objects.filter(
+        created_at__gte=last_30_days
+    ).annotate(hour=ExtractHour('created_at')).values('hour').annotate(count=Count('id'))
+    
+    enquiry_hours = BusinessEnquiry.objects.filter(
+        created_at__gte=last_30_days
+    ).annotate(hour=ExtractHour('created_at')).values('hour').annotate(count=Count('id'))
+    
+    # Aggregate by hour
+    hour_counts = {}
+    for item in demo_view_hours:
+        hour_counts[item['hour']] = hour_counts.get(item['hour'], 0) + item['count']
+    for item in demo_request_hours:
+        hour_counts[item['hour']] = hour_counts.get(item['hour'], 0) + item['count']
+    for item in enquiry_hours:
+        hour_counts[item['hour']] = hour_counts.get(item['hour'], 0) + item['count']
+    
+    # Sort and format
+    total_activities = sum(hour_counts.values())
+    sorted_hours = sorted(hour_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+    
+    peak_hours_data = []
+    for hour, count in sorted_hours:
+        start_hour = f"{hour:02d}:00"
+        end_hour = f"{(hour+1):02d}:00"
+        time_slot = f"{start_hour} - {end_hour}"
+        percentage = (count / total_activities * 100) if total_activities > 0 else 0
+        
+        peak_hours_data.append({
+            'time_slot': time_slot,
+            'count': count,
+            'percentage': round(percentage, 1)
+        })
+    
+    # Most Active Users (last 30 days)
+    most_active_users_data = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).annotate(
+        activity_count=(
+            Count('demo_views', filter=Q(demo_views__viewed_at__gte=last_30_days)) + 
+            Count('demo_requests', filter=Q(demo_requests__created_at__gte=last_30_days)) + 
+            Count('enquiries', filter=Q(enquiries__created_at__gte=last_30_days))
+        )
+    ).filter(activity_count__gt=0).order_by('-activity_count')[:10]
+    
+    context = {
+        # User Stats
+        'total_users': total_users,
+        'new_users_today': new_users_today,
+        'new_users_week': new_users_week,
+        'pending_approvals': pending_approvals,
+        'active_users': active_users,
+        
+        # Demo Stats
+        'total_demos': total_demos,
+        'active_demos': active_demos,
+        'total_demo_views': total_demo_views,
+        'demo_views_today': demo_views_today,
+        'demo_requests_pending': demo_requests_pending,
+        'demo_requests_today': demo_requests_today,
+        
+        # Enquiry Stats
+        'total_enquiries': total_enquiries,
+        'open_enquiries': open_enquiries,
+        'new_enquiries_today': new_enquiries_today,
+        'overdue_enquiries': overdue_enquiries,
+        
+        # Recent Activity
+        'recent_users': recent_users,
+        'recent_enquiries': recent_enquiries,
+        'recent_demo_requests': recent_demo_requests,
+        'recent_contact_messages': [],
+        'popular_demos': popular_demos,
+        
+        # Chart Data
+        'monthly_users': monthly_users,
+        'weekly_activity': weekly_activity,
+        'system_health': system_health,
+        
+        # Demographics Data
+        'country_data': country_data,
+        'source_data': source_data,
+        
+        # Activity Analytics
+        'activity_stats': activity_stats,
+        'user_activity_data': user_activity_data,
+        'peak_hours': peak_hours_data,
+        'most_active_users': most_active_users_data,
+        'activity_period': activity_period,
+    }
+    
+    return render(request, 'admin/dashboard.html', context)
+
+# =====================================
 
 def contact_view(request):
     """Contact page for general inquiries"""
@@ -248,7 +751,10 @@ def admin_logout_view(request):
 @login_required
 @user_passes_test(is_admin)
 def admin_dashboard_view(request):
-    """Main admin dashboard with statistics - FIXED customer counts"""
+    """Main admin dashboard with statistics and demographics"""
+    
+    # Get activity period from request
+    activity_period = request.GET.get('period', 'daily')
     
     # Date ranges for statistics
     today = timezone.now().date()
@@ -320,30 +826,87 @@ def admin_dashboard_view(request):
     
     recent_enquiries = BusinessEnquiry.objects.order_by('-created_at')[:5]
     recent_demo_requests = DemoRequest.objects.select_related('user', 'demo').order_by('-created_at')[:5]
-    recent_contact_messages = ContactMessage.objects.order_by('-created_at')[:5]
     
     # Popular Demos (most viewed)
     popular_demos = Demo.objects.annotate(
-        views=Count('demo_views')
-    ).order_by('-views')[:5]
+        views_count_calc=Count('demo_views')
+    ).order_by('-views_count_calc')[:5]
     
-    # Monthly User Growth Chart Data - CUSTOMERS ONLY
+    # ============ DYNAMIC USER REGISTRATION DATA (WITH FILTERS) ============
+    end_date = timezone.now()
+    
+    if activity_period == 'daily':
+        start_date = end_date - timedelta(days=7)  # Last 7 days
+        date_format = '%m/%d'
+    elif activity_period == 'weekly':
+        start_date = end_date - timedelta(weeks=12)  # Last 12 weeks
+        date_format = 'Week %W'
+    elif activity_period == 'monthly':
+        start_date = end_date - timedelta(days=365)  # Last 12 months
+        date_format = '%b %Y'
+    elif activity_period == 'custom':
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        if start_date_str and end_date_str:
+            from datetime import datetime
+            start_date = timezone.make_aware(datetime.strptime(start_date_str, '%Y-%m-%d'))
+            end_date = timezone.make_aware(datetime.strptime(end_date_str, '%Y-%m-%d'))
+        else:
+            start_date = end_date - timedelta(days=30)
+        date_format = '%m/%d'
+    else:
+        start_date = end_date - timedelta(days=7)
+        date_format = '%m/%d'
+    
+    # Monthly User Growth Chart Data
     monthly_users = []
-    for i in range(6):  # Last 6 months
-        date = today.replace(day=1) - timedelta(days=i*30)
-        count = User.objects.filter(
-            created_at__year=date.year,
-            created_at__month=date.month,
-            is_staff=False,
-            is_superuser=False
-        ).count()
-        monthly_users.append({
-            'month': date.strftime('%b %Y'),
-            'count': count
-        })
-    monthly_users.reverse()
     
-    # Weekly Activity Data
+    if activity_period == 'monthly':
+        # Monthly breakdown for last 12 months
+        for i in range(12):
+            date = today.replace(day=1) - timedelta(days=i*30)
+            count = User.objects.filter(
+                created_at__year=date.year,
+                created_at__month=date.month,
+                is_staff=False,
+                is_superuser=False
+            ).count()
+            monthly_users.append({
+                'month': date.strftime('%b %Y'),
+                'count': count
+            })
+        monthly_users.reverse()
+    elif activity_period == 'weekly':
+        # Weekly breakdown for last 12 weeks
+        current_date = start_date.date()
+        while current_date <= end_date.date():
+            week_end = current_date + timedelta(days=6)
+            count = User.objects.filter(
+                created_at__date__range=[current_date, week_end],
+                is_staff=False,
+                is_superuser=False
+            ).count()
+            monthly_users.append({
+                'month': f"Week {current_date.strftime('%W')}",
+                'count': count
+            })
+            current_date = week_end + timedelta(days=1)
+    else:
+        # Daily breakdown
+        current_date = start_date.date()
+        while current_date <= end_date.date():
+            count = User.objects.filter(
+                created_at__date=current_date,
+                is_staff=False,
+                is_superuser=False
+            ).count()
+            monthly_users.append({
+                'month': current_date.strftime(date_format),
+                'count': count
+            })
+            current_date += timedelta(days=1)
+    
+    # Weekly Activity Data (always last 7 days)
     weekly_activity = []
     for i in range(7):  # Last 7 days
         date = today - timedelta(days=i)
@@ -363,8 +926,223 @@ def admin_dashboard_view(request):
         })
     weekly_activity.reverse()
     
+    # ============ USER DEMOGRAPHICS BY COUNTRY ============
+    country_distribution = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).exclude(
+        Q(country_code__isnull=True) | Q(country_code='')
+    ).values('country_code').annotate(
+        count=Count('id')
+    ).order_by('-count')[:10]  # Top 10 countries
+    
+    # Phone code to country name mapping
+    PHONE_CODE_TO_COUNTRY = {
+        '+91': 'India', '+1': 'USA/Canada', '+44': 'United Kingdom', '+61': 'Australia',
+        '+86': 'China', '+81': 'Japan', '+82': 'South Korea', '+49': 'Germany',
+        '+33': 'France', '+39': 'Italy', '+34': 'Spain', '+7': 'Russia/Kazakhstan',
+        '+52': 'Mexico', '+55': 'Brazil', '+62': 'Indonesia', '+63': 'Philippines',
+        '+60': 'Malaysia', '+65': 'Singapore', '+66': 'Thailand', '+84': 'Vietnam',
+        '+92': 'Pakistan', '+880': 'Bangladesh', '+94': 'Sri Lanka', '+977': 'Nepal',
+        '+971': 'UAE', '+966': 'Saudi Arabia', '+27': 'South Africa', '+234': 'Nigeria',
+        '+254': 'Kenya', '+20': 'Egypt', '+30': 'Greece', '+31': 'Netherlands',
+        '+41': 'Switzerland', '+46': 'Sweden', '+47': 'Norway', '+48': 'Poland',
+        '+351': 'Portugal', '+353': 'Ireland', '+358': 'Finland', '+380': 'Ukraine',
+        '+420': 'Czech Republic', '+43': 'Austria', '+45': 'Denmark', '+90': 'Turkey',
+    }
+    
+    # Format country data for chart
+    country_data = []
+    for item in country_distribution:
+        phone_code = item['country_code']
+        country_name = PHONE_CODE_TO_COUNTRY.get(phone_code, phone_code)
+        country_data.append({
+            'country': country_name,
+            'count': item['count']
+        })
+    
+    # Add "Not Specified" if there are users without country_code
+    users_without_country = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).filter(
+        Q(country_code__isnull=True) | Q(country_code='')
+    ).count()
+    
+    if users_without_country > 0:
+        country_data.append({
+            'country': 'Not Specified',
+            'count': users_without_country
+        })
+    
+    # ============ USER SOURCE TRACKING ============
+    source_distribution = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).values('referral_source').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Format source data for chart
+    source_data = []
+    source_labels = {
+        'referral': 'Referral from colleague',
+        'facebook': 'Facebook',
+        'youtube': 'YouTube',
+        'linkedin': 'LinkedIn',
+        'google': 'Google Search',
+        'other': 'Other',
+        '': 'Not Specified',
+        None: 'Not Specified'
+    }
+    
+    for item in source_distribution:
+        source_value = item['referral_source'] if item['referral_source'] else ''
+        source_name = source_labels.get(source_value, 'Not Specified')
+        
+        # Avoid duplicate "Not Specified" entries
+        existing = next((x for x in source_data if x['source'] == source_name), None)
+        if existing:
+            existing['count'] += item['count']
+        else:
+            source_data.append({
+                'source': source_name,
+                'count': item['count']
+            })
+    
+    # ============ USER ACTIVITY ANALYTICS ============
+    # Calculate date range based on period
+    period_duration = (end_date.date() - start_date.date()).days
+    previous_period_end = start_date
+    previous_period_start = previous_period_end - timedelta(days=period_duration)
+    
+    # Active Users (users who performed any activity)
+    current_active_users = User.objects.filter(
+        Q(demo_views__viewed_at__range=[start_date, end_date]) |
+        Q(demo_requests__created_at__range=[start_date, end_date]) |
+        Q(enquiries__created_at__range=[start_date, end_date]),
+        is_staff=False,
+        is_superuser=False
+    ).distinct().count()
+    
+    previous_active_users = User.objects.filter(
+        Q(demo_views__viewed_at__range=[previous_period_start, previous_period_end]) |
+        Q(demo_requests__created_at__range=[previous_period_start, previous_period_end]) |
+        Q(enquiries__created_at__range=[previous_period_start, previous_period_end]),
+        is_staff=False,
+        is_superuser=False
+    ).distinct().count()
+    
+    active_users_change = ((current_active_users - previous_active_users) / max(previous_active_users, 1)) * 100 if previous_active_users > 0 else 0
+    
+    # Total Views
+    current_views = DemoView.objects.filter(viewed_at__range=[start_date, end_date]).count()
+    previous_views = DemoView.objects.filter(viewed_at__range=[previous_period_start, previous_period_end]).count()
+    views_change = ((current_views - previous_views) / max(previous_views, 1)) * 100 if previous_views > 0 else 0
+    
+    # Demo Requests
+    current_requests = DemoRequest.objects.filter(created_at__range=[start_date, end_date]).count()
+    previous_requests = DemoRequest.objects.filter(created_at__range=[previous_period_start, previous_period_end]).count()
+    requests_change = ((current_requests - previous_requests) / max(previous_requests, 1)) * 100 if previous_requests > 0 else 0
+    
+    # Enquiries
+    current_enquiries = BusinessEnquiry.objects.filter(created_at__range=[start_date, end_date]).count()
+    previous_enquiries = BusinessEnquiry.objects.filter(created_at__range=[previous_period_start, previous_period_end]).count()
+    enquiries_change = ((current_enquiries - previous_enquiries) / max(previous_enquiries, 1)) * 100 if previous_enquiries > 0 else 0
+    
+    activity_stats = {
+        'active_users': current_active_users,
+        'active_users_change': round(active_users_change, 1),
+        'total_views': current_views,
+        'views_change': round(views_change, 1),
+        'demo_requests': current_requests,
+        'requests_change': round(requests_change, 1),
+        'enquiries': current_enquiries,
+        'enquiries_change': round(enquiries_change, 1),
+    }
+    
+    # User Activity Timeline Data
+    user_activity_data = []
+    current_date = start_date.date()
+    while current_date <= end_date.date():
+        date_start = timezone.make_aware(timezone.datetime.combine(current_date, timezone.datetime.min.time()))
+        date_end = timezone.make_aware(timezone.datetime.combine(current_date, timezone.datetime.max.time()))
+        
+        views = DemoView.objects.filter(viewed_at__range=[date_start, date_end]).count()
+        requests = DemoRequest.objects.filter(created_at__range=[date_start, date_end]).count()
+        enquiries_count = BusinessEnquiry.objects.filter(created_at__range=[date_start, date_end]).count()
+        logins = User.objects.filter(
+            last_login__range=[date_start, date_end],
+            is_staff=False,
+            is_superuser=False
+        ).count()
+        
+        user_activity_data.append({
+            'date': current_date.strftime(date_format),
+            'views': views,
+            'requests': requests,
+            'enquiries': enquiries_count,
+            'logins': logins,
+        })
+        
+        current_date += timedelta(days=1)
+    
+    # Peak Activity Hours (last 30 days)
+    last_30_days = timezone.now() - timedelta(days=30)
+    
+    # Get activity by hour
+    demo_view_hours = DemoView.objects.filter(
+        viewed_at__gte=last_30_days
+    ).annotate(hour=ExtractHour('viewed_at')).values('hour').annotate(count=Count('id'))
+    
+    demo_request_hours = DemoRequest.objects.filter(
+        created_at__gte=last_30_days
+    ).annotate(hour=ExtractHour('created_at')).values('hour').annotate(count=Count('id'))
+    
+    enquiry_hours = BusinessEnquiry.objects.filter(
+        created_at__gte=last_30_days
+    ).annotate(hour=ExtractHour('created_at')).values('hour').annotate(count=Count('id'))
+    
+    # Aggregate by hour
+    hour_counts = {}
+    for item in demo_view_hours:
+        hour_counts[item['hour']] = hour_counts.get(item['hour'], 0) + item['count']
+    for item in demo_request_hours:
+        hour_counts[item['hour']] = hour_counts.get(item['hour'], 0) + item['count']
+    for item in enquiry_hours:
+        hour_counts[item['hour']] = hour_counts.get(item['hour'], 0) + item['count']
+    
+    # Sort and format
+    total_activities = sum(hour_counts.values())
+    sorted_hours = sorted(hour_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+    
+    peak_hours_data = []
+    for hour, count in sorted_hours:
+        start_hour = f"{hour:02d}:00"
+        end_hour = f"{(hour+1):02d}:00"
+        time_slot = f"{start_hour} - {end_hour}"
+        percentage = (count / total_activities * 100) if total_activities > 0 else 0
+        
+        peak_hours_data.append({
+            'time_slot': time_slot,
+            'count': count,
+            'percentage': round(percentage, 1)
+        })
+    
+    # Most Active Users (last 30 days)
+    most_active_users_data = User.objects.filter(
+        is_staff=False,
+        is_superuser=False
+    ).annotate(
+        activity_count=(
+            Count('demo_views', filter=Q(demo_views__viewed_at__gte=last_30_days)) + 
+            Count('demo_requests', filter=Q(demo_requests__created_at__gte=last_30_days)) + 
+            Count('enquiries', filter=Q(enquiries__created_at__gte=last_30_days))
+        )
+    ).filter(activity_count__gt=0).order_by('-activity_count')[:10]
+    
     context = {
-        # User Stats (Customers only)
+        # User Stats
         'total_users': total_users,
         'new_users_today': new_users_today,
         'new_users_week': new_users_week,
@@ -389,13 +1167,24 @@ def admin_dashboard_view(request):
         'recent_users': recent_users,
         'recent_enquiries': recent_enquiries,
         'recent_demo_requests': recent_demo_requests,
-        'recent_contact_messages': recent_contact_messages,
+        'recent_contact_messages': [],
         'popular_demos': popular_demos,
         
         # Chart Data
         'monthly_users': monthly_users,
         'weekly_activity': weekly_activity,
         'system_health': system_health,
+        
+        # Demographics Data
+        'country_data': country_data,
+        'source_data': source_data,
+        
+        # Activity Analytics
+        'activity_stats': activity_stats,
+        'user_activity_data': user_activity_data,
+        'peak_hours': peak_hours_data,
+        'most_active_users': most_active_users_data,
+        'activity_period': activity_period,
     }
     
     return render(request, 'admin/dashboard.html', context)
@@ -622,7 +1411,7 @@ def admin_demos_view(request):
 @login_required
 @user_passes_test(is_admin)
 def admin_add_demo_view(request):
-    """Admin add new demo - WITH MANDATORY CATEGORY SELECTION"""
+    """Admin add new demo - WITH MANDATORY CATEGORY SELECTION (No file size limits)"""
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
         description = request.POST.get('description', '').strip()
@@ -671,12 +1460,7 @@ def admin_add_demo_view(request):
                     messages.error(request, 'Video file is required when file type is Video.')
                     return redirect('core:admin_add_demo')
                 
-                # Validate video file size
-                if video_file.size > 100 * 1024 * 1024:  # 100MB
-                    messages.error(request, 'Video file size cannot exceed 100MB.')
-                    return redirect('core:admin_add_demo')
-                
-                # Validate video file extension
+                # Validate video file extension only
                 video_ext = video_file.name.split('.')[-1].lower()
                 if video_ext not in ['mp4', 'avi', 'mov', 'wmv']:
                     messages.error(request, 'Invalid video format. Allowed: MP4, AVI, MOV, WMV')
@@ -687,12 +1471,7 @@ def admin_add_demo_view(request):
                     messages.error(request, 'WebGL file is required when file type is WebGL.')
                     return redirect('core:admin_add_demo')
                 
-                # Validate webgl file size
-                if webgl_file.size > 100 * 1024 * 1024:  # 100MB
-                    messages.error(request, 'WebGL file size cannot exceed 100MB.')
-                    return redirect('core:admin_add_demo')
-                
-                # Validate webgl file extension
+                # Validate webgl file extension only
                 webgl_ext = webgl_file.name.split('.')[-1].lower()
                 if webgl_ext not in ['html', 'zip', 'gltf', 'glb']:
                     messages.error(request, 'Invalid WebGL format. Allowed: HTML, ZIP, GLTF, GLB')
@@ -702,11 +1481,7 @@ def admin_add_demo_view(request):
                 messages.error(request, 'Invalid file type selected.')
                 return redirect('core:admin_add_demo')
             
-            # Validate thumbnail
-            if thumbnail.size > 5 * 1024 * 1024:  # 5MB
-                messages.error(request, 'Thumbnail size cannot exceed 5MB.')
-                return redirect('core:admin_add_demo')
-            
+            # Validate thumbnail extension only
             thumbnail_ext = thumbnail.name.split('.')[-1].lower()
             if thumbnail_ext not in ['jpg', 'jpeg', 'png', 'webp']:
                 messages.error(request, 'Invalid thumbnail format. Allowed: JPG, PNG, WebP')
@@ -806,10 +1581,11 @@ def admin_add_demo_view(request):
     }
     
     return render(request, 'admin/demos/add.html', context)
+
 @login_required
 @user_passes_test(is_admin)
 def admin_demo_detail_view(request, demo_id):
-    """View and edit demo details - UPDATED WITH WEBGL & CUSTOMER SELECTION"""
+    """View and edit demo details - No file size limits"""
     
     demo = get_object_or_404(
         Demo.objects.prefetch_related(
@@ -827,7 +1603,7 @@ def admin_demo_detail_view(request, demo_id):
             demo.description = request.POST.get('description', demo.description).strip()
             demo.demo_type = request.POST.get('demo_type', demo.demo_type)
             
-            # NEW: Handle file type changes
+            # Handle file type changes
             file_type = request.POST.get('file_type', demo.file_type)
             
             # Validate title and description
@@ -850,7 +1626,7 @@ def admin_demo_detail_view(request, demo_id):
             except ValueError:
                 demo.sort_order = 0
             
-            # NEW: Handle file type and file uploads
+            # Handle file type and file uploads
             if file_type != demo.file_type:
                 # File type is changing
                 demo.file_type = file_type
@@ -871,11 +1647,7 @@ def admin_demo_detail_view(request, demo_id):
             if 'video_file' in request.FILES:
                 video_file = request.FILES['video_file']
                 
-                # Validate video file
-                if video_file.size > 100 * 1024 * 1024:  # 100MB
-                    messages.error(request, 'Video file size cannot exceed 100MB.')
-                    return redirect('core:admin_demo_detail', demo_id=demo.id)
-                
+                # Validate video file extension only
                 video_ext = video_file.name.split('.')[-1].lower()
                 if video_ext not in ['mp4', 'avi', 'mov', 'wmv']:
                     messages.error(request, 'Invalid video format. Allowed: MP4, AVI, MOV, WMV')
@@ -888,15 +1660,11 @@ def admin_demo_detail_view(request, demo_id):
                 demo.video_file = video_file
                 demo.file_type = 'video'
             
-            # NEW: Update WebGL file if provided
+            # Update WebGL file if provided
             if 'webgl_file' in request.FILES:
                 webgl_file = request.FILES['webgl_file']
                 
-                # Validate WebGL file
-                if webgl_file.size > 100 * 1024 * 1024:  # 100MB
-                    messages.error(request, 'WebGL file size cannot exceed 100MB.')
-                    return redirect('core:admin_demo_detail', demo_id=demo.id)
-                
+                # Validate WebGL file extension only
                 webgl_ext = webgl_file.name.split('.')[-1].lower()
                 if webgl_ext not in ['html', 'zip', 'gltf', 'glb']:
                     messages.error(request, 'Invalid WebGL format. Allowed: HTML, ZIP, GLTF, GLB')
@@ -913,11 +1681,7 @@ def admin_demo_detail_view(request, demo_id):
             if 'thumbnail' in request.FILES:
                 thumbnail = request.FILES['thumbnail']
                 
-                # Validate thumbnail
-                if thumbnail.size > 5 * 1024 * 1024:  # 5MB
-                    messages.error(request, 'Thumbnail size cannot exceed 5MB.')
-                    return redirect('core:admin_demo_detail', demo_id=demo.id)
-                
+                # Validate thumbnail extension only
                 thumbnail_ext = thumbnail.name.split('.')[-1].lower()
                 if thumbnail_ext not in ['jpg', 'jpeg', 'png', 'webp']:
                     messages.error(request, 'Invalid thumbnail format. Allowed: JPG, PNG, WebP')
@@ -1034,7 +1798,7 @@ def admin_demo_detail_view(request, demo_id):
     context = {
         'demo': demo,
         'demo_types': Demo.DEMO_TYPE_CHOICES,
-        'file_types': Demo.FILE_TYPE_CHOICES,  # NEW
+        'file_types': Demo.FILE_TYPE_CHOICES,
         'business_categories': business_categories,
         'customers': customers,
         'total_views': total_views,
@@ -1043,7 +1807,7 @@ def admin_demo_detail_view(request, demo_id):
         'target_customers': target_customers,
         'total_accessible_customers': total_accessible_customers,
         'is_for_all_customers': demo.is_for_all_customers,
-        'is_for_all_business_categories': demo.is_for_all_business_categories,  # NEW
+        'is_for_all_business_categories': demo.is_for_all_business_categories,
         'recent_views': recent_views,
         'recent_requests': recent_requests,
         'pending_approvals': pending_approvals,
@@ -1052,6 +1816,36 @@ def admin_demo_detail_view(request, demo_id):
     }
     
     return render(request, 'admin/demos/detail.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def admin_demo_watch_view(request, demo_id):
+    """
+    Admin watch/preview demo - handles both video and WebGL
+    Auto-redirects WebGL to WebGL viewer
+    """
+    demo = get_object_or_404(Demo, id=demo_id)
+    
+    # Context for sidebar
+    from accounts.models import CustomUser
+    pending_approvals = CustomUser.objects.filter(is_approved=False, is_active=True).count()
+    open_enquiries = BusinessEnquiry.objects.filter(status='open').count()
+    demo_requests_pending = DemoRequest.objects.filter(status='pending').count()
+    
+    # ✅ NEW: Auto-redirect WebGL demos to WebGL viewer
+    if demo.file_type == 'webgl':
+        return redirect('core:admin_webgl_preview', demo_id=demo.id)
+    
+    # ✅ For video demos, show video player
+    context = {
+        'demo': demo,
+        'is_admin_preview': True,
+        'pending_approvals': pending_approvals,
+        'open_enquiries': open_enquiries,
+        'demo_requests_pending': demo_requests_pending,
+    }
+    
+    return render(request, 'admin/demos/watch.html', context)
 
 @login_required
 @user_passes_test(is_admin)

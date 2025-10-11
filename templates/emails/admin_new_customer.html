@@ -1,0 +1,31 @@
+{% extends "emails/base.html" %}
+
+{% block email_title %}New Customer Registration{% endblock %}
+
+{% block email_content %}
+<div class="email-greeting">
+    Hi {{ user.first_name }}!
+</div>
+
+<div class="email-content">
+    <p>A new customer has registered on Demo Portal and requires approval.</p>
+    
+    <div class="notification-card">
+        <h3>🆕 New Customer Registration</h3>
+        <p>Please review and approve or reject the customer's account.</p>
+    </div>
+    
+    <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <p style="margin: 5px 0;"><strong>Customer Name:</strong> {{ customer_name }}</p>
+        <p style="margin: 5px 0;"><strong>Email:</strong> {{ customer_email }}</p>
+        <p style="margin: 5px 0;"><strong>Company:</strong> {{ customer_company }}</p>
+        <p style="margin: 5px 0;"><strong>Registration Date:</strong> {{ registration_date }}</p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ site_url }}/admin/users/" class="email-button">
+            Review Customer →
+        </a>
+    </div>
+</div>
+{% endblock %}

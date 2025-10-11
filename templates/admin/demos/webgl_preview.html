@@ -1,7 +1,7 @@
 {% extends 'admin/base.html' %}
 
-{% block admin_title %}{{ demo.title }} - Universal Preview{% endblock %}
-{% block page_title %}Universal Preview{% endblock %}
+{% block admin_title %}{{ demo.title }} - 3D Viewer{% endblock %}
+{% block page_title %}{{ demo.title }} - WebGL Preview{% endblock %}
 
 {% block breadcrumb %}
 <div class="admin-breadcrumb">
@@ -13,12 +13,12 @@
                 </a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{% url 'core:admin_demos' %}">Demo Content</a>
+                <a href="{% url 'core:admin_demos' %}">Demos</a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{% url 'core:admin_demo_detail' demo.id %}">{{ demo.title|truncatechars:30 }}</a>
+                <a href="{% url 'core:admin_demo_detail' demo.id %}">{{ demo.title }}</a>
             </li>
-            <li class="breadcrumb-item active">Universal Preview</li>
+            <li class="breadcrumb-item active">WebGL Preview</li>
         </ol>
     </nav>
 </div>
@@ -26,214 +26,340 @@
 
 {% block header_actions %}
 <div class="d-flex align-items-center gap-2">
-    <span class="badge bg-info">
-        <i class="fas fa-eye me-1"></i>{{ demo.get_file_type_display }} Preview
-    </span>
     <a href="{% url 'core:admin_demo_detail' demo.id %}" class="btn btn-outline-secondary btn-sm">
-        <i class="fas fa-arrow-left me-1"></i>Back to Details
+        <i class="fas fa-arrow-left me-1"></i>Back to Demo
     </a>
+    <button class="btn btn-outline-primary btn-sm" id="fullscreenBtn" onclick="toggleFullscreen()">
+        <i class="fas fa-expand me-2" id="fullscreenIcon"></i>
+        <span id="fullscreenText">Fullscreen</span>
+    </button>
 </div>
 {% endblock %}
 
 {% block admin_extra_css %}
 <style>
-    .universal-preview-container {
-        background: var(--gradient-primary);
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-xl);
-        overflow: hidden;
-        min-height: calc(100vh - 250px);
-        display: flex;
-        flex-direction: column;
-        animation: fadeIn 0.3s ease-in;
+    /* Remove default padding */
+    .admin-main-content {
+        padding: 0 !important;
     }
     
-    .preview-header {
-        background: rgba(255, 255, 255, 0.98);
-        padding: var(--spacing-lg) var(--spacing-xl);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--gray-200);
+    /* WebGL Container - Full Screen */
+    .webgl-container {
+        position: fixed;
+        top: var(--admin-header-height);
+        left: var(--admin-sidebar-width);
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        z-index: 1;
     }
     
-    .preview-frame-container {
-        flex: 1;
-        position: relative;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 600px;
+    .admin-sidebar.collapsed ~ .admin-content .webgl-container {
+        left: var(--admin-sidebar-collapsed);
     }
     
-    .preview-iframe {
+    /* WebGL Iframe */
+    .webgl-iframe {
         width: 100%;
         height: 100%;
         border: none;
-        background: white;
+        display: block;
     }
     
+    /* Loading Overlay */
     .loading-overlay {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(255, 255, 255, 0.95);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        z-index: 10;
+        z-index: 100;
+        transition: opacity 0.5s ease;
     }
     
-    .loading-spinner {
-        width: 60px;
-        height: 60px;
-        border: 4px solid var(--gray-200);
-        border-top: 4px solid var(--primary-color);
+    .loading-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    
+    .loading-content {
+        text-align: center;
+        color: white;
+        max-width: 500px;
+        padding: 30px;
+    }
+    
+    /* Spinner */
+    .spinner-container {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 30px;
+    }
+    
+    .spinner {
+        width: 80px;
+        height: 80px;
+        border: 6px solid rgba(255,255,255,0.2);
+        border-top-color: white;
         border-radius: 50%;
         animation: spin 1s linear infinite;
-        margin-bottom: var(--spacing-lg);
     }
     
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        to { transform: rotate(360deg); }
     }
     
-    .fullscreen-btn {
+    .loading-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    .loading-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+    
+    /* Progress Bar */
+    .progress-bar-container {
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+        height: 100%;
+        background: white;
+        border-radius: 2px;
+        transition: width 0.3s ease;
+        width: 0%;
+    }
+    
+    /* Admin Badge */
+    .admin-badge {
         position: fixed;
-        bottom: var(--spacing-xl);
-        right: var(--spacing-xl);
-        background: var(--gradient-primary);
-        color: white;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        border: none;
+        top: calc(var(--admin-header-height) + 15px);
+        right: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        color: var(--primary-color);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        z-index: 10;
         display: flex;
         align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: var(--shadow-xl);
-        transition: all 0.3s ease;
-        z-index: 100;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     
-    .fullscreen-btn:hover {
-        transform: scale(1.1);
+    /* Error State */
+    .error-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+        max-width: 500px;
+        padding: 30px;
+    }
+    
+    .error-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+        color: var(--danger-color);
+    }
+    
+    @media (max-width: 1024px) {
+        .webgl-container {
+            left: 0;
+        }
     }
 </style>
 {% endblock %}
 
 {% block admin_content %}
-<div class="universal-preview-container">
-    <div class="preview-header">
-        <div>
-            <h1 style="margin: 0; font-size: 1.5rem;">{{ demo.title }}</h1>
-            <div style="color: var(--gray-600); font-size: 0.875rem; margin-top: 0.5rem;">
-<i class="fas fa-{% if demo.file_type == 'video' %}video{% else %}cube{% endif %}"></i>
-                {{ demo.get_file_type_display }} | {{ demo.get_demo_type_display }}
+<div class="webgl-container">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <!-- Spinner -->
+            <div class="spinner-container">
+                <div class="spinner"></div>
             </div>
-        </div>
-        <div>
-            {% if demo.file_type == 'video' and demo.video_file %}
-                <a href="{{ demo.video_file.url }}" class="btn btn-primary" download>
-                    <i class="fas fa-download me-1"></i>Download
-                </a>
-            {% elif demo.file_type == 'webgl' and demo.webgl_file %}
-                <a href="{{ demo.webgl_file.url }}" class="btn btn-primary" download>
-                    <i class="fas fa-download me-1"></i>Download
-                </a>
-            {% endif %}
+            
+            <!-- Loading Text -->
+            <h4 class="loading-title">
+                <i class="fas fa-cube me-2"></i>
+                Loading WebGL Content
+            </h4>
+            <p class="loading-subtitle">
+                Preparing {{ demo.title }}...
+            </p>
+            
+            <!-- Progress Bar -->
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            
+            <p style="opacity: 0.6; font-size: 0.85rem; margin-top: 20px;">
+                <i class="fas fa-info-circle me-1"></i>
+                Admin Preview Mode
+            </p>
         </div>
     </div>
     
-    <div class="preview-frame-container">
-        <div class="loading-overlay" id="loadingOverlay">
-            <div class="loading-spinner"></div>
-            <div style="color: var(--gray-700); font-size: 1.125rem;">Loading {{ demo.get_file_type_display }}...</div>
-        </div>
-        
+    <!-- WebGL Iframe -->
+    {% if demo.get_webgl_index_url %}
         <iframe 
-            id="previewFrame"
-            class="preview-iframe"
-            src="{% url 'core:serve_webgl_content' demo.id %}"
-            onload="hideLoader()"
-            onerror="showError()"
-            allow="fullscreen; autoplay; xr-spatial-tracking"
-            allowfullscreen>
+            id="webglFrame"
+            class="webgl-iframe" 
+            src="{{ demo.get_webgl_index_url }}"
+            allowfullscreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-downloads"
+            onload="hideLoading()">
         </iframe>
-    </div>
+    {% else %}
+        <!-- Error State -->
+        <div class="error-container">
+            <i class="fas fa-exclamation-triangle error-icon"></i>
+            <h3>Unable to Load WebGL Content</h3>
+            <p style="opacity: 0.8; margin-bottom: 20px;">
+                The WebGL file could not be loaded or is not configured properly.
+            </p>
+            <a href="{% url 'core:admin_demo_detail' demo.id %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Demo Details
+            </a>
+        </div>
+    {% endif %}
 </div>
 
-<button class="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
-    <i class="fas fa-expand" id="fullscreenIcon"></i>
-</button>
+<!-- Admin Badge -->
+<div class="admin-badge">
+    <i class="fas fa-shield-alt"></i>
+    <span>Admin Preview</span>
+</div>
 {% endblock %}
 
 {% block admin_extra_js %}
 <script>
-    let isFullscreen = false;
-    
-    function hideLoader() {
-        const loader = document.getElementById('loadingOverlay');
-        if (loader) {
-            loader.style.display = 'none';
-        }
+let loadingProgress = 0;
+let progressInterval = null;
+const loadStartTime = Date.now();
+
+// Update progress bar
+function updateLoadingProgress(progress) {
+    loadingProgress = Math.min(progress, 100);
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) {
+        progressBar.style.width = `${loadingProgress}%`;
     }
     
-    function showError() {
-        const iframe = document.getElementById('previewFrame');
-        const loader = document.getElementById('loadingOverlay');
-        
-        if (loader) loader.style.display = 'none';
-        if (iframe) {
-            iframe.style.display = 'none';
-            const container = iframe.parentElement;
-            container.innerHTML += `
-                <div style="text-align: center; padding: 40px;">
-                    <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: var(--danger-color);"></i>
-                    <h3 style="margin-top: 20px;">Error Loading Content</h3>
-                    <p style="color: var(--gray-600);">Unable to load the file. Please check the file format.</p>
-                </div>
-            `;
-        }
+    const subtitle = document.querySelector('.loading-subtitle');
+    if (subtitle) {
+        subtitle.textContent = loadingProgress < 100 
+            ? `Loading... ${Math.round(loadingProgress)}%` 
+            : 'Almost ready...';
     }
+}
+
+// Hide loading
+function hideLoading() {
+    if (progressInterval) clearInterval(progressInterval);
+    updateLoadingProgress(100);
     
-    function toggleFullscreen() {
-        const iframe = document.getElementById('previewFrame');
-        const icon = document.getElementById('fullscreenIcon');
-        
-        if (!isFullscreen) {
-            if (iframe.requestFullscreen) {
-                iframe.requestFullscreen();
-            } else if (iframe.webkitRequestFullscreen) {
-                iframe.webkitRequestFullscreen();
-            }
-            icon.className = 'fas fa-compress';
-            isFullscreen = true;
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-            icon.className = 'fas fa-expand';
-            isFullscreen = false;
-        }
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            const loadTime = ((Date.now() - loadStartTime) / 1000).toFixed(1);
+            console.log(`✅ WebGL loaded in ${loadTime}s`);
+        }, 500);
     }
+}
+
+// Start progress simulation
+progressInterval = setInterval(() => {
+    if (loadingProgress < 90) {
+        const increment = loadingProgress < 30 ? 15 : 
+                        loadingProgress < 60 ? 10 : 
+                        loadingProgress < 80 ? 5 : 2;
+        loadingProgress += increment + Math.random() * 5;
+        updateLoadingProgress(Math.min(loadingProgress, 90));
+    }
+}, 500);
+
+// Toggle Fullscreen
+function toggleFullscreen() {
+    const container = document.querySelector('.webgl-container');
+    const icon = document.getElementById('fullscreenIcon');
+    const text = document.getElementById('fullscreenText');
     
-    document.addEventListener('fullscreenchange', function() {
-        const icon = document.getElementById('fullscreenIcon');
-        if (!document.fullscreenElement) {
-            icon.className = 'fas fa-expand';
-            isFullscreen = false;
+    if (!document.fullscreenElement) {
+        container.requestFullscreen().then(() => {
+            icon.className = 'fas fa-compress me-2';
+            text.textContent = 'Exit Fullscreen';
+        }).catch(err => {
+            console.error('Fullscreen error:', err);
+            alert('Fullscreen not supported on this device');
+        });
+    } else {
+        document.exitFullscreen().then(() => {
+            icon.className = 'fas fa-expand me-2';
+            text.textContent = 'Fullscreen';
+        });
+    }
+}
+
+// Monitor iframe loading
+const iframe = document.getElementById('webglFrame');
+if (iframe) {
+    iframe.onload = hideLoading;
+    iframe.onerror = () => {
+        clearInterval(progressInterval);
+        hideLoading();
+        alert('Failed to load WebGL content');
+    };
+    
+    setTimeout(() => {
+        if (loadingProgress < 90) {
+            console.log('⚠️ Large file detected - still loading...');
         }
-    });
-    
-    setTimeout(hideLoader, 10000);
+    }, 10000);
+}
+
+// Auto-hide loading after 30 seconds (fallback)
+setTimeout(() => {
+    if (loadingProgress < 100) {
+        hideLoading();
+    }
+}, 30000);
+
+// Keyboard shortcut - F for fullscreen
+document.addEventListener('keydown', (e) => {
+    if ((e.key === 'f' || e.key === 'F') && !e.target.matches('input, textarea')) {
+        e.preventDefault();
+        toggleFullscreen();
+    }
+});
 </script>
 {% endblock %}

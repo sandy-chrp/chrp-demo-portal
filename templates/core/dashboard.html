@@ -389,14 +389,14 @@
         </div>
 
         <!-- Statistics Grid -->
-        <div class="stats-grid">
+        {% comment %} <div class="stats-grid">
             <div class="stat-card primary">
                 <div class="stat-icon primary">
                     <i class="fas fa-video"></i>
                 </div>
                 <div class="stat-number">{{ total_demos_watched|default:0 }}</div>
                 <div class="stat-label">Demos Watched</div>
-            </div>
+            </div> {% endcomment %}
             
             <div class="stat-card success">
                 <div class="stat-icon success">
@@ -414,13 +414,13 @@
                 <div class="stat-label">Pending Requests</div>
             </div>
             
-            <div class="stat-card info">
+            {% comment %} <div class="stat-card info">
                 <div class="stat-icon info">
                     <i class="fas fa-envelope"></i>
                 </div>
                 <div class="stat-number">{{ total_enquiries|default:0 }}</div>
                 <div class="stat-label">Enquiries Sent</div>
-            </div>
+            </div> {% endcomment %}
         </div>
 
         <div class="row">

@@ -4,6 +4,9 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+handler404 = 'core.views.custom_404'
+handler500 = 'core.views.custom_500'
+
 urlpatterns = [
     # Django's default admin (for development only)
     path('django-admin/', admin.site.urls),
@@ -17,7 +20,7 @@ urlpatterns = [
     # Feature URLs  
     path('demos/', include('demos.urls')),
     path('enquiries/', include('enquiries.urls')),
-    path('notifications/', include('notifications.urls')),
+    path('notifications/', include(('notifications.urls', 'notifications'), namespace='notifications')),
     path('chatbot/', include('chatbot.urls')),
     path('customer/', include('customers.urls')),
 

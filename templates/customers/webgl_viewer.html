@@ -1,0 +1,648 @@
+<!-- templates/customers/webgl_viewer.html - USER FRIENDLY VERSION -->
+{% extends 'customers/base.html' %}
+
+{% block customer_title %}{{ demo.title }} - Interactive 3D Viewer{% endblock %}
+{% block page_title %}
+    <i class="fas fa-cube me-2"></i>{{ demo.title }}
+{% endblock %}
+
+{% block header_actions %}
+    <!-- Custom Header Actions for WebGL Viewer -->
+    <a href="{% url 'customers:browse_demos' %}" class="btn btn-outline-secondary me-2">
+        <i class="fas fa-arrow-left me-2"></i>Back to Demos
+    </a>
+    
+    <button class="btn btn-outline-primary me-2" id="fullscreenBtnHeader" onclick="toggleFullscreen()">
+        <i class="fas fa-expand me-2" id="fullscreenIconHeader"></i>
+        <span id="fullscreenText">Fullscreen</span>
+    </button>
+    
+    <button class="btn {% if user_liked %}btn-danger{% else %}btn-outline-danger{% endif %}" 
+            id="likeBtnHeader" 
+            onclick="toggleLike()">
+        <i class="{% if user_liked %}fas{% else %}far{% endif %} fa-heart me-2" id="likeIconHeader"></i>
+        <span id="likeText">{% if user_liked %}Liked{% else %}Like{% endif %}</span>
+    </button>
+{% endblock %}
+
+{% block customer_extra_css %}
+<style>
+ <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://ajax.googleapis.com">
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://ajax.googleapis.com">
+
+<!-- ✅ Preload the WebGL content -->
+{% if content_url %}
+<link rel="preload" href="{{ content_url }}" as="document">
+{% endif %}
+
+    /* Remove default padding */
+    body {
+        overflow: hidden;
+    }
+    
+    .customer-content {
+        padding: 0 !important;
+    }
+    
+    /* WebGL Container - Full Screen */
+    .webgl-container {
+        position: fixed;
+        top: var(--customer-header-height);
+        left: var(--customer-sidebar-width);
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        z-index: 1;
+    }
+    
+    .customer-sidebar.collapsed ~ .customer-main .webgl-container {
+        left: var(--customer-sidebar-collapsed);
+    }
+    
+    /* WebGL Iframe */
+    .webgl-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+    }
+    
+    /* Loading Overlay - Enhanced */
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        transition: opacity 0.5s ease;
+    }
+    
+    .loading-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    
+    .loading-content {
+        text-align: center;
+        color: white;
+        max-width: 500px;
+        padding: 30px;
+    }
+    
+    /* Enhanced Spinner */
+    .spinner-container {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 30px;
+    }
+    
+    .spinner {
+        width: 80px;
+        height: 80px;
+        border: 6px solid rgba(255,255,255,0.2);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    .spinner-inner {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 60px;
+        height: 60px;
+        border: 4px solid rgba(255,255,255,0.3);
+        border-right-color: white;
+        border-radius: 50%;
+        animation: spin 1.5s linear infinite reverse;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .loading-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .loading-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+    
+    .loading-tips {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-lg);
+        padding: 15px 20px;
+        font-size: 0.875rem;
+        text-align: left;
+        backdrop-filter: blur(10px);
+    }
+    
+    .loading-tips h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .loading-tips ul {
+        margin: 0;
+        padding-left: 20px;
+        line-height: 1.8;
+    }
+    
+    .loading-tips li {
+        margin-bottom: 5px;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    /* Progress Bar */
+    .progress-bar-container {
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+        height: 100%;
+        background: white;
+        border-radius: 2px;
+        animation: progressAnimation 3s ease-in-out infinite;
+    }
+    
+    @keyframes progressAnimation {
+        0% { width: 0%; }
+        50% { width: 70%; }
+        100% { width: 100%; }
+    }
+    
+    /* Model Viewer Specific */
+    model-viewer {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    }
+    
+    /* Watermark - Subtle */
+    .watermark {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
+        color: rgba(255, 255, 255, 0.8);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        z-index: 5;
+        pointer-events: none;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 1024px) {
+        .webgl-container {
+            left: 0;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .loading-content {
+            padding: 20px;
+        }
+        
+        .loading-title {
+            font-size: 1.25rem;
+        }
+        
+        .loading-tips {
+            font-size: 0.8rem;
+        }
+        
+        .watermark {
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.7rem;
+        }
+    }
+    
+    /* Error State */
+    .error-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+        max-width: 500px;
+        padding: 30px;
+    }
+    
+    .error-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+        color: var(--danger-color);
+    }
+    
+    .error-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .error-message {
+        opacity: 0.8;
+        margin-bottom: 20px;
+    }
+</style>
+
+<!-- Model Viewer for GLTF/GLB -->
+{% if viewer_type == 'model-viewer' %}
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+{% endif %}
+{% endblock %}
+
+{% block customer_content %}
+<div class="webgl-container">
+    <!-- Enhanced Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <!-- Spinner -->
+            <div class="spinner-container">
+                <div class="spinner"></div>
+                <div class="spinner-inner"></div>
+            </div>
+            
+            <!-- Loading Text -->
+            <h4 class="loading-title">
+                <i class="fas fa-cube me-2"></i>
+                Loading Interactive 3D Experience
+            </h4>
+            <p class="loading-subtitle">
+                Preparing {{ demo.title }}...
+            </p>
+            
+            <!-- Progress Bar -->
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill"></div>
+            </div>
+            
+            <!-- Helpful Tips -->
+            <div class="loading-tips mt-4">
+                <h4>
+                    <i class="fas fa-lightbulb"></i>
+                    While you wait...
+                </h4>
+                <ul>
+                    <li><strong>Use fullscreen</strong> for best experience</li>
+                    <li><strong>Mouse/Touch controls</strong> to rotate and zoom</li>
+                    <li><strong>Works on mobile</strong> and desktop browsers</li>
+                    {% if demo.file_type == 'webgl' %}
+                    <li><strong>Interactive demo</strong> - explore freely!</li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <p style="opacity: 0.6; font-size: 0.85rem; margin-top: 20px;">
+                <i class="fas fa-info-circle me-1"></i>
+                Large files may take a moment to load
+            </p>
+        </div>
+    </div>
+    
+    {% if viewer_type == 'iframe' %}
+        <!-- For ZIP (extracted) and HTML files -->
+        <iframe 
+            id="webglFrame"
+            class="webgl-iframe" 
+            src="{{ content_url }}"
+            allowfullscreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-downloads"
+            onload="hideLoading()">
+        </iframe>
+    
+    {% elif viewer_type == 'model-viewer' %}
+        <!-- For GLTF/GLB 3D Models -->
+        <model-viewer
+            id="modelViewer"
+            src="{{ content_url }}"
+            alt="{{ demo.title }}"
+            camera-controls
+            auto-rotate
+            shadow-intensity="1"
+            exposure="1"
+            environment-image="neutral"
+            tone-mapping="commerce"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            onload="hideLoading()">
+            <div slot="progress-bar" style="display: none;"></div>
+        </model-viewer>
+    
+    {% else %}
+        <!-- Error State -->
+        <div class="error-container">
+            <i class="fas fa-exclamation-triangle error-icon"></i>
+            <h3 class="error-title">Unable to Load Content</h3>
+            <p class="error-message">
+                The WebGL file format is not supported or the file is missing.
+            </p>
+            <a href="{% url 'customers:browse_demos' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Back to Demo Library
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Subtle Watermark -->
+{% comment %} <div class="watermark">
+    <i class="fas fa-user-shield"></i>
+    <span>{{ user.email }}</span>
+</div> {% endcomment %}
+{% endblock %}
+
+{% block customer_extra_js %}
+<script>
+    // ✅ NEW: Progressive loading with real progress
+    let loadingProgress = 0;
+    let progressInterval = null;
+    
+    function updateLoadingProgress(progress) {
+        loadingProgress = Math.min(progress, 100);
+        const progressBar = document.querySelector('.progress-bar-fill');
+        if (progressBar) {
+            progressBar.style.width = `${loadingProgress}%`;
+            progressBar.style.animation = 'none';
+        }
+        
+        const subtitle = document.querySelector('.loading-subtitle');
+        if (subtitle) {
+            if (loadingProgress < 100) {
+                subtitle.textContent = `Loading... ${Math.round(loadingProgress)}%`;
+            } else {
+                subtitle.textContent = 'Almost ready...';
+            }
+        }
+    }
+    
+    // Hide loading overlay with smooth transition
+    function hideLoading() {
+        if (progressInterval) {
+            clearInterval(progressInterval);
+        }
+        
+        updateLoadingProgress(100);
+        
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                showToast('Demo loaded successfully!', 'success');
+            }, 500);
+        }
+    }
+    
+    // ✅ NEW: Start progress simulation
+    const loadStartTime = Date.now();
+    
+    progressInterval = setInterval(() => {
+        if (loadingProgress < 90) {
+            // Faster progress at start, slower near end
+            const increment = loadingProgress < 30 ? 15 : 
+                            loadingProgress < 60 ? 10 : 
+                            loadingProgress < 80 ? 5 : 2;
+            
+            loadingProgress += increment + Math.random() * 5;
+            updateLoadingProgress(Math.min(loadingProgress, 90));
+        }
+    }, 500);
+    
+    // Toggle Like
+    let isLiked = {{ user_liked|yesno:"true,false" }};
+    
+    function toggleLike() {
+        const btnHeader = document.getElementById('likeBtnHeader');
+        const iconHeader = document.getElementById('likeIconHeader');
+        const textHeader = document.getElementById('likeText');
+        
+        const originalText = textHeader.textContent;
+        textHeader.textContent = 'Processing...';
+        btnHeader.disabled = true;
+        
+        fetch("{% url 'customers:toggle_demo_like' demo.id %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.liked) {
+                iconHeader.className = 'fas fa-heart me-2';
+                textHeader.textContent = 'Liked';
+                btnHeader.className = 'btn btn-danger';
+                showToast('Added to your liked demos!', 'success');
+            } else {
+                iconHeader.className = 'far fa-heart me-2';
+                textHeader.textContent = 'Like';
+                btnHeader.className = 'btn btn-outline-danger';
+                showToast('Removed from liked demos', 'info');
+            }
+            
+            btnHeader.disabled = false;
+            isLiked = data.liked;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            textHeader.textContent = originalText;
+            btnHeader.disabled = false;
+            showToast('Failed to update like status', 'error');
+        });
+    }
+    
+    // Toggle Fullscreen
+    function toggleFullscreen() {
+        const container = document.querySelector('.webgl-container');
+        const iconHeader = document.getElementById('fullscreenIconHeader');
+        const textHeader = document.getElementById('fullscreenText');
+        
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().then(() => {
+                iconHeader.className = 'fas fa-compress me-2';
+                textHeader.textContent = 'Exit Fullscreen';
+                showToast('Entered fullscreen mode', 'info');
+            }).catch(err => {
+                console.error('Fullscreen error:', err);
+                showToast('Fullscreen not supported', 'warning');
+            });
+        } else {
+            document.exitFullscreen().then(() => {
+                iconHeader.className = 'fas fa-expand me-2';
+                textHeader.textContent = 'Fullscreen';
+                showToast('Exited fullscreen mode', 'info');
+            });
+        }
+    }
+    
+    // Toast notification system
+    function showToast(message, type = 'info') {
+        const existingToast = document.querySelector('.custom-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast';
+        
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+        
+        const colors = {
+            success: '#10b981',
+            error: '#ef4444',
+            warning: '#f59e0b',
+            info: '#06b6d4'
+        };
+        
+        toast.style.cssText = `
+            position: fixed;
+            top: calc(var(--customer-header-height) + 20px);
+            right: 20px;
+            background: white;
+            color: #1f2937;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid ${colors[type]};
+        `;
+        
+        toast.innerHTML = `
+            <i class="fas ${icons[type]}" style="color: ${colors[type]}; font-size: 1.2rem;"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // ✅ NEW: Monitor iframe loading with real metrics
+    const iframe = document.getElementById('webglFrame');
+    if (iframe) {
+        iframe.onload = function() {
+            const loadTime = ((Date.now() - loadStartTime) / 1000).toFixed(1);
+            hideLoading();
+            console.log(`✅ WebGL loaded in ${loadTime}s`);
+        };
+        
+        iframe.onerror = function() {
+            clearInterval(progressInterval);
+            hideLoading();
+            showToast('Failed to load WebGL content', 'error');
+        };
+        
+        // Show progress update at 10 seconds
+        setTimeout(() => {
+            if (loadingProgress < 90) {
+                showToast('Large file detected - still loading...', 'info');
+            }
+        }, 10000);
+    }
+    
+    // Auto-hide loading after 30 seconds (fallback)
+    setTimeout(() => {
+        if (loadingProgress < 100) {
+            hideLoading();
+            showToast('Content loaded with timeout', 'warning');
+        }
+    }, 30000);
+    
+    // Disable right-click
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target.closest('.webgl-container')) {
+            e.preventDefault();
+            showToast('Content protection enabled', 'warning');
+        }
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'f' || e.key === 'F') {
+            if (!e.target.matches('input, textarea')) {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        }
+        
+        if (e.key === 'l' || e.key === 'L') {
+            if (!e.target.matches('input, textarea')) {
+                e.preventDefault();
+                toggleLike();
+            }
+        }
+    });
+    
+    // Show keyboard shortcuts hint
+    setTimeout(() => {
+        if (!sessionStorage.getItem('webgl_shortcuts_shown')) {
+            showToast('💡 Tip: Press F for fullscreen, L to like', 'info');
+            sessionStorage.setItem('webgl_shortcuts_shown', 'true');
+        }
+    }, 5000);
+</script>
+{% endblock %}

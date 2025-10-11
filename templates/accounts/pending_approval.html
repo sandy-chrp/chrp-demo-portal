@@ -23,7 +23,7 @@
         
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            {% comment %} background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); {% endcomment %}
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -386,9 +386,9 @@
                     <a href="{% url 'accounts:resend_verification' %}" class="btn-custom btn-outline-custom">
                         <i class="fas fa-envelope me-2"></i>Resend Verification Email
                     </a>
-                    <a href="{% url 'core:home' %}" class="btn-custom btn-primary-custom">
+                    {% comment %} <a href="{% url 'core:home' %}" class="btn-custom btn-primary-custom">
                         <i class="fas fa-home me-2"></i>Back to Home
-                    </a>
+                    </a> {% endcomment %}
                 </div>
                 
                 <!-- Contact Information -->

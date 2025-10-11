@@ -1,10 +1,11 @@
-<!-- templates/accounts/signup.html - COMPLETE FILE -->
+<!-- templates/accounts/signup.html - UPDATED WITHOUT PLACEHOLDERS -->
 {% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Sign Up - Demo Portal{% endblock %}
 
 {% block extra_css %}
+<!-- Keep all existing CSS exactly as is -->
 <style>
     .signup-container {
         min-height: calc(100vh - 160px);
@@ -335,11 +336,11 @@
                     <div class="sales-contact-info">
                         <div class="sales-contact-item">
                             <i class="fas fa-phone-alt"></i>
-                            <span>+91-1234567890</span>
+                            <span>+91 8008987948</span>
                         </div>
                         <div class="sales-contact-item">
                             <i class="fas fa-envelope"></i>
-                            <span>sales@chrp-india.com</span>
+                            <span>reach@chrp-india.com</span>
                         </div>
                     </div>
                     
@@ -375,30 +376,27 @@
                             </div>
                         {% endif %}
 
-                        <!-- Name Fields -->
+                        <!-- Name Fields - PLACEHOLDERS REMOVED -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">First Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="first_name" id="firstName" 
-                                       required value="{{ form.first_name.value|default:'' }}"
-                                       placeholder="John">
+                                       required value="{{ form.first_name.value|default:'' }}">
                                 <div class="invalid-feedback">Please enter your first name</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Last Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="last_name" id="lastName" 
-                                       required value="{{ form.last_name.value|default:'' }}"
-                                       placeholder="Doe">
+                                       required value="{{ form.last_name.value|default:'' }}">
                                 <div class="invalid-feedback">Please enter your last name</div>
                             </div>
                         </div>
 
-                        <!-- Email -->
+                        <!-- Email - PLACEHOLDER REMOVED -->
                         <div class="mb-3">
                             <label class="form-label">Business Email <span class="text-danger">*</span></label>
                             <input type="email" class="form-control" name="email" id="emailField" 
-                                   required placeholder="your@company.com" 
-                                   value="{{ form.email.value|default:'' }}">
+                                   required value="{{ form.email.value|default:'' }}">
                             <div class="invalid-feedback" id="emailError">Please enter a valid business email</div>
                             <small class="form-text text-muted">
                                 <i class="fas fa-info-circle me-1"></i>
@@ -406,7 +404,7 @@
                             </small>
                         </div>
 
-                        <!-- Mobile -->
+                        <!-- Mobile - PLACEHOLDER REMOVED -->
                         <div class="mb-3">
                             <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -418,26 +416,24 @@
                                     {% endfor %}
                                 </select>
                                 <input type="tel" class="form-control" name="mobile" id="mobileField" 
-                                       required pattern="[0-9]{10}" placeholder="10-digit number" 
-                                       maxlength="10" value="{{ form.mobile.value|default:'' }}">
+                                       required pattern="[0-9]{10}" maxlength="10" 
+                                       value="{{ form.mobile.value|default:'' }}">
                             </div>
                             <div class="invalid-feedback">Please enter a valid 10-digit mobile number</div>
                         </div>
 
-                        <!-- Job & Organization -->
+                        <!-- Job & Organization - PLACEHOLDERS REMOVED -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Job Title <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="job_title" id="jobTitle" 
-                                       required value="{{ form.job_title.value|default:'' }}"
-                                       placeholder="e.g., Sales Manager">
+                                       required value="{{ form.job_title.value|default:'' }}">
                                 <div class="invalid-feedback">Please enter your job title</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Organization <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="organization" id="organization" 
-                                       required value="{{ form.organization.value|default:'' }}"
-                                       placeholder="Company name">
+                                       required value="{{ form.organization.value|default:'' }}">
                                 <div class="invalid-feedback">Please enter your organization name</div>
                             </div>
                         </div>
@@ -468,12 +464,12 @@
                             </div>
                         </div>
 
-                        <!-- Password -->
+                        <!-- Password - PLACEHOLDERS REMOVED -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Password <span class="text-danger">*</span></label>
                                 <input type="password" class="form-control" name="password1" id="password1" 
-                                       required minlength="8" placeholder="Min 8 characters">
+                                       required minlength="8">
                                 <div class="password-strength">
                                     <div class="password-strength-bar" id="strengthBar"></div>
                                 </div>
@@ -483,7 +479,7 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
                                 <input type="password" class="form-control" name="password2" id="password2" 
-                                       required placeholder="Re-enter password">
+                                       required>
                                 <div class="invalid-feedback" id="password2Error">Passwords must match</div>
                                 <div class="valid-feedback">
                                     <i class="fas fa-check-circle me-1"></i>Passwords match
@@ -524,10 +520,7 @@
                             <i class="fas fa-user-plus me-2"></i>Create Account
                         </button>
                         
-                        <div class="text-center text-muted small">
-                            <i class="fas fa-shield-alt me-1"></i>
-                            Your data is secured with enterprise-grade encryption
-                        </div>
+                    
                     </form>
 
                     <hr class="my-4">
@@ -568,7 +561,7 @@
                 <div class="contact-method">
                     <h6><i class="fas fa-phone-alt me-2"></i>Phone Support</h6>
                     <p class="mb-1">
-                        Call us: <a href="tel:+911234567890">+91-1234567890</a>
+                        Call us: <a href="tel:+91 8008987948 ">+91-8008987948 </a>
                     </p>
                     <small class="text-muted">Monday - Saturday: 9:00 AM - 7:00 PM IST</small>
                 </div>
@@ -576,7 +569,7 @@
                 <div class="contact-method">
                     <h6><i class="fas fa-envelope me-2"></i>Email Support</h6>
                     <p class="mb-1">
-                        Email us: <a href="mailto:sales@chrp-india.com">sales@chrp-india.com</a>
+                        Email us: <a href="mailto:reach@chrp-india.com">reach@chrp-india.com</a>
                     </p>
                     <small class="text-muted">Response within 24 hours</small>
                 </div>
@@ -584,7 +577,7 @@
                 <div class="contact-method">
                     <h6><i class="fas fa-whatsapp me-2"></i>WhatsApp Business</h6>
                     <p class="mb-1">
-                        Message us: <a href="https://wa.me/911234567890?text=Hi%2C%20I%20need%20help%20with%20account%20registration" target="_blank">+91-1234567890</a>
+                        Message us: <a href="https://wa.me/918008987948?text=Hi%2C%20I%20need%20help%20with%20account%20registration" target="_blank">+91-1234567890</a>
                     </p>
                     <small class="text-muted">Quick responses during business hours</small>
                 </div>
@@ -596,7 +589,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <a href="mailto:sales@chrp-india.com?subject=Enterprise Account Registration" class="btn btn-primary">
+                <a href="mailto:reach@chrp-india.com?subject=Enterprise Account Registration" class="btn btn-primary">
                     <i class="fas fa-envelope me-2"></i>Send Email
                 </a>
             </div>
@@ -606,6 +599,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Keep all existing JavaScript exactly as is -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('signupForm');

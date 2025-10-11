@@ -1,4 +1,4 @@
-# demo_request_views.py - Complete Demo Requests Management System
+# demo_request_views.py - Complete Demo Requests Management System with Enhanced Validation
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -11,14 +11,20 @@ from django.core.mail import send_mail
 from django.conf import settings
 from datetime import datetime, timedelta
 import json
-from accounts.models import BusinessCategory, BusinessSubCategory
+import pytz
+
+# App imports
+from accounts.models import BusinessCategory, BusinessSubCategory, CustomUser
 from demos.models import Demo, DemoRequest, TimeSlot
-from accounts.models import CustomUser
 from enquiries.models import BusinessEnquiry
+from notifications.models import Notification, NotificationTemplate
+from django.contrib.contenttypes.models import ContentType
+
 
 def is_admin(user):
     """Check if user is admin"""
     return user.is_authenticated and (user.is_staff or user.is_superuser)
+
 
 def get_filtered_demos_for_business(business_category=None, business_subcategory=None):
     """
@@ -45,6 +51,10 @@ def get_filtered_demos_for_business(business_category=None, business_subcategory
     
     return demos.order_by('title')
 
+
+# ================================================================================
+# ADMIN DEMO REQUESTS LIST & MANAGEMENT
+# ================================================================================
 
 @login_required
 @user_passes_test(is_admin)
@@ -169,6 +179,10 @@ def admin_demo_requests_list_view(request):
     return render(request, 'admin/demo_requests/list.html', context)
 
 
+# ================================================================================
+# CREATE DEMO REQUEST
+# ================================================================================
+
 @login_required
 @user_passes_test(is_admin)
 def admin_create_demo_request_view(request):
@@ -221,17 +235,15 @@ def admin_create_demo_request_view(request):
             business_category = None
             business_subcategory = None
             
-            if business_category_id:  # Only if not empty string
+            if business_category_id:
                 try:
-                    from accounts.models import BusinessCategory
                     business_category = BusinessCategory.objects.get(id=business_category_id)
                 except (BusinessCategory.DoesNotExist, ValueError):
                     messages.error(request, 'Invalid business category selected')
                     return redirect('core:admin_create_demo_request')
 
-            if business_subcategory_id:  # Only if not empty string
+            if business_subcategory_id:
                 try:
-                    from accounts.models import BusinessSubCategory
                     business_subcategory = BusinessSubCategory.objects.get(id=business_subcategory_id)
                     
                     # Validate subcategory belongs to category
@@ -271,8 +283,8 @@ def admin_create_demo_request_view(request):
                 demo=demo,
                 requested_date=requested_date,
                 requested_time_slot=time_slot,
-                business_category=business_category,  # This will be None if empty, which is correct
-                business_subcategory=business_subcategory,  # This will be None if empty, which is correct
+                business_category=business_category,
+                business_subcategory=business_subcategory,
                 postal_code=postal_code,
                 city=city,
                 country_region=country_region,
@@ -283,28 +295,21 @@ def admin_create_demo_request_view(request):
             )
             
             # Create notification for customer
-            from notifications.models import Notification, NotificationTemplate
-            from django.contrib.contenttypes.models import ContentType
-            
-            # Try to get template for demo request creation
             try:
                 template = NotificationTemplate.objects.get(
                     notification_type='demo_request_created',
                     is_active=True
                 )
                 
-                # Format the notification message
                 notification_title = template.title_template.replace('{{demo_title}}', demo.title)
                 notification_message = template.message_template.replace('{{demo_title}}', demo.title)\
                     .replace('{{requested_date}}', requested_date.strftime('%B %d, %Y'))\
                     .replace('{{requested_time}}', str(time_slot))
             except NotificationTemplate.DoesNotExist:
-                # Use default messages if template doesn't exist
                 notification_title = f'Demo Request Created: {demo.title}'
                 notification_message = f'Your demo request for "{demo.title}" on {requested_date.strftime("%B %d, %Y")} at {time_slot} has been created. We will confirm your appointment shortly.'
             
-            # Create the notification
-            notification = Notification.objects.create(
+            Notification.objects.create(
                 user=user,
                 notification_type='demo_request_created',
                 title=notification_title,
@@ -350,13 +355,11 @@ def admin_create_demo_request_view(request):
             return redirect('core:admin_create_demo_request')
     
     # GET request - show form
-    # Get active customers
     customers = CustomUser.objects.filter(
         is_active=True, 
         is_approved=True
     ).order_by('first_name', 'last_name')
     
-    # Get all active demos initially (will be filtered by JS based on selection)
     all_demos = Demo.objects.filter(is_active=True).prefetch_related(
         'target_business_categories', 
         'target_business_subcategories'
@@ -368,7 +371,7 @@ def admin_create_demo_request_view(request):
         demos_data.append({
             'id': demo.id,
             'title': demo.title,
-            'demo_type': demo.get_demo_type_display(),  # ✅ Use demo_type instead
+            'demo_type': demo.get_demo_type_display(),
             'description': demo.description[:100],
             'duration': demo.formatted_duration,
             'business_categories': list(demo.target_business_categories.values_list('id', flat=True)),
@@ -379,13 +382,10 @@ def admin_create_demo_request_view(request):
     
     time_slots = TimeSlot.objects.filter(is_active=True).order_by('start_time')
     
-    # Get business categories and subcategories
-    from accounts.models import BusinessCategory, BusinessSubCategory
     business_categories = BusinessCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
     business_subcategories = BusinessSubCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
     
     # Context for sidebar badges
-    from enquiries.models import BusinessEnquiry
     pending_approvals = CustomUser.objects.filter(is_approved=False, is_active=True).count()
     open_enquiries = BusinessEnquiry.objects.filter(status='open').count()
     demo_requests_pending = DemoRequest.objects.filter(status='pending').count()
@@ -393,7 +393,7 @@ def admin_create_demo_request_view(request):
     context = {
         'customers': customers,
         'demos': all_demos,
-        'demos_json': json.dumps(demos_data),  # For JavaScript filtering
+        'demos_json': json.dumps(demos_data),
         'time_slots': time_slots,
         'business_categories': business_categories,
         'business_subcategories': business_subcategories,
@@ -405,7 +405,10 @@ def admin_create_demo_request_view(request):
     return render(request, 'admin/demo_requests/create.html', context)
 
 
-# AJAX endpoint to get filtered demos
+# ================================================================================
+# AJAX - GET FILTERED DEMOS
+# ================================================================================
+
 @login_required
 @user_passes_test(is_admin)
 @require_http_methods(["GET"])
@@ -418,23 +421,19 @@ def admin_get_filtered_demos(request):
     business_subcategory = None
     
     if business_category_id:
-        from accounts.models import BusinessCategory
         try:
             business_category = BusinessCategory.objects.get(id=business_category_id)
         except BusinessCategory.DoesNotExist:
             pass
     
     if business_subcategory_id:
-        from accounts.models import BusinessSubCategory
         try:
             business_subcategory = BusinessSubCategory.objects.get(id=business_subcategory_id)
         except BusinessSubCategory.DoesNotExist:
             pass
     
-    # Get filtered demos
     demos = get_filtered_demos_for_business(business_category, business_subcategory)
     
-    # Prepare response data
     demos_data = []
     for demo in demos:
         demos_data.append({
@@ -451,18 +450,19 @@ def admin_get_filtered_demos(request):
         'count': len(demos_data)
     })
 
-# New email function for demo request creation
+
+# ================================================================================
+# EMAIL UTILITY FUNCTIONS
+# ================================================================================
+
 def send_demo_request_created_email(demo_request):
     """Send demo request creation email to customer"""
     try:
-        from django.core.mail import send_mail
-        from django.conf import settings
         from django.template.loader import render_to_string
         from django.utils.html import strip_tags
         
         subject = f'Demo Request Received: {demo_request.demo.title}'
         
-        # Try to render HTML template if exists
         try:
             html_message = render_to_string('emails/demo_request_created.html', {
                 'demo_request': demo_request,
@@ -473,7 +473,6 @@ def send_demo_request_created_email(demo_request):
             })
             message = strip_tags(html_message)
         except:
-            # Fallback to plain text
             message = f"""
 Dear {demo_request.user.first_name},
 
@@ -508,19 +507,124 @@ CHRP India
             fail_silently=True,
         )
         
-        # Log email sent
-        print(f"Demo request creation email sent to {demo_request.user.email}")
+        print(f"✅ Demo request creation email sent to {demo_request.user.email}")
         
     except Exception as e:
-        print(f"Error sending demo request creation email: {e}")
+        print(f"❌ Error sending demo request creation email: {e}")
+
+
+def send_demo_confirmation_email(demo_request):
+    """Send demo confirmation email to customer"""
+    try:
+        subject = f'Demo Confirmed: {demo_request.demo.title}'
+        message = f"""
+Dear {demo_request.user.first_name},
+
+Your demo request has been confirmed!
+
+Demo Details:
+- Product: {demo_request.demo.title}
+- Date: {demo_request.confirmed_date.strftime('%B %d, %Y')}
+- Time: {demo_request.confirmed_time_slot}
+
+We look forward to showcasing our solution to you.
+
+Best regards,
+Demo Portal Team
+CHRP India
+        """
+        
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[demo_request.user.email],
+            fail_silently=True,
+        )
+        
+        print(f"✅ Demo confirmation email sent to {demo_request.user.email}")
+        
+    except Exception as e:
+        print(f"❌ Error sending confirmation email: {e}")
+
+
+def send_demo_reschedule_email(demo_request, reason):
+    """Send demo reschedule email to customer"""
+    try:
+        subject = f'Demo Rescheduled: {demo_request.demo.title}'
+        message = f"""
+Dear {demo_request.user.first_name},
+
+Your demo has been rescheduled.
+
+New Demo Details:
+- Product: {demo_request.demo.title}
+- New Date: {demo_request.confirmed_date.strftime('%B %d, %Y')}
+- New Time: {demo_request.confirmed_time_slot}
+
+Reason: {reason}
+
+We apologize for any inconvenience.
+
+Best regards,
+Demo Portal Team
+CHRP India
+        """
+        
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[demo_request.user.email],
+            fail_silently=True,
+        )
+        
+        print(f"✅ Demo reschedule email sent to {demo_request.user.email}")
+        
+    except Exception as e:
+        print(f"❌ Error sending reschedule email: {e}")
+
+
+def send_demo_cancellation_email(demo_request, reason):
+    """Send demo cancellation email to customer"""
+    try:
+        subject = f'Demo Cancelled: {demo_request.demo.title}'
+        message = f"""
+Dear {demo_request.user.first_name},
+
+Unfortunately, your demo request has been cancelled.
+
+Demo Details:
+- Product: {demo_request.demo.title}
+- Original Date: {demo_request.requested_date.strftime('%B %d, %Y')}
+- Time: {demo_request.requested_time_slot}
+
+Reason: {reason}
+
+Please feel free to submit a new request or contact us directly.
+
+Best regards,
+Demo Portal Team
+CHRP India
+        """
+        
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[demo_request.user.email],
+            fail_silently=True,
+        )
+        
+        print(f"✅ Demo cancellation email sent to {demo_request.user.email}")
+        
+    except Exception as e:
+        print(f"❌ Error sending cancellation email: {e}")
+
 
 def create_demo_confirmation_notification(demo_request):
     """Create confirmation notification for demo request"""
     try:
-        from notifications.models import Notification, NotificationTemplate
-        from django.contrib.contenttypes.models import ContentType
-        
-        # Try to get template
         try:
             template = NotificationTemplate.objects.get(
                 notification_type='demo_confirmation',
@@ -545,8 +649,15 @@ def create_demo_confirmation_notification(demo_request):
             object_id=demo_request.id
         )
         
+        print(f"✅ Demo confirmation notification created for {demo_request.user.email}")
+        
     except Exception as e:
-        print(f"Error creating confirmation notification: {e}")
+        print(f"❌ Error creating confirmation notification: {e}")
+
+
+# ================================================================================
+# EDIT DEMO REQUEST
+# ================================================================================
 
 @login_required
 @user_passes_test(is_admin)
@@ -561,42 +672,34 @@ def admin_edit_demo_request_view(request, request_id):
         requested_time_slot_id = request.POST.get('requested_time_slot_id')
         status = request.POST.get('status')
         
-        # Business category fields - handle empty strings
         business_category_id = request.POST.get('business_category_id', '').strip()
         business_subcategory_id = request.POST.get('business_subcategory_id', '').strip()
         
-        # Location fields
         postal_code = request.POST.get('postal_code', '').strip()
         city = request.POST.get('city', '').strip()
         country_region = request.POST.get('country_region', '').strip()
         
-        # Notes
         notes = request.POST.get('notes', '')
         admin_notes = request.POST.get('admin_notes', '')
         
         try:
-            # Update user if changed
             if user_id:
                 user = get_object_or_404(CustomUser, id=user_id, is_active=True)
                 demo_request.user = user
             
-            # Update demo
             if demo_id:
                 demo = get_object_or_404(Demo, id=demo_id, is_active=True)
                 demo_request.demo = demo
             
-            # Update date
             if requested_date:
                 new_date = datetime.strptime(requested_date, '%Y-%m-%d').date()
                 if new_date >= timezone.now().date() and new_date.weekday() != 6:
                     demo_request.requested_date = new_date
             
-            # Update time slot
             if requested_time_slot_id:
                 time_slot = get_object_or_404(TimeSlot, id=requested_time_slot_id)
                 demo_request.requested_time_slot = time_slot
             
-            # Update business category - convert empty string to None
             business_category = None
             business_subcategory = None
             
@@ -618,18 +721,15 @@ def admin_edit_demo_request_view(request, request_id):
             demo_request.business_category = business_category
             demo_request.business_subcategory = business_subcategory
             
-            # Update location - FIX HERE
             demo_request.postal_code = postal_code
             demo_request.city = city
             demo_request.country_region = country_region if country_region else None
             
-            # Fix is_international - convert to proper boolean
             if country_region and country_region.strip():
                 demo_request.is_international = (country_region != 'IN')
             else:
-                demo_request.is_international = False  # Default to False if no country
+                demo_request.is_international = False
             
-            # Update other fields
             demo_request.notes = notes
             demo_request.admin_notes = admin_notes
             demo_request.status = status
@@ -643,16 +743,13 @@ def admin_edit_demo_request_view(request, request_id):
         except Exception as e:
             messages.error(request, f'Error updating demo request: {str(e)}')
     
-    # GET request - show form
     customers = CustomUser.objects.filter(is_active=True, is_approved=True).order_by('first_name', 'last_name')
     demos = Demo.objects.filter(is_active=True).order_by('title')
     time_slots = TimeSlot.objects.filter(is_active=True).order_by('start_time')
     
-    # Get business categories and subcategories
     business_categories = BusinessCategory.objects.filter(is_active=True).order_by('name')
     business_subcategories = BusinessSubCategory.objects.filter(is_active=True).select_related('category').order_by('category__name', 'name')
     
-    # Context for sidebar badges
     pending_approvals = CustomUser.objects.filter(is_approved=False, is_active=True).count()
     open_enquiries = BusinessEnquiry.objects.filter(status='open').count()
     demo_requests_pending = DemoRequest.objects.filter(status='pending').count()
@@ -671,6 +768,11 @@ def admin_edit_demo_request_view(request, request_id):
     
     return render(request, 'admin/demo_requests/edit.html', context)
 
+
+# ================================================================================
+# DELETE DEMO REQUEST
+# ================================================================================
+
 @login_required
 @user_passes_test(is_admin)
 @require_http_methods(["POST"])
@@ -679,7 +781,6 @@ def admin_delete_demo_request_view(request, request_id):
     demo_request = get_object_or_404(DemoRequest, id=request_id)
     
     try:
-        # Only allow deletion of cancelled requests or with confirmation
         if demo_request.status not in ['cancelled'] and not request.POST.get('force_delete'):
             return JsonResponse({
                 'success': False,
@@ -707,21 +808,23 @@ def admin_delete_demo_request_view(request, request_id):
             'error': str(e)
         })
 
+
+# ================================================================================
+# DEMO REQUEST DETAIL
+# ================================================================================
+
 @login_required
 @user_passes_test(is_admin)
 def admin_demo_request_detail_view(request, request_id):
     """Demo request detail view with comprehensive management"""
     demo_request = get_object_or_404(DemoRequest, id=request_id)
     
-    # Get available time slots
     time_slots = TimeSlot.objects.filter(is_active=True).order_by('start_time')
     
-    # Get user's other requests
     user_other_requests = DemoRequest.objects.filter(
         user=demo_request.user
     ).exclude(id=request_id).order_by('-created_at')[:5]
     
-    # Check for scheduling conflicts if confirmed
     conflicts = []
     if demo_request.confirmed_date and demo_request.confirmed_time_slot:
         conflicts = DemoRequest.objects.filter(
@@ -730,7 +833,6 @@ def admin_demo_request_detail_view(request, request_id):
             status='confirmed'
         ).exclude(id=request_id)
     
-    # Context for sidebar badges
     pending_approvals = CustomUser.objects.filter(is_approved=False, is_active=True).count()
     open_enquiries = BusinessEnquiry.objects.filter(status='open').count()
     demo_requests_pending = DemoRequest.objects.filter(status='pending').count()
@@ -747,11 +849,19 @@ def admin_demo_request_detail_view(request, request_id):
     
     return render(request, 'admin/demo_requests/detail.html', context)
 
+
+# ================================================================================
+# CONFIRM/RESCHEDULE/CANCEL DEMO REQUEST - WITH ENHANCED VALIDATION
+# ================================================================================
+
 @login_required
 @user_passes_test(is_admin)
 @require_http_methods(["POST"])
 def admin_confirm_demo_request_view(request, request_id):
-    """Confirm demo request with date and time"""
+    """
+    Confirm demo request with date and time - WITH ENHANCED VALIDATION
+    ✅ Same validation logic as customer side
+    """
     demo_request = get_object_or_404(DemoRequest, id=request_id)
     
     try:
@@ -773,24 +883,98 @@ def admin_confirm_demo_request_view(request, request_id):
             # Parse date
             confirmed_date = datetime.strptime(confirmed_date_str, '%Y-%m-%d').date()
             
-            # Check if date is not in past
-            if confirmed_date < timezone.now().date():
+            # Get time slot
+            confirmed_time_slot = get_object_or_404(TimeSlot, id=confirmed_time_slot_id)
+            
+            # ✅ VALIDATION LOGIC - Same as customer side
+            indian_tz = pytz.timezone('Asia/Kolkata')
+            now_utc = timezone.now()
+            now_indian = now_utc.astimezone(indian_tz)
+            
+            today = now_indian.date()
+            current_time = now_indian.time()
+            
+            print(f"\n{'='*60}")
+            print(f"🔍 ADMIN BOOKING VALIDATION")
+            print(f"{'='*60}")
+            print(f"📅 Confirmed Date: {confirmed_date}")
+            print(f"⏰ Time Slot: {confirmed_time_slot.start_time} - {confirmed_time_slot.end_time}")
+            print(f"🇮🇳 Current Indian Time: {now_indian}")
+            print(f"📆 Today's Date: {today}")
+            print(f"🕐 Current Time: {current_time}")
+            print(f"👤 Admin: {request.user.username}")
+            print(f"{'='*60}\n")
+            
+            # ✅ VALIDATION 0: Check if date is in the past
+            if confirmed_date < today:
+                print(f"❌ VALIDATION FAILED: Past date")
                 return JsonResponse({
                     'success': False,
                     'error': 'Cannot confirm demo for past dates'
                 })
             
-            # Check if date is not Sunday
+            # ✅ VALIDATION 1: Check if date is Sunday
             if confirmed_date.weekday() == 6:
+                print(f"❌ VALIDATION FAILED: Sunday selected")
                 return JsonResponse({
                     'success': False,
                     'error': 'Demos cannot be scheduled on Sundays'
                 })
             
-            # Get time slot
-            confirmed_time_slot = get_object_or_404(TimeSlot, id=confirmed_time_slot_id)
+            # ✅ VALIDATION 2: Check if requested time slot has ENDED (for today)
+            if confirmed_date == today:
+                # Check if slot has ENDED (current time >= END time)
+                if current_time >= confirmed_time_slot.end_time:
+                    print(f"❌ VALIDATION FAILED: Slot has ended")
+                    print(f"   Slot ends at: {confirmed_time_slot.end_time}")
+                    print(f"   Current time: {current_time}")
+                    
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'The time slot {confirmed_time_slot.start_time.strftime("%I:%M %p")} - '
+                                f'{confirmed_time_slot.end_time.strftime("%I:%M %p")} has already ended '
+                                f'(Current time: {current_time.strftime("%I:%M %p")}). '
+                                f'Please select a future time slot.'
+                    })
+                
+                # Check if slot is starting within 30 minutes (but hasn't started yet)
+                slot_start_datetime = indian_tz.localize(
+                    datetime.combine(confirmed_date, confirmed_time_slot.start_time)
+                )
+                current_datetime = now_indian
+                
+                time_until_start = (slot_start_datetime - current_datetime).total_seconds() / 60
+                
+                print(f"\n🔍 STARTING SOON CHECK:")
+                print(f"   Slot start: {slot_start_datetime}")
+                print(f"   Current: {current_datetime}")
+                print(f"   Time until start: {time_until_start:.2f} minutes")
+                
+                # Only block if starting within 30 minutes AND hasn't started yet
+                if 0 < time_until_start < 30:
+                    print(f"❌ VALIDATION FAILED: Slot starting within 30 minutes ({time_until_start:.2f} min)")
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'Cannot confirm slots starting within 30 minutes. '
+                                f'The slot at {confirmed_time_slot.start_time.strftime("%I:%M %p")} '
+                                f'is starting in {int(time_until_start)} minutes. '
+                                f'Please select a slot starting at least 30 minutes from now.'
+                    })
+                elif time_until_start <= 0:
+                    # Slot has already started - check if it hasn't ended
+                    if current_time < confirmed_time_slot.end_time:
+                        # Slot is in progress - ALLOW CONFIRMATION!
+                        print(f"✅ Slot in progress but still confirmable (ends at {confirmed_time_slot.end_time})")
+                    else:
+                        print(f"❌ Slot has ended")
+                        return JsonResponse({
+                            'success': False,
+                            'error': 'The time slot has already ended. Please select a future time slot.'
+                        })
+                else:
+                    print(f"✅ STARTING SOON CHECK PASSED: {time_until_start:.2f} minutes until start")
             
-            # Check for conflicts
+            # ✅ VALIDATION 3: Check for conflicts
             conflicts = DemoRequest.objects.filter(
                 confirmed_date=confirmed_date,
                 confirmed_time_slot=confirmed_time_slot,
@@ -798,10 +982,16 @@ def admin_confirm_demo_request_view(request, request_id):
             ).exclude(id=request_id)
             
             if conflicts.exists():
+                print(f"❌ VALIDATION FAILED: Time slot conflict")
                 return JsonResponse({
                     'success': False,
                     'error': f'Time slot conflict: Another demo is already scheduled at this time'
                 })
+            
+            # ✅ All validations passed
+            print(f"\n{'='*60}")
+            print(f"✅ ALL VALIDATIONS PASSED - CONFIRMING BOOKING")
+            print(f"{'='*60}\n")
             
             # Update request
             demo_request.status = 'confirmed'
@@ -813,6 +1003,9 @@ def admin_confirm_demo_request_view(request, request_id):
             
             # Send confirmation email
             send_demo_confirmation_email(demo_request)
+            
+            # Create notification
+            create_demo_confirmation_notification(demo_request)
             
             messages.success(
                 request, 
@@ -826,6 +1019,7 @@ def admin_confirm_demo_request_view(request, request_id):
             })
             
         elif action == 'reschedule':
+            # Similar validation for reschedule
             new_date_str = data.get('new_date')
             new_time_slot_id = data.get('new_time_slot_id')
             reason = data.get('reason', '')
@@ -839,8 +1033,16 @@ def admin_confirm_demo_request_view(request, request_id):
             new_date = datetime.strptime(new_date_str, '%Y-%m-%d').date()
             new_time_slot = get_object_or_404(TimeSlot, id=new_time_slot_id)
             
+            # Apply same validation logic as confirm
+            indian_tz = pytz.timezone('Asia/Kolkata')
+            now_utc = timezone.now()
+            now_indian = now_utc.astimezone(indian_tz)
+            
+            today = now_indian.date()
+            current_time = now_indian.time()
+            
             # Check constraints
-            if new_date < timezone.now().date():
+            if new_date < today:
                 return JsonResponse({
                     'success': False,
                     'error': 'Cannot reschedule to past dates'
@@ -851,6 +1053,27 @@ def admin_confirm_demo_request_view(request, request_id):
                     'success': False,
                     'error': 'Demos cannot be scheduled on Sundays'
                 })
+            
+            # Check if slot has ended (for today)
+            if new_date == today:
+                if current_time >= new_time_slot.end_time:
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'The time slot has already ended. Please select a future time slot.'
+                    })
+                
+                # Check starting soon
+                slot_start_datetime = indian_tz.localize(
+                    datetime.combine(new_date, new_time_slot.start_time)
+                )
+                current_datetime = now_indian
+                time_until_start = (slot_start_datetime - current_datetime).total_seconds() / 60
+                
+                if 0 < time_until_start < 30:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Cannot reschedule to slots starting within 30 minutes'
+                    })
             
             # Check conflicts
             conflicts = DemoRequest.objects.filter(
@@ -926,10 +1149,19 @@ def admin_confirm_demo_request_view(request, request_id):
             })
             
     except Exception as e:
+        print(f"❌ ERROR in admin_confirm_demo_request_view: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
         return JsonResponse({
             'success': False,
             'error': str(e)
         })
+
+
+# ================================================================================
+# BULK ACTIONS
+# ================================================================================
 
 @login_required
 @user_passes_test(is_admin)
@@ -1011,6 +1243,11 @@ def admin_bulk_demo_request_actions_view(request):
             'error': str(e)
         })
 
+
+# ================================================================================
+# CALENDAR VIEW
+# ================================================================================
+
 @login_required
 @user_passes_test(is_admin)
 def admin_demo_requests_calendar_view(request):
@@ -1060,97 +1297,178 @@ def admin_demo_requests_calendar_view(request):
     
     return render(request, 'admin/demo_requests/calendar.html', context)
 
-# Email utility functions
-def send_demo_confirmation_email(demo_request):
-    """Send demo confirmation email to customer"""
+
+# ================================================================================
+# AJAX - ADMIN CHECK SLOT AVAILABILITY
+# ================================================================================
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["GET"])
+def ajax_admin_check_slot_availability(request):
+    """
+    AJAX endpoint for admin to check time slot availability
+    ✅ Fixed: Slot in progress logic
+    """
     try:
-        subject = f'Demo Confirmed: {demo_request.demo.title}'
-        message = f"""
-Dear {demo_request.user.first_name},
-
-Your demo request has been confirmed!
-
-Demo Details:
-- Product: {demo_request.demo.title}
-- Date: {demo_request.confirmed_date.strftime('%B %d, %Y')}
-- Time: {demo_request.confirmed_time_slot}
-
-We look forward to showcasing our solution to you.
-
-Best regards,
-Demo Portal Team
-        """
+        requested_date = request.GET.get('date')
         
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[demo_request.user.email],
-            fail_silently=True,
-        )
-    except Exception as e:
-        print(f"Error sending confirmation email: {e}")
-
-def send_demo_reschedule_email(demo_request, reason):
-    """Send demo reschedule email to customer"""
-    try:
-        subject = f'Demo Rescheduled: {demo_request.demo.title}'
-        message = f"""
-Dear {demo_request.user.first_name},
-
-Your demo has been rescheduled.
-
-New Demo Details:
-- Product: {demo_request.demo.title}
-- New Date: {demo_request.confirmed_date.strftime('%B %d, %Y')}
-- New Time: {demo_request.confirmed_time_slot}
-
-Reason: {reason}
-
-We apologize for any inconvenience.
-
-Best regards,
-Demo Portal Team
-        """
+        if not requested_date:
+            return JsonResponse({'success': False, 'error': 'Date is required'}, status=400)
         
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[demo_request.user.email],
-            fail_silently=True,
-        )
-    except Exception as e:
-        print(f"Error sending reschedule email: {e}")
-
-def send_demo_cancellation_email(demo_request, reason):
-    """Send demo cancellation email to customer"""
-    try:
-        subject = f'Demo Cancelled: {demo_request.demo.title}'
-        message = f"""
-Dear {demo_request.user.first_name},
-
-Unfortunately, your demo request has been cancelled.
-
-Demo Details:
-- Product: {demo_request.demo.title}
-- Original Date: {demo_request.requested_date.strftime('%B %d, %Y')}
-- Time: {demo_request.requested_time_slot}
-
-Reason: {reason}
-
-Please feel free to submit a new request or contact us directly.
-
-Best regards,
-Demo Portal Team
-        """
+        try:
+            check_date = datetime.strptime(requested_date, '%Y-%m-%d').date()
+        except ValueError:
+            return JsonResponse({'success': False, 'error': 'Invalid date format'}, status=400)
         
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[demo_request.user.email],
-            fail_silently=True,
-        )
+        # Check if Sunday
+        if check_date.weekday() == 6:
+            return JsonResponse({
+                'success': False,
+                'available': False,
+                'reason': 'sunday',
+                'message': 'Demo sessions are not available on Sundays'
+            })
+        
+        indian_tz = pytz.timezone('Asia/Kolkata')
+        now_utc = timezone.now()
+        now_indian = now_utc.astimezone(indian_tz)
+        
+        today = now_indian.date()
+        current_time = now_indian.time()
+        
+        print(f"🕐 Admin checking slots for: {check_date}")
+        print(f"🇮🇳 Current Indian time: {now_indian}")
+        
+        # Check if past date
+        if check_date < today:
+            return JsonResponse({
+                'success': False,
+                'available': False,
+                'reason': 'past',
+                'message': 'Cannot confirm demos for past dates'
+            })
+        
+        # Get all active time slots
+        all_slots = TimeSlot.objects.filter(is_active=True).order_by('start_time')
+        
+        if not all_slots.exists():
+            return JsonResponse({'success': False, 'message': 'No time slots configured'})
+        
+        # Get all confirmed bookings for this date
+        confirmed_bookings = DemoRequest.objects.filter(
+            Q(confirmed_date=check_date) | 
+            Q(requested_date=check_date, confirmed_date__isnull=True),
+            status__in=['pending', 'confirmed']
+        ).select_related('demo', 'user', 'confirmed_time_slot', 'requested_time_slot')
+        
+        slots_data = []
+        max_bookings_per_slot = 1
+        is_today = check_date == today
+        
+        for slot in all_slots:
+            is_past_slot = False
+            is_starting_soon = False
+            
+            if is_today:
+                # ✅ FIXED: Check if slot has ENDED (current time >= end time)
+                if current_time >= slot.end_time:
+                    is_past_slot = True
+                    print(f"⏰ Slot {slot.start_time}-{slot.end_time} - ENDED (current: {current_time})")
+                else:
+                    # Slot hasn't ended - check if it's starting soon
+                    slot_start_datetime = indian_tz.localize(
+                        datetime.combine(check_date, slot.start_time)
+                    )
+                    current_datetime = now_indian
+                    time_until_start = (slot_start_datetime - current_datetime).total_seconds() / 60
+                    
+                    # Check if starting within 30 minutes
+                    if 0 < time_until_start < 30:
+                        is_starting_soon = True
+                        is_past_slot = True  # Block booking
+                        print(f"   ⚠️ Starting soon ({time_until_start:.2f} min) - BLOCKED")
+                    elif time_until_start <= 0:
+                        # Slot has already started but not ended
+                        minutes_since_start = abs(time_until_start)
+                        print(f"   ✅ Slot in progress (started {minutes_since_start:.2f} min ago) - BOOKABLE")
+                    else:
+                        print(f"   ✅ Future slot: {time_until_start:.2f} minutes until start - BOOKABLE")
+            
+            # Get bookings for this slot
+            slot_bookings = confirmed_bookings.filter(
+                Q(confirmed_time_slot=slot) | 
+                Q(requested_time_slot=slot, confirmed_time_slot__isnull=True)
+            )
+            
+            confirmed_count = slot_bookings.count()
+            available_spots = max_bookings_per_slot - confirmed_count
+            
+            # Determine status
+            if is_past_slot and not is_starting_soon:
+                status = 'past'
+                is_available = False
+                status_message = 'Time Passed'
+            elif is_starting_soon:
+                status = 'starting_soon'
+                is_available = False
+                status_message = 'Starting Soon'
+            elif available_spots <= 0:
+                status = 'full'
+                is_available = False
+                status_message = 'Fully Booked'
+            else:
+                status = 'available'
+                is_available = True
+                status_message = 'Available'
+            
+            # Get booking details for admin
+            booking_details = []
+            for booking in slot_bookings:
+                booking_details.append({
+                    'id': booking.id,
+                    'customer_name': booking.user.full_name,
+                    'customer_email': booking.user.email,
+                    'demo_title': booking.demo.title,
+                    'status': booking.get_status_display(),
+                })
+            
+            slot_info = {
+                'id': slot.id,
+                'start_time': slot.start_time.strftime('%I:%M %p'),
+                'end_time': slot.end_time.strftime('%I:%M %p'),
+                'slot_type': slot.get_slot_type_display(),
+                'is_available': is_available,
+                'confirmed_bookings': confirmed_count,
+                'available_spots': max(0, available_spots),
+                'total_capacity': max_bookings_per_slot,
+                'status': status,
+                'status_message': status_message,
+                'is_past': is_past_slot,
+                'is_starting_soon': is_starting_soon,
+                'booking_details': booking_details,
+            }
+            
+            slots_data.append(slot_info)
+        
+        return JsonResponse({
+            'success': True,
+            'available': True,
+            'date': requested_date,
+            'day_name': check_date.strftime('%A'),
+            'is_today': is_today,
+            'slots': slots_data,
+            'total_bookings': confirmed_bookings.count(),
+            'message': f'{confirmed_bookings.count()} demos scheduled for {check_date.strftime("%B %d, %Y")}'
+        })
+        
     except Exception as e:
-        print(f"Error sending cancellation email: {e}")
+        print(f"❌ Error in ajax_admin_check_slot_availability: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        return JsonResponse({
+            'success': False,
+            'error': 'Server error occurred',
+            'details': str(e)
+        }, status=500)

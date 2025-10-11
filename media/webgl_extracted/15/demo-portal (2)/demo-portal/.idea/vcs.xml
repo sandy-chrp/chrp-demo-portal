@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="VcsDirectoryMappings">
-    <mapping directory="$PROJECT_DIR$/demo-portal-admin" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/demo-portal-api" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/demo-portal-customer" vcs="Git" />
-  </component>
-</project>

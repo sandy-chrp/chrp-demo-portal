@@ -9,6 +9,7 @@ from . import business_categories_views
 from . import admin_notification_views
 from . import admin_settings_views
 from .views import get_subcategories_ajax, get_subcategories_for_category
+from . import user_activity_analytics_views
 
 # Import WebGL views
 from . import webgl_views
@@ -21,9 +22,8 @@ urlpatterns = [
     # =====================================
     
     # Landing Page & Home
-    path('', views.landing_page_view, name='home'),
-    path('landing/', views.landing_page_view, name='landing'),
-    path('dashboard/', views.dashboard_view, name='dashboard'),
+    # path('', views.landing_page_view, name='home'),
+
     path('contact/', views.contact_view, name='contact'),
     path('contact-sales/', views.contact_sales_view, name='contact_sales'),
     
@@ -32,11 +32,11 @@ urlpatterns = [
     # =====================================
     
     # Admin Authentication
-    path('admin/', views.admin_login_view, name='admin_login'),
+    path('', views.admin_login_view, name='admin_login'),
     path('admin/logout/', views.admin_logout_view, name='admin_logout'),
     path('admin/dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     
-    path('dashboard/', views.dashboard_redirect, name='dashboard'),
+    # path('dashboard/', views.dashboard_redirect, name='dashboard'),
 
     # =====================================
     # ADMIN CUSTOMER MANAGEMENT (CRUD)
@@ -52,7 +52,9 @@ urlpatterns = [
     path('admin/customers/<int:customer_id>/unblock/', admin_customer_views.admin_unblock_customer, name='admin_unblock_customer'),
     path('admin/customers/<int:customer_id>/delete/', admin_customer_views.admin_delete_customer, name='admin_delete_customer'),
     path('admin/customers/bulk-actions/', admin_customer_views.admin_bulk_customer_actions, name='admin_bulk_customer_actions'),
-    
+    path('admin/customers/bulk-import/', admin_customer_views.admin_bulk_import_customers, name='admin_bulk_import_customers'),
+    path('admin/customers/import-template/', admin_customer_views.download_import_template, name='download_import_template'),
+
     # =====================================
     # ADMIN DEMO MANAGEMENT  
     # =====================================
@@ -114,7 +116,8 @@ urlpatterns = [
     path('admin/demo-requests/<int:request_id>/edit/', demo_request_views.admin_edit_demo_request_view, name='admin_edit_demo_request'),
     path('admin/demo-requests/<int:request_id>/delete/', demo_request_views.admin_delete_demo_request_view, name='admin_delete_demo_request'),
     path('admin/demo-requests/<int:request_id>/confirm/', demo_request_views.admin_confirm_demo_request_view, name='admin_confirm_demo_request'),
-        
+    path('admin/demo-requests/ajax-check-slots/', demo_request_views.ajax_admin_check_slot_availability, name='ajax_admin_check_slot_availability'),
+    
     # =====================================
     # ADMIN CATEGORY MANAGEMENT
     # =====================================
@@ -216,4 +219,21 @@ urlpatterns = [
 
     path('admin/customers/send-otp/', admin_customer_views.send_email_otp, name='admin_send_otp'),
     path('admin/customers/verify-otp/', admin_customer_views.verify_email_otp, name='admin_verify_otp'),
+
+    path('admin/activity-analytics/', 
+         user_activity_analytics_views.user_activity_analytics_page, 
+         name='user_activity_analytics'),
+    
+    path('admin/ajax/activity-analytics/', 
+         user_activity_analytics_views.ajax_activity_analytics, 
+         name='ajax_activity_analytics'),
+    
+    path('admin/ajax/quick-stats/', 
+         user_activity_analytics_views.ajax_quick_stats, 
+         name='ajax_quick_stats'),
+
+    path('admin/ajax/registration-data/', 
+     user_activity_analytics_views.ajax_registration_data, 
+     name='ajax_registration_data'),         
+
 ]

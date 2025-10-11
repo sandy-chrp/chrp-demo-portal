@@ -1,8 +1,6 @@
-<!-- templates/admin/dashboard.html - Complete Admin Dashboard -->
 {% extends 'admin/base.html' %}
 
 {% block admin_title %}Dashboard Overview{% endblock %}
-{% block page_title %}Dashboard Overview{% endblock %}
 
 {% block breadcrumb %}
     <!-- No breadcrumb needed for dashboard -->
@@ -36,6 +34,7 @@
         margin-bottom: var(--spacing-lg);
         display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: var(--spacing-sm);
     }
 
@@ -158,38 +157,6 @@
         color: var(--gray-600);
     }
 
-    .system-health {
-        display: flex;
-        gap: var(--spacing-lg);
-        flex-wrap: wrap;
-        margin-bottom: var(--spacing-lg);
-    }
-
-    .health-item {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        padding: var(--spacing-sm) var(--spacing-md);
-        background: var(--gray-50);
-        border-radius: var(--radius-md);
-        font-size: 0.875rem;
-    }
-
-    .health-status {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--success-color);
-    }
-
-    .health-status.warning {
-        background: var(--warning-color);
-    }
-
-    .health-status.error {
-        background: var(--danger-color);
-    }
-
     .table-responsive {
         border-radius: var(--radius-lg);
         overflow: hidden;
@@ -257,6 +224,111 @@
         color: var(--gray-400);
         margin-bottom: var(--spacing-lg);
     }
+
+    /* Activity Filters */
+    .activity-filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .activity-filters .btn {
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .activity-filters .btn.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .activity-filters .btn:not(.active):hover {
+        background: rgba(30, 60, 114, 0.1);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    #regCustomDateRange {
+        padding: 15px;
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        margin-bottom: 15px;
+    }
+
+    /* Activity Stats Cards */
+    .activity-stat-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--gray-200);
+        display: flex;
+        gap: var(--spacing-md);
+        align-items: center;
+        transition: all 0.3s ease;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .activity-stat-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .activity-stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .activity-stat-content {
+        flex: 1;
+    }
+
+    .activity-stat-label {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-bottom: 4px;
+    }
+
+    .activity-stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    .activity-stat-change {
+        font-size: 0.75rem;
+        color: var(--success-color);
+        font-weight: 600;
+    }
+
+    .activity-stat-change.negative {
+        color: var(--danger-color);
+    }
+
+    .activity-stat-change i {
+        margin-right: 4px;
+    }
+
+    /* Loading State */
+    .loading-overlay {
+        display: none;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .loading-overlay.active {
+        display: block;
+    }
 </style>
 {% endblock %}
 
@@ -265,7 +337,7 @@
 <div class="admin-card">
     <div class="admin-card-body">
         <div class="row align-items-center">
-            <div class="col-lg-8">
+            <div class="col-lg-12">
                 <h2 class="mb-3">
                     <i class="fas fa-chart-line text-primary me-2"></i>
                     Welcome back, {{ user.first_name|default:"Administrator" }}!
@@ -273,30 +345,6 @@
                 <p class="text-muted mb-3">
                     Here's what's happening with your demo portal today.
                 </p>
-                <div class="system-health">
-                    <div class="health-item">
-                        <div class="health-status"></div>
-                        <span>Database</span>
-                    </div>
-                    <div class="health-item">
-                        <div class="health-status"></div>
-                        <span>Email Service</span>
-                    </div>
-                    <div class="health-item">
-                        <div class="health-status"></div>
-                        <span>File Storage</span>
-                    </div>
-                    <div class="health-item">
-                        <div class="health-status"></div>
-                        <span>Cache</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 text-lg-end">
-                <div class="d-flex flex-column gap-2">
-                    <span class="text-muted small">Last updated:</span>
-                    <span class="fw-semibold">{{ "now"|date:"M d, Y H:i" }}</span>
-                </div>
             </div>
         </div>
     </div>
@@ -336,19 +384,6 @@
         {% endif %}
     </div>
 
-    <!-- Demo Views -->
-    <div class="stat-card info">
-        <div class="stat-icon">
-            <i class="fas fa-play-circle"></i>
-        </div>
-        <div class="stat-number">{{ total_demo_views|default:0 }}</div>
-        <div class="stat-label">Total Demo Views</div>
-        <div class="stat-change positive">
-            <i class="fas fa-arrow-up"></i>
-            +{{ demo_views_today|default:0 }} today
-        </div>
-    </div>
-
     <!-- Active Demos -->
     <div class="stat-card success">
         <div class="stat-icon">
@@ -374,23 +409,6 @@
             <div class="stat-change positive">
                 <i class="fas fa-check"></i>
                 No pending requests
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- Open Enquiries -->
-    <div class="stat-card danger">
-        <div class="stat-icon">
-            <i class="fas fa-envelope-open"></i>
-        </div>
-        <div class="stat-number">{{ open_enquiries|default:0 }}</div>
-        <div class="stat-label">Open Enquiries</div>
-        {% if overdue_enquiries > 0 %}
-            <small class="text-danger">{{ overdue_enquiries }} overdue</small>
-        {% else %}
-            <div class="stat-change positive">
-                <i class="fas fa-check"></i>
-                All up to date
             </div>
         {% endif %}
     </div>
@@ -441,114 +459,264 @@
 </div>
 
 <!-- Charts and Analytics -->
-<div class="row">
-    <!-- User Growth Chart -->
-    <div class="col-lg-8">
-        <div class="chart-card">
-            <div class="chart-title">
-                <i class="fas fa-chart-line"></i>User Registration Trend (Last 6 Months)
-            </div>
-            <div class="chart-container">
-                <canvas id="userGrowthChart"></canvas>
-            </div>
+<!-- User Growth Chart with Filters - FULL WIDTH -->
+<div class="chart-card">
+    <div class="chart-title">
+        <span>
+            <i class="fas fa-chart-line"></i>User Registration
+        </span>
+        <div class="activity-filters">
+            <button class="btn btn-sm btn-outline-primary active" 
+                    onclick="loadRegistrationData(event, 'daily')" data-reg-period="daily">Daily</button>
+            <button class="btn btn-sm btn-outline-primary" 
+                    onclick="loadRegistrationData(event, 'weekly')" data-reg-period="weekly">Weekly</button>
+            <button class="btn btn-sm btn-outline-primary" 
+                    onclick="loadRegistrationData(event, 'monthly')" data-reg-period="monthly">Monthly</button>
+            <button class="btn btn-sm btn-outline-primary" 
+                    onclick="showRegCustomDatePicker(event)" data-reg-period="custom">
+                <i class="fas fa-calendar-alt"></i> Custom
+            </button>
         </div>
-
-        <!-- Weekly Activity Chart -->
-        <div class="chart-card">
-            <div class="chart-title">
-                <i class="fas fa-chart-bar"></i>Weekly Activity Overview
+    </div>
+    
+    <!-- Custom Date Range -->
+    <div id="regCustomDateRange" style="display: none;">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <input type="date" class="form-control form-control-sm" id="regStartDate">
             </div>
-            <div class="chart-container">
-                <canvas id="weeklyActivityChart"></canvas>
+            <div class="col-md-4">
+                <input type="date" class="form-control form-control-sm" id="regEndDate">
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-sm w-100" onclick="applyRegCustomDateRange(event)">
+                    <i class="fas fa-search"></i> Apply
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activity -->
-    <div class="col-lg-4">
-        <div class="admin-card">
-            <div class="admin-card-header">
-                <h3 class="admin-card-title">
-                    <i class="fas fa-clock"></i>Recent Activity
-                </h3>
-                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+    <!-- Loading Indicator -->
+    <div id="regLoadingIndicator" style="display: none; text-align: center; padding: 2rem;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading registration data...</p>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="userGrowthChart"></canvas>
+    </div>
+</div>
+
+
+
+<!-- User Demographics Section -->
+<div class="row">
+    <!-- User Demographics by Country -->
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-globe"></i>User Demographics by Country
             </div>
-            <div class="admin-card-body p-0">
-                <div class="activity-feed">
-                    {% if recent_users %}
-                        {% for user in recent_users %}
-                            <div class="activity-item">
-                                <div class="activity-icon user">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">New User Registration</div>
-                                    <div class="activity-description">
-                                        {{ user.full_name }} from {{ user.organization|default:"Unknown" }}
-                                    </div>
-                                    <div class="activity-time">{{ user.created_at|timesince }} ago</div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+            <div class="chart-container">
+                <canvas id="countryDemographicsChart"></canvas>
+            </div>
+        </div>
+    </div>
 
-                    {% if recent_demo_requests %}
-                        {% for request in recent_demo_requests %}
-                            <div class="activity-item">
-                                <div class="activity-icon demo">
-                                    <i class="fas fa-calendar-plus"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Demo Request</div>
-                                    <div class="activity-description">
-                                        {{ request.user.full_name }} requested {{ request.demo.title }}
-                                    </div>
-                                    <div class="activity-time">{{ request.created_at|timesince }} ago</div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+    <!-- User Acquisition Sources -->
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-chart-pie"></i>User Acquisition Sources
+            </div>
+            <div class="chart-container">
+                <canvas id="userSourceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
 
-                    {% if recent_enquiries %}
-                        {% for enquiry in recent_enquiries %}
-                            <div class="activity-item">
-                                <div class="activity-icon enquiry">
-                                    <i class="fas fa-envelope"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">New Enquiry</div>
-                                    <div class="activity-description">
-                                        {{ enquiry.full_name }} - {{ enquiry.enquiry_id }}
-                                    </div>
-                                    <div class="activity-time">{{ enquiry.created_at|timesince }} ago</div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+<!-- User Activity Analytics Section - AJAX VERSION (No Page Reload) -->
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h3 class="admin-card-title">
+            <i class="fas fa-chart-area"></i>User Activity Analytics
+        </h3>
+        <div class="activity-filters">
+            <button class="btn btn-sm btn-outline-primary active" 
+                    data-period="daily" onclick="loadActivityAjax(event, 'daily')">Daily</button>
+            <button class="btn btn-sm btn-outline-primary" 
+                    data-period="weekly" onclick="loadActivityAjax(event, 'weekly')">Weekly</button>
+            <button class="btn btn-sm btn-outline-primary" 
+                    data-period="monthly" onclick="loadActivityAjax(event, 'monthly')">Monthly</button>
+            <button class="btn btn-sm btn-outline-primary" 
+                    data-period="custom" onclick="toggleActivityCustomDate(event)">
+                <i class="fas fa-calendar-alt"></i> Custom
+            </button>
+        </div>
+    </div>
+    <div class="admin-card-body">
+        <!-- Loading Indicator -->
+        <div id="activityLoadingIndicator" style="display: none; text-align: center; padding: 2rem;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading analytics data...</p>
+        </div>
 
-                    {% if recent_contact_messages %}
-                        {% for message in recent_contact_messages %}
-                            <div class="activity-item">
-                                <div class="activity-icon contact">
-                                    <i class="fas fa-phone"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Contact Message</div>
-                                    <div class="activity-description">
-                                        {{ message.name }} - {{ message.subject }}
-                                    </div>
-                                    <div class="activity-time">{{ message.created_at|timesince }} ago</div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+        <!-- Custom Date Range for Activity -->
+        <div id="activityCustomDateRange" style="display: none; margin-bottom: 20px;">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Start Date</label>
+                    <input type="date" class="form-control" id="activityStartDate">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">End Date</label>
+                    <input type="date" class="form-control" id="activityEndDate">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-primary d-block w-100" onclick="applyActivityDateRangeAjax()">
+                        <i class="fas fa-search"></i> Apply
+                    </button>
+                </div>
+            </div>
+        </div>
 
-                    {% if not recent_users and not recent_demo_requests and not recent_enquiries and not recent_contact_messages %}
-                        <div class="empty-state">
-                            <i class="fas fa-clock"></i>
-                            <p>No recent activity</p>
+        <!-- Activity Stats Grid -->
+        <div class="row mb-4" id="activityStatsGrid">
+            <div class="col-md-3">
+                <div class="activity-stat-card">
+                    <div class="activity-stat-icon" style="background: rgba(30, 60, 114, 0.1); color: rgb(30, 60, 114);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="activity-stat-content">
+                        <div class="activity-stat-label">Active Users</div>
+                        <div class="activity-stat-value" id="statActiveUsers">{{ activity_stats.active_users|default:0 }}</div>
+                        <div class="activity-stat-change" id="changeActiveUsers">
+                            <i class="fas fa-arrow-up"></i> 0%
                         </div>
-                    {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="activity-stat-card">
+                    <div class="activity-stat-icon" style="background: rgba(16, 185, 129, 0.1); color: rgb(16, 185, 129);">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="activity-stat-content">
+                        <div class="activity-stat-label">Total Views</div>
+                        <div class="activity-stat-value" id="statTotalViews">{{ activity_stats.total_views|default:0 }}</div>
+                        <div class="activity-stat-change" id="changeTotalViews">
+                            <i class="fas fa-arrow-up"></i> 0%
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="activity-stat-card">
+                    <div class="activity-stat-icon" style="background: rgba(59, 130, 246, 0.1); color: rgb(59, 130, 246);">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="activity-stat-content">
+                        <div class="activity-stat-label">Demo Requests</div>
+                        <div class="activity-stat-value" id="statDemoRequests">{{ activity_stats.demo_requests|default:0 }}</div>
+                        <div class="activity-stat-change" id="changeDemoRequests">
+                            <i class="fas fa-arrow-up"></i> 0%
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="activity-stat-card">
+                    <div class="activity-stat-icon" style="background: rgba(245, 158, 11, 0.1); color: rgb(245, 158, 11);">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="activity-stat-content">
+                        <div class="activity-stat-label">Enquiries</div>
+                        <div class="activity-stat-value" id="statEnquiries">{{ activity_stats.enquiries|default:0 }}</div>
+                        <div class="activity-stat-change" id="changeEnquiries">
+                            <i class="fas fa-arrow-up"></i> 0%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Chart -->
+        <div class="chart-container" style="height: 400px;">
+            <canvas id="userActivityChart"></canvas>
+        </div>
+
+        <!-- Activity Breakdown Table -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h5 class="mb-3"><i class="fas fa-clock"></i> Peak Activity Hours</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Time Slot</th>
+                                <th>Activities</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="peakHoursTableBody">
+                            {% for hour in peak_hours %}
+                            <tr>
+                                <td>{{ hour.time_slot }}</td>
+                                <td>{{ hour.count }}</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ hour.percentage }}%; background: rgb(30, 60, 114);">
+                                            {{ hour.percentage }}%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3"><i class="fas fa-fire"></i> Most Active Users</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Organization</th>
+                                <th>Activities</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activeUsersTableBody">
+                            {% for user in most_active_users %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ user.full_name }}</div>
+                                    <small class="text-muted">{{ user.email }}</small>
+                                </td>
+                                <td>{{ user.organization|default:"N/A" }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ user.activity_count }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -588,7 +756,6 @@
                                         </td>
                                         <td>
                                             <div class="fw-semibold">{{ request.demo.title|truncatechars:30 }}</div>
-                                            <small class="text-muted">{{ request.demo.category.name }}</small>
                                         </td>
                                         <td>
                                             <div>{{ request.requested_date|date:"M d" }}</div>
@@ -696,7 +863,6 @@
                 <thead>
                     <tr>
                         <th>Demo Title</th>
-                        <th>Category</th>
                         <th>Views</th>
                         <th>Likes</th>
                         <th>Created</th>
@@ -714,9 +880,8 @@
                                     </small>
                                 {% endif %}
                             </td>
-                            <td>{{ demo.category.name }}</td>
                             <td>
-                                <span class="fw-semibold">{{ demo.views|default:0 }}</span>
+                                <span class="fw-semibold">{{ demo.views_count_calc|default:0 }}</span>
                             </td>
                             <td>{{ demo.likes_count }}</td>
                             <td>{{ demo.created_at|date:"M d, Y" }}</td>
@@ -738,53 +903,310 @@
 {% endblock %}
 
 {% block admin_extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script>
+// Global Chart Instances
+let activityChartInstance = null;
+let userGrowthChartInstance = null;
+let weeklyActivityChartInstance = null;
+let countryChartInstance = null;
+let sourceChartInstance = null;
+
+// Get CSRF Token
+function getCSRFToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+        || document.querySelector('[name=csrfmiddlewaretoken]')?.value 
+        || '';
+}
+
+// ============ REGISTRATION CHART AJAX FUNCTIONS ============
+function loadRegistrationData(event, period, startDate = null, endDate = null) {
+    if (event) event.preventDefault();
+    
+    const loadingIndicator = document.getElementById('regLoadingIndicator');
+    if (loadingIndicator) loadingIndicator.style.display = 'block';
+    
+    let url = `/admin/ajax/registration-data/?period=${period}`;
+    if (period === 'custom' && startDate && endDate) {
+        url += `&start_date=${startDate}&end_date=${endDate}`;
+    }
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            updateRegistrationChart(data.monthly_users);
+            
+            // Update active button
+            document.querySelectorAll('[data-reg-period]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`[data-reg-period="${period}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        } else {
+            alert('Error: ' + (data.error || 'Failed to load data'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to load registration data: ' + error.message);
+    })
+    .finally(() => {
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
+    });
+}
+
+function updateRegistrationChart(monthlyUsers) {
+    const ctx = document.getElementById('userGrowthChart');
+    if (!ctx) return;
+
+    if (userGrowthChartInstance) userGrowthChartInstance.destroy();
+
+    userGrowthChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthlyUsers.map(d => d.month),
+            datasets: [{
+                label: 'New Users',
+                data: monthlyUsers.map(d => d.count),
+                borderColor: 'rgb(30, 60, 114)',
+                backgroundColor: 'rgba(30, 60, 114, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: 'rgb(30, 60, 114)',
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.1)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function showRegCustomDatePicker(event) {
+    if (event) event.preventDefault();
+    const customDateRange = document.getElementById('regCustomDateRange');
+    if (customDateRange) {
+        customDateRange.style.display = customDateRange.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+function applyRegCustomDateRange(event) {
+    if (event) event.preventDefault();
+    const startDate = document.getElementById('regStartDate').value;
+    const endDate = document.getElementById('regEndDate').value;
+    if (!startDate || !endDate) {
+        alert('Please select both dates');
+        return;
+    }
+    if (new Date(startDate) > new Date(endDate)) {
+        alert('Start date must be before end date');
+        return;
+    }
+    loadRegistrationData(null, 'custom', startDate, endDate);
+}
+
+// ============ ACTIVITY ANALYTICS AJAX FUNCTIONS ============
+function loadActivityAjax(event, period) {
+    if (event) event.preventDefault();
+
+    document.getElementById('activityLoadingIndicator').style.display = 'block';
+    
+    let url = '/admin/ajax/activity-analytics/?period=' + period;
+    if (period === 'custom') {
+        const startDate = document.getElementById('activityStartDate').value;
+        const endDate = document.getElementById('activityEndDate').value;
+        if (!startDate || !endDate) {
+            alert('Please select both dates');
+            document.getElementById('activityLoadingIndicator').style.display = 'none';
+            return;
+        }
+        url += `&start_date=${startDate}&end_date=${endDate}`;
+    }
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            updateActivityStats(data.stats);
+            updateActivityChart(data.timeline);
+            updatePeakHoursTable(data.peak_hours);
+            updateActiveUsersTable(data.most_active_users);
+            
+            // Update active button
+            document.querySelectorAll('.activity-filters button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`button[data-period="${period}"]`)?.classList.add('active');
+        } else {
+            alert('Error: ' + (data.error || 'Failed to load data'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to load analytics data: ' + error.message);
+    })
+    .finally(() => {
+        document.getElementById('activityLoadingIndicator').style.display = 'none';
+    });
+}
+
+function updateActivityStats(stats) {
+    animateNumber('statActiveUsers', stats.active_users.value);
+    updateChangeIndicator('changeActiveUsers', stats.active_users.change);
+    animateNumber('statTotalViews', stats.total_views.value);
+    updateChangeIndicator('changeTotalViews', stats.total_views.change);
+    animateNumber('statDemoRequests', stats.demo_requests.value);
+    updateChangeIndicator('changeDemoRequests', stats.demo_requests.change);
+    animateNumber('statEnquiries', stats.enquiries.value);
+    updateChangeIndicator('changeEnquiries', stats.enquiries.change);
+}
+
+function updateChangeIndicator(elementId, changeValue) {
+    const element = document.getElementById(elementId);
+    const isPositive = changeValue >= 0;
+    element.className = 'activity-stat-change ' + (isPositive ? '' : 'negative');
+    element.innerHTML = `<i class="fas fa-arrow-${isPositive ? 'up' : 'down'}"></i> ${Math.abs(changeValue)}%`;
+}
+
+function animateNumber(elementId, targetValue) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    let currentValue = 0;
+    const increment = targetValue / 50;
+    const timer = setInterval(() => {
+        currentValue += increment;
+        if (currentValue >= targetValue) {
+            element.textContent = targetValue;
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(currentValue);
+        }
+    }, 20);
+}
+
+function updateActivityChart(timeline) {
+    const ctx = document.getElementById('userActivityChart');
+    if (!ctx) return;
+
+    if (activityChartInstance) activityChartInstance.destroy();
+
+    activityChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timeline.map(t => t.date),
+            datasets: [
+                { label: 'Demo Views', data: timeline.map(t => t.views), borderColor: 'rgb(30, 60, 114)', backgroundColor: 'rgba(30, 60, 114, 0.1)', tension: 0.4, fill: true, pointRadius: 4 },
+                { label: 'Demo Requests', data: timeline.map(t => t.requests), borderColor: 'rgb(16, 185, 129)', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true, pointRadius: 4 },
+                { label: 'Enquiries', data: timeline.map(t => t.enquiries), borderColor: 'rgb(245, 158, 11)', backgroundColor: 'rgba(245, 158, 11, 0.1)', tension: 0.4, fill: true, pointRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'top', labels: { padding: 20, usePointStyle: true } } },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.1)' } }, x: { grid: { display: false } } }
+        }
+    });
+}
+
+function updatePeakHoursTable(peakHours) {
+    const tbody = document.getElementById('peakHoursTableBody');
+    if (!peakHours || peakHours.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center">No data</td></tr>';
+        return;
+    }
+    tbody.innerHTML = peakHours.map(h => `<tr><td>${h.time_slot}</td><td>${h.count}</td><td><div class="progress" style="height: 20px;"><div class="progress-bar" style="width:${h.percentage}%; background: rgb(30, 60, 114);">${h.percentage}%</div></div></td></tr>`).join('');
+}
+
+function updateActiveUsersTable(users) {
+    const tbody = document.getElementById('activeUsersTableBody');
+    if (!users || users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center">No data</td></tr>';
+        return;
+    }
+    tbody.innerHTML = users.map(u => `<tr><td><strong>${u.full_name}</strong><br><small>${u.email}</small></td><td>${u.organization}</td><td><span class="badge bg-primary">${u.activity_count}</span></td></tr>`).join('');
+}
+
+function toggleActivityCustomDate(event) {
+    if (event) event.preventDefault();
+    const customDateDiv = document.getElementById('activityCustomDateRange');
+    if (customDateDiv) {
+        customDateDiv.style.display = customDateDiv.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+function applyActivityDateRangeAjax() {
+    const startDate = document.getElementById('activityStartDate').value;
+    const endDate = document.getElementById('activityEndDate').value;
+    if (!startDate || !endDate) {
+        alert('Please select both dates');
+        return;
+    }
+    loadActivityAjax(null, 'custom');
+}
+
+// ============ INITIAL CHART CREATION ============
 document.addEventListener('DOMContentLoaded', function() {
-    // User Growth Chart
+    // User Growth Chart - Initial Load
     const userGrowthCtx = document.getElementById('userGrowthChart');
     if (userGrowthCtx) {
-        new Chart(userGrowthCtx, {
+        userGrowthChartInstance = new Chart(userGrowthCtx, {
             type: 'line',
             data: {
-                labels: [
-                    {% for data in monthly_users %}
-                        '{{ data.month }}'{% if not forloop.last %},{% endif %}
-                    {% endfor %}
-                ],
+                labels: [{% for data in monthly_users %}'{{ data.month }}'{% if not forloop.last %},{% endif %}{% endfor %}],
                 datasets: [{
                     label: 'New Users',
-                    data: [
-                        {% for data in monthly_users %}
-                            {{ data.count }}{% if not forloop.last %},{% endif %}
-                        {% endfor %}
-                    ],
+                    data: [{% for data in monthly_users %}{{ data.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
                     borderColor: 'rgb(30, 60, 114)',
                     backgroundColor: 'rgba(30, 60, 114, 0.1)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: 'rgb(30, 60, 114)',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 2
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
+                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                scales: { y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.1)' } }, x: { grid: { display: false } } }
             }
         });
     }
@@ -792,157 +1214,90 @@ document.addEventListener('DOMContentLoaded', function() {
     // Weekly Activity Chart
     const weeklyActivityCtx = document.getElementById('weeklyActivityChart');
     if (weeklyActivityCtx) {
-        new Chart(weeklyActivityCtx, {
+        weeklyActivityChartInstance = new Chart(weeklyActivityCtx, {
             type: 'bar',
             data: {
-                labels: [
-                    {% for data in weekly_activity %}
-                        '{{ data.date }}'{% if not forloop.last %},{% endif %}
-                    {% endfor %}
-                ],
+                labels: [{% for data in weekly_activity %}'{{ data.date }}'{% if not forloop.last %},{% endif %}{% endfor %}],
                 datasets: [
-                    {
-                        label: 'Demo Views',
-                        data: [
-                            {% for data in weekly_activity %}
-                                {{ data.demo_views }}{% if not forloop.last %},{% endif %}
-                            {% endfor %}
-                        ],
-                        backgroundColor: 'rgba(30, 60, 114, 0.8)',
-                        borderColor: 'rgb(30, 60, 114)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'New Signups',
-                        data: [
-                            {% for data in weekly_activity %}
-                                {{ data.signups }}{% if not forloop.last %},{% endif %}
-                            {% endfor %}
-                        ],
-                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                        borderColor: 'rgb(16, 185, 129)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Enquiries',
-                        data: [
-                            {% for data in weekly_activity %}
-                                {{ data.enquiries }}{% if not forloop.last %},{% endif %}
-                            {% endfor %}
-                        ],
-                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                        borderColor: 'rgb(59, 130, 246)',
-                        borderWidth: 1
-                    }
+                    { label: 'Demo Views', data: [{% for data in weekly_activity %}{{ data.demo_views }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor: 'rgba(30, 60, 114, 0.8)', borderColor: 'rgb(30, 60, 114)', borderWidth: 1 },
+                    { label: 'New Signups', data: [{% for data in weekly_activity %}{{ data.signups }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor: 'rgba(16, 185, 129, 0.8)', borderColor: 'rgb(16, 185, 129)', borderWidth: 1 },
+                    { label: 'Enquiries', data: [{% for data in weekly_activity %}{{ data.enquiries }}{% if not forloop.last %},{% endif %}{% endfor %}], backgroundColor: 'rgba(59, 130, 246, 0.8)', borderColor: 'rgb(59, 130, 246)', borderWidth: 1 }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
+                plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } },
+                scales: { y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.1)' } }, x: { grid: { display: false } } }
             }
         });
     }
 
-    // Auto-refresh dashboard data every 5 minutes
-    setInterval(function() {
-        // Only refresh if page is visible
-        if (!document.hidden) {
-            fetch('{% url "core:ajax_system_health" %}')
-                .then(response => response.json())
-                .then(data => {
-                    // Update system health indicators
-                    console.log('Dashboard data refreshed:', data.last_updated);
-                })
-                .catch(error => {
-                    console.log('Auto-refresh failed:', error);
-                });
-        }
-    }, 300000); // 5 minutes
-
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Quick stats animation
-    function animateCounter(element, target, duration = 1000) {
-        let start = 0;
-        const increment = target / (duration / 16);
-        
-        function updateCounter() {
-            start += increment;
-            if (start < target) {
-                element.textContent = Math.floor(start);
-                requestAnimationFrame(updateCounter);
-            } else {
-                element.textContent = target;
+    // Country Demographics Chart
+    const countryCtx = document.getElementById('countryDemographicsChart');
+    if (countryCtx) {
+        countryChartInstance = new Chart(countryCtx, {
+            type: 'pie',
+            data: {
+                labels: [{% for data in country_data %}'{{ data.country }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for data in country_data %}{{ data.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: ['rgba(30, 60, 114, 0.85)', 'rgba(16, 185, 129, 0.85)', 'rgba(59, 130, 246, 0.85)', 'rgba(245, 158, 11, 0.85)', 'rgba(239, 68, 68, 0.85)'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { padding: 15, usePointStyle: true } } }
             }
-        }
-        updateCounter();
+        });
     }
 
-    // Animate stat numbers on page load
+    // Source Chart
+    const sourceCtx = document.getElementById('userSourceChart');
+    if (sourceCtx) {
+        sourceChartInstance = new Chart(sourceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [{% for data in source_data %}'{{ data.source }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for data in source_data %}{{ data.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                    backgroundColor: ['rgba(30, 60, 114, 0.85)', 'rgba(24, 119, 242, 0.85)', 'rgba(255, 0, 0, 0.85)', 'rgba(0, 119, 181, 0.85)'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right', labels: { padding: 15, usePointStyle: true } } },
+                cutout: '60%'
+            }
+        });
+    }
+
+    // Number animation
     document.querySelectorAll('.stat-number').forEach(function(element) {
         const target = parseInt(element.textContent);
         if (!isNaN(target)) {
-            element.textContent = '0';
-            animateCounter(element, target);
+            let start = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                start += increment;
+                if (start >= target) {
+                    element.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(start);
+                }
+            }, 20);
         }
     });
+
+    // Load initial AJAX data
+    loadActivityAjax(null, 'daily');
 });
-
-// Global functions for admin dashboard
-window.AdminDashboard = {
-    refreshStats: function() {
-        location.reload();
-    },
-
-    showQuickAction: function(action) {
-        switch(action) {
-            case 'add_demo':
-                window.location.href = '{% url "core:admin_add_demo" %}';
-                break;
-            case 'approve_users':
-                window.location.href = '{% url "core:admin_users" %}?status=pending';
-                break;
-            case 'demo_requests':
-                window.location.href = '{% url "core:admin_demo_requests" %}';
-                break;
-            case 'enquiries':
-                window.location.href = '{% url "core:admin_enquiries" %}';
-                break;
-        }
-    },
-
-    exportData: function(type) {
-        // Implementation for data export
-        console.log(`Exporting ${type} data...`);
-        AdminPanel.showToast(`${type} export started`, 'info');
-    }
-};
 </script>
-
 {% endblock %}

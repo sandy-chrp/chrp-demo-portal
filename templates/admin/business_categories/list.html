@@ -33,7 +33,7 @@
 <div class="admin-card">
     <div class="admin-card-header">
         <h2 class="admin-card-title">
-            <i class="fas fa-folder"></i>
+           
             Business Categories Management
         </h2>
         <a href="{% url 'core:admin_business_category_create' %}" class="btn btn-primary">
@@ -57,8 +57,8 @@
                 </form>
             </div>
             <div class="col-md-6 text-end">
-                <a href="{% url 'core:admin_business_subcategories' %}" class="btn btn-outline-info">
-                    <i class="fas fa-layer-group me-2"></i>Manage Subcategories
+                <a href="{% url 'core:admin_business_subcategories' %}" class="btn btn-outline-primary">
+                    Manage Subcategories
                 </a>
             </div>
         </div>
@@ -71,7 +71,7 @@
                         <tr>
                             <th width="50">#</th>
                             <th>Category Name</th>
-                            <th width="100" class="text-center">Icon</th>
+                            {% comment %} <th width="100" class="text-center">Icon</th> {% endcomment %}
                             <th width="120" class="text-center">Subcategories</th>
                             <th width="120" class="text-center">Customers</th>
                             <th width="100" class="text-center">Status</th>
@@ -88,11 +88,11 @@
                                         <br><small class="text-muted">{{ category.description|truncatewords:15 }}</small>
                                     {% endif %}
                                 </td>
-                                <td class="text-center">
+                                {% comment %} <td class="text-center">
                                     <span style="font-size: 1.5rem;">{{ category.icon|default:"📁" }}</span>
-                                </td>
+                                </td> {% endcomment %}
                                 <td class="text-center">
-                                    <span class="badge bg-info">{{ category.subcategory_count }}</span>
+                                    <span class="badge bg-primary">{{ category.subcategory_count }}</span>
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-primary">{{ category.customer_count }}</span>

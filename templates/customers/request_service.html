@@ -1,4 +1,4 @@
-<!-- templates/customers/request_service.html - Service Request with Category Selection -->
+<!-- templates/customers/request_service.html - Fully Dynamic Service Request -->
 {% extends 'customers/base.html' %}
 {% load static %}
 
@@ -12,75 +12,35 @@
         user-select: none;
     }
 
-    .page-header {
-        background: white;
-        padding: var(--spacing-xl);
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-md);
-        margin-bottom: var(--spacing-xl);
-        border: 1px solid var(--gray-200);
-    }
-
     .service-request-form {
         background: white;
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow-md);
-        padding: var(--spacing-xl);
+        padding: var(--spacing-lg);
         border: 1px solid var(--gray-200);
-        max-width: 900px;
-        margin: 0 auto;
     }
 
     .form-section {
-        margin-bottom: var(--spacing-xl);
-        padding-bottom: var(--spacing-xl);
-        border-bottom: 2px solid var(--gray-100);
-    }
-
-    .form-section:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-    }
-
-    .section-title {
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: var(--dark-color);
         margin-bottom: var(--spacing-lg);
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-
-    .section-title .step-number {
-        background: var(--gradient-primary);
-        color: white;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        font-weight: 700;
     }
 
     .form-label {
         font-weight: 600;
         color: var(--dark-color);
         margin-bottom: var(--spacing-sm);
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
         font-size: 0.95rem;
     }
 
     .required {
         color: var(--danger-color);
-        margin-left: 4px;
     }
 
     .form-control, .form-select {
         width: 100%;
-        padding: var(--spacing-md);
+        padding: 12px;
         border: 2px solid var(--gray-300);
         border-radius: var(--radius-lg);
         font-size: 1rem;
@@ -93,47 +53,121 @@
         outline: none;
     }
 
-    .form-select {
-        cursor: pointer;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 0.75rem center;
-        background-size: 16px 12px;
+    /* Date Status Banner */
+    .date-info-banner {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 2px solid #0ea5e9;
+        border-radius: var(--radius-lg);
+        padding: 12px;
+        margin-top: var(--spacing-sm);
+        display: none;
+        align-items: center;
+        gap: var(--spacing-sm);
+        animation: slideDown 0.3s ease;
+        font-size: 0.9rem;
     }
 
-    .form-text {
-        font-size: 0.875rem;
-        color: var(--gray-500);
-        margin-top: var(--spacing-xs);
+    .date-info-banner.show {
+        display: flex;
+    }
+
+    .date-info-banner.unavailable {
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        border-color: #ef4444;
+    }
+
+    .date-info-banner.busy {
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        border-color: #f59e0b;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Time Slots Grid */
+    .time-slots-wrapper {
+        margin-top: var(--spacing-md);
     }
 
     .time-slots {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-sm);
-        margin-top: var(--spacing-md);
     }
 
     .time-slot {
-        background: var(--gray-50);
+        background: white;
         border: 2px solid var(--gray-300);
         border-radius: var(--radius-lg);
-        padding: var(--spacing-md);
-        text-align: center;
+        padding: 12px;
         cursor: pointer;
         transition: all 0.3s ease;
         position: relative;
     }
 
-    .time-slot:hover {
+    .time-slot:hover:not(.full):not(.past):not(.starting_soon):not(.already_booked) {
         border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
+        background: rgba(30, 60, 114, 0.02);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
     }
 
     .time-slot.selected {
         border-color: var(--primary-color);
-        background: rgba(30, 60, 114, 0.05);
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
         box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+    }
+
+    .time-slot.full {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        cursor: not-allowed !important;
+        opacity: 0.7;
+        pointer-events: none !important;
+    }
+
+    .time-slot.past,
+    .time-slot.starting_soon {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+        cursor: not-allowed !important;
+        opacity: 0.6;
+        pointer-events: none !important;
+    }
+
+    .time-slot.starting_soon {
+        background: #fef3c7;
+        border-color: #fbbf24;
+        opacity: 0.7;
+    }
+
+    .time-slot.already_booked {
+        background: #fef3c7;
+        border-color: #fbbf24;
+        cursor: not-allowed !important;
+        opacity: 0.8;
+        pointer-events: none !important;
+    }
+
+    .time-slot.already_booked::after {
+        content: '✓ Your Booking';
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        font-size: 0.65rem;
+        background: #f59e0b;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-weight: 600;
     }
 
     .time-slot input[type="radio"] {
@@ -143,39 +177,151 @@
         width: 16px;
         height: 16px;
         cursor: pointer;
+        accent-color: var(--primary-color);
+    }
+
+    .time-slot.full input[type="radio"],
+    .time-slot.past input[type="radio"],
+    .time-slot.starting_soon input[type="radio"],
+    .time-slot.already_booked input[type="radio"] {
+        display: none;
+    }
+
+    .slot-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 6px;
     }
 
     .slot-time {
-        font-size: 1rem;
+        font-size: 0.9rem;
         font-weight: 700;
         color: var(--dark-color);
-        margin-bottom: var(--spacing-xs);
+        line-height: 1.2;
+    }
+
+    .slot-status-badge {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .slot-status-badge.available {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .slot-status-badge.full {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .slot-status-badge.past {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .slot-status-badge.starting_soon {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .slot-status-badge.already_booked {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .slot-info {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: var(--gray-600);
+    }
+
+    .capacity-bar {
+        width: 40px;
+        height: 3px;
+        background: var(--gray-200);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-left: 4px;
+    }
+
+    .capacity-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #10b981, #059669);
+        transition: width 0.3s ease;
+    }
+
+    .capacity-fill.high {
+        background: linear-gradient(90deg, #ef4444, #dc2626);
     }
 
     .slot-type {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: var(--gray-500);
+        margin-top: 2px;
+    }
+
+    .loading-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--gray-500);
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(30, 60, 114, 0.1);
+        border-top-color: var(--primary-color);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--gray-500);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        opacity: 0.3;
+        margin-bottom: var(--spacing-md);
     }
 
     .submit-section {
         text-align: center;
         padding-top: var(--spacing-lg);
+        margin-top: var(--spacing-lg);
+        border-top: 2px solid var(--gray-100);
     }
 
     .btn-submit {
         background: var(--gradient-primary);
         color: white;
         border: none;
-        padding: var(--spacing-md) calc(var(--spacing-xl) * 2);
+        padding: 14px 48px;
         border-radius: var(--radius-lg);
-        font-size: 1.125rem;
+        font-size: 1rem;
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: var(--shadow-md);
     }
 
-    .btn-submit:hover {
+    .btn-submit:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
     }
@@ -185,155 +331,134 @@
         cursor: not-allowed;
     }
 
-    .info-alert {
-        background: #eff6ff;
-        border-left: 4px solid #3b82f6;
-        padding: var(--spacing-md);
-        border-radius: var(--radius-lg);
-        margin-bottom: var(--spacing-lg);
-    }
-
     @media (max-width: 768px) {
         .time-slots {
             grid-template-columns: 1fr;
+        }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .time-slots {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1025px) {
+        .time-slots {
+            grid-template-columns: repeat(4, 1fr);
         }
     }
 </style>
 {% endblock %}
 
 {% block customer_content %}
-
-
 <form method="POST" id="serviceRequestForm" class="service-request-form">
     {% csrf_token %}
     
-    <!-- Step 1: Business Category -->
+    <!-- Business Category & Subcategory in One Row -->
     <div class="form-section">
-        <h3 class="section-title">
-            <span class="step-number">1</span>
-            Business Category
-        </h3>
-        
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">
-                    <i class="fas fa-building me-1"></i>
-                    Select Your Business Category
+                    <i class="fas fa-building"></i>
+                    Business Category
                     <span class="required">*</span>
                 </label>
                 <select name="business_category" 
                         id="businessCategory" 
-                        class="form-select" 
+                        class="form-control" 
                         required>
-                    <option value="">-- Select Category --</option>
+                    <option value="">-- Select Your Business Category --</option>
                     {% for category in business_categories %}
                         <option value="{{ category.id }}">
                             {% if category.icon %}{{ category.icon }} {% endif %}{{ category.name }}
                         </option>
                     {% endfor %}
                 </select>
-                <small class="form-text">Choose the category that best describes your business</small>
             </div>
             
             <div class="col-md-6" id="subcategoryWrapper" style="display: none;">
                 <label class="form-label">
-                    <i class="fas fa-tags me-1"></i>
-                    Subcategory (Optional)
+                    <i class="fas fa-tags"></i>
+                    Business Subcategory (Optional)
                 </label>
                 <select name="business_subcategory" 
                         id="businessSubcategory" 
-                        class="form-select">
+                        class="form-control">
                     <option value="">-- All Subcategories --</option>
                 </select>
-                <small class="form-text">Narrow down to a specific subcategory if needed</small>
             </div>
         </div>
     </div>
     
-    <!-- Step 2: Date & Time -->
+    <!-- Date Selection -->
     <div class="form-section">
-        <h3 class="section-title">
-            <span class="step-number">2</span>
-            Preferred Date & Time
-        </h3>
+        <label class="form-label">
+            <i class="fas fa-calendar"></i>
+            Preferred Date
+            <span class="required">*</span>
+        </label>
+        <input type="date" 
+               name="requested_date" 
+               id="requestedDate"
+               class="form-control" 
+               min="{{ min_date }}"
+               max="{{ max_date }}"
+               required>
         
-        <div class="row g-4">
-            <div class="col-md-6">
-                <label class="form-label">
-                    <i class="fas fa-calendar me-1"></i>
-                    Select Date
-                    <span class="required">*</span>
-                </label>
-                <input type="date" 
-                       name="requested_date" 
-                       id="requestedDate"
-                       class="form-control" 
-                       min="{{ min_date }}"
-                       max="{{ max_date }}"
-                       required>
-                <small class="form-text">
-                    <i class="fas fa-exclamation-circle me-1"></i>
-                    Monday - Saturday only
-                </small>
+        <div class="date-info-banner" id="dateInfoBanner">
+            <i class="fas fa-info-circle"></i>
+            <span id="dateInfoText">Select a date to check availability</span>
+        </div>
+    </div>
+    
+    <!-- Time Slot Selection -->
+    <div class="form-section">
+        <label class="form-label">
+            <i class="fas fa-clock"></i>
+            Available Time Slots
+            <span class="required">*</span>
+        </label>
+        
+        <div class="time-slots-wrapper">
+            <div id="slotsLoadingState" class="loading-state" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p class="mt-2 mb-0">Checking availability...</p>
             </div>
             
-            <div class="col-md-6">
-                <label class="form-label">
-                    <i class="fas fa-clock me-1"></i>
-                    Select Time Slot
-                    <span class="required">*</span>
-                </label>
-                <div class="time-slots">
-                    {% for slot in time_slots %}
-                        <label class="time-slot" for="slot_{{ slot.id }}">
-                            <input type="radio" 
-                                   name="time_slot_id" 
-                                   value="{{ slot.id }}" 
-                                   id="slot_{{ slot.id }}" 
-                                   required>
-                            <div class="slot-time">
-                                {{ slot.start_time|time:"g:i A" }} - {{ slot.end_time|time:"g:i A" }}
-                            </div>
-                            <div class="slot-type">{{ slot.get_slot_type_display }}</div>
-                        </label>
-                    {% endfor %}
+            <div class="time-slots" id="timeSlotsContainer">
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <i class="fas fa-calendar-alt"></i>
+                    <p class="mb-0">Please select a date to see available slots</p>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Step 3: Requirements -->
+    <!-- Additional Notes -->
     <div class="form-section">
-        <h3 class="section-title">
-            <span class="step-number">3</span>
-            Your Requirements
-        </h3>
-        
         <label class="form-label">
-            <i class="fas fa-comments me-1"></i>
-            Tell us about your needs
+            <i class="fas fa-comments"></i>
+            Your Requirements
             <span class="required">*</span>
         </label>
         <textarea name="notes" 
                   class="form-control" 
-                  rows="5"
+                  rows="4"
                   placeholder="Please describe your business needs, specific requirements, or questions you'd like to discuss..."
                   required></textarea>
-        <small class="form-text">
-            Help us prepare for your consultation by sharing detailed information about what you're looking for
-        </small>
     </div>
     
-    <!-- Submit -->
+    <!-- Submit Button -->
     <div class="submit-section">
-        <button type="submit" class="btn-submit" id="submitBtn">
+        <button type="submit" class="btn-submit" id="submitBtn" disabled>
             <i class="fas fa-paper-plane me-2"></i>
-            Submit Request
+            Submit Service Request
         </button>
-        <div class="mt-3">
+        <div class="mt-2">
             <small class="text-muted">
                 <i class="fas fa-check-circle me-1"></i>
-                Our team will contact you within 24 hours
+                We'll confirm within 24 hours
             </small>
         </div>
     </div>
@@ -345,14 +470,20 @@
 document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('contextmenu', e => e.preventDefault());
     
-    const BASE_URL = window.location.pathname.includes('/customer/') ? '/customer/' : '/customers/';
     const categorySelect = document.getElementById('businessCategory');
     const subcategorySelect = document.getElementById('businessSubcategory');
     const subcategoryWrapper = document.getElementById('subcategoryWrapper');
     const dateInput = document.getElementById('requestedDate');
     const form = document.getElementById('serviceRequestForm');
     const submitBtn = document.getElementById('submitBtn');
+    const slotsContainer = document.getElementById('timeSlotsContainer');
+    const loadingState = document.getElementById('slotsLoadingState');
+    const dateInfoBanner = document.getElementById('dateInfoBanner');
+    const dateInfoText = document.getElementById('dateInfoText');
     
+    let selectedSlotId = null;
+    
+    // Load subcategories when category changes
     categorySelect.addEventListener('change', function() {
         const categoryId = this.value;
         
@@ -365,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function loadSubcategories(categoryId) {
-        fetch(`${BASE_URL}ajax/subcategories/${categoryId}/`)
+        fetch(`/customer/ajax/subcategories/${categoryId}/`)
             .then(response => response.json())
             .then(data => {
                 subcategorySelect.innerHTML = '<option value="">-- All Subcategories --</option>';
@@ -379,41 +510,256 @@ document.addEventListener('DOMContentLoaded', function() {
                     subcategoryWrapper.style.display = 'none';
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error loading subcategories:', error));
     }
     
-    document.querySelectorAll('.time-slot').forEach(slot => {
-        slot.addEventListener('click', function(e) {
-            if (e.target.tagName !== 'INPUT') {
-                this.querySelector('input').checked = true;
-            }
-            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-            this.classList.add('selected');
-        });
-    });
-    
-    dateInput.addEventListener('change', function() {
-        const date = new Date(this.value);
-        if (date.getDay() === 0) {
-            alert('Sundays are not available. Please select another date.');
-            this.value = '';
+    // Check slot availability when date changes
+    dateInput.addEventListener('change', async function() {
+        const selectedDate = this.value;
+        
+        if (!selectedDate) {
+            resetSlots();
+            return;
         }
+        
+        // Check if Sunday
+        const date = new Date(selectedDate + 'T00:00:00');
+        if (date.getDay() === 0) {
+            showDateInfo('unavailable', '⚠️ Sundays not available. Select another date.');
+            resetSlots();
+            this.value = '';
+            return;
+        }
+        
+        // Load slot availability
+        await loadSlotAvailability(selectedDate);
     });
     
+    // Load slot availability from server
+    async function loadSlotAvailability(date) {
+        try {
+            slotsContainer.style.display = 'none';
+            loadingState.style.display = 'block';
+            submitBtn.disabled = true;
+            selectedSlotId = null;
+            
+            const response = await fetch(`/customer/ajax/check-slot-availability/?date=${date}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            loadingState.style.display = 'none';
+            slotsContainer.style.display = 'grid';
+            
+            if (!data.success) {
+                showDateInfo('unavailable', data.message || 'Date not available');
+                showEmptyState(data.message || 'This date is not available for bookings');
+                return;
+            }
+            
+            // Show user booking warning
+            if (data.user_has_booking && data.user_booking_message) {
+                showDateInfo('busy', `⚠️ ${data.user_booking_message}`);
+            } else {
+                const totalBookings = data.total_bookings || 0;
+                if (totalBookings >= 3) {
+                    showDateInfo('busy', `⚠️ Limited slots! ${totalBookings} demos scheduled`);
+                } else if (totalBookings > 0) {
+                    showDateInfo('moderate', `ℹ️ ${totalBookings} demos scheduled for ${data.day_name}`);
+                } else {
+                    showDateInfo('available', `✅ Good availability for ${data.day_name}`);
+                }
+            }
+            
+            // Render slots
+            if (data.slots && data.slots.length > 0) {
+                renderTimeSlots(data.slots);
+            } else {
+                showEmptyState('No time slots available');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error loading slots:', error);
+            loadingState.style.display = 'none';
+            slotsContainer.style.display = 'grid';
+            showDateInfo('unavailable', '❌ Connection error. Please refresh the page.');
+            showEmptyState('Failed to load availability. Please try again.');
+        }
+    }
+    
+    // Render time slots
+    function renderTimeSlots(slots) {
+        slotsContainer.innerHTML = '';
+        
+        slots.forEach(slot => {
+            const slotDiv = document.createElement('label');
+            slotDiv.className = `time-slot ${slot.status}`;
+            slotDiv.id = `slot_${slot.id}`;
+            
+            slotDiv.setAttribute('data-slot-id', slot.id);
+            slotDiv.setAttribute('data-slot-status', slot.status);
+            slotDiv.setAttribute('data-is-available', slot.is_available);
+            
+            const radioInput = (slot.is_available && slot.status === 'available') ? 
+                `<input type="radio" name="time_slot_id" value="${slot.id}" id="slot_radio_${slot.id}" required>` : '';
+            
+            let statusClass = 'available';
+            let statusText = 'AVAILABLE';
+            
+            if (slot.status === 'past') {
+                statusClass = 'past';
+                statusText = 'TIME PASSED';
+            } else if (slot.status === 'starting_soon') {
+                statusClass = 'starting_soon';
+                statusText = 'STARTING SOON';
+            } else if (slot.status === 'already_booked') {
+                statusClass = 'already_booked';
+                statusText = 'YOUR BOOKING';
+            } else if (slot.status === 'full') {
+                statusClass = 'full';
+                statusText = 'BOOKED';
+            }
+            
+            const capacityPercent = slot.occupancy_percentage || 0;
+            const capacityClass = capacityPercent >= 80 ? 'high' : 'low';
+            
+            let slotHTML = `
+                ${radioInput}
+                <div class="slot-header">
+                    <div class="slot-time">${slot.start_time} - ${slot.end_time}</div>
+                    <span class="slot-status-badge ${statusClass}">${statusText}</span>
+                </div>
+            `;
+            
+            if (slot.status !== 'past' && slot.status !== 'starting_soon' && slot.status !== 'already_booked') {
+                slotHTML += `
+                    <div class="slot-info">
+                        <i class="fas fa-users" style="font-size: 0.7rem;"></i>
+                        <span>${slot.confirmed_bookings}/${slot.total_capacity}</span>
+                        <div class="capacity-bar">
+                            <div class="capacity-fill ${capacityClass}" style="width: ${capacityPercent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            slotHTML += `<div class="slot-type">${slot.slot_type}</div>`;
+            
+            slotDiv.innerHTML = slotHTML;
+            
+            if (slot.is_available && slot.status === 'available') {
+                slotDiv.style.cursor = 'pointer';
+                slotDiv.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'INPUT') {
+                        const radio = this.querySelector('input[type="radio"]');
+                        if (radio) {
+                            radio.checked = true;
+                            selectedSlotId = slot.id;
+                            updateSelectedSlot();
+                        }
+                    } else {
+                        selectedSlotId = slot.id;
+                        updateSelectedSlot();
+                    }
+                });
+            } else {
+                slotDiv.style.cursor = 'not-allowed';
+                slotDiv.style.pointerEvents = 'none';
+                
+                slotDiv.title = slot.status === 'past' ? 'This time slot has passed' :
+                               slot.status === 'starting_soon' ? 'Cannot book slots starting within 30 minutes' :
+                               slot.status === 'already_booked' ? 'You have already booked this slot' :
+                               slot.status === 'full' ? 'This slot is fully booked' :
+                               'Not available';
+            }
+            
+            slotsContainer.appendChild(slotDiv);
+        });
+    }
+    
+    function updateSelectedSlot() {
+        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+        if (selectedSlotId) {
+            const selectedSlot = document.getElementById(`slot_${selectedSlotId}`);
+            if (selectedSlot) {
+                selectedSlot.classList.add('selected');
+                
+                const isAvailable = selectedSlot.getAttribute('data-is-available') === 'true';
+                const slotStatus = selectedSlot.getAttribute('data-slot-status');
+                
+                if (isAvailable && slotStatus === 'available') {
+                    submitBtn.disabled = false;
+                } else {
+                    submitBtn.disabled = true;
+                    selectedSlotId = null;
+                    selectedSlot.classList.remove('selected');
+                    
+                    if (slotStatus === 'starting_soon') {
+                        alert('⚠️ Cannot book slots starting within 30 minutes.');
+                    } else if (slotStatus === 'already_booked') {
+                        alert('⚠️ You have already booked this slot.');
+                    } else if (slotStatus === 'past') {
+                        alert('⚠️ This time slot has already passed.');
+                    } else {
+                        alert('⚠️ This slot is not available.');
+                    }
+                }
+            }
+        }
+    }
+    
+    function showDateInfo(type, message) {
+        dateInfoBanner.className = 'date-info-banner show ' + type;
+        dateInfoText.textContent = message;
+    }
+    
+    function showEmptyState(message) {
+        slotsContainer.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="fas fa-calendar-times"></i>
+                <p class="mb-0">${message}</p>
+            </div>
+        `;
+        submitBtn.disabled = true;
+    }
+    
+    function resetSlots() {
+        slotsContainer.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="fas fa-calendar-alt"></i>
+                <p class="mb-0">Please select a date to see available slots</p>
+            </div>
+        `;
+        submitBtn.disabled = true;
+        dateInfoBanner.classList.remove('show');
+        selectedSlotId = null;
+    }
+    
+    // Form submission
     form.addEventListener('submit', function(e) {
+        if (!selectedSlotId) {
+            e.preventDefault();
+            alert('⚠️ Please select a time slot before submitting.');
+            return false;
+        }
+        
         const category = categorySelect.value;
         const date = dateInput.value;
-        const slot = document.querySelector('input[name="time_slot_id"]:checked');
         const notes = document.querySelector('textarea[name="notes"]').value.trim();
         
-        if (!category || !date || !slot || !notes) {
+        if (!category || !date || !notes) {
             e.preventDefault();
-            alert('Please fill all required fields');
-            return;
+            alert('⚠️ Please fill all required fields.');
+            return false;
         }
         
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+        
+        return true;
     });
 });
 </script>

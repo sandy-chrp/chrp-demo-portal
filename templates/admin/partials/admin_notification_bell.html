@@ -1,0 +1,503 @@
+<!-- templates/admin/partials/admin_notification_bell.html - UPDATED WITH REDIRECT -->
+<style>
+    .admin-notif-dropdown {
+        position: relative;
+    }
+    
+    .admin-notif-btn {
+        position: relative;
+        background: transparent;
+        border: 1px solid #dee2e6;
+        color: #6c757d;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .admin-notif-btn:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+    }
+    
+    .admin-notif-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #dc3545;
+        color: white;
+        border-radius: 10px;
+        padding: 2px 6px;
+        font-size: 10px;
+        font-weight: bold;
+        min-width: 18px;
+        text-align: center;
+        display: none;
+    }
+    
+    .admin-notif-badge.show {
+        display: block;
+    }
+    
+    .admin-notif-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+        width: 400px;
+        max-height: 500px;
+        overflow: hidden;
+        z-index: 1050;
+    }
+    
+    .admin-notif-dropdown-menu.show {
+        display: block;
+    }
+    
+    .admin-notif-header {
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+    }
+    
+    .admin-notif-header h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #212529;
+    }
+    
+    .admin-notif-mark-all {
+        background: transparent;
+        border: none;
+        color: #0d6efd;
+        cursor: pointer;
+        font-size: 0.875rem;
+        padding: 0;
+    }
+    
+    .admin-notif-mark-all:hover {
+        text-decoration: underline;
+    }
+    
+    .admin-notif-list {
+        max-height: 360px;
+        overflow-y: auto;
+    }
+    
+    .admin-notif-item {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f3f5;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+    
+    .admin-notif-item:hover {
+        background: #f8f9fa;
+        text-decoration: none;
+    }
+    
+    .admin-notif-item.unread {
+        background: #e7f3ff;
+    }
+    
+    .admin-notif-item-content {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .admin-notif-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+        flex-shrink: 0;
+    }
+    
+    .admin-notif-icon.customer { background: #e3f2fd; }
+    .admin-notif-icon.demo { background: #fff3e0; }
+    .admin-notif-icon.enquiry { background: #f3e5f5; }
+    .admin-notif-icon.milestone { background: #e8f5e9; }
+    .admin-notif-icon.cancellation { background: #ffebee; }
+    
+    .admin-notif-text {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .admin-notif-title {
+        font-weight: 600;
+        color: #212529;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .admin-notif-message {
+        color: #6c757d;
+        font-size: 0.8125rem;
+        line-height: 1.4;
+        margin-bottom: 0.25rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    
+    .admin-notif-time {
+        font-size: 0.75rem;
+        color: #adb5bd;
+    }
+    
+    .admin-notif-footer {
+        padding: 0.75rem 1rem;
+        text-align: center;
+        border-top: 1px solid #dee2e6;
+        background: #f8f9fa;
+    }
+    
+    .admin-notif-view-all {
+        color: #0d6efd;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .admin-notif-view-all:hover {
+        text-decoration: underline;
+    }
+    
+    .admin-notif-empty {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: #adb5bd;
+    }
+    
+    .admin-notif-empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="admin-notif-dropdown">
+    <button class="admin-notif-btn" id="adminNotifBtn" type="button">
+        <i class="fas fa-bell"></i>
+        <span class="admin-notif-badge" id="adminNotifBadge">0</span>
+    </button>
+    
+    <div class="admin-notif-dropdown-menu" id="adminNotifMenu">
+        <div class="admin-notif-header">
+            <h6>Notifications</h6>
+            <button class="admin-notif-mark-all" id="adminMarkAllBtn">Mark all read</button>
+        </div>
+        
+        <div class="admin-notif-list" id="adminNotifList">
+            <div class="admin-notif-empty">
+                <div class="admin-notif-empty-icon">🔔</div>
+                <div>Loading notifications...</div>
+            </div>
+        </div>
+        
+        <div class="admin-notif-footer">
+            <a href="{% url 'core:admin_notifications' %}" class="admin-notif-view-all">View All Notifications</a>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const btn = document.getElementById('adminNotifBtn');
+    const menu = document.getElementById('adminNotifMenu');
+    const badge = document.getElementById('adminNotifBadge');
+    const list = document.getElementById('adminNotifList');
+    const markAllBtn = document.getElementById('adminMarkAllBtn');
+    
+    // Toggle dropdown
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('show');
+        if (menu.classList.contains('show')) {
+            loadNotifications();
+        }
+    });
+    
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target) && e.target !== btn) {
+            menu.classList.remove('show');
+        }
+    });
+    
+    // Load unread count
+    function loadUnreadCount() {
+        fetch('/notifications/api/admin/unread-count/', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.count > 0) {
+                badge.textContent = data.count > 99 ? '99+' : data.count;
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
+        })
+        .catch(err => console.error('Error loading count:', err));
+    }
+    
+    // Load recent notifications
+    function loadNotifications() {
+        fetch('/notifications/api/admin/list/?limit=10', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => {
+            if (!r.ok) throw new Error('Network response was not ok');
+            return r.json();
+        })
+        .then(data => {
+            console.log('API Response:', data);
+            
+            const notifications = data.notifications || [];
+            
+            if (notifications.length > 0) {
+                renderNotifications(notifications);
+            } else {
+                list.innerHTML = `
+                    <div class="admin-notif-empty">
+                        <div class="admin-notif-empty-icon">📭</div>
+                        <div>No notifications yet</div>
+                    </div>
+                `;
+            }
+        })
+        .catch(err => {
+            console.error('Error loading notifications:', err);
+            list.innerHTML = `
+                <div class="admin-notif-empty">
+                    <div class="admin-notif-empty-icon">❌</div>
+                    <div>Error: ${err.message}</div>
+                </div>
+            `;
+        });
+    }
+    
+    // ✅ NEW: Get redirect URL based on notification type
+    function getNotificationUrl(notification) {
+        const type = notification.notification_type;
+        const contentType = notification.content_type;
+        const objectId = notification.object_id;
+        
+        console.log('Notification data:', { type, contentType, objectId });
+        
+        // If link is provided directly, use it
+        if (notification.link) {
+            return notification.link;
+        }
+        
+        // Generate URL based on notification type
+        switch(type) {
+            case 'new_customer':
+                // Redirect to customer detail in admin
+                if (objectId) {
+                    return `/admin/accounts/customuser/${objectId}/change/`;
+                }
+                return '/admin/accounts/customuser/';
+            
+            case 'demo_request':
+                // Redirect to demo request detail in admin
+                if (objectId) {
+                    return `/admin/demos/demorequest/${objectId}/change/`;
+                }
+                return '/admin/demos/demorequest/';
+            
+            case 'demo_cancellation':
+                // Redirect to cancelled demo request
+                if (objectId) {
+                    return `/admin/demos/demorequest/${objectId}/change/`;
+                }
+                return '/admin/demos/demorequest/?status__exact=cancelled';
+            
+            case 'enquiry':
+                // Redirect to enquiry detail in admin
+                if (objectId) {
+                    return `/admin/enquiries/businessenquiry/${objectId}/change/`;
+                }
+                return '/admin/enquiries/businessenquiry/';
+            
+            case 'milestone':
+                // Redirect to dashboard or specific milestone page
+                return '/admin/';
+            
+            default:
+                // Default: go to all notifications page
+                return '/core/admin/notifications/';
+        }
+    }
+    
+    // Render notifications
+    function renderNotifications(notifications) {
+        list.innerHTML = notifications.map(n => {
+            const iconClass = getIconClass(n.notification_type);
+            const iconEmoji = getIconEmoji(n.notification_type);
+            const redirectUrl = getNotificationUrl(n);
+            
+            return `
+                <a href="${redirectUrl}" class="admin-notif-item ${n.is_read ? '' : 'unread'}" 
+                   data-id="${n.id}" 
+                   data-url="${redirectUrl}">
+                    <div class="admin-notif-item-content">
+                        <div class="admin-notif-icon ${iconClass}">
+                            ${iconEmoji}
+                        </div>
+                        <div class="admin-notif-text">
+                            <div class="admin-notif-title">${escapeHtml(n.title)}</div>
+                            <div class="admin-notif-message">${escapeHtml(n.message)}</div>
+                            <div class="admin-notif-time">${n.created_at}</div>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }).join('');
+        
+        // Add click handlers to mark as read before redirect
+        list.querySelectorAll('.admin-notif-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.dataset.id;
+                const url = this.dataset.url;
+                
+                // Mark as read first
+                markAsReadAndRedirect(id, url);
+            });
+        });
+    }
+    
+    // ✅ NEW: Mark as read and redirect
+    function markAsReadAndRedirect(id, url) {
+        fetch(`/notifications/api/admin/${id}/read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadUnreadCount();
+                // Redirect to the notification's page
+                window.location.href = url;
+            } else {
+                // Still redirect even if marking as read fails
+                window.location.href = url;
+            }
+        })
+        .catch(err => {
+            console.error('Error marking as read:', err);
+            // Still redirect even if there's an error
+            window.location.href = url;
+        });
+    }
+    
+    // Mark as read (without redirect)
+    function markAsRead(id) {
+        fetch(`/notifications/api/admin/${id}/read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadUnreadCount();
+                const item = list.querySelector(`[data-id="${id}"]`);
+                if (item) item.classList.remove('unread');
+            }
+        })
+        .catch(err => console.error('Error marking as read:', err));
+    }
+    
+    // Mark all as read
+    markAllBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        fetch('/notifications/api/admin/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadUnreadCount();
+                loadNotifications();
+            }
+        })
+        .catch(err => console.error('Error marking all as read:', err));
+    });
+    
+    // Helper functions
+    function getIconClass(type) {
+        const map = {
+            'new_customer': 'customer',
+            'demo_request': 'demo',
+            'demo_cancellation': 'cancellation',
+            'enquiry': 'enquiry',
+            'milestone': 'milestone'
+        };
+        return map[type] || 'customer';
+    }
+    
+    function getIconEmoji(type) {
+        const map = {
+            'new_customer': '👤',
+            'demo_request': '🎯',
+            'demo_cancellation': '🚫',
+            'enquiry': '💬',
+            'milestone': '🎉'
+        };
+        return map[type] || '🔔';
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Initial load and polling
+    loadUnreadCount();
+    setInterval(loadUnreadCount, 30000); // Poll every 30 seconds
+})();
+</script>

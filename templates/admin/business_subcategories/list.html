@@ -59,7 +59,7 @@
             </div>
             <div class="col-md-3">
                 <button type="submit" class="btn btn-outline-primary me-2">
-                    <i class="fas fa-filter"></i> Filter
+                    <i class="fas fa-search"></i> Search
                 </button>
                 {% if search_query or category_filter %}
                     <a href="{% url 'core:admin_business_subcategories' %}" class="btn btn-outline-secondary">
@@ -75,7 +75,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th width="50">#</th>
+                            {% comment %} <th width="50">#</th> {% endcomment %}
                             <th>Subcategory Name</th>
                             <th>Parent Category</th>
                             <th width="120" class="text-center">Customers</th>
@@ -86,7 +86,7 @@
                     <tbody>
                         {% for subcategory in subcategories %}
                             <tr>
-                                <td>{{ subcategory.sort_order }}</td>
+                                {% comment %} <td>{{ subcategory.sort_order }}</td> {% endcomment %}
                                 <td>
                                     <strong>{{ subcategory.name }}</strong>
                                     {% if subcategory.description %}

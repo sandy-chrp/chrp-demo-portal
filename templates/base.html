@@ -168,25 +168,6 @@
             text-decoration: none;
         }
 
-        .nav-link {
-            color: var(--gray-600) !important;
-            font-weight: 500;
-            margin: 0 0.5rem;
-            padding: 0.5rem 1rem !important;
-            border-radius: var(--radius-md);
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--primary-color) !important;
-            background-color: var(--gray-100);
-        }
-
-        .nav-link.active {
-            color: var(--primary-color) !important;
-            background-color: var(--gray-100);
-        }
-
         /* Footer Styles */
         .footer {
             background: var(--gradient-primary);
@@ -302,7 +283,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'core:home' %}">
+            <a class="navbar-brand" href="/">
                 <i class="fas fa-play-circle me-2"></i>Demo Portal
             </a>
             
@@ -311,83 +292,21 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'core:dashboard' %}">
-                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            <a class="btn btn-outline-primary me-2" href="{% url 'accounts:signout' %}">
+                                <i class="fas fa-sign-out-alt me-1"></i>Sign Out
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'demos:list' %}">
-                                <i class="fas fa-video me-1"></i>Demos
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'enquiries:list' %}">
-                                <i class="fas fa-envelope me-1"></i>Enquiries
-                            </a>
-                        </li>
-                    {% endif %}
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:contact' %}">
-                            <i class="fas fa-phone me-1"></i>Contact
-                        </a>
-                    </li>
-                </ul>
-                
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <!-- Notifications -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-bell"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                                    3
-                                </span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" style="width: 300px;">
-                                <li><h6 class="dropdown-header">Notifications</h6></li>
-                                <li><a class="dropdown-item" href="#">Demo request approved</a></li>
-                                <li><a class="dropdown-item" href="#">New demo available</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-center" href="{% url 'notifications:list' %}">View All</a></li>
-                            </ul>
-                        </li>
-                        
-                        <!-- User Menu -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i>{{ user.first_name }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
-                                    <i class="fas fa-user me-2"></i>My Profile
-                                </a></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:change_password' %}">
-                                    <i class="fas fa-key me-2"></i>Change Password
-                                </a></li>
-                                {% if user.is_staff %}
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{% url 'core:admin_dashboard' %}">
-                                        <i class="fas fa-cog me-2"></i>Admin Panel
-                                    </a></li>
-                                {% endif %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:signout' %}">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Sign Out
-                                </a></li>
-                            </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:signin' %}">
+                            <a class="btn btn-outline-primary me-2" href="{% url 'accounts:signin' %}">
                                 <i class="fas fa-sign-in-alt me-1"></i>Sign In
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-primary ms-2" href="{% url 'accounts:signup' %}">
+                            <a class="btn btn-primary" href="{% url 'accounts:signup' %}">
                                 <i class="fas fa-user-plus me-1"></i>Sign Up
                             </a>
                         </li>
@@ -432,62 +351,9 @@
     <!-- Footer -->
     <footer class="footer mt-auto">
         <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <h5 class="fw-bold mb-3">Demo Portal</h5>
-                    <p class="mb-3">Professional business demo portal providing comprehensive solution demonstrations and expert consultation services.</p>
-                    <div class="d-flex">
-                        <a href="#" class="me-3"><i class="fab fa-facebook fa-lg"></i></a>
-                        <a href="#" class="me-3"><i class="fab fa-linkedin fa-lg"></i></a>
-                        <a href="#" class="me-3"><i class="fab fa-youtube fa-lg"></i></a>
-                        <a href="#"><i class="fab fa-twitter fa-lg"></i></a>
-                    </div>
-                </div>
-                
-                <div class="col-md-2 mb-4">
-                    <h6 class="fw-bold mb-3">Quick Links</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="{% url 'core:home' %}">Home</a></li>
-                        <li class="mb-2"><a href="{% url 'demos:list' %}">Demos</a></li>
-                        <li class="mb-2"><a href="{% url 'core:contact' %}">Contact</a></li>
-                        <li class="mb-2"><a href="{% url 'accounts:signup' %}">Sign Up</a></li>
-                    </ul>
-                </div>
-                
-                <div class="col-md-3 mb-4">
-                    <h6 class="fw-bold mb-3">Support</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><a href="{% url 'chatbot:interface' %}">Help Center</a></li>
-                        <li class="mb-2"><a href="{% url 'core:contact' %}">Contact Support</a></li>
-                        <li class="mb-2"><a href="#">FAQ</a></li>
-                        <li class="mb-2"><a href="#">Documentation</a></li>
-                    </ul>
-                </div>
-                
-                <div class="col-md-3 mb-4">
-                    <h6 class="fw-bold mb-3">Contact Info</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <i class="fas fa-envelope me-2"></i>
-                            support@chrp-india.com
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-phone me-2"></i>
-                            +91-1234567890
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-map-marker-alt me-2"></i>
-                            India
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            
-            <hr class="my-4" style="border-color: rgba(255,255,255,0.2);">
-            
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; 2025 CHRP India. All rights reserved.</p>
+                    <p class="mb-0">&copy; 2025 CHRP-INDIA. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <a href="#" class="me-3">Privacy Policy</a>

@@ -10,14 +10,28 @@ class NotificationTemplate(models.Model):
     """Templates for different types of notifications"""
     
     NOTIFICATION_TYPES = [
+        # Customer Notifications
         ('demo_confirmation', 'Demo Confirmation'),
         ('demo_reschedule', 'Demo Reschedule'),
         ('demo_cancellation', 'Demo Cancellation'),
+        ('demo_rejection', 'Demo Rejection'),
         ('enquiry_received', 'Enquiry Received'),
         ('enquiry_response', 'Enquiry Response'),
+        ('enquiry_status', 'Enquiry Status Change'),
         ('new_demo_available', 'New Demo Available'),
         ('account_approved', 'Account Approved'),
+        ('account_blocked', 'Account Blocked'),
+        ('account_unblocked', 'Account Unblocked'),
+        ('password_reset', 'Password Reset'),
+        ('profile_updated', 'Profile Updated'),
         ('system_announcement', 'System Announcement'),
+        
+        # Admin Notifications (NEW)
+        ('new_customer', 'New Customer Registration'),
+        ('demo_request', 'New Demo Request'),
+        ('demo_request_cancelled', 'Demo Request Cancelled by Customer'),  # ✅ NEW
+        ('enquiry', 'New Business Enquiry'),
+        ('milestone', 'System Milestone'),
     ]
     
     name = models.CharField(max_length=100, verbose_name="Template Name")
