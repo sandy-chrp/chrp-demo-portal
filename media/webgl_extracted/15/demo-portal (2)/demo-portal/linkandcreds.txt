@@ -1,0 +1,22 @@
+admin panel
+Admin Panel: http://65.2.57.126:3000/login
+
+email : akaash.mistry@jpinnovations.in
+pass : abc123
+=============================================================
+
+customer panel
+Customer Panel: http://3.110.191.31:3001/login
+
+
+=============================================================
+
+main api
+* Customer Panel: http://3.110.191.31:8080
+
+Database
+mongodb+srv://mistryaksh1998:LGo5kZZLZoEuQ7tD@demo-portal.jyqsnyv.mongodb.net/?retryWrites=true&w=majority&appName=demo-portal
+
+* Frontend: React 19
+* Backend: Node.js 24
+* Database: MongoDB 8.2
